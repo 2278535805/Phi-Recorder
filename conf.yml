@@ -10,7 +10,7 @@
 aggressive: true
 
 # 玩家名字
-playerName: Mivik
+playerName: HLMC
 # 玩家 RKS
 playerRks: 15.00
 # 课题模式颜色；可选有：white(白色)、green(绿色)、blue(蓝色)、red(红色)、golden(金色)、rainbow(彩色)
@@ -33,6 +33,6 @@ volumeMusic: 1.0
 volumeSfx: 1.0
 
 # 重采样数，越高渲染时间越长，但抗锯齿效果越好。建议设置为 2 的 n 次幂
-sampleCount: 4
+sampleCount: 1
 # 是否启用快速近似抗锯齿（FXAA）
 fxaa: false

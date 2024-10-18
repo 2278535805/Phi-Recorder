@@ -81,7 +81,7 @@ zh-CN:
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
 
   sample-count: 采样数
-  sample-count-tips: 必须为 2 的幂。非 1 的采样数会启用 MSAA，提高画面质量的同时会在一定程度上增加性能开销
+  sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
 
   bitrate: 码率
   bitrate-tips: 码率越高，画面质量越高，文件大小也越大
@@ -150,7 +150,7 @@ import TipTextField from './TipTextField.vue';
 
 const props = defineProps<{ initAspectRatio?: number }>();
 
-const RESOLUTIONS = ['1920x1080', '1280x720', '960x540', '960x540', '800x600', '2560x1440'];
+const RESOLUTIONS = [ '1280x720','1920x1080', '2560x1440', '3840x2160', '2844x1600', '2388x1668'];
 
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);
@@ -173,7 +173,7 @@ const resolution = ref('1920x1080'),
   hwAccel = ref(true);
 
 const fxaa = ref(false),
-  sampleCount = ref('4'),
+  sampleCount = ref('1'),
   bitrate = ref('7M');
 
 const playerAvatar = ref<string>(),
@@ -233,7 +233,7 @@ const doubleHint = ref(true),
 const volumeMusic = ref(1),
   volumeSfx = ref(1);
 
-const endingLength = ref('25.5');
+const endingLength = ref('5.5');
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -317,7 +317,7 @@ function applyConfig(config: RenderConfig) {
 
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
-  endingLength: 25.5,
+  endingLength: 5.5,
   fps: 60,
   hardwareAccel: true,
   bitrate: '7M',
@@ -333,7 +333,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   playerAvatar: null,
   playerName: '',
   playerRks: 15,
-  sampleCount: 4,
+  sampleCount: 1,
   resPackPath: null,
   speed: 1,
   volumeMusic: 1,
@@ -510,7 +510,7 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-8 align-center">
         <v-col cols="12" class="px-6">
-          <v-slider :label="t('note-scale')" thumb-label="always" :min="0.3" :max="1.5" :step="0.05" v-model="noteScale"> </v-slider>
+          <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.05" v-model="noteScale"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-1">
