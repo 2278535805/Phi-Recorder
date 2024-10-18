@@ -541,7 +541,7 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-1">
         <v-col cols="12">
-          <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.positive]"></v-text-field>
+          <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
       </v-row>
     </div>
