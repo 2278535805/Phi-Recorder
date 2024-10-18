@@ -268,7 +268,7 @@ pub async fn main() -> Result<()> {
         pos += ending.frame_count() as f64 / sample_rate as f64;
     }
     let mut proc = cmd_hidden(&ffmpeg)
-        .args("-y -f f32le -ar 44100 -ac 2 -i - -c:a flac -f flac".split_whitespace())
+        .args("-y -f f32le -ar 44100 -ac 2 -i - -c:a pcm_s32le -f pcm_s32le".split_whitespace())
         .arg(mixing_output.path())
         .stdin(Stdio::piped())
         .stderr(Stdio::inherit())
@@ -335,7 +335,7 @@ pub async fn main() -> Result<()> {
     if use_cuda {
         args += " -hwaccel_output_format cuda";
     }
-    write!(&mut args, " -s vwx{vh} -r {fps} -pix_fmt rgba -i - -i")?;
+    write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
 
     let args2 = format!(
         "-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -vf vflip -f mp4",
