@@ -292,9 +292,9 @@ pub async fn main() -> Result<()> {
     static MSAA: AtomicBool = AtomicBool::new(false);
     let player = build_player(&params.config).await?;
     let mut main = Main::new(
-        /*Box::new(
+        Box::new(
             LoadingScene::new(GameMode::Normal, info, config, fs, Some(player), None, None).await?,
-        ),*/
+        ),
         tm,
         {
             let mut cnt = 0;
