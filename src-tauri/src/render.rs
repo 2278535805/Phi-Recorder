@@ -268,7 +268,7 @@ pub async fn main() -> Result<()> {
         pos += ending.frame_count() as f64 / sample_rate as f64;
     }
     let mut proc = cmd_hidden(&ffmpeg)
-        .args("-y -f f32le -ar 44100 -ac 2 -i - -c:a aac -f aac".split_whitespace())
+        .args("-y -f f32le -ar 44100 -ac 2 -i - -c:a mp3 -f mp3".split_whitespace())
         .arg(mixing_output.path())
         .stdin(Stdio::piped())
         .stderr(Stdio::inherit())
@@ -292,9 +292,9 @@ pub async fn main() -> Result<()> {
     static MSAA: AtomicBool = AtomicBool::new(false);
     let player = build_player(&params.config).await?;
     let mut main = Main::new(
-        Box::new(
+        /*Box::new(
             LoadingScene::new(GameMode::Normal, info, config, fs, Some(player), None, None).await?,
-        ),
+        ),*/
         tm,
         {
             let mut cnt = 0;
@@ -315,7 +315,8 @@ pub async fn main() -> Result<()> {
     main.top_level = false;
     main.viewport = Some((0, 0, vw as _, vh as _));
 
-    const O: f64 = LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64;
+    //const O: f64 = LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64;
+    const O: f64 =  GameScene::BEFORE_TIME as f64;
     const A: f64 = 0.7 + 0.3 + 0.4;
 
     let fps = params.config.fps;
