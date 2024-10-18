@@ -212,7 +212,7 @@ pub async fn main() -> Result<()> {
 
     send(IPCEvent::StartMixing);
     let mixing_output = NamedTempFile::new()?;
-    let sample_rate = 48000;
+    let sample_rate = 44100;
     assert_eq!(sample_rate, ending.sample_rate());
     assert_eq!(sample_rate, sfx_click.sample_rate());
     assert_eq!(sample_rate, sfx_drag.sample_rate());
@@ -268,7 +268,7 @@ pub async fn main() -> Result<()> {
         pos += ending.frame_count() as f64 / sample_rate as f64;
     }
     let mut proc = cmd_hidden(&ffmpeg)
-        .args("-y -f f32le -ar 48000 -ac 2 -i - -c:a flac -f flac".split_whitespace())
+        .args("-y -f f32le -ar 44100 -ac 2 -i - -c:a flac -f flac".split_whitespace())
         .arg(mixing_output.path())
         .stdin(Stdio::piped())
         .stderr(Stdio::inherit())
