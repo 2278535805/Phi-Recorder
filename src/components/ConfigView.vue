@@ -331,7 +331,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   noteScale: 1,
   particle: true,
   playerAvatar: null,
-  playerName: 'HLMC',
+  playerName: '',
   playerRks: 15,
   sampleCount: 1,
   resPackPath: null,
@@ -479,7 +479,7 @@ async function replacePreset() {
             :model-value="playerAvatar ? playerAvatar.split('\\').pop()!.split('/').pop() : ''"></v-text-field>
         </v-col>
         <v-col cols="8">
-          <v-text-field class="mx-2" :label="t('player-name')" :rules="[RULES.non_empty]" v-model="playerName"></v-text-field>
+          <v-text-field class="mx-2" :label="t('player-name')" :v-model="playerName"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-1">
