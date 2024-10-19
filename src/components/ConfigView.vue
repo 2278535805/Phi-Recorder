@@ -233,7 +233,7 @@ const doubleHint = ref(true),
 const volumeMusic = ref(1),
   volumeSfx = ref(1);
 
-const endingLength = ref('5.5');
+const endingLength = ref('-2.0');
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -317,7 +317,7 @@ function applyConfig(config: RenderConfig) {
 
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
-  endingLength: 5.5,
+  endingLength: -2.0,
   fps: 60,
   hardwareAccel: true,
   bitrate: '7M',
