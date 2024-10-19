@@ -331,7 +331,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   noteScale: 1,
   particle: true,
   playerAvatar: null,
-  playerName: '',
+  playerName: 'HLMC',
   playerRks: 15,
   sampleCount: 1,
   resPackPath: null,
