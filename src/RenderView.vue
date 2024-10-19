@@ -313,7 +313,6 @@ function tryParseAspect(): number | undefined {
           <v-row no-gutters class="mx-n2">
             <v-col cols="8">
               <v-text-field class="mx-2" :label="t('chart-name')" :rules="[RULES.non_empty]" v-model="chartInfo.name"></v-text-field>
-              <v-text-field class="mx-2" :label="t('chart-name')" :rules="[RULES.non_empty]" v-model="chartInfo.name"></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field class="mx-2" :label="t('level')" :rules="[RULES.non_empty]" v-model="chartInfo.level"></v-text-field>
