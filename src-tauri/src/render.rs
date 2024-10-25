@@ -263,7 +263,7 @@ pub async fn main() -> Result<()> {
             volume_sfx,
         );
     }
-    let mut pos = O + length + A + 0.15;
+    let mut pos = O + length + A;
     while place(pos, &ending, volume_music) != 0 {
         pos += ending.frame_count() as f64 / sample_rate as f64;
     }
