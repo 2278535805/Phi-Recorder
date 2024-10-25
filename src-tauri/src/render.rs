@@ -231,6 +231,8 @@ pub async fn main() -> Result<()> {
         }
     }
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
+        // 输出日志
+        println!("pos: {}, sample_rate: {}, position: {}", pos, sample_rate, position);
         let position = (pos * clip.sample_rate() as f64).round() as usize * 2;
         if position >= output.len() {
             return 0;
