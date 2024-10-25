@@ -213,7 +213,7 @@ pub async fn main() -> Result<()> {
     send(IPCEvent::StartMixing);
     let mixing_output = NamedTempFile::new()?;
     let sample_rate = 48000;
-    let sample_rate_1 = 48000 * 1.0;
+    let sample_rate_1 = 48000.0 * 1.0;
     assert_eq!(sample_rate, ending.sample_rate());
     assert_eq!(sample_rate, sfx_click.sample_rate());
     assert_eq!(sample_rate, sfx_drag.sample_rate());
@@ -232,9 +232,9 @@ pub async fn main() -> Result<()> {
         }
     }
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
+        let position = (pos * sample_rate_1 as f64).round() as usize * 2;
         // 输出日志
         println!("pos: {}, sample_rate: {}, position: {}", pos, sample_rate, position);
-        let position = (pos * sample_rate_1 as f64).round() as usize * 2;
         if position >= output.len() {
             return 0;
         }
