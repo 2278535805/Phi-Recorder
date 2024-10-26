@@ -213,16 +213,17 @@ pub async fn main() -> Result<()> {
     send(IPCEvent::StartMixing);
     let mixing_output = NamedTempFile::new()?;
     let sample_rate = 48000;
+    let sample_rate_f64 = sample_rate as f64;
     assert_eq!(sample_rate, ending.sample_rate());
     assert_eq!(sample_rate, sfx_click.sample_rate());
     assert_eq!(sample_rate, sfx_drag.sample_rate());
     assert_eq!(sample_rate, sfx_flick.sample_rate());
-    let mut output = vec![0.0_f32; (video_length * sample_rate as f64).ceil() as usize * 2];
+    let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
     {
         let pos = O - chart.offset.min(0.) as f64;
-        let count = (music.length() as f64 * sample_rate as f64) as usize;
-        let mut it = output[((pos * sample_rate as f64).round() as usize * 2)..].iter_mut();
-        let ratio = 1. / sample_rate as f64;
+        let count = (music.length() as f64 * sample_rate_f64) as usize;
+        let mut it = output[((pos * sample_rate_f64).round() as usize * 2)..].iter_mut();
+        let ratio = 1. / sample_rate_f64;
         for frame in 0..count {
             let position = frame as f64 * ratio;
             let frame = music.sample(position as f32).unwrap_or_default();
@@ -230,8 +231,9 @@ pub async fn main() -> Result<()> {
             *it.next().unwrap() += frame.1 * volume_music;
         }
     }
+    
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
-        let position = (pos * sample_rate as f64).round() as usize * 2;
+        let position = (pos * sample_rate_f64).round() as usize * 2;
         if position >= output.len() {
             return 0;
         }
@@ -244,28 +246,36 @@ pub async fn main() -> Result<()> {
             *dst += frame.0 * volume;
             let dst = it.next().unwrap();
             *dst += frame.1 * volume;
+            /*if let (Some(dst1), Some(dst2)) = (it.next(), it.next()) {
+                *dst1 += frame.0 * volume;
+                *dst2 += frame.1 * volume;
+            }*/
         }
         return len;
     };
-    for note in chart
-        .lines
-        .iter()
-        .flat_map(|it| it.notes.iter())
-        .filter(|it| !it.fake)
-    {
-        place(
-            O + note.time as f64 + offset as f64,
-            match note.kind {
-                NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
-                NoteKind::Drag => &sfx_drag,
-                NoteKind::Flick => &sfx_flick,
-            },
-            volume_sfx,
-        );
+
+    // 尝试在volume_sfx=0时不处理音效
+    if volume_sfx > 0 {
+        for note in chart
+            .lines
+            .iter()
+            .flat_map(|it| it.notes.iter())
+            .filter(|it| !it.fake)
+        {
+            place(
+                O + note.time as f64 + offset as f64,
+                match note.kind {
+                    NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
+                    NoteKind::Drag => &sfx_drag,
+                    NoteKind::Flick => &sfx_flick,
+                },
+                volume_sfx,
+            );
+        }
     }
     let mut pos = O + length + A;
     while place(pos, &ending, volume_music) != 0 {
-        pos += ending.frame_count() as f64 / sample_rate as f64;
+        pos += ending.frame_count() as f64 / sample_rate_f64;
     }
     let mut proc = cmd_hidden(&ffmpeg)
         .args(format!("-y -f f32le -ar {} -ac 2 -i - -c:a flac -f flac", sample_rate).split_whitespace())
