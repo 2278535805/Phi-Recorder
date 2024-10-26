@@ -255,7 +255,7 @@ pub async fn main() -> Result<()> {
     };
 
     // 尝试在volume_sfx=0时不处理音效
-    if volume_sfx > 0 {
+    if volume_sfx > 0.0 {
         for note in chart
             .lines
             .iter()
