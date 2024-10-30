@@ -72,7 +72,7 @@ impl Task {
             .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
             .collect();
         let output = output_dir()?.join(format!(
-            "{} {safe_name}.mp4",
+            "{} {safe_name}.mov",
             Local::now().format("%Y-%m-%d %H-%M-%S")
         ));
 
