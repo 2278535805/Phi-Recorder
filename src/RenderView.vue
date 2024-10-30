@@ -321,7 +321,7 @@ function tryParseAspect(): number | undefined {
 
           <v-row no-gutters class="mx-n2 mt-1">
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('charter')" :v-model="chartInfo.charter"></v-text-field>
+              <v-text-field class="mx-2" :label="t('charter')" v-model="chartInfo.charter"></v-text-field>
             </v-col>
             <v-col cols="12" sm="4">
               <v-text-field class="mx-2" :label="t('composer')" v-model="chartInfo.composer"></v-text-field>
