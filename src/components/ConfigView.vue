@@ -51,6 +51,7 @@ en:
   volume-sfx: SFX Volume
 
   ending-length: Result Screen Duration
+  disable-loading: Remove loading screen
 
   presets: Presets
   preset-refresh: Refresh
@@ -116,6 +117,7 @@ zh-CN:
   volume-sfx: 音效音量
 
   ending-length: 结算画面时长
+  disable-loading: 删除加载画面
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -235,6 +237,8 @@ const volumeMusic = ref(1),
 
 const endingLength = ref('-2.0');
 
+const disableLoading = ref(true)
+
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
 async function buildConfig(): Promise<RenderConfig | null> {
@@ -248,6 +252,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
       return [parseInt(parts[0]), parseInt(parts[1])];
     })(),
     endingLength: parseFloat(endingLength.value),
+    disableLoading: disableLoading.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
     bitrate: bitrate.value,
@@ -294,6 +299,7 @@ function StickyLabel(props: { title: string }) {
 function applyConfig(config: RenderConfig) {
   resolution.value = config.resolution.join('x');
   endingLength.value = String(config.endingLength);
+  disableLoading.value = config.disableLoading;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
   bitrate.value = config.bitrate;
@@ -318,6 +324,7 @@ function applyConfig(config: RenderConfig) {
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
   endingLength: -2.0,
+  disableLoading: true,
   fps: 60,
   hardwareAccel: true,
   bitrate: '7M',
@@ -542,6 +549,9 @@ async function replacePreset() {
       <v-row no-gutters class="mx-n2 mt-1">
         <v-col cols="12">
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>
         </v-col>
       </v-row>
     </div>

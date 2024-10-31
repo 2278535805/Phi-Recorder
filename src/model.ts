@@ -52,6 +52,7 @@ export interface Task {
 export interface RenderConfig {
   resolution: number[];
   endingLength: number;
+  disableLoading: boolean;
   fps: number;
   hardwareAccel: boolean;
   bitrate: string;

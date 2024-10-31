@@ -33,6 +33,7 @@ use tempfile::NamedTempFile;
 pub struct RenderConfig {
     resolution: (u32, u32),
     ending_length: f64,
+    disableLoading: bool,
     fps: u32,
     hardware_accel: bool,
     bitrate: String,
@@ -348,7 +349,7 @@ pub async fn main() -> Result<()> {
     write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
 
     let args2 = format!(
-        "-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -ss 00:00:03.5 -vf vflip -f mov",
+        "-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
         //"-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -vf vflip -f mp4",
         if use_cuda {
             "h264_nvenc"
@@ -361,6 +362,8 @@ pub async fn main() -> Result<()> {
             "libx264"
         },
         params.config.bitrate,
+        if disableLoading{"-ss 00:00:03.5"}
+        else{"-ss 00:00:00"},
     );
 
     let mut proc = cmd_hidden(&ffmpeg)
