@@ -33,7 +33,7 @@ use tempfile::NamedTempFile;
 pub struct RenderConfig {
     resolution: (u32, u32),
     ending_length: f64,
-    disableLoading: bool,
+    disable_loading: bool,
     fps: u32,
     hardware_accel: bool,
     bitrate: String,
