@@ -34,6 +34,7 @@ pub struct RenderConfig {
     resolution: (u32, u32),
     ending_length: f64,
     disable_loading: bool,
+    chart_debug: bool,
     fps: u32,
     hardware_accel: bool,
     bitrate: String,
@@ -74,6 +75,7 @@ impl RenderConfig {
             speed: self.speed,
             volume_music: self.volume_music,
             volume_sfx: self.volume_sfx,
+            chart_debug: self.chart_debug,
             ..Default::default()
         }
     }
@@ -194,7 +196,7 @@ pub async fn main() -> Result<()> {
         }
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
-    let ending = ld!("ending.mp3");
+    let ending = ld!("ending.ogg");
     let track_length = music.length() as f64;
     let sfx_click = ld!("click.ogg");
     let sfx_drag = ld!("drag.ogg");
