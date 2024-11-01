@@ -53,6 +53,7 @@ export interface RenderConfig {
   resolution: number[];
   endingLength: number;
   disableLoading: boolean;
+  chartDebug: boolean,
   fps: number;
   hardwareAccel: boolean;
   bitrate: string;
