@@ -57,6 +57,7 @@ export interface RenderConfig {
   chartRatio: number;
   fps: number;
   hardwareAccel: boolean;
+  bitrateControl: string;
   bitrate: string;
 
   aggressive: boolean;
