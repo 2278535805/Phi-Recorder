@@ -372,7 +372,7 @@ pub async fn main() -> Result<()> {
             "-b:v"
         },
         params.config.bitrate,
-        if !use_cuda && !has_qsv && has_amf {"main"}
+        if !use_cuda && (has_qsv || has_amf) {"main"}
         else {params.config.ffmpeg_preset},
         if params.config.disable_loading{"-ss 00:00:03.5"}
         else{"-ss 00:00:00"},
