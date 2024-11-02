@@ -506,7 +506,7 @@ async function replacePreset() {
     </div>
     <div class="mt-2">
       <StickyLabel :title="t('title.player')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 px-6">
+      <v-row no-gutters class="mx-n2 px-2">
         <v-col cols="4">
           <v-text-field
             readonly
@@ -522,7 +522,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-name')" v-model="playerName"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 px-6">
+      <v-row no-gutters class="mx-n2 px-2">
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
@@ -579,12 +579,12 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
+      <v-row no-gutters class="mx-n2 mt-8 align-center px-2">
         <v-col cols="12">
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
-      <!--</v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">-->
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
         <v-col cols="3">
           <TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>
         </v-col>
