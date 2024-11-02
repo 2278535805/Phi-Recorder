@@ -42,7 +42,7 @@ en:
   double-hint: Double Hit Hint
 
   aggressive: Aggressive Optimization
-  aggressive-tips: Improve rendering speed, but may cause some notes to disappear
+  aggressive-tips: Improve rendering speed, Hide off-screen note, but may cause some notes to disappear
 
   disable-particle: Disable Particle
   disable-effect: Disable Effect
@@ -110,7 +110,7 @@ zh-CN:
   double-hint: 双押提示
 
   aggressive: 激进优化
-  aggressive-tips: 提升渲染速度，但可能会导致部分音符消失
+  aggressive-tips: 提升渲染速度，隐藏屏幕外按键，但可能会导致部分音符消失
 
   disable-particle: 禁用粒子
   disable-effect: 禁用特效
