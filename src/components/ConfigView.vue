@@ -20,8 +20,8 @@ en:
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA, which can improve the quality of the picture while increasing the performance cost
 
   bitrate-control: Bitrate Control
-  bitrate: Bitrate
-  bitrate-tips: A higher bitrate will result in higher quality and larger file size
+  bitrate: level/bitrate
+  bitrate-tips: CRF: This is the CRF level<br>CBR: This is the bitrate
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -90,8 +90,8 @@ zh-CN:
   sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
 
   bitrate-control: 码率控制
-  bitrate: 码率
-  bitrate-tips: 码率越高，画面质量越高，文件大小也越大
+  bitrate: 级别/码率
+  bitrate-tips: CRF: 该项为CRF级别<br>CBR: 该项为码率
 
   player-avatar: 玩家头像
   player-name: 玩家名
