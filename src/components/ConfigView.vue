@@ -44,7 +44,7 @@ en:
   double-hint: Double Hit Hint
 
   aggressive: Aggressive Optimization
-  aggressive-tips: Improve rendering speed, Hide off-screen note, but may cause some notes to disappear
+  aggressive-tips: Hide off-screen note, Improve rendering speed, but may cause some notes to disappear
 
   disable-particle: Disable Particle
   disable-effect: Disable Effect
@@ -114,7 +114,7 @@ zh-CN:
   double-hint: 双押提示
 
   aggressive: 激进优化
-  aggressive-tips: 提升渲染速度，隐藏屏幕外按键，但可能会导致部分音符消失
+  aggressive-tips: 剔除屏幕外按键，提升渲染速度，但可能会导致部分音符消失
 
   disable-particle: 禁用粒子
   disable-effect: 禁用特效
@@ -123,7 +123,7 @@ zh-CN:
   volume-sfx: 音效音量
 
   ending-length: 结算画面时长
-  disable-loading: 删除加载画面
+  disable-loading: 加载画面
   chart_debug: 调试模式
   chart_ratio: 谱面缩放
 
@@ -249,7 +249,7 @@ const volumeMusic = ref(1),
 
 const endingLength = ref('-2.0');
 
-const disableLoading = ref(true)
+const disableLoading = ref(false)
 
 const chartDebug = ref(false)
 const chartRatio = ref(1.0)
@@ -268,7 +268,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
-    disableLoading: disableLoading.value,
+    disableLoading: !disableLoading.value,
     chartDebug: chartDebug.value,
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
@@ -522,7 +522,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-name')" v-model="playerName"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-4 px-2">
+      <v-row no-gutters class="mx-n2 mt-1">
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
@@ -548,7 +548,7 @@ async function replacePreset() {
           <v-btn class="pa-1" size="large" @click="openRespackFolder" v-t="'respack-open'"></v-btn>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center">
+      <v-row no-gutters class="mx-n2 mt-4 align-center">
         <v-col cols="12" class="px-6">
           <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.05" v-model="noteScale"> </v-slider>
         </v-col>
@@ -579,7 +579,7 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center">
+      <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="12">
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
