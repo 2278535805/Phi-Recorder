@@ -522,7 +522,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-name')" v-model="playerName"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 px-2">
+      <v-row no-gutters class="mx-n2 mt-4 px-2">
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
@@ -537,7 +537,7 @@ async function replacePreset() {
 
     <div class="mt-2">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 align-center px-6">
+      <v-row no-gutters class="mx-n2 mt-4 align-center px-2">
         <v-col cols="8">
           <v-combobox class="mx-2" :label="t('respack')" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
@@ -553,7 +553,7 @@ async function replacePreset() {
           <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.05" v-model="noteScale"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-1">
+      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
           <TipSwitch :label="t('double-hint')" v-model="doubleHint"></TipSwitch>
         </v-col>
