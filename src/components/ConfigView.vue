@@ -506,7 +506,7 @@ async function replacePreset() {
     </div>
     <div class="mt-2">
       <StickyLabel :title="t('title.player')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 px-2">
+      <v-row no-gutters class="mx-n2">
         <v-col cols="4">
           <v-text-field
             readonly
@@ -584,7 +584,7 @@ async function replacePreset() {
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
+      <v-row no-gutters class="mx-n2 mt-2 align-center px-6">
         <v-col cols="3">
           <TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>
         </v-col>
