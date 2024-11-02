@@ -266,7 +266,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
       let parts = resolution.value.split('x');
       return [parseInt(parts[0]), parseInt(parts[1])];
     })(),
-    ffmpegPreset: preset.value,
+    ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
     disableLoading: disableLoading.value,
     chartDebug: chartDebug.value,
