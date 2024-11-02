@@ -559,12 +559,12 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-1">
+      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
         <v-col cols="12">
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
-      </v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
+      <!--</v-row>
+      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">-->
         <v-col cols="3">
           <TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>
         </v-col>
