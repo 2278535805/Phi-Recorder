@@ -53,7 +53,7 @@ en:
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
   chart_debug: Debug Mode
-  chart_ratio: Chart zoom ratio
+  chart_ratio: Chart Zoom
 
   presets: Presets
   preset-refresh: Refresh
@@ -121,7 +121,7 @@ zh-CN:
   ending-length: 结算画面时长
   disable-loading: 删除加载画面
   chart_debug: 调试模式
-  chart_ratio: 谱面缩放比例
+  chart_ratio: 谱面缩放
 
   presets: 预设配置
   preset-refresh: 刷新
