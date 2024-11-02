@@ -32,6 +32,7 @@ use tempfile::NamedTempFile;
 #[serde(rename_all = "camelCase")]
 pub struct RenderConfig {
     resolution: (u32, u32),
+    ffmpegPreset: String,
     ending_length: f64,
     disable_loading: bool,
     chart_debug: bool,
@@ -354,7 +355,7 @@ pub async fn main() -> Result<()> {
     write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
 
     let args2 = format!(
-        "-c:a copy -c:v {} -pix_fmt yuv420p {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
+        "-c:a copy -c:v {} -pix_fmt yuv420p {} {} -preset {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
         //"-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -vf vflip -f mp4",
         if use_cuda {
             "h264_nvenc"
@@ -372,6 +373,7 @@ pub async fn main() -> Result<()> {
             "-b:v"
         },
         params.config.bitrate,
+        params.config.ffmpegPreset,
         if params.config.disable_loading{"-ss 00:00:03.5"}
         else{"-ss 00:00:00"},
     );

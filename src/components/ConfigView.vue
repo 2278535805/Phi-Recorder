@@ -7,6 +7,7 @@ en:
     audio: Audio
 
   resolution: Resolution
+  ffmpeg-preset: Preset
   fps: FPS
 
   hw-accel: Hardware Acceleration
@@ -76,6 +77,7 @@ zh-CN:
     audio: 音频
 
   resolution: 分辨率
+  ffmpeg-preset: 预设
   fps: FPS
 
   hw-accel: 硬件加速
@@ -159,6 +161,8 @@ import TipTextField from './TipTextField.vue';
 const props = defineProps<{ initAspectRatio?: number }>();
 
 const RESOLUTIONS = [ '1280x720','1920x1080', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
+const ffmpegPresetPresetList = ['ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow', 'placebo'];
+const bitrateControlList = ['CRF','CBR'];
 
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);
@@ -177,10 +181,10 @@ const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number
 const form = ref<VForm>();
 
 const resolution = ref('1920x1080'),
+  ffmpegPreset = ref('fast'),
   fps = ref('60'),
   hwAccel = ref(true);
 
-const bitrateControlList = ['CRF','CBR'];
 const fxaa = ref(false),
   sampleCount = ref('1'),
   bitrateControl = ref('CRF'),
@@ -262,6 +266,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
       let parts = resolution.value.split('x');
       return [parseInt(parts[0]), parseInt(parts[1])];
     })(),
+    ffmpegPreset: preset.value,
     endingLength: parseFloat(endingLength.value),
     disableLoading: disableLoading.value,
     chartDebug: chartDebug.value,
@@ -312,6 +317,7 @@ function StickyLabel(props: { title: string }) {
 
 function applyConfig(config: RenderConfig) {
   resolution.value = config.resolution.join('x');
+  ffmpegPreset.value = config.ffmpegPreset;
   endingLength.value = String(config.endingLength);
   disableLoading.value = config.disableLoading;
   chartDebug.value = config.chartDebug;
@@ -340,6 +346,7 @@ function applyConfig(config: RenderConfig) {
 
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
+  ffmpegPreset: 'fast',
   endingLength: -2.0,
   disableLoading: true,
   chartDebug: false,
@@ -469,8 +476,11 @@ async function replacePreset() {
     <div>
       <StickyLabel :title="t('title.output')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
-        <v-col cols="6">
+        <v-col cols="4">
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
+        </v-col>
+        <v-col cols="2">
+          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetList" class="mx-2" :rules="[RULES.non_empty]" v-model="ffmpegPreset"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-text-field :label="t('fps')" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-text-field>
@@ -484,7 +494,7 @@ async function replacePreset() {
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
         <v-col cols="2">
-          <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate" :tooltip="t('bitrate-tips')"></TipTextField>
+          <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate"></TipTextField>
         </v-col>
         <v-col cols="3">
           <v-combobox :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-combobox>
