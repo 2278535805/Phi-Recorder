@@ -81,7 +81,7 @@ zh-CN:
   fps: FPS
 
   hw-accel: 硬件加速
-  hw-accel-tips: 如果渲染失败，请尝试关闭此选项
+  hw-accel-tips: 部分预设不支持硬件加速
 
   fxaa: FXAA
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
