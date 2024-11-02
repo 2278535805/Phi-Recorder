@@ -11,7 +11,7 @@ en:
   fps: FPS
 
   hw-accel: Hardware Acceleration
-  hw-accel-tips: If render fails, try to turn it off
+  hw-accel-tips: Some presets do not support hardware acceleration
 
   fxaa: FXAA
   fxaa-tips: FXAA, as a low-cost anti-aliasing method, will cause the picture to be blurred, and it is not recommended to turn it on
@@ -537,7 +537,7 @@ async function replacePreset() {
 
     <div class="mt-2">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 mt-4 align-center px-2">
+      <v-row no-gutters class="mx-n2 mt-4 align-center">
         <v-col cols="8">
           <v-combobox class="mx-2" :label="t('respack')" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
@@ -579,7 +579,7 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-8 align-center px-2">
+      <v-row no-gutters class="mx-n2 mt-8 align-center">
         <v-col cols="12">
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
