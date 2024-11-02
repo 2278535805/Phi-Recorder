@@ -180,7 +180,7 @@ const resolution = ref('1920x1080'),
   fps = ref('60'),
   hwAccel = ref(true);
 
-const bitrateControlList = [ 'CRF','CBR'];
+const bitrateControlList = ['CRF','CBR'];
 const fxaa = ref(false),
   sampleCount = ref('1'),
   bitrateControl = ref('CRF'),
@@ -487,7 +487,7 @@ async function replacePreset() {
           <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate" :tooltip="t('bitrate-tips')"></TipTextField>
         </v-col>
         <v-col cols="3">
-          <v-combobox :label="t('resolution')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="resolution"></v-combobox>
+          <v-combobox :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('fxaa')" :tooltip="t('fxaa-tips')" v-model="fxaa"></TipSwitch>
