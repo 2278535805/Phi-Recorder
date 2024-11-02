@@ -244,7 +244,7 @@ const endingLength = ref('-2.0');
 const disableLoading = ref(true)
 
 const chartDebug = ref(false)
-const chartRatio = ref('1.0')
+const chartRatio = ref(1.0)
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
