@@ -32,14 +32,14 @@ use tempfile::NamedTempFile;
 #[serde(rename_all = "camelCase")]
 pub struct RenderConfig {
     resolution: (u32, u32),
-    ffmpegPreset: String,
+    ffmpeg_preset: String,
     ending_length: f64,
     disable_loading: bool,
     chart_debug: bool,
     chart_ratio: f32,
     fps: u32,
     hardware_accel: bool,
-    bitrateControl: String,
+    bitrate_control: String,
     bitrate: String,
 
     aggressive: bool,
@@ -367,13 +367,13 @@ pub async fn main() -> Result<()> {
             // "libx264 -preset ultrafast"
             "libx264"
         },
-        if params.config.bitrateControl == "CRF" {
+        if params.config.bitrate_control == "CRF" {
             "-crf"
         } else {
             "-b:v"
         },
         params.config.bitrate,
-        params.config.ffmpegPreset,
+        params.config.ffmpeg_preset,
         if params.config.disable_loading{"-ss 00:00:03.5"}
         else{"-ss 00:00:00"},
     );
