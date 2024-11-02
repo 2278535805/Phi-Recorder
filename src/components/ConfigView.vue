@@ -476,10 +476,10 @@ async function replacePreset() {
     <div>
       <StickyLabel :title="t('title.output')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
-        <v-col cols="4">
+        <v-col cols="3">
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
-        <v-col cols="2">
+        <v-col cols="3">
           <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetList" class="mx-2" :rules="[RULES.non_empty]" v-model="ffmpegPreset"></v-combobox>
         </v-col>
         <v-col cols="3">
@@ -490,11 +490,11 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-1">
-        <v-col cols="4">
+        <v-col cols="3">
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
-        <v-col cols="2">
-          <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate"></TipTextField>
+        <v-col cols="3">
+          <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate" :tooltip="t('bitrate-tips')"></TipTextField>
         </v-col>
         <v-col cols="3">
           <v-combobox :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-combobox>
