@@ -337,7 +337,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   endingLength: -2.0,
   disableLoading: true,
   chartDebug: false,
-  chartRatio: 1
+  chartRatio: 1,
   fps: 60,
   hardwareAccel: true,
   bitrate: '7M',
