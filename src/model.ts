@@ -54,6 +54,7 @@ export interface RenderConfig {
   endingLength: number;
   disableLoading: boolean;
   chartDebug: boolean;
+  chartRatio: number;
   fps: number;
   hardwareAccel: boolean;
   bitrate: string;
