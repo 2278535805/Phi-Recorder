@@ -21,7 +21,11 @@ en:
 
   bitrate-control: Bitrate Control
   bitrate: level/bitrate
+<<<<<<< HEAD
   bitrate-tips: CRF-This is the CRF level CBR-This is the bitrate
+=======
+  bitrate-tips: CRF: This is the CRF level. CBR: This is the bitrate
+>>>>>>> parent of 8d74186 (Revert "Update ConfigView.vue")
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -91,7 +95,11 @@ zh-CN:
 
   bitrate-control: 码率控制
   bitrate: 级别/码率
+<<<<<<< HEAD
   bitrate-tips: CRF-该项为CRF级别<br>CBR-该项为码率
+=======
+  bitrate-tips: CRF: 该项为CRF级别 CBR: 该项为码率
+>>>>>>> parent of 8d74186 (Revert "Update ConfigView.vue")
 
   player-avatar: 玩家头像
   player-name: 玩家名
