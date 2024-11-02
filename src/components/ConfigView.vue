@@ -569,7 +569,7 @@ async function replacePreset() {
         <v-col cols="3">
           <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="6">
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
