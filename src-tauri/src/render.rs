@@ -38,6 +38,7 @@ pub struct RenderConfig {
     chart_ratio: f32,
     fps: u32,
     hardware_accel: bool,
+    bitrateControl: String,
     bitrate: String,
 
     aggressive: bool,
@@ -353,7 +354,7 @@ pub async fn main() -> Result<()> {
     write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
 
     let args2 = format!(
-        "-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
+        "-c:a copy -c:v {} -pix_fmt yuv420p {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
         //"-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -vf vflip -f mp4",
         if use_cuda {
             "h264_nvenc"
@@ -364,6 +365,11 @@ pub async fn main() -> Result<()> {
         } else {
             // "libx264 -preset ultrafast"
             "libx264"
+        },
+        if params.config.bitrateControl == "CRF" {
+            "-crf"
+        } else {
+            "-b:v"
         },
         params.config.bitrate,
         if params.config.disable_loading{"-ss 00:00:03.5"}

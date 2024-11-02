@@ -18,6 +18,7 @@ en:
   sample-count: Sample Count
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA, which can improve the quality of the picture while increasing the performance cost
 
+  bitrate-control: Bitrate Control
   bitrate: Bitrate
   bitrate-tips: A higher bitrate will result in higher quality and larger file size
 
@@ -86,6 +87,7 @@ zh-CN:
   sample-count: 采样数
   sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
 
+  bitrate-control: 码率控制
   bitrate: 码率
   bitrate-tips: 码率越高，画面质量越高，文件大小也越大
 
@@ -156,7 +158,7 @@ import TipTextField from './TipTextField.vue';
 
 const props = defineProps<{ initAspectRatio?: number }>();
 
-const RESOLUTIONS = [ '1280x720','1920x1080', '2560x1440', '3840x2160', '2844x1600', '2388x1668'];
+const RESOLUTIONS = [ '1280x720','1920x1080', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
 
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);
@@ -178,9 +180,11 @@ const resolution = ref('1920x1080'),
   fps = ref('60'),
   hwAccel = ref(true);
 
+const bitrateControlList = [ 'CRF','CBR'];
 const fxaa = ref(false),
   sampleCount = ref('1'),
-  bitrate = ref('7M');
+  bitrateControl = ref('CRF'),
+  bitrate = ref('26');
 
 const playerAvatar = ref<string>(),
   playerName = ref(''),
@@ -264,6 +268,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
+    bitrateControl: bitrateControl.value,
     bitrate: bitrate.value,
 
     aggressive: aggressive.value,
@@ -287,7 +292,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
 
 function onEnter() {
   if (preset.value.key !== 'default') return;
-  resolution.value = RESOLUTIONS[0];
+  resolution.value = RESOLUTIONS[1];
   if (props.initAspectRatio) {
     for (let res of RESOLUTIONS) {
       let [w, h] = parseResolution(res)!;
@@ -313,6 +318,7 @@ function applyConfig(config: RenderConfig) {
   chartRatio.value = config.chartRatio;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
+  bitrateControl.value = config.bitrateControl;
   bitrate.value = config.bitrate;
 
   aggressive.value = config.aggressive;
@@ -340,7 +346,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   chartRatio: 1,
   fps: 60,
   hardwareAccel: true,
-  bitrate: '7M',
+  bitrateControl: 'CRF',
+  bitrate: '26',
 
   aggressive: false,
   challengeColor: 'golden',
@@ -476,8 +483,11 @@ async function replacePreset() {
         <v-col cols="4">
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
-        <v-col cols="5">
+        <v-col cols="2">
           <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate" :tooltip="t('bitrate-tips')"></TipTextField>
+        </v-col>
+        <v-col cols="3">
+          <v-combobox :label="t('resolution')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('fxaa')" :tooltip="t('fxaa-tips')" v-model="fxaa"></TipSwitch>
