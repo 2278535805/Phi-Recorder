@@ -52,6 +52,8 @@ en:
 
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
+  chart_debug: Debug Mode
+  chart_ratio: Chart zoom ratio
 
   presets: Presets
   preset-refresh: Refresh
@@ -119,6 +121,7 @@ zh-CN:
   ending-length: 结算画面时长
   disable-loading: 删除加载画面
   chart_debug: 调试模式
+  chart_ratio: 谱面缩放比例
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -241,6 +244,7 @@ const endingLength = ref('-2.0');
 const disableLoading = ref(true)
 
 const chartDebug = ref(false)
+const chartRatio = ref('1.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -257,6 +261,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     endingLength: parseFloat(endingLength.value),
     disableLoading: disableLoading.value,
     chartDebug: chartDebug.value,
+    chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
     bitrate: bitrate.value,
@@ -305,6 +310,7 @@ function applyConfig(config: RenderConfig) {
   endingLength.value = String(config.endingLength);
   disableLoading.value = config.disableLoading;
   chartDebug.value = config.chartDebug;
+  chartRatio.value = config.chartRatio;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
   bitrate.value = config.bitrate;
@@ -331,6 +337,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   endingLength: -2.0,
   disableLoading: true,
   chartDebug: false,
+  chartRatio: 1
   fps: 60,
   hardwareAccel: true,
   bitrate: '7M',
@@ -561,6 +568,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
+        </v-col>
+        <v-col cols="3">
+          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
     </div>

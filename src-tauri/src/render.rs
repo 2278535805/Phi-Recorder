@@ -35,6 +35,7 @@ pub struct RenderConfig {
     ending_length: f64,
     disable_loading: bool,
     chart_debug: bool,
+    chart_ratio: f32,
     fps: u32,
     hardware_accel: bool,
     bitrate: String,
@@ -76,6 +77,7 @@ impl RenderConfig {
             volume_music: self.volume_music,
             volume_sfx: self.volume_sfx,
             chart_debug: self.chart_debug,
+            chart_ratio: self.chart_ratio,
             ..Default::default()
         }
     }
