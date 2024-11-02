@@ -357,18 +357,14 @@ pub async fn main() -> Result<()> {
     let args2 = format!(
         "-c:a copy -c:v {} -pix_fmt yuv420p {} {} -preset {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
         //"-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -vf vflip -f mp4",
-        if use_cuda {
-            "h264_nvenc"
-        } else if has_qsv {
-            "h264_qsv"
-        } else if params.config.hardware_accel {
-            bail!(tl!("no-hwacc"));
-        } else {
-            // "libx264 -preset ultrafast"
-            "libx264"
-        },
+        if use_cuda {"h264_nvenc"} 
+        else if has_qsv {"h264_qsv"} 
+        else if params.config.hardware_accel {bail!(tl!("no-hwacc"));} 
+        else {"libx264"},
         if params.config.bitrate_control == "CRF" {
-            "-crf"
+            if use_cuda {"-cq"}
+            else if has_qsv {"-global_quality"}
+            else {"-crf"}
         } else {
             "-b:v"
         },
