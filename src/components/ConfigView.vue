@@ -506,7 +506,7 @@ async function replacePreset() {
     </div>
     <div class="mt-2">
       <StickyLabel :title="t('title.player')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 mt-1 align-center px-6">
+      <v-row no-gutters class="mx-n2">
         <v-col cols="4">
           <v-text-field
             readonly
@@ -522,7 +522,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-name')" v-model="playerName"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-1 align-center px-6">
+      <v-row no-gutters class="mx-n2 mt-1">
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
@@ -537,7 +537,7 @@ async function replacePreset() {
 
     <div class="mt-2">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 align-center px-6">
+      <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="8">
           <v-combobox class="mx-2" :label="t('respack')" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
