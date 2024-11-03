@@ -39,6 +39,7 @@ pub struct RenderConfig {
     chart_ratio: f32,
     fps: u32,
     hardware_accel: bool,
+    hevc: bool,
     bitrate_control: String,
     bitrate: String,
 
@@ -390,7 +391,7 @@ pub async fn main() -> Result<()> {
             if params.config.disable_loading{"-ss 00:00:03.5"}
             else{"-ss 00:00:00"},
         );
-    } else if {
+    } else {
         let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)
         } else if has_qsv {ffmpeg_preset_name_list.nth(0)
         } else if has_amf {ffmpeg_preset_name_list.nth(2)
