@@ -192,7 +192,7 @@ const resolution = ref('1920x1080'),
 const fxaa = ref(false),
   sampleCount = ref('1'),
   bitrateControl = ref('CRF'),
-  bitrate = ref('26');
+  bitrate = ref('28');
 
 const playerAvatar = ref<string>(),
   playerName = ref(''),
@@ -361,7 +361,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   hardwareAccel: true,
   hevc: false,
   bitrateControl: 'CRF',
-  bitrate: '26',
+  bitrate: '28',
 
   aggressive: false,
   challengeColor: 'golden',
