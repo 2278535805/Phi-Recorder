@@ -391,6 +391,15 @@ pub async fn main() -> Result<()> {
             if params.config.disable_loading{"-ss 00:00:03.5"}
             else{"-ss 00:00:00"},
         );
+        let mut proc = cmd_hidden(&ffmpeg)
+        .args(args.split_whitespace())
+        .arg(mixing_output.path())
+        .args(args2.split_whitespace())
+        .arg(output_path)
+        .stdin(Stdio::piped())
+        .stderr(Stdio::inherit())
+        .spawn()
+        .with_context(|| tl!("run-ffmpeg-failed"))?;
     } else {
         let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)
         } else if has_qsv {ffmpeg_preset_name_list.nth(0)
@@ -424,10 +433,7 @@ pub async fn main() -> Result<()> {
             if params.config.disable_loading{"-ss 00:00:03.5"}
             else{"-ss 00:00:00"},
         );
-    }
-    
-
-    let mut proc = cmd_hidden(&ffmpeg)
+        let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg(mixing_output.path())
         .args(args2.split_whitespace())
@@ -436,6 +442,9 @@ pub async fn main() -> Result<()> {
         .stderr(Stdio::inherit())
         .spawn()
         .with_context(|| tl!("run-ffmpeg-failed"))?;
+    }
+    
+
     let mut input = proc.stdin.take().unwrap();
 
     let byte_size = vw as usize * vh as usize * 4;
