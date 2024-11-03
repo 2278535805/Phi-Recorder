@@ -261,6 +261,8 @@ pub async fn main() -> Result<()> {
                 *dst += frame.1 * volume;
             }
             return len;
+        } else {
+            return 0;
         }
     };
 
