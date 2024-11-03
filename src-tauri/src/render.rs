@@ -226,19 +226,22 @@ pub async fn main() -> Result<()> {
     assert_eq!(sample_rate, sfx_click.sample_rate());
     assert_eq!(sample_rate, sfx_drag.sample_rate());
     assert_eq!(sample_rate, sfx_flick.sample_rate());
-    let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    {
-        let pos = O - chart.offset.min(0.) as f64;
-        let count = (music.length() as f64 * sample_rate_f64) as usize;
-        let mut it = output[((pos * sample_rate_f64).round() as usize * 2)..].iter_mut();
-        let ratio = 1. / sample_rate_f64;
-        for frame in 0..count {
-            let position = frame as f64 * ratio;
-            let frame = music.sample(position as f32).unwrap_or_default();
-            *it.next().unwrap() += frame.0 * volume_music;
-            *it.next().unwrap() += frame.1 * volume_music;
+    if volume_music != 0.0 {
+        let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+        {
+            let pos = O - chart.offset.min(0.) as f64;
+            let count = (music.length() as f64 * sample_rate_f64) as usize;
+            let mut it = output[((pos * sample_rate_f64).round() as usize * 2)..].iter_mut();
+            let ratio = 1. / sample_rate_f64;
+            for frame in 0..count {
+                let position = frame as f64 * ratio;
+                let frame = music.sample(position as f32).unwrap_or_default();
+                *it.next().unwrap() += frame.0 * volume_music;
+                *it.next().unwrap() += frame.1 * volume_music;
+            }
         }
     }
+    
     
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
@@ -263,7 +266,7 @@ pub async fn main() -> Result<()> {
     };
 
     // 尝试在volume_sfx=0时不处理音效
-    if volume_sfx > 0.0 {
+    if volume_sfx != 0.0 {
         for note in chart
             .lines
             .iter()

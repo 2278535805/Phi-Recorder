@@ -16,7 +16,7 @@ This is a fork of the Phira-render repository, fixing some issues and adding som
 
 ## Installation 安装
 
-Check [Releases](https://github.com/2278535805/phira-render/releases).
+Check [Releases](https://github.com/2278535805/phira-render/releases)
 
 ## Manual build 手动构建
 
