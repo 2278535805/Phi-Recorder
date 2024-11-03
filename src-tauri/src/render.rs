@@ -260,8 +260,8 @@ pub async fn main() -> Result<()> {
                 let dst = it.next().unwrap();
                 *dst += frame.1 * volume;
             }
+            return len;
         }
-        return len;
     };
 
     // 尝试在volume_sfx=0时不处理音效
