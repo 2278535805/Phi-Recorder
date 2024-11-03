@@ -11,7 +11,7 @@ en:
   fps: FPS
 
   hw-accel: Hardware Acceleration
-  hw-accel-tips: If hardware accelerated rendering is not supported, it will fail
+  hw-accel-tips: Improve rendering speed, slightly reduce quality
 
   fxaa: FXAA
   fxaa-tips: FXAA, as a low-cost anti-aliasing method, will cause the picture to be blurred, and it is not recommended to turn it on
@@ -81,7 +81,7 @@ zh-CN:
   fps: FPS
 
   hw-accel: 硬件加速
-  hw-accel-tips: 如果不支持硬件加速，渲染将会失败
+  hw-accel-tips: 提升渲染速度，略微降低质量
 
   fxaa: FXAA
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
