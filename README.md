@@ -1,5 +1,5 @@
 
-# phira-render 介绍
+# Phira-render 介绍
 
 This is a fork of the Phira-render repository, fixing some issues and adding some new features.
 这是 Phira-render 仓库的一个分支，修复了 Phira-render 的一些问题并添加了一些新功能。
