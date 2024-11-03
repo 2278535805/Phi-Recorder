@@ -359,15 +359,15 @@ pub async fn main() -> Result<()> {
     let mut ffmpeg_preset_name_list = params.config.ffmpeg_preset.split_whitespace();
 
     if params.config.hevc {
-        let nvenc = "hevc_nvenc"
-        let qsv = "hevc_qsv"
-        let amf = "hevc_amf"
-        let cpu = "libx265"
+        let nvenc = "hevc_nvenc";
+        let qsv = "hevc_qsv";
+        let amf = "hevc_amf";
+        let cpu = "libx265";
     } else {
-        let nvenc = "h264_nvenc"
-        let qsv = "h264_qsv"
-        let amf = "h264_amf"
-        let cpu = "libx264"
+        let nvenc = "h264_nvenc";
+        let qsv = "h264_qsv";
+        let amf = "h264_amf";
+        let cpu = "libx264";
     }
     
 
