@@ -260,7 +260,6 @@ pub async fn main() -> Result<()> {
             *dst += frame.1 * volume;
         }
         return len;
-        }
     };
 
     // 尝试在volume_sfx=0时不处理音效
