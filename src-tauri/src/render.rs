@@ -348,6 +348,9 @@ pub async fn main() -> Result<()> {
     let use_cuda = params.config.hardware_accel && codecs.contains("h264_nvenc");
     let has_qsv = params.config.hardware_accel && codecs.contains("h264_qsv");
     let has_amf = params.config.hardware_accel && codecs.contains("h264_amf");
+    let ffmpeg_preset =  if !use_cuda && !has_qsv && has_amf {"-quality"} else {"-preset"};
+    let ffmpeg_preset_name_list = params.config.ffmpeg_preset.split_whitespace()
+    let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)} else if has_qsv {ffmpeg_preset_name_list.nth(0)} else if has_amf {ffmpeg_preset_name_list.nth(2)};
 
     let mut args = "-y -f rawvideo -c:v rawvideo".to_owned();
     if use_cuda {
@@ -356,24 +359,24 @@ pub async fn main() -> Result<()> {
     write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
 
     let args2 = format!(
-        "-c:a copy -c:v {} -pix_fmt yuv420p {} {} -preset {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
+        "-c:a copy -c:v {} -pix_fmt yuv420p {} {} {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
         //"-c:a copy -c:v {} -pix_fmt yuv420p -b:v {} -map 0:v:0 -map 1:a:0 -vf vflip -f mp4",
         if use_cuda {"h264_nvenc"} 
         else if has_qsv {"h264_qsv"} 
-        else if has_amf {"h264_amf"}
+        //else if has_amf {"h264_amf"}
         else if params.config.hardware_accel {bail!(tl!("no-hwacc"));} 
         else {"libx264"},
         if params.config.bitrate_control == "CRF" {
             if use_cuda {"-cq"}
-            else if has_qsv {"-global_quality"}
-            else if has_amf {"-qp"}
+            else if has_qsv {"-q"}
+            //else if has_amf {"-qp_p"}
             else {"-crf"}
         } else {
             "-b:v"
         },
         params.config.bitrate,
-        if !use_cuda && (has_qsv || has_amf) {"main"}
-        else {&params.config.ffmpeg_preset},
+        ffmpeg_preset,
+        ffmpeg_preset_name,
         if params.config.disable_loading{"-ss 00:00:03.5"}
         else{"-ss 00:00:00"},
     );

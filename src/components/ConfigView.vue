@@ -20,7 +20,7 @@ en:
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA, which can improve the quality of the picture while increasing the performance cost
 
   bitrate-control: Bitrate Control
-  bitrate: level/bitrate
+  bitrate: Quantization parameters/Bitrate
   bitrate-tips: CRF-This is the CRF level. CBR-This is the bitrate
 
   player-avatar: Player Avatar
@@ -90,7 +90,7 @@ zh-CN:
   sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
 
   bitrate-control: 码率控制
-  bitrate: 级别/码率
+  bitrate: 量化参数/码率
   bitrate-tips: CRF-该项为CRF级别 CBR-该项为码率
 
   player-avatar: 玩家头像
@@ -161,7 +161,7 @@ import TipTextField from './TipTextField.vue';
 const props = defineProps<{ initAspectRatio?: number }>();
 
 const RESOLUTIONS = [ '1280x720','1920x1080', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
-const ffmpegPresetPresetList = ['fast', 'medium', 'slow'];
+const ffmpegPresetPresetList = ['veryfast p1 speed', 'faster p2 speed','fast p3 balanced', 'medium p4 balanced', 'slow balanced', 'slower p6 quality', 'veryslow p7 quality'];
 const bitrateControlList = ['CRF','CBR'];
 
 function parseResolution(resolution: string): [number, number] | null {
