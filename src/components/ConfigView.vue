@@ -11,7 +11,7 @@ en:
   fps: FPS
 
   hw-accel: Hardware Acceleration
-  hw-accel-tips: Some presets do not support hardware acceleration
+  hw-accel-tips: If hardware accelerated rendering is not supported, it will fail
 
   fxaa: FXAA
   fxaa-tips: FXAA, as a low-cost anti-aliasing method, will cause the picture to be blurred, and it is not recommended to turn it on
@@ -81,7 +81,7 @@ zh-CN:
   fps: FPS
 
   hw-accel: 硬件加速
-  hw-accel-tips: 部分预设不支持硬件加速
+  hw-accel-tips: 如果不支持硬件加速，渲染将会失败
 
   fxaa: FXAA
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
@@ -181,7 +181,7 @@ const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number
 const form = ref<VForm>();
 
 const resolution = ref('1920x1080'),
-  ffmpegPreset = ref('fast'),
+  ffmpegPreset = ref('medium p4 balanced'),
   fps = ref('60'),
   hwAccel = ref(true);
 
@@ -346,7 +346,7 @@ function applyConfig(config: RenderConfig) {
 
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
-  ffmpegPreset: 'fast',
+  ffmpegPreset: 'medium p4 balanced',
   endingLength: -2.0,
   disableLoading: true,
   chartDebug: false,

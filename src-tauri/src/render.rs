@@ -350,7 +350,7 @@ pub async fn main() -> Result<()> {
     let has_amf = params.config.hardware_accel && codecs.contains("h264_amf");
     let ffmpeg_preset =  if !use_cuda && !has_qsv && has_amf {"-quality"} else {"-preset"};
     let mut ffmpeg_preset_name_list = params.config.ffmpeg_preset.split_whitespace();
-    let mut ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)
+    let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)
     } else if has_qsv {ffmpeg_preset_name_list.nth(0)
     } else if has_amf {ffmpeg_preset_name_list.nth(2)
     } else {ffmpeg_preset_name_list.nth(0)};
