@@ -229,11 +229,11 @@ pub async fn main() -> Result<()> {
     
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
     {
-        let pos = O - chart.offset.min(0.) as f64;
-        let count = (music.length() as f64 * sample_rate_f64) as usize;
-        let mut it = output[((pos * sample_rate_f64).round() as usize * 2)..].iter_mut();
-        let ratio = 1. / sample_rate_f64;
         if volume_music != 0.0 {
+            let pos = O - chart.offset.min(0.) as f64;
+            let count = (music.length() as f64 * sample_rate_f64) as usize;
+            let mut it = output[((pos * sample_rate_f64).round() as usize * 2)..].iter_mut();
+            let ratio = 1. / sample_rate_f64;
             for frame in 0..count {
                 let position = frame as f64 * ratio;
                 let frame = music.sample(position as f32).unwrap_or_default();
@@ -245,23 +245,21 @@ pub async fn main() -> Result<()> {
     }
     
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
-        let position = (pos * sample_rate_f64).round() as usize * 2;
-        if position >= output.len() {
-            return 0;
-        }
-        let slice = &mut output[position..];
-        let len = (slice.len() / 2).min(clip.frame_count());
-        let mut it = slice.iter_mut();
-        // TODO optimize?
-        for frame in clip.frames()[..len].iter() {
-            let dst = it.next().unwrap();
-            *dst += frame.0 * volume;
-            let dst = it.next().unwrap();
-            *dst += frame.1 * volume;
-            /*if let (Some(dst1), Some(dst2)) = (it.next(), it.next()) {
-                *dst1 += frame.0 * volume;
-                *dst2 += frame.1 * volume;
-            }*/
+        if volume_music != 0.0 {
+            let position = (pos * sample_rate_f64).round() as usize * 2;
+            if position >= output.len() {
+                return 0;
+            }
+            let slice = &mut output[position..];
+            let len = (slice.len() / 2).min(clip.frame_count());
+            let mut it = slice.iter_mut();
+            // TODO optimize?
+            for frame in clip.frames()[..len].iter() {
+                let dst = it.next().unwrap();
+                *dst += frame.0 * volume;
+                let dst = it.next().unwrap();
+                *dst += frame.1 * volume;
+            }
         }
         return len;
     };
