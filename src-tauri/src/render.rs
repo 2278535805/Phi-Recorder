@@ -391,7 +391,7 @@ pub async fn main() -> Result<()> {
             if params.config.disable_loading{"-ss 00:00:03.5"}
             else{"-ss 00:00:00"},
         );
-        let mut proc = cmd_hidden(&ffmpeg)
+        let proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg(mixing_output.path())
         .args(args2.split_whitespace())
@@ -433,7 +433,7 @@ pub async fn main() -> Result<()> {
             if params.config.disable_loading{"-ss 00:00:03.5"}
             else{"-ss 00:00:00"},
         );
-        let mut proc = cmd_hidden(&ffmpeg)
+        let proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg(mixing_output.path())
         .args(args2.split_whitespace())
