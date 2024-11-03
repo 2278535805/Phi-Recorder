@@ -245,24 +245,21 @@ pub async fn main() -> Result<()> {
     }
     
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
-        if volume_music != 0.0 {
-            let position = (pos * sample_rate_f64).round() as usize * 2;
-            if position >= output.len() {
-                return 0;
-            }
-            let slice = &mut output[position..];
-            let len = (slice.len() / 2).min(clip.frame_count());
-            let mut it = slice.iter_mut();
-            // TODO optimize?
-            for frame in clip.frames()[..len].iter() {
-                let dst = it.next().unwrap();
-                *dst += frame.0 * volume;
-                let dst = it.next().unwrap();
-                *dst += frame.1 * volume;
-            }
-            return len;
-        } else {
+        let position = (pos * sample_rate_f64).round() as usize * 2;
+        if position >= output.len() {
             return 0;
+        }
+        let slice = &mut output[position..];
+        let len = (slice.len() / 2).min(clip.frame_count());
+        let mut it = slice.iter_mut();
+        // TODO optimize?
+        for frame in clip.frames()[..len].iter() {
+            let dst = it.next().unwrap();
+            *dst += frame.0 * volume;
+            let dst = it.next().unwrap();
+            *dst += frame.1 * volume;
+        }
+        return len;
         }
     };
 
