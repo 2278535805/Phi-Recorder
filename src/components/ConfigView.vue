@@ -86,6 +86,9 @@ zh-CN:
   fxaa: FXAA
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
 
+  hevc: HEVC编码
+  hevc-tips: 使用 HEVC 编码，压缩率更高，渲染速度更慢
+
   sample-count: 采样数
   sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
 
@@ -183,7 +186,8 @@ const form = ref<VForm>();
 const resolution = ref('1920x1080'),
   ffmpegPreset = ref('medium p4 balanced'),
   fps = ref('60'),
-  hwAccel = ref(true);
+  hwAccel = ref(true),
+  hevc = ref(false);
 
 const fxaa = ref(false),
   sampleCount = ref('1'),
@@ -273,6 +277,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
+    hevc: hevc.value,
     bitrateControl: bitrateControl.value,
     bitrate: bitrate.value,
 
@@ -324,6 +329,7 @@ function applyConfig(config: RenderConfig) {
   chartRatio.value = config.chartRatio;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
+  hevc.value = config.hevc;
   bitrateControl.value = config.bitrateControl;
   bitrate.value = config.bitrate;
 
@@ -353,6 +359,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   chartRatio: 1,
   fps: 60,
   hardwareAccel: true,
+  hevc: false,
   bitrateControl: 'CRF',
   bitrate: '26',
 
@@ -584,13 +591,18 @@ async function replacePreset() {
           <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-2 align-center px-6">
+      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
           <TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
         </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('hevc')" :tooltip="t('hevc-tips')" v-model="hevc"></TipSwitch>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-2 align-center px-6">
         <v-col cols="6">
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
