@@ -350,7 +350,10 @@ pub async fn main() -> Result<()> {
     let has_amf = params.config.hardware_accel && codecs.contains("h264_amf");
     let ffmpeg_preset =  if !use_cuda && !has_qsv && has_amf {"-quality"} else {"-preset"};
     let ffmpeg_preset_name_list = params.config.ffmpeg_preset.split_whitespace();
-    let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)} else if has_qsv {ffmpeg_preset_name_list.nth(0)} else if has_amf {ffmpeg_preset_name_list.nth(2)} else {ffmpeg_preset_name_list.nth(0)};
+    let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)
+    } else if has_qsv {ffmpeg_preset_name_list.nth(0)
+    } else if has_amf {ffmpeg_preset_name_list.nth(2)
+    } else {ffmpeg_preset_name_list.nth(0)};
 
     let mut args = "-y -f rawvideo -c:v rawvideo".to_owned();
     if use_cuda {
@@ -376,7 +379,7 @@ pub async fn main() -> Result<()> {
         },
         params.config.bitrate,
         ffmpeg_preset,
-        ffmpeg_preset_name,
+        ffmpeg_preset_name.unwrap(),
         if params.config.disable_loading{"-ss 00:00:03.5"}
         else{"-ss 00:00:00"},
     );
