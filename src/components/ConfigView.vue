@@ -126,7 +126,7 @@ zh-CN:
   volume-sfx: 音效音量
 
   ending-length: 结算画面时长
-  disable-loading: 加载画面
+  disable-loading: 禁用加载
   chart_debug: 调试模式
   chart_ratio: 谱面缩放
 
@@ -272,7 +272,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
-    disableLoading: !disableLoading.value,
+    disableLoading: disableLoading.value,
     chartDebug: chartDebug.value,
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
