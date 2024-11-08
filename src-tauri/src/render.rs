@@ -361,7 +361,7 @@ pub async fn main() -> Result<()> {
     let (nvenc, qsv, amf, cpu) = if params.config.hevc {
         ("hevc_nvenc", "hevc_qsv", "hevc_amf", "libx265")
     } else {
-        ("h264_nvenc", "h264_qsv", "h264_amf", "libx264")
+        ("h264_nvenc", "h264_qsv", "h264_amf", "copy")
     };
     if params.config.hardware_accel && !use_cuda_hevc && !has_qsv_hevc && !has_amf_hevc {bail!(tl!("no-hwacc"));}
 
