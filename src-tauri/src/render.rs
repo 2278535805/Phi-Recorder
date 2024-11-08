@@ -433,7 +433,7 @@ pub async fn main() -> Result<()> {
     send(IPCEvent::StartRender(frames));
 
     for frame in 0..frames {
-        *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
+        *my_time.borrow_mut() = (frame as f64 * frame_delta).max(0.) as f64;
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         clear_background(BLACK);
         main.viewport = Some((0, 0, vw as _, vh as _));
@@ -465,7 +465,7 @@ pub async fn main() -> Result<()> {
             glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1) as usize % N]);
             let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8);
             if !src.is_null() {
-                input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
+                input.write_all(&std::slice::from_raw_parts(src as *const usize, byte_size))?;
                 glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
             }
         }
