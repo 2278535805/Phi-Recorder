@@ -1,12 +1,14 @@
 <i18n>
 en:
   render: Render
+  render1: Render
   rpe: RPE
   tasks: Tasks
   about: About
 
 zh-CN:
   render: 渲染
+  render1: 渲染
   rpe: RPE
   tasks: 任务列表
   about: 关于

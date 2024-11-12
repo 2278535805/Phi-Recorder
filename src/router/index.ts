@@ -14,17 +14,10 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'render', component: RenderView },
+    { path: '/render1', name: 'render1', component: RenderView1 },
     { path: '/rpe', name: 'rpe', component: RPEView },
-    {
-      path: '/tasks',
-      name: 'tasks',
-      component: TasksView,
-    },
-    {
-      path: '/about',
-      name: 'about',
-      component: AboutView,
-    },
+    { path: '/tasks', name: 'tasks', component: TasksView },
+    { path: '/about', name: 'about', component: AboutView },
   ],
   scrollBehavior(_to, from, savedPosition) {
     return new Promise((resolve) => {
@@ -37,6 +30,7 @@ const router = createRouter({
 
 import { i18n } from '../main';
 import { setTitle } from '../common';
+import RenderView1 from '@/RenderView1.vue';
 
 router.afterEach((to) => {
   nextTick(() => {
