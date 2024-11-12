@@ -68,7 +68,7 @@ window.goto = (name: string) => {
     <v-navigation-drawer expand-on-hover rail permanent>
       <v-list density="compact" nav>
         <v-list-item
-          v-for="key in ['render', 'rpe', 'tasks', 'about']"
+          v-for="key in ['render', 'render1', 'rpe', 'tasks', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
