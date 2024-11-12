@@ -144,7 +144,7 @@ async function chooseChart(folder?: boolean) {
 
   choosingChart.value = false;
 
-  moveNext();
+  await moveNext();
 }
 async function loadChart(file: string) {
   try {

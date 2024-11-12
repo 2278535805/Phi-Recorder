@@ -51,6 +51,7 @@ const route = useRoute(),
 
 const icons = {
   render: 'mdi-auto-fix',
+  render1: 'mdi-auto-fix',
   rpe: 'mdi-bookshelf',
   tasks: 'mdi-server',
   about: 'mdi-information-outline',
