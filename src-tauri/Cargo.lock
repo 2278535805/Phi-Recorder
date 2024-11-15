@@ -2869,7 +2869,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "phigros-recorder"
+name = "phira-render"
 version = "0.1.0"
 dependencies = [
  "anyhow",
