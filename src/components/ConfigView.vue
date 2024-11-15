@@ -16,6 +16,9 @@ en:
   fxaa: FXAA
   fxaa-tips: FXAA, as a low-cost anti-aliasing method, will cause the picture to be blurred, and it is not recommended to turn it on
 
+  hevc: HEVC encoding
+  hevc-tips: Use HEVC encoding, which has higher compression rate and slower speed
+
   sample-count: Sample Count
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA, which can improve the quality of the picture while increasing the performance cost
 
