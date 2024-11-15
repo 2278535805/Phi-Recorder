@@ -1,6 +1,6 @@
 <i18n>
 en:
-  already-running: phira-render is already running
+  already-running: phigros-recorder is already running
 
   prev-step: Previous
   next-step: Next
@@ -46,7 +46,7 @@ en:
   ffmpeg-not-found: You haven't installed ffmpeg yet. Please download FFmpeg.exe and put it in the specific folder.
 
 zh-CN:
-  already-running: phira-render 已经在运行
+  already-running: phigros-recorder 已经在运行
 
   prev-step: 上一步
   next-step: 下一步
@@ -319,7 +319,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1">
+          <v-row no-gutters class="mx-n2 mt-2">
             <v-col cols="12" sm="4">
               <v-text-field class="mx-2" :label="t('charter')" v-model="chartInfo.charter"></v-text-field>
             </v-col>
@@ -331,7 +331,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1 align-center">
+          <v-row no-gutters class="mx-n2 mt-2 align-center">
             <v-col cols="4">
               <div class="mx-2 d-flex flex-column">
                 <p class="text-caption" v-t="'aspect'"></p>
@@ -347,7 +347,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1">
+          <v-row no-gutters class="mx-n2 mt-2">
             <v-col cols="12">
               <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
             </v-col>

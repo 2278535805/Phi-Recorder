@@ -1,12 +1,12 @@
 [package]
-name = "phira-render"
-version = "0.1.5"
-description = "Phira render"
+name = "phigros-recorder"
+version = "0.1.6"
+description = "Phigros Recorder"
 authors = ["Mivik", "HLMC"]
 license = ""
 repository = ""
-default-run = "phira-render"
-edition = "2021"
+default-run = "phigros-recorder"
+edition = "2024"
 rust-version = "1.60"
 
 [build-dependencies]
