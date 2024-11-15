@@ -6,7 +6,7 @@ authors = ["Mivik", "HLMC"]
 license = ""
 repository = ""
 default-run = "phigros-recorder"
-edition = "2024"
+edition = "2021"
 rust-version = "1.60"
 
 [build-dependencies]
