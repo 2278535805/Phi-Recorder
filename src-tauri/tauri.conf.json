@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "phira-render",
-    "version": "0.1.5"
+    "productName": "phigros-recorder",
+    "version": "0.1.6"
   },
   "tauri": {
     "allowlist": {
@@ -46,7 +46,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "org.flos.phira.render",
+      "identifier": "com.hlmc.phigros.recorder",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -78,7 +78,7 @@
         "fullscreen": false,
         "height": 660,
         "resizable": true,
-        "title": "phira-render",
+        "title": "phigros-recorder",
         "width": 880,
         "fileDropEnabled": true
       }

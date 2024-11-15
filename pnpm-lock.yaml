@@ -14,7 +14,7 @@ dependencies:
   moment:
     specifier: ^2.29.4
     version: 2.29.4
-  phira-render:
+  phigros-recorder:
     specifier: 'link:'
     version: 'link:'
   vue:
