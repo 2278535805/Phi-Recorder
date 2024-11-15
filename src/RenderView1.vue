@@ -1,6 +1,6 @@
 <i18n>
 en:
-  already-running: phira-render is already running
+  already-running: phigros-recorder is already running
 
   prev-step: Previous
   next-step: Next
@@ -46,7 +46,7 @@ en:
   ffmpeg-not-found: You haven't installed ffmpeg yet. Please download FFmpeg.exe and put it in the specific folder.
 
 zh-CN:
-  already-running: phira-render 已经在运行
+  already-running: phigros-recorder 已经在运行
 
   prev-step: 上一步
   next-step: 下一步
