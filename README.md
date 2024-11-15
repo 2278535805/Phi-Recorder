@@ -1,9 +1,8 @@
 
-# Not-Phira-render 介绍
+# Phigros Recorder 介绍
 
-This is a fork of the Phira-render repository, fixing some issues and adding some new features.
-
-这是 Phira-render 仓库的一个分支，修复了 Phira-render 的一些问题并添加了一些新功能。
+Better rendering of Phigros chart.
+更好的渲染 Phigros 谱面。
 
 ## Features 功能
 
@@ -16,7 +15,7 @@ This is a fork of the Phira-render repository, fixing some issues and adding som
 
 ## Installation 安装
 
-Check [Releases](https://github.com/2278535805/phira-render/releases)
+Check [Releases](https://github.com/2278535805/phigros-recorder/releases)
 
 ## Manual build 手动构建
 
