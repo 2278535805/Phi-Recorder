@@ -66,13 +66,14 @@ impl Task {
         let mut cover = NamedTempFile::new()?;
         cover.write_all(&fs.load_file(&info.illustration).await?)?;
 
+        let level: String = info.level.split_whitespace().next().unwrap_or_default()
         let safe_name: String = info
             .name
             .chars()
             .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
             .collect();
         let output = output_dir()?.join(format!(
-            "{} {safe_name}.mov",
+            "{} {safe_name}_{level}.mov",
             Local::now().format("%Y-%m-%d %H-%M-%S")
         ));
 
