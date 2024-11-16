@@ -66,7 +66,7 @@ impl Task {
         let mut cover = NamedTempFile::new()?;
         cover.write_all(&fs.load_file(&info.illustration).await?)?;
 
-        let level: String = info.level.split_whitespace().next().unwrap_or_default();
+        let level: String = info.level.split_whitespace().next().unwrap_or_default().to_string();
         let safe_name: String = info
             .name
             .chars()
