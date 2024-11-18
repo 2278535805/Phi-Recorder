@@ -395,7 +395,7 @@ pub async fn main() -> Result<()> {
         ffmpeg_preset,
         ffmpeg_preset_name.unwrap(),
         if params.config.disable_loading{"-ss 00:00:03.5"}
-        else{"-ss 00:00:00"},
+        else{"-ss 00:00:00.1"},
     );
 
     let mut proc = cmd_hidden(&ffmpeg)
