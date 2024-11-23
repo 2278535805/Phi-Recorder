@@ -334,7 +334,7 @@ pub async fn main() -> Result<()> {
     main.viewport = Some((0, 0, vw as _, vh as _));
 
     const O: f64 = LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64;
-    const A: f64 = 0.7 + 0.3 + 0.4;
+    const A: f64 = 0.7 + 0.3 + 0.4 - 0.4;
 
     let fps = params.config.fps;
     let frame_delta = 1. / fps as f32;
