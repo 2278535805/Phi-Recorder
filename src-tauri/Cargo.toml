@@ -19,7 +19,7 @@ tauri = { version = "1.4.0", features = [ "dialog-message", "system-tray", "shel
 
 anyhow = { version = "1.0.70", features = ["backtrace"] }
 macroquad = { git = "https://github.com/Mivik/prpr-macroquad", default-features = false }
-prpr = { git = "https://github.com/2278535805/phira", package = "prpr", branch = "render-lib" }
+prpr = { git = "https://github.com/2278535805/render-lib", package = "prpr", branch = "render-lib" }
 # prpr = { path = "../../phira/prpr" }
 
 sasa = { git = "https://github.com/Mivik/sasa" }
