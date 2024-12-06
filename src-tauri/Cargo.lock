@@ -2879,7 +2879,7 @@ dependencies = [
  "macroquad",
  "open 5.0.0",
  "prpr",
- "sasa",
+ "sasa 0.1.0 (git+https://github.com/2278535805/sasa)",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -3063,7 +3063,7 @@ dependencies = [
  "rayon",
  "regex",
  "rfd",
- "sasa",
+ "sasa 0.1.0 (git+https://github.com/Mivik/sasa)",
  "serde",
  "serde_json",
  "serde_yaml",
@@ -3433,6 +3433,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "sasa"
+version = "0.1.0"
+source = "git+https://github.com/2278535805/sasa#480e804f3ced0373f988757177d51b917d16d1c5"
+dependencies = [
+ "anyhow",
+ "cpal",
+ "ringbuf",
+ "symphonia",
+ "thiserror",
 ]
 
 [[package]]
@@ -3879,6 +3891,7 @@ dependencies = [
  "lazy_static",
  "symphonia-bundle-flac",
  "symphonia-bundle-mp3",
+ "symphonia-codec-aac",
  "symphonia-codec-adpcm",
  "symphonia-codec-pcm",
  "symphonia-codec-vorbis",
@@ -3912,6 +3925,17 @@ dependencies = [
  "log",
  "symphonia-core",
  "symphonia-metadata",
+]
+
+[[package]]
+name = "symphonia-codec-aac"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68bdd75b25ce4b84b12a4bd20bfea2460c2dbd7fc1d227ef5533504d3168109d"
+dependencies = [
+ "lazy_static",
+ "log",
+ "symphonia-core",
 ]
 
 [[package]]
