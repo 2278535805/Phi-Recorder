@@ -1,4 +1,4 @@
-name: Release
+name: Build Phigros Recorder
 on:
   push:
     tags:
