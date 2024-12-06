@@ -10,7 +10,6 @@ Better rendering of Phigros chart.
 - CRF bitrate control CRF码率控制
 - Support HEVC 支持 HEVC 编码
 - Lossless Audio 无损音频
-- Disable Loading Scene 禁用加载场景
 - ...
 
 ## Installation 安装
