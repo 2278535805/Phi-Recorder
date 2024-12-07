@@ -59,6 +59,7 @@ en:
   disable-loading: Remove loading screen
   chart_debug: Debug Mode
   chart_ratio: Chart Zoom
+  all_good: Force Good judgment
 
   presets: Presets
   preset-refresh: Refresh
@@ -132,6 +133,7 @@ zh-CN:
   disable-loading: 禁用加载
   chart_debug: 调试模式
   chart_ratio: 谱面缩放
+  all_good: 强制Good
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -251,8 +253,8 @@ const doubleHint = ref(true),
   disableParticle = ref(false),
   disableEffect = ref(false);
 
-const volumeMusic = ref(1),
-  volumeSfx = ref(1);
+const volumeMusic = ref(1.0),
+  volumeSfx = ref(0.7);
 
 const endingLength = ref('-2.0');
 
@@ -260,6 +262,7 @@ const disableLoading = ref(false)
 
 const chartDebug = ref(false)
 const chartRatio = ref(1.0)
+const allGood = ref(false)
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -300,6 +303,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     speed: 1,
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
+    allGood: allGood.value,
   };
 }
 
@@ -351,6 +355,7 @@ function applyConfig(config: RenderConfig) {
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0];
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
+  allGood.value = config.allGood;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -380,8 +385,9 @@ const DEFAULT_CONFIG: RenderConfig = {
   sampleCount: 1,
   resPackPath: null,
   speed: 1,
-  volumeMusic: 1,
-  volumeSfx: 1,
+  volumeMusic: 1.0,
+  volumeSfx: 0.7,
+  allGood: false,
 };
 interface Preset {
   name: string;
@@ -603,6 +609,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('hevc')" :tooltip="t('hevc-tips')" v-model="hevc"></TipSwitch>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2 align-center px-6">
