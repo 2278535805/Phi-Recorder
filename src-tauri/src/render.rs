@@ -59,6 +59,7 @@ pub struct RenderConfig {
     speed: f32,
     volume_music: f32,
     volume_sfx: f32,
+    all_good: bool,
 }
 
 impl RenderConfig {
@@ -81,6 +82,7 @@ impl RenderConfig {
             volume_sfx: self.volume_sfx,
             chart_debug: self.chart_debug,
             chart_ratio: self.chart_ratio,
+            all_good: self.all_good,
             ..Default::default()
         }
     }

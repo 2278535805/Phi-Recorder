@@ -1,8 +1,8 @@
 [package]
 name = "phigros-recorder"
-version = "0.1.6"
+version = "0.1.7"
 description = "Phigros Recorder"
-authors = ["Mivik", "HLMC"]
+authors = ["HLMC", "Mivik"]
 license = ""
 repository = ""
 default-run = "phigros-recorder"
