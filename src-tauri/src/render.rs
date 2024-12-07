@@ -37,6 +37,7 @@ pub struct RenderConfig {
     disable_loading: bool,
     chart_debug: bool,
     chart_ratio: f32,
+    all_good: bool,
     fps: u32,
     hardware_accel: bool,
     hevc: bool,
@@ -59,7 +60,6 @@ pub struct RenderConfig {
     speed: f32,
     volume_music: f32,
     volume_sfx: f32,
-    all_good: bool,
 }
 
 impl RenderConfig {
