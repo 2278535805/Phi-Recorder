@@ -10,7 +10,7 @@ mod render;
 mod task;
 
 use anyhow::{bail, Context, Result};
-use common::{ensure_dir, respack_dir, CONFIG_DIR, DATA_DIR};
+use common::{ensure_dir, respack_dir, output_dir, CONFIG_DIR, DATA_DIR};
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
 use prpr::{
@@ -101,6 +101,7 @@ async fn main() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             is_the_only_instance,
             exit_program,
+            show_folder,
             show_in_folder,
             preview_chart,
             parse_chart,
@@ -222,6 +223,12 @@ fn is_the_only_instance() -> bool {
 #[tauri::command]
 fn exit_program() {
     std::process::exit(0);
+}
+
+#[tauri::command]
+fn show_folder() -> Result<(), InvokeError> {
+    let dir = output_dir().unwrap();
+    show_in_folder(&dir)
 }
 
 #[tauri::command]
