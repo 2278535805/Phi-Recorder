@@ -60,6 +60,7 @@ en:
   chart_debug: Debug Mode
   chart_ratio: Chart Zoom
   all_good: Force Good judgment
+  watermark: Watermark
 
   presets: Presets
   preset-refresh: Refresh
@@ -134,6 +135,7 @@ zh-CN:
   chart_debug: 调试模式
   chart_ratio: 谱面缩放
   all_good: 强制Good
+  watermark: 水印
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -202,6 +204,8 @@ const fxaa = ref(false),
 const playerAvatar = ref<string>(),
   playerName = ref(''),
   playerRks = ref('15.0');
+
+const watermark = ref('');
 
 async function chooseAvatar() {
   let file = await open({
@@ -304,6 +308,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     allGood: allGood.value,
+    watermark: watermark.value,
   };
 }
 
@@ -356,6 +361,7 @@ function applyConfig(config: RenderConfig) {
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0];
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
+  watermark.value = config.watermark;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -388,6 +394,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
+  watermark: '',
 };
 interface Preset {
   name: string;
@@ -617,6 +624,9 @@ async function replacePreset() {
       <v-row no-gutters class="mx-n2 mt-2 align-center px-6">
         <v-col cols="6">
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
         </v-col>
       </v-row>
     </div>

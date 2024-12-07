@@ -79,6 +79,7 @@ export interface RenderConfig {
   speed: number;
   volumeMusic: number;
   volumeSfx: number;
+  watermark: string;
 }
 
 export interface RPEChart {
