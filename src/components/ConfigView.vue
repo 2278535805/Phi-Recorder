@@ -334,6 +334,7 @@ function applyConfig(config: RenderConfig) {
   disableLoading.value = config.disableLoading;
   chartDebug.value = config.chartDebug;
   chartRatio.value = config.chartRatio;
+  allGood.value = config.allGood;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
   hevc.value = config.hevc;
@@ -355,7 +356,6 @@ function applyConfig(config: RenderConfig) {
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0];
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
-  allGood.value = config.allGood;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -365,6 +365,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   disableLoading: true,
   chartDebug: false,
   chartRatio: 1,
+  allGood: false,
   fps: 60,
   hardwareAccel: true,
   hevc: false,
@@ -387,7 +388,6 @@ const DEFAULT_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
-  allGood: false,
 };
 interface Preset {
   name: string;

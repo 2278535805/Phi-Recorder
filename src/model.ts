@@ -56,6 +56,7 @@ export interface RenderConfig {
   disableLoading: boolean;
   chartDebug: boolean;
   chartRatio: number;
+  allGood: boolean;
   fps: number;
   hardwareAccel: boolean;
   hevc: boolean;
@@ -78,7 +79,6 @@ export interface RenderConfig {
   speed: number;
   volumeMusic: number;
   volumeSfx: number;
-  allGood: boolean;
 }
 
 export interface RPEChart {

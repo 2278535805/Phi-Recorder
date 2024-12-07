@@ -82,6 +82,7 @@ impl RenderConfig {
             volume_sfx: self.volume_sfx,
             chart_debug: self.chart_debug,
             chart_ratio: self.chart_ratio,
+            all_good: self.all_good,
             ..Default::default()
         }
     }
