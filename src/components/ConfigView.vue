@@ -64,6 +64,7 @@ en:
   roman: Roman Mode
   chinese: Chinese Mode
   combo: COMBO text
+  difficulty: Custom Difficulty
 
   presets: Presets
   preset-refresh: Refresh
@@ -142,6 +143,7 @@ zh-CN:
   roman: 罗马模式
   chinese: 中文模式
   combo: COMBO文字
+  difficulty: 自定义难度
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -276,6 +278,7 @@ const allGood = ref(false)
 const roman = ref(false)
 const chinese = ref(false)
 const combo = ref('AUTOPLAY')
+const difficulty = ref('')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -321,6 +324,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     roman: roman.value,
     chinese: chinese.value,
     combo: combo.value,
+    difficulty: difficulty.value,
   };
 }
 
@@ -377,6 +381,7 @@ function applyConfig(config: RenderConfig) {
   roman.value = config.roman;
   chinese.value = config.chinese;
   combo.value = config.combo;
+  difficulty.value = config.difficulty;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -412,7 +417,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   watermark: '',
   roman: false,
   chinese: false,
-  combo: 'AUTOPLAY'
+  combo: 'AUTOPLAY',
+  difficulty: '',
 };
 interface Preset {
   name: string;
@@ -640,11 +646,14 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="6">
+        <v-col cols="4">
           <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="4">
           <v-text-field class="mx-2" :label="t('combo')" v-model="combo"></v-text-field>
+        </v-col>
+        <v-col cols="4">
+          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

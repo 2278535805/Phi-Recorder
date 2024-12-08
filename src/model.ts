@@ -83,6 +83,7 @@ export interface RenderConfig {
   roman: boolean;
   chinese: boolean;
   combo: string;
+  difficulty: string;
 }
 
 export interface RPEChart {

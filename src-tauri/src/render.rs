@@ -64,6 +64,7 @@ pub struct RenderConfig {
     roman: bool,
     chinese: bool,
     combo: String,
+    difficulty: String,
 }
 
 impl RenderConfig {
@@ -91,6 +92,7 @@ impl RenderConfig {
             roman: self.roman,
             chinese: self.chinese,
             combo: self.combo.clone(),
+            difficulty: self.difficulty.clone(),
             ..Default::default()
         }
     }
@@ -321,7 +323,7 @@ pub async fn main() -> Result<()> {
     let player = build_player(&params.config).await?;
     let mut main = Main::new(
         Box::new(
-            LoadingScene::new(GameMode::Normal, info, config, fs, Some(player), None, None).await?,
+            LoadingScene::new(GameMode::Normal, info, &config, fs, Some(player), None, None).await?,
         ),
         tm,
         {

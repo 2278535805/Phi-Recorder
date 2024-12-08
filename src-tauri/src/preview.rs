@@ -65,7 +65,7 @@ pub async fn main() -> Result<()> {
     let mut main = Main::new(
         Box::new(BaseScene(
             Some(NextScene::Overlay(Box::new(
-                LoadingScene::new(GameMode::Normal, info, config, fs, Some(player), None, None)
+                LoadingScene::new(GameMode::Normal, info, &config, fs, Some(player), None, None)
                     .await?,
             ))),
             false,
