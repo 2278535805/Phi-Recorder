@@ -62,6 +62,7 @@ pub struct RenderConfig {
     volume_sfx: f32,
     watermark: String,
     roman: bool,
+    combo: String,
 }
 
 impl RenderConfig {
@@ -87,6 +88,7 @@ impl RenderConfig {
             all_good: self.all_good,
             watermark: self.watermark.clone(),
             roman: self.roman,
+            combo: self.combo.clone(),
             ..Default::default()
         }
     }

@@ -62,6 +62,7 @@ en:
   all_good: Force Good judgment
   watermark: Watermark
   roman: Roman Mode
+  combo: COMBO text
 
   presets: Presets
   preset-refresh: Refresh
@@ -138,6 +139,7 @@ zh-CN:
   all_good: 强制Good
   watermark: 水印
   roman: 罗马模式
+  combo: COMBO文字
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -270,6 +272,7 @@ const chartDebug = ref(false)
 const chartRatio = ref(1.0)
 const allGood = ref(false)
 const roman = ref(false)
+const combo = ref('AUTOPLAY')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -313,6 +316,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     allGood: allGood.value,
     watermark: watermark.value,
     roman: roman.value,
+    combo: combo.value,
   };
 }
 
@@ -367,6 +371,7 @@ function applyConfig(config: RenderConfig) {
   volumeSfx.value = config.volumeSfx;
   watermark.value = config.watermark;
   roman.value = config.roman;
+  combo.value = config.combo;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -401,6 +406,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   volumeSfx: 0.7,
   watermark: '',
   roman: false,
+  combo: 'AUTOPLAY'
 };
 interface Preset {
   name: string;
@@ -627,15 +633,18 @@ async function replacePreset() {
           <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-2 align-center px-6">
-        <v-col cols="6">
-          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
-        </v-col>
+      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="6">
           <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
         </v-col>
+        <v-col cols="6">
+          <v-text-field class="mx-2" :label="t('combo')" v-model="combo"></v-text-field>
+        </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="6">
+          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
+        </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('roman')" v-model="roman"></TipSwitch>
         </v-col>
