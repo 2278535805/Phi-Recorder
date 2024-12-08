@@ -80,6 +80,7 @@ export interface RenderConfig {
   volumeMusic: number;
   volumeSfx: number;
   watermark: string;
+  roman: boolean;
 }
 
 export interface RPEChart {

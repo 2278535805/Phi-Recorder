@@ -61,6 +61,7 @@ pub struct RenderConfig {
     volume_music: f32,
     volume_sfx: f32,
     watermark: String,
+    roman: bool,
 }
 
 impl RenderConfig {
@@ -85,6 +86,7 @@ impl RenderConfig {
             chart_ratio: self.chart_ratio,
             all_good: self.all_good,
             watermark: self.watermark.clone(),
+            roman: self.roman,
             ..Default::default()
         }
     }
