@@ -81,6 +81,7 @@ export interface RenderConfig {
   volumeSfx: number;
   watermark: string;
   roman: boolean;
+  chinese: boolean;
   combo: string;
 }
 

@@ -62,6 +62,7 @@ en:
   all_good: Force Good judgment
   watermark: Watermark
   roman: Roman Mode
+  chinese: Chinese Mode
   combo: COMBO text
 
   presets: Presets
@@ -139,6 +140,7 @@ zh-CN:
   all_good: 强制Good
   watermark: 水印
   roman: 罗马模式
+  chinese: 中文模式
   combo: COMBO文字
 
   presets: 预设配置
@@ -272,6 +274,7 @@ const chartDebug = ref(false)
 const chartRatio = ref(1.0)
 const allGood = ref(false)
 const roman = ref(false)
+const chinese = ref(false)
 const combo = ref('AUTOPLAY')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
@@ -316,6 +319,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     allGood: allGood.value,
     watermark: watermark.value,
     roman: roman.value,
+    chinese: chinese.value,
     combo: combo.value,
   };
 }
@@ -371,6 +375,7 @@ function applyConfig(config: RenderConfig) {
   volumeSfx.value = config.volumeSfx;
   watermark.value = config.watermark;
   roman.value = config.roman;
+  chinese.value = config.chinese;
   combo.value = config.combo;
 }
 
@@ -406,6 +411,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   volumeSfx: 0.7,
   watermark: '',
   roman: false,
+  chinese: false,
   combo: 'AUTOPLAY'
 };
 interface Preset {
@@ -647,6 +653,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('roman')" v-model="roman"></TipSwitch>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('chinese')" v-model="chinese"></TipSwitch>
         </v-col>
       </v-row>
     </div>
