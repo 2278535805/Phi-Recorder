@@ -62,6 +62,17 @@ jobs:
           cwd: ./static-lib
           files: prpr-avc-static-lib.tar.gz
 
+      - name: Check Tauri version 
+        run: tauri --version 
+        
+      - name: Check Cargo version 
+        run: cargo --version
+        
+      - name: Cargo Update
+        run: |
+          cd ./src-tauri
+          cargo update
+
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
 
