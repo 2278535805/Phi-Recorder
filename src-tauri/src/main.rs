@@ -53,7 +53,10 @@ pub fn build_conf() -> macroquad::window::Conf {
         window_title: "Phigros".to_string(),
         window_width: 1280,
         window_height: 720,
-        headless: std::env::args().skip(1).next().as_deref() != Some("preview"),
+        headless: !matches!(
+            std::env::args().skip(1).next().as_deref(),
+            Some("preview") | Some("tweakoffset")
+        ),
         ..Default::default()
     }
 }
@@ -83,6 +86,9 @@ async fn main() -> Result<()> {
             Some("preview") => {
                 run_wrapped(preview::main()).await;
             }
+            Some("tweakoffset") => {
+                run_wrapped(preview::tweakoffset()).await;
+            }
             cmd => {
                 eprintln!("Unknown subcommand: {cmd:?}");
                 std::process::exit(1);
@@ -104,6 +110,7 @@ async fn main() -> Result<()> {
             show_folder,
             show_in_folder,
             preview_chart,
+            preview_tweakoffset,
             parse_chart,
             post_render,
             get_tasks,
@@ -300,6 +307,28 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
             .write_all(format!("{}\n", serde_json::to_string(&params)?).as_bytes())
             .await?;
 
+        Ok(())
+    })
+    .await
+}
+
+#[tauri::command]
+async fn preview_tweakoffset(params: RenderParams) -> Result<(), InvokeError> {
+    wrap_async(async move {
+        let mut child = Command::new(std::env::current_exe()?)
+            .arg("tweakoffset")
+            .arg(ASSET_PATH.get().unwrap())
+            .stdin(Stdio::piped())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn()?;
+
+        let mut stdin = child.stdin.take().unwrap();
+        let info = format!("{}\n", serde_json::to_string(&params)?);
+        stdin
+            .write_all(info.as_bytes())
+            .await?;
+        
         Ok(())
     })
     .await

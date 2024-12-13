@@ -51,6 +51,7 @@ pub struct RenderConfig {
     double_hint: bool,
     fxaa: bool,
     note_scale: f32,
+    offset: f32,
     particle: bool,
     player_avatar: Option<String>,
     player_name: String,
@@ -77,6 +78,7 @@ impl RenderConfig {
             double_hint: self.double_hint,
             fxaa: self.fxaa,
             note_scale: self.note_scale,
+            offset: self.offset,
             particle: self.particle,
             player_name: self.player_name.clone(),
             player_rks: self.player_rks,
@@ -447,7 +449,7 @@ pub async fn main() -> Result<()> {
     for frame in 0..frames {
         *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
-        clear_background(BLACK);
+        //clear_background(BLACK);
         main.viewport = Some((0, 0, vw as _, vh as _));
         main.update()?;
         main.render(&mut painter)?;

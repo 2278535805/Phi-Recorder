@@ -6,6 +6,7 @@ export interface ChartInfo {
   illustrator: string;
 
   tip: string | null;
+  offset: number;
 
   aspectRatio: number;
   backgroundDim: number;
@@ -70,6 +71,7 @@ export interface RenderConfig {
   doubleHint: boolean;
   fxaa: boolean;
   noteScale: number;
+  offset: number;
   particle: boolean;
   playerAvatar: string | null;
   playerName: string;

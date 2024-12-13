@@ -65,6 +65,7 @@ en:
   chinese: Chinese Mode
   combo: COMBO text
   difficulty: Custom Difficulty
+  offset: Offset
 
   presets: Presets
   preset-refresh: Refresh
@@ -144,6 +145,7 @@ zh-CN:
   chinese: 中文模式
   combo: COMBO文字
   difficulty: 自定义难度
+  offset: 延时
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -279,6 +281,7 @@ const roman = ref(false)
 const chinese = ref(false)
 const combo = ref('AUTOPLAY')
 const difficulty = ref('')
+const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -311,6 +314,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     fxaa: fxaa.value,
     noteScale: noteScale.value,
     particle: !disableParticle.value,
+    offset: parseFloat(offset.value) / 1000,
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
     playerRks: parseFloat(playerRks.value),
@@ -369,6 +373,7 @@ function applyConfig(config: RenderConfig) {
   doubleHint.value = config.doubleHint;
   fxaa.value = config.fxaa;
   noteScale.value = config.noteScale;
+  offset.value = String(config.offset);
   disableParticle.value = !config.particle;
   playerAvatar.value = config.playerAvatar || undefined;
   playerName.value = config.playerName;
@@ -405,6 +410,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   doubleHint: true,
   fxaa: false,
   noteScale: 1,
+  offset: 0.0,
   particle: true,
   playerAvatar: null,
   playerName: '',
@@ -655,6 +661,9 @@ async function replacePreset() {
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
+        <!--<v-col cols="3">
+          <v-text-field :label="t('offset')" v-model="offset" type="number" :rules="[RULES.greaterThanZero]"></v-text-field>
+        </v-col>-->
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="6">

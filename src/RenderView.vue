@@ -19,6 +19,7 @@ en:
   chart-file: Chart file
 
   chart-name: Chart name
+  chart-offset: Offset
   charter: Charter
   illustrator: Illustrator
   level: Level
@@ -37,6 +38,7 @@ en:
     music: Music (empty for default)
     illustration: Illustration (empty for default)
 
+  tweakoffset: Tweak Offset
   preview: Preview
   render: Render
 
@@ -65,6 +67,7 @@ zh-CN:
   chart-file: 谱面文件
 
   chart-name: 谱面名
+  chart-offset: 偏移
   charter: 谱师
   composer: 曲师
   illustrator: 画师
@@ -78,6 +81,7 @@ zh-CN:
   width: 宽
   height: 高
 
+  tweakoffset: 调整延时
   preview: 预览
   render: 渲染
 
@@ -150,6 +154,7 @@ async function loadChart(file: string) {
     chartPath = file;
     chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
     stepIndex.value++;
+    offset_text.value = String(chartInfo.value.offset);
     aspectWidth.value = String(chartInfo.value.aspectRatio);
     aspectHeight.value = '1.0';
     for (let asp of [
@@ -174,6 +179,8 @@ async function loadChart(file: string) {
 const aspectWidth = ref('0'),
   aspectHeight = ref('0');
 
+const offset_text = ref('0')
+
 const fileHovering = ref(false);
 event.listen('tauri://file-drop-hover', (_event) => (fileHovering.value = step.value === 'choose'));
 event.listen('tauri://file-drop-cancelled', (_event) => (fileHovering.value = false));
@@ -189,6 +196,7 @@ const form = ref<VForm>();
 const configView = ref<typeof ConfigView>();
 async function buildParams() {
   let config = await configView.value!.buildConfig();
+  chartInfo.value!.offset = parseFloat(offset_text.value) / 1000;
   if (!config) return null;
   if (!chartInfo.value!.tip?.trim().length) chartInfo.value!.tip = null;
   return {
@@ -221,6 +229,18 @@ async function previewChart() {
     let params = await buildParams();
     if (!params) return false;
     await invoke('preview_chart', { params });
+    return true;
+  } catch (e) {
+    toastError(e);
+    return false;
+  }
+}
+
+async function previewTweakoffset() {
+  try {
+    let params = await buildParams();
+    if (!params) return false;
+    await invoke('preview_tweakoffset', { params });
     return true;
   } catch (e) {
     toastError(e);
@@ -288,6 +308,7 @@ function tryParseAspect(): number | undefined {
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn variant="text" @click="stepIndex && stepIndex--" v-t="'prev-step'"></v-btn>
         <div class="flex-grow-1"></div>
+        <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewChart" class="mr-2" v-t="'preview'"></v-btn>
         <v-btn variant="tonal" @click="moveNext">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
       </div>
@@ -311,8 +332,11 @@ function tryParseAspect(): number | undefined {
       <template v-slot:item.2>
         <v-form ref="form" v-if="chartInfo">
           <v-row no-gutters class="mx-n2">
-            <v-col cols="8">
+            <v-col cols="6">
               <v-text-field class="mx-2" :label="t('chart-name')" v-model="chartInfo.name"></v-text-field>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field class="mx-2" :label="t('chart-offset')" type="number" :rules="[RULES.greaterThanZero]" v-model="offset_text"></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field class="mx-2" :label="t('level')" v-model="chartInfo.level"></v-text-field>
