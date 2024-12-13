@@ -281,7 +281,7 @@ const roman = ref(false)
 const chinese = ref(false)
 const combo = ref('AUTOPLAY')
 const difficulty = ref('')
-const offset = ref('0.0')
+//const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -314,7 +314,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     fxaa: fxaa.value,
     noteScale: noteScale.value,
     particle: !disableParticle.value,
-    offset: parseFloat(offset.value) / 1000,
+    //offset: parseFloat(offset.value) / 1000,
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
     playerRks: parseFloat(playerRks.value),
@@ -373,7 +373,7 @@ function applyConfig(config: RenderConfig) {
   doubleHint.value = config.doubleHint;
   fxaa.value = config.fxaa;
   noteScale.value = config.noteScale;
-  offset.value = String(config.offset);
+  //offset.value = String(config.offset);
   disableParticle.value = !config.particle;
   playerAvatar.value = config.playerAvatar || undefined;
   playerName.value = config.playerName;
@@ -410,7 +410,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   doubleHint: true,
   fxaa: false,
   noteScale: 1,
-  offset: 0.0,
+  //offset: 0.0,
   particle: true,
   playerAvatar: null,
   playerName: '',

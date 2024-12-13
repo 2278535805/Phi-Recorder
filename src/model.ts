@@ -71,7 +71,7 @@ export interface RenderConfig {
   doubleHint: boolean;
   fxaa: boolean;
   noteScale: number;
-  offset: number;
+  //offset: number;
   particle: boolean;
   playerAvatar: string | null;
   playerName: string;
