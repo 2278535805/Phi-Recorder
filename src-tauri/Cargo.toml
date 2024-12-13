@@ -1,6 +1,6 @@
 [package]
 name = "phigros-recorder"
-version = "0.1.13"
+version = "0.1.14"
 description = "Phigros Recorder"
 authors = ["HLMC", "Mivik"]
 license = ""
