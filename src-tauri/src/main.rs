@@ -286,6 +286,8 @@ async fn parse_chart(path: &Path) -> Result<ChartInfo, InvokeError> {
         let info = fs::load_info(fs.deref_mut())
             .await
             .with_context(|| mtl!("load-info-failed"))?;
+        //let info1 = format!("{}\n", serde_json::to_string(&info)?);
+        //println!("{}", info1);
         Ok(info)
     })
     .await
@@ -328,7 +330,6 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<(), InvokeError> {
         stdin
             .write_all(info.as_bytes())
             .await?;
-        
         Ok(())
     })
     .await
