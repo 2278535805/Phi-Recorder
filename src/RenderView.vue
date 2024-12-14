@@ -154,7 +154,7 @@ async function loadChart(file: string) {
     chartPath = file;
     chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
     stepIndex.value++;
-    offset_text.value = String(chartInfo.value.offset);
+    offset_text.value = String(chartInfo.value.offset * 1000);
     aspectWidth.value = String(chartInfo.value.aspectRatio);
     aspectHeight.value = '1.0';
     for (let asp of [
