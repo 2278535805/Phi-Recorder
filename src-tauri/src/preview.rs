@@ -57,7 +57,7 @@ impl Scene for BaseScene {
 pub async fn main() -> Result<()> {
     set_pc_assets_folder(&std::env::args().nth(2).unwrap());
 
-    let mut stdin = std::io::stdin();
+    let mut stdin = std::io::stdin().lock();
     let stdin = &mut stdin;
 
     let mut line = String::new();
@@ -114,7 +114,7 @@ pub async fn main() -> Result<()> {
 pub async fn tweakoffset() -> Result<()> {
     set_pc_assets_folder(&std::env::args().nth(2).unwrap());
 
-    let mut stdin = std::io::stdin();
+    let mut stdin = std::io::stdin().lock();
     let stdin = &mut stdin;
 
     let mut line = String::new();
