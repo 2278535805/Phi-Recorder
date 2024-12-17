@@ -242,20 +242,20 @@ pub async fn main() -> Result<()> {
     assert_eq!(sample_rate, sfx_flick.sample_rate());
     
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    {
-        if volume_music != 0.0 {
-            let pos = O - chart.offset.min(0.) as f64;
-            let count = (music.length() as f64 * sample_rate_f64) as usize;
-            let mut it = output[((pos * sample_rate_f64).round() as usize * 2)..].iter_mut();
-            let ratio = 1. / sample_rate_f64;
-            for frame in 0..count {
-                let position = frame as f64 * ratio;
-                let frame = music.sample(position as f32).unwrap_or_default();
-                *it.next().unwrap() += frame.0 * volume_music;
-                *it.next().unwrap() += frame.1 * volume_music;
-            }
+    if volume_music != 0.0 {
+        let start_time = Instant::now();
+        let pos = O - chart.offset.min(0.) as f64;
+        let count = (music.length() as f64 * sample_rate_f64) as usize;
+        let start_index = (pos * sample_rate_f64).round() as usize * 2;
+        let ratio = 1.0 / sample_rate_f64;
+        for i in 0..count {
+            let position = i as f64 * ratio;
+            let frame = music.sample(position as f32).unwrap_or_default();
+            output[start_index + i * 2] += frame.0 * volume_music;
+            output[start_index + i * 2 + 1] += frame.1 * volume_music;
         }
-        
+        info!("music Time:{:?}", start_time.elapsed())
+
     }
     
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
@@ -265,40 +265,41 @@ pub async fn main() -> Result<()> {
         }
         let slice = &mut output[position..];
         let len = (slice.len() / 2).min(clip.frame_count());
-        let mut it = slice.iter_mut();
-        // TODO optimize?
-        for frame in clip.frames()[..len].iter() {
-            let dst = it.next().unwrap();
-            *dst += frame.0 * volume;
-            let dst = it.next().unwrap();
-            *dst += frame.1 * volume;
+
+        let frames = clip.frames();
+        for i in 0..len {
+            slice[i * 2] += frames[i].0 * volume;
+            slice[i * 2 + 1] += frames[i].1 * volume;
         }
+    
         return len;
     };
+    
 
-    // 尝试在volume_sfx=0时不处理音效
     if volume_sfx != 0.0 {
-        for note in chart
-            .lines
-            .iter()
-            .flat_map(|it| it.notes.iter())
-            .filter(|it| !it.fake)
-        {
-            place(
-                O + note.time as f64 + offset as f64,
-                match note.kind {
-                    NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
-                    NoteKind::Drag => &sfx_drag,
-                    NoteKind::Flick => &sfx_flick,
-                },
-                volume_sfx,
-            );
+        let start_time = Instant::now();
+        for line in &chart.lines {
+            for note in &line.notes {
+                if !note.fake {
+                    let sfx = match note.kind {
+                        NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
+                        NoteKind::Drag => &sfx_drag,
+                        NoteKind::Flick => &sfx_flick,
+                    };
+                    place(O + note.time as f64 + offset as f64, sfx, volume_sfx);
+                }
+            }
         }
+        info!("sfx Time:{:?}", start_time.elapsed())
+        
     }
+
+    //ending
     let mut pos = O + length + A;
-    while place(pos, &ending, volume_music) != 0 {
+    while place(pos, &ending, volume_music) != 0 && params.config.ending_length > 0.1 {
         pos += ending.frame_count() as f64 / sample_rate_f64;
     }
+
     let mut proc = cmd_hidden(&ffmpeg)
         .args(format!("-y -f f32le -ar {} -ac 2 -i - -c:a pcm_f32le -f wav", sample_rate).split_whitespace())
         .arg(mixing_output.path())
@@ -354,6 +355,8 @@ pub async fn main() -> Result<()> {
 
     let fps = params.config.fps;
     let frame_delta = 1. / fps as f32;
+    let frames = (video_length / frame_delta as f64).ceil() as u64;
+    send(IPCEvent::StartRender(frames));
 
     let codecs = String::from_utf8(
         cmd_hidden(&ffmpeg)
@@ -429,7 +432,6 @@ pub async fn main() -> Result<()> {
 
     let byte_size = vw as usize * vh as usize * 4;
 
-    let frames = (video_length / frame_delta as f64).ceil() as u64;
 
     const N: usize = 3;
     let mut pbos: [GLuint; N] = [0; N];
@@ -448,7 +450,6 @@ pub async fn main() -> Result<()> {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 
-    send(IPCEvent::StartRender(frames));
 
     for frame in 0..frames {
         *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
