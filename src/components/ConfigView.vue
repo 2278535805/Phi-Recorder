@@ -5,6 +5,8 @@ en:
     player: Player
     graphics: Graphics
     audio: Audio
+    debug: Debug
+    other: Other
 
   resolution: Resolution
   ffmpeg-preset: Preset
@@ -24,7 +26,7 @@ en:
 
   bitrate-control: Bitrate Control
   bitrate: Quantization parameters/Bitrate
-  bitrate-tips: CRF-This is the CRF level. CBR-This is the bitrate
+  bitrate-tips: CRF-CRF level. CBR-bitrate.
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -86,6 +88,8 @@ zh-CN:
     player: 玩家
     graphics: 图像
     audio: 音频
+    debug: 调试
+    other: 其他
 
   resolution: 分辨率
   ffmpeg-preset: 预设
@@ -215,7 +219,7 @@ const fxaa = ref(false),
 
 const playerAvatar = ref<string>(),
   playerName = ref(''),
-  playerRks = ref('15.0');
+  playerRks = ref('16.0');
 
 const watermark = ref('');
 
@@ -234,8 +238,8 @@ async function chooseAvatar() {
   }
 }
 
-const challengeColor = ref(t('challenge-colors').split(',')[4]),
-  challengeRank = ref('45');
+const challengeColor = ref(t('challenge-colors').split(',')[5]),
+  challengeRank = ref('3');
 
 interface Respack {
   name: string;
@@ -315,7 +319,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     challengeRank: parseInt(challengeRank.value),
     disableEffect: disableEffect.value,
     doubleHint: doubleHint.value,
-    fxaa: fxaa.value,
+    fxaa: false, //Disable FXAA
     noteScale: noteScale.value,
     particle: !disableParticle.value,
     //offset: parseFloat(offset.value) / 1000,
@@ -376,7 +380,7 @@ function applyConfig(config: RenderConfig) {
   challengeRank.value = String(config.challengeRank);
   disableEffect.value = config.disableEffect;
   doubleHint.value = config.doubleHint;
-  fxaa.value = config.fxaa;
+  //fxaa.value = config.fxaa;
   noteScale.value = config.noteScale;
   //offset.value = String(config.offset);
   disableParticle.value = !config.particle;
@@ -410,8 +414,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   bitrate: '28',
 
   aggressive: false,
-  challengeColor: 'golden',
-  challengeRank: 45,
+  challengeColor: 'rainbow',
+  challengeRank: 3,
   disableEffect: false,
   doubleHint: true,
   fxaa: false,
@@ -420,7 +424,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   particle: true,
   playerAvatar: null,
   playerName: '',
-  playerRks: 15,
+  playerRks: 16.00,
   sampleCount: 2,
   resPackPath: null,
   speed: 1,
@@ -558,8 +562,11 @@ async function replacePreset() {
         <v-col cols="3">
           <v-combobox :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-combobox>
         </v-col>
-        <v-col cols="3">
+        <!--<v-col cols="3">
           <TipSwitch :label="t('fxaa')" :tooltip="t('fxaa-tips')" v-model="fxaa"></TipSwitch>
+        </v-col>-->
+        <v-col cols="3">
+          <TipSwitch :label="t('hevc')" v-model="hevc"></TipSwitch>
         </v-col>
       </v-row>
     </div>
@@ -608,8 +615,11 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
-        <v-col cols="12" class="px-6">
+        <v-col cols="6" class="px-6">
           <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.05" v-model="noteScale"> </v-slider>
+        </v-col>
+        <v-col cols="6" class="px-6">
+          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
@@ -638,9 +648,22 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 align-center">
-        <v-col cols="12">
-          <v-text-field :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+    </div>
+
+    <div class="mt-2">
+      <StickyLabel :title="t('title.other')"></StickyLabel>
+      <v-row no-gutters class="align-center">
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('combo')" v-model="combo"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
@@ -651,30 +674,13 @@ async function replacePreset() {
           <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('hevc')" v-model="hevc"></TipSwitch>
-        </v-col>
-        <v-col cols="3">
           <TipSwitch :label="t('hires')" v-model="hires"></TipSwitch>
         </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
+        </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="4">
-          <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
-        </v-col>
-        <v-col cols="4">
-          <v-text-field class="mx-2" :label="t('combo')" v-model="combo"></v-text-field>
-        </v-col>
-        <v-col cols="4">
-          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
-        </v-col>
-        <!--<v-col cols="3">
-          <v-text-field :label="t('offset')" v-model="offset" type="number" :rules="[RULES.greaterThanZero]"></v-text-field>
-        </v-col>-->
-      </v-row>
-      <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="6">
-          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
-        </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('roman')" v-model="roman"></TipSwitch>
         </v-col>
@@ -683,9 +689,7 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="3">
-          <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
-        </v-col>
+        
       </v-row>
     </div>
   </v-form>
