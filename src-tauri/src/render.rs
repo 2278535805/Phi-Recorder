@@ -67,6 +67,7 @@ pub struct RenderConfig {
     chinese: bool,
     combo: String,
     difficulty: String,
+    phira_mode: bool,
 }
 
 impl RenderConfig {
@@ -97,6 +98,7 @@ impl RenderConfig {
             chinese: self.chinese,
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
+            phira_mode: self.phira_mode,
             ..Default::default()
         }
     }

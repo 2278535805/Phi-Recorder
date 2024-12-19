@@ -87,6 +87,7 @@ export interface RenderConfig {
   chinese: boolean;
   combo: string;
   difficulty: string;
+  phiraMode: boolean;
 }
 
 export interface RPEChart {

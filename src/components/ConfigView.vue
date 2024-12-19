@@ -69,6 +69,8 @@ en:
   combo: COMBO text
   difficulty: Custom Difficulty
   offset: Offset
+  phiraMode: Phira Features
+  phiraMode-tips: Sync some phira features(bug)
 
   presets: Presets
   preset-refresh: Refresh
@@ -152,6 +154,8 @@ zh-CN:
   combo: COMBO文字
   difficulty: 自定义难度
   offset: 延时
+  phiraMode: Phira模式
+  phiraMode-tips: 同步phira部分特性(bug)
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -288,6 +292,7 @@ const roman = ref(false)
 const chinese = ref(false)
 const combo = ref('AUTOPLAY')
 const difficulty = ref('')
+const phiraMode = ref(false)
 //const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
@@ -337,6 +342,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chinese: chinese.value,
     combo: combo.value,
     difficulty: difficulty.value,
+    phiraMode: phiraMode.value,
   };
 }
 
@@ -396,6 +402,7 @@ function applyConfig(config: RenderConfig) {
   chinese.value = config.chinese;
   combo.value = config.combo;
   difficulty.value = config.difficulty;
+  phiraMode.value = config.phiraMode;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -435,6 +442,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   chinese: false,
   combo: 'AUTOPLAY',
   difficulty: '',
+  phiraMode: false,
 };
 interface Preset {
   name: string;
@@ -686,6 +694,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('chinese')" v-model="chinese"></TipSwitch>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('phiraMode')" :tooltip="t('phiraMode-tips')" v-model="phiraMode"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
