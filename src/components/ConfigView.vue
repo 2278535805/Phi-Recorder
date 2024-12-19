@@ -57,6 +57,7 @@ en:
 
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
+  hires: Lossless Audio
   chart_debug: Debug Mode
   chart_ratio: Chart Zoom
   all_good: Force Good judgment
@@ -137,6 +138,7 @@ zh-CN:
 
   ending-length: 结算画面时长
   disable-loading: 禁用加载
+  hires: 无损音频
   chart_debug: 调试模式
   chart_ratio: 谱面缩放
   all_good: 强制Good
@@ -207,7 +209,7 @@ const resolution = ref('1920x1080'),
   hevc = ref(false);
 
 const fxaa = ref(false),
-  sampleCount = ref('1'),
+  sampleCount = ref('2'),
   bitrateControl = ref('CRF'),
   bitrate = ref('28');
 
@@ -273,6 +275,7 @@ const volumeMusic = ref(1.0),
 const endingLength = ref('-2.0');
 
 const disableLoading = ref(false)
+const hires = ref(false)
 
 const chartDebug = ref(false)
 const chartRatio = ref(1.0)
@@ -298,6 +301,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
     disableLoading: disableLoading.value,
+    hires: hires.value,
     chartDebug: chartDebug.value,
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
@@ -357,6 +361,7 @@ function applyConfig(config: RenderConfig) {
   ffmpegPreset.value = config.ffmpegPreset;
   endingLength.value = String(config.endingLength);
   disableLoading.value = config.disableLoading;
+  hires.value = config.hires;
   chartDebug.value = config.chartDebug;
   chartRatio.value = config.chartRatio;
   allGood.value = config.allGood;
@@ -394,6 +399,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   ffmpegPreset: 'medium p4 balanced',
   endingLength: -2.0,
   disableLoading: true,
+  hires: false,
   chartDebug: false,
   chartRatio: 1,
   allGood: false,
@@ -415,7 +421,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   playerAvatar: null,
   playerName: '',
   playerRks: 15,
-  sampleCount: 1,
+  sampleCount: 2,
   resPackPath: null,
   speed: 1,
   volumeMusic: 1.0,
@@ -645,10 +651,10 @@ async function replacePreset() {
           <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('hevc')" :tooltip="t('hevc-tips')" v-model="hevc"></TipSwitch>
+          <TipSwitch :label="t('hevc')" v-model="hevc"></TipSwitch>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
+          <TipSwitch :label="t('hires')" v-model="hires"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
@@ -674,6 +680,11 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('chinese')" v-model="chinese"></TipSwitch>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="3">
+          <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
         </v-col>
       </v-row>
     </div>

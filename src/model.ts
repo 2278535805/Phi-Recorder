@@ -55,6 +55,7 @@ export interface RenderConfig {
   ffmpegPreset: string;
   endingLength: number;
   disableLoading: boolean;
+  hires: boolean;
   chartDebug: boolean;
   chartRatio: number;
   allGood: boolean;

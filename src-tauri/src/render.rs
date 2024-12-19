@@ -35,6 +35,7 @@ pub struct RenderConfig {
     ffmpeg_preset: String,
     ending_length: f64,
     disable_loading: bool,
+    hires: bool,
     chart_debug: bool,
     chart_ratio: f32,
     all_good: bool,
@@ -75,6 +76,7 @@ impl RenderConfig {
             challenge_color: self.challenge_color.clone(),
             challenge_rank: self.challenge_rank,
             disable_effect: self.disable_effect,
+            hires: self.hires,
             double_hint: self.double_hint,
             fxaa: self.fxaa,
             note_scale: self.note_scale,
@@ -396,7 +398,8 @@ pub async fn main() -> Result<()> {
     write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
 
     let args2 = format!(
-        "-c:a copy -c:v {} -pix_fmt yuv420p {} {} {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f mov",
+        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f {}",
+        if params.config.hires {"copy"} else {"aac -b:a 320k"},
         if use_cuda {nvenc} 
         else if has_qsv {qsv} 
         //else if has_amf {amf}
@@ -415,6 +418,7 @@ pub async fn main() -> Result<()> {
         ffmpeg_preset_name.unwrap(),
         if params.config.disable_loading{format!("-ss {}", LoadingScene::TOTAL_TIME + GameScene::BEFORE_TIME)}
         else{"-ss 0.1".to_string()},
+        if params.config.hires {"mov"} else {"mp4"}
     );
 
     let mut proc = cmd_hidden(&ffmpeg)
