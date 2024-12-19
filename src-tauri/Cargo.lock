@@ -2162,9 +2162,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.168"
+version = "0.2.169"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aaeb2981e0606ca11d79718f8bb01164f1d6ed75080182d3abf017e6d244b6d"
+checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
 
 [[package]]
 name = "libloading"
@@ -2331,7 +2331,7 @@ dependencies = [
 [[package]]
 name = "macroquad"
 version = "0.3.25"
-source = "git+https://github.com/Mivik/prpr-macroquad#19119d6e3ec231502f6d64ff077114ffe1fcb04a"
+source = "git+https://github.com/2278535805/prpr-macroquad#bbe11a075287acb065153a8964756d4b68584d74"
 dependencies = [
  "bumpalo",
  "fontdue",
@@ -2345,7 +2345,7 @@ dependencies = [
 [[package]]
 name = "macroquad_macro"
 version = "0.1.7"
-source = "git+https://github.com/Mivik/prpr-macroquad#19119d6e3ec231502f6d64ff077114ffe1fcb04a"
+source = "git+https://github.com/2278535805/prpr-macroquad#bbe11a075287acb065153a8964756d4b68584d74"
 
 [[package]]
 name = "malloc_buf"
@@ -3189,7 +3189,7 @@ dependencies = [
 [[package]]
 name = "prpr"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#8ab283bd81f2e6e806383c72011df8d771082e4f"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#b62aff1848cdab59ae1003d04a91d995dbefeefd"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3257,7 +3257,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#8ab283bd81f2e6e806383c72011df8d771082e4f"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#b62aff1848cdab59ae1003d04a91d995dbefeefd"
 dependencies = [
  "anyhow",
  "tracing",
