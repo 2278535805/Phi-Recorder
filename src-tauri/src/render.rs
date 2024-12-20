@@ -8,7 +8,7 @@ use prpr::{
     core::{internal_id, MSRenderTarget, NoteKind},
     fs,
     info::ChartInfo,
-    scene::{BasicPlayer, GameMode, GameScene, LoadingScene},
+    scene::{BasicPlayer, GameMode, GameScene, LoadingScene, EndingScene},
     time::TimeManager,
     ui::{FontArc, TextPainter},
     Main,
@@ -77,6 +77,7 @@ impl RenderConfig {
             challenge_color: self.challenge_color.clone(),
             challenge_rank: self.challenge_rank,
             disable_effect: self.disable_effect,
+            disable_loading: self.disable_loading,
             hires: self.hires,
             double_hint: self.double_hint,
             fxaa: self.fxaa,
@@ -230,8 +231,16 @@ pub async fn main() -> Result<()> {
     let volume_music = std::mem::take(&mut config.volume_music);
     let volume_sfx = std::mem::take(&mut config.volume_sfx);
 
+    let o: f64 = if params.config.disable_loading {
+        GameScene::BEFORE_TIME as f64
+    } else {
+        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64
+    };
+    let a: f64 = 0.7 + 0.3;
+    let musica: f64 = 0.7 + 0.3 + EndingScene::BPM_WAIT_TIME;
+
     let length = track_length - chart.offset.min(0.) as f64 + 1.;
-    let video_length = O + length + A + params.config.ending_length;
+    let video_length = o + length + a + params.config.ending_length;
     let offset = chart.offset.max(0.);
 
     let render_start_time = Instant::now();
@@ -248,8 +257,8 @@ pub async fn main() -> Result<()> {
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
     if volume_music != 0.0 {
         let start_time = Instant::now();
-        let pos = O - chart.offset.min(0.) as f64;
-        let count = (music.length() as f64 * sample_rate_f64) as usize;
+        let pos = o - chart.offset.min(0.) as f64;
+        let count = ((music.length() as f64 + params.config.ending_length + 2.) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
         for i in 0..count {
@@ -290,7 +299,7 @@ pub async fn main() -> Result<()> {
                         NoteKind::Drag => &sfx_drag,
                         NoteKind::Flick => &sfx_flick,
                     };
-                    place(O + note.time as f64 + offset as f64, sfx, volume_sfx);
+                    place(o + note.time as f64 + offset as f64, sfx, volume_sfx);
                 }
             }
         }
@@ -299,7 +308,7 @@ pub async fn main() -> Result<()> {
     }
 
     //ending
-    let mut pos = O + length + A;
+    let mut pos = o + length + musica;
     while place(pos, &ending, volume_music) != 0 && params.config.ending_length > 0.1 {
         pos += ending.frame_count() as f64 / sample_rate_f64;
     }
@@ -354,8 +363,6 @@ pub async fn main() -> Result<()> {
     main.top_level = false;
     main.viewport = Some((0, 0, vw as _, vh as _));
 
-    const O: f64 = LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64;
-    const A: f64 = 0.7 + 0.3 + 0.4 - 0.4;
 
     let fps = params.config.fps;
     let frame_delta = 1. / fps as f32;
@@ -418,8 +425,8 @@ pub async fn main() -> Result<()> {
         params.config.bitrate,
         ffmpeg_preset,
         ffmpeg_preset_name.unwrap(),
-        if params.config.disable_loading{format!("-ss {}", LoadingScene::TOTAL_TIME + GameScene::BEFORE_TIME)}
-        else{"-ss 0.1".to_string()},
+        if params.config.disable_loading{format!("-ss {}", o)} //LoadingScene::TOTAL_TIME + GameScene::BEFORE_TIME
+        else{format!("-ss {}", 0. / params.config.fps as f32)},
         if params.config.hires {"mov"} else {"mp4"}
     );
 
@@ -439,7 +446,7 @@ pub async fn main() -> Result<()> {
     let byte_size = vw as usize * vh as usize * 4;
 
 
-    const N: usize = 3;
+    const N: usize = 30;
     let mut pbos: [GLuint; N] = [0; N];
     unsafe {
         use miniquad::gl::*;
@@ -453,11 +460,40 @@ pub async fn main() -> Result<()> {
                 GL_STREAM_READ,
             );
         }
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        //glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 
 
-    for frame in 0..frames {
+    for i in 0..N {
+        *my_time.borrow_mut() = (i as f32 * frame_delta).max(0.) as f64;
+        gl.quad_gl.render_pass(Some(mst.output().render_pass));
+        main.update()?;
+        main.render(&mut painter)?;
+        draw_rectangle(0., 0., 0., 0., Color::default());
+        gl.flush();
+
+        if MSAA.load(Ordering::SeqCst) {
+            mst.blit();
+        }
+        unsafe {
+            use miniquad::gl::*;
+            //let tex = mst.output().texture.raw_miniquad_texture_handle();
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[i]);
+            glReadPixels(
+                0,
+                0,
+                vw as _,
+                vh as _,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                std::ptr::null_mut(),
+            );
+        }
+    }
+
+
+    for frame in N as u64..frames {
         *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         //clear_background(BLACK);
@@ -465,7 +501,10 @@ pub async fn main() -> Result<()> {
         main.update()?;
         main.render(&mut painter)?;
         // TODO magic. can't remove this line.
-        draw_rectangle(0., 0., 0., 0., Color::default());
+        if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && !params.config.disable_loading {
+            draw_rectangle(0., 0., 0., 0., Color::default());
+        }
+        
         gl.flush();
 
         if MSAA.load(Ordering::SeqCst) {

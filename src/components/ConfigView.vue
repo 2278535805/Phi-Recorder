@@ -26,7 +26,9 @@ en:
 
   bitrate-control: Bitrate Control
   bitrate: Quantization parameters/Bitrate
-  bitrate-tips: CRF-CRF level. CBR-bitrate.
+  bitrate-tips: |
+    CRF-CRF level.
+    CBR-bitrate.
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -111,7 +113,9 @@ zh-CN:
 
   bitrate-control: 码率控制
   bitrate: 量化参数/码率
-  bitrate-tips: CRF-该项为CRF级别 CBR-该项为码率
+  bitrate-tips: |
+    CRF-CRF级别
+    CBR-码率
 
   player-avatar: 玩家头像
   player-name: 玩家名
@@ -282,8 +286,8 @@ const volumeMusic = ref(1.0),
 
 const endingLength = ref('-2.0');
 
-const disableLoading = ref(false)
-const hires = ref(false)
+const disableLoading = ref(true)
+const hires = ref(true)
 
 const chartDebug = ref(false)
 const chartRatio = ref(1.0)
@@ -662,7 +666,7 @@ async function replacePreset() {
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="align-center">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
