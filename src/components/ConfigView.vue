@@ -410,7 +410,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   ffmpegPreset: 'medium p4 balanced',
   endingLength: -2.0,
   disableLoading: true,
-  hires: false,
+  hires: true,
   chartDebug: false,
   chartRatio: 1,
   allGood: false,
