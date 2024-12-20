@@ -425,8 +425,8 @@ pub async fn main() -> Result<()> {
         params.config.bitrate,
         ffmpeg_preset,
         ffmpeg_preset_name.unwrap(),
-        if params.config.disable_loading{format!("-ss {}", o)} //LoadingScene::TOTAL_TIME + GameScene::BEFORE_TIME
-        else{format!("-ss {}", 0. / params.config.fps as f32)},
+        if params.config.disable_loading{format!("-ss {}", o)}
+        else{"".to_string()},
         if params.config.hires {"mov"} else {"mp4"}
     );
 
