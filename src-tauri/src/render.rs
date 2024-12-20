@@ -460,7 +460,7 @@ pub async fn main() -> Result<()> {
                 GL_STREAM_READ,
             );
         }
-        //glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 
 
