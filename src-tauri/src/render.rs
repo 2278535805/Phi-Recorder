@@ -404,7 +404,7 @@ pub async fn main() -> Result<()> {
     if use_cuda {
         args += " -hwaccel_output_format cuda";
     }
-    write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -i - -i")?;
+    write!(&mut args, " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i - -i")?;
 
     let args2 = format!(
         "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f {}",
@@ -537,7 +537,7 @@ pub async fn main() -> Result<()> {
     }
     drop(input);
     proc.wait()?;
-
+    info!("Task done in {:?}", render_start_time.elapsed());
     send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
     Ok(())
 }
