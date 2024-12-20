@@ -200,7 +200,7 @@ pub async fn main() -> Result<()> {
     let Some(ffmpeg) = find_ffmpeg()? else {
         bail!("FFmpeg not found")
     };
-    dbg!(&ffmpeg);
+    info!("ffmpeg: {}", &ffmpeg);
 
     let mut painter = TextPainter::new(font);
 
