@@ -2741,9 +2741,9 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.36.5"
+version = "0.36.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aedf0a2d09c573ed1d8d85b30c119153926a2b36dce0ab28322c09a117a4683e"
+checksum = "62948e14d923ea95ea2c7c86c71013138b66525b86bdc08d2dcc262bdb497b87"
 dependencies = [
  "memchr",
 ]
@@ -3189,7 +3189,7 @@ dependencies = [
 [[package]]
 name = "prpr"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#84fd244b2516827e698ee24c647c794990bf6952"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#befaf849dec097c13bf32d57536a168c815d069e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3257,7 +3257,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#84fd244b2516827e698ee24c647c794990bf6952"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#befaf849dec097c13bf32d57536a168c815d069e"
 dependencies = [
  "anyhow",
  "tracing",
@@ -3579,9 +3579,9 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe_arch"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6153d6e19b611afde437944fa67bde0193eb913f63e03b2a7d2ab36be32e42f0"
+checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
 dependencies = [
  "bytemuck",
 ]
@@ -5154,9 +5154,9 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 
 [[package]]
 name = "wide"
-version = "0.7.29"
+version = "0.7.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "898b9cda3b6929da16eae368efa7582515168e444b36b6d2c59e1c1297d88184"
+checksum = "58e6db2670d2be78525979e9a5f9c69d296fd7d670549fe9ebf70f8708cb5019"
 dependencies = [
  "bytemuck",
  "safe_arch",
