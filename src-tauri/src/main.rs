@@ -170,6 +170,16 @@ async fn main() -> Result<()> {
                     _ => {}
                 }
             }
+            SystemTrayEvent::LeftClick { .. } => {
+                let window = app.get_window("main").unwrap();
+                let visible = window.is_visible().unwrap();
+                if visible {
+                    window.hide().unwrap();
+                } else {
+                    window.show().unwrap();
+                }
+                window.set_focus().unwrap();
+            }
             _ => {}
         })
         .on_window_event(|event| match event.event() {
