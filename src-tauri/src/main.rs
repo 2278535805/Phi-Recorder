@@ -173,16 +173,18 @@ async fn main() -> Result<()> {
             _ => {}
         })
         .on_window_event(|event| match event.event() {
-            WindowEvent::CloseRequested { api, .. } => {
-                event
+            //WindowEvent::CloseRequested { api, .. } => {
+            WindowEvent::CloseRequested { .. } => {
+                /*event
                     .window()
                     .app_handle()
                     .tray_handle()
                     .get_item("toggle")
                     .set_title(mtl!("tray-show"))
-                    .unwrap();
-                event.window().hide().unwrap();
-                api.prevent_close();
+                    .unwrap();*/
+                std::process::exit(0);
+                //event.window().hide().unwrap();
+                //api.prevent_close();
             }
             _ => {}
         })
