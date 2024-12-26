@@ -528,7 +528,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
 dependencies = [
  "lazy_static",
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -2183,7 +2183,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc2f4eb4bc735547cfed7c0a4922cbd04a4655978c09b54f1f7b228750664c34"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.6",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -2633,17 +2633,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-derive"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed3955f1a9c7c0c15e092f9c887db08b1fc683305fdf6eb6684f22555355e202"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.90",
-]
-
-[[package]]
 name = "num-integer"
 version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2757,20 +2746,20 @@ dependencies = [
  "jni 0.19.0",
  "ndk 0.6.0",
  "ndk-context",
- "num-derive 0.3.3",
+ "num-derive",
  "num-traits",
  "oboe-sys 0.4.5",
 ]
 
 [[package]]
 name = "oboe"
-version = "0.6.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8b61bebd49e5d43f5f8cc7ee2891c16e0f41ec7954d36bcb6c14c5e0de867fb"
+checksum = "8868cc237ee02e2d9618539a23a8d228b9bb3fc2e7a5b11eed3831de77c395d0"
 dependencies = [
- "num-derive 0.4.2",
+ "num-derive",
  "num-traits",
- "oboe-sys 0.6.1",
+ "oboe-sys 0.5.0",
 ]
 
 [[package]]
@@ -2784,9 +2773,9 @@ dependencies = [
 
 [[package]]
 name = "oboe-sys"
-version = "0.6.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c8bb09a4a2b1d668170cfe0a7d5bc103f8999fb316c98099b6a9939c9f2e79d"
+checksum = "7f44155e7fb718d3cfddcf70690b2b51ac4412f347cd9e4fbe511abe9cd7b5f2"
 dependencies = [
  "cc",
 ]
@@ -3189,7 +3178,7 @@ dependencies = [
 [[package]]
 name = "prpr"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#0e2523ef752edeed7c9b9c559dbd11b665e86d4c"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#41ff366c3e9675baee4e5c0f9d9c799838d2b812"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3257,7 +3246,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#0e2523ef752edeed7c9b9c559dbd11b665e86d4c"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#41ff366c3e9675baee4e5c0f9d9c799838d2b812"
 dependencies = [
  "anyhow",
  "tracing",
@@ -3598,11 +3587,11 @@ dependencies = [
 [[package]]
 name = "sasa"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/sasa#2e03e00cfdd43a15ab932bfe8d4ca85efca1e431"
+source = "git+https://github.com/2278535805/sasa#ef804300b3d19d93634828958cd39b004b111a12"
 dependencies = [
  "anyhow",
  "cpal",
- "oboe 0.6.1",
+ "oboe 0.5.0",
  "ringbuf",
  "symphonia",
  "thiserror",
@@ -5184,7 +5173,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
