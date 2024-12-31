@@ -285,9 +285,9 @@ const doubleHint = ref(true),
 
 const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
-  compressionRatio = ref(1.0);
+  compressionRatio = ref(100.0);
 
-const endingLength = ref('-2.0');
+const endingLength = ref('-1.0');
 
 const disableLoading = ref(true)
 const hires = ref(true)
@@ -417,7 +417,7 @@ function applyConfig(config: RenderConfig) {
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
   ffmpegPreset: 'medium p4 balanced',
-  endingLength: -2.0,
+  endingLength: -1.0,
   disableLoading: true,
   hires: true,
   chartDebug: false,
@@ -446,7 +446,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
-  compressionRatio: 1.0,
+  compressionRatio: 100.0,
   watermark: '',
   roman: false,
   chinese: false,
