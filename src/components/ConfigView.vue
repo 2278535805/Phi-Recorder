@@ -58,6 +58,7 @@ en:
 
   volume-music: Music Volume
   volume-sfx: SFX Volume
+  compression-ratio: SFX Compression Ratio
 
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
@@ -145,6 +146,7 @@ zh-CN:
 
   volume-music: 音乐音量
   volume-sfx: 音效音量
+  compression-ratio: 音效压缩比
 
   ending-length: 结算画面时长
   disable-loading: 禁用加载
@@ -282,7 +284,8 @@ const doubleHint = ref(true),
   disableEffect = ref(false);
 
 const volumeMusic = ref(1.0),
-  volumeSfx = ref(0.7);
+  volumeSfx = ref(0.7),
+  compressionRatio = ref(1.0);
 
 const endingLength = ref('-2.0');
 
@@ -340,6 +343,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     speed: 1,
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
+    compressionRatio: compressionRatio.value,
     allGood: allGood.value,
     watermark: watermark.value,
     roman: roman.value,
@@ -401,6 +405,7 @@ function applyConfig(config: RenderConfig) {
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0];
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
+  compressionRatio.value = config.compressionRatio;
   watermark.value = config.watermark;
   roman.value = config.roman;
   chinese.value = config.chinese;
@@ -441,6 +446,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
+  compressionRatio: 1.0,
   watermark: '',
   roman: false,
   chinese: false,
@@ -653,11 +659,14 @@ async function replacePreset() {
     <div class="mt-2">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
-        <v-col cols="6">
+        <v-col cols="4">
           <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeMusic"> </v-slider>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="4">
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
+        </v-col>
+        <v-col cols="4">
+          <v-slider :label="t('compression-ratio')" thumb-label="always" :min="1" :max="100" :step="0.1" v-model="compressionRatio"> </v-slider>
         </v-col>
       </v-row>
     </div>

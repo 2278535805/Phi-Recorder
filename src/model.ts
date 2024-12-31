@@ -82,6 +82,7 @@ export interface RenderConfig {
   speed: number;
   volumeMusic: number;
   volumeSfx: number;
+  compressionRatio: number;
   watermark: string;
   roman: boolean;
   chinese: boolean;

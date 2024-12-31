@@ -62,6 +62,7 @@ pub struct RenderConfig {
     speed: f32,
     volume_music: f32,
     volume_sfx: f32,
+    compression_ratio: f32,
     watermark: String,
     roman: bool,
     chinese: bool,
@@ -177,6 +178,7 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 }
 
 pub async fn main() -> Result<()> {
+    let loading_time = Instant::now();
     use crate::ipc::client::*;
 
     set_pc_assets_folder(&std::env::args().nth(2).unwrap());
@@ -243,40 +245,28 @@ pub async fn main() -> Result<()> {
     let video_length = o + length + a + params.config.ending_length;
     let offset = chart.offset.max(0.);
 
+    info!("Loading Resources Time:{:?}", loading_time.elapsed());
+
     let render_start_time = Instant::now();
 
     send(IPCEvent::StartMixing);
     let mixing_output = NamedTempFile::new()?;
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
-    assert_eq!(sample_rate, ending.sample_rate());
-    assert_eq!(sample_rate, sfx_click.sample_rate());
-    assert_eq!(sample_rate, sfx_drag.sample_rate());
-    assert_eq!(sample_rate, sfx_flick.sample_rate());
+    assert_eq!(sample_rate, ending.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, ending.sample_rate());
+    assert_eq!(sample_rate, sfx_click.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_click.sample_rate());
+    assert_eq!(sample_rate, sfx_drag.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_drag.sample_rate());
+    assert_eq!(sample_rate, sfx_flick.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_flick.sample_rate());
     
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    if volume_music != 0.0 {
-        let start_time = Instant::now();
-        let pos = o - chart.offset.min(0.) as f64;
-        let count = ((music.length() as f64 + params.config.ending_length + 2.) * sample_rate_f64) as usize;
-        let start_index = (pos * sample_rate_f64).round() as usize * 2;
-        let ratio = 1.0 / sample_rate_f64;
-        for i in 0..count {
-            let position = i as f64 * ratio;
-            let frame = music.sample(position as f32).unwrap_or_default();
-            output[start_index + i * 2] += frame.0 * volume_music;
-            output[start_index + i * 2 + 1] += frame.1 * volume_music;
-        }
-        info!("music Time:{:?}", start_time.elapsed())
+    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
 
-    }
-    
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
-        if position >= output.len() {
+        if position >= output2.len() {
             return 0;
         }
-        let slice = &mut output[position..];
+        let slice = &mut output2[position..];
         let len = (slice.len() / 2).min(clip.frame_count());
 
         let frames = clip.frames();
@@ -287,10 +277,59 @@ pub async fn main() -> Result<()> {
     
         return len;
     };
+
+    if volume_music != 0.0 {
+        let music_time = Instant::now();
+        let pos = o - chart.offset.min(0.) as f64;
+        let count = ((music.length() as f64 + params.config.ending_length + 2.) * sample_rate_f64) as usize;
+        let start_index = (pos * sample_rate_f64).round() as usize * 2;
+        let ratio = 1.0 / sample_rate_f64;
+        for i in 0..count {
+            let position = i as f64 * ratio;
+            let frame = music.sample(position as f32).unwrap_or_default();
+            output[start_index + i * 2] += frame.0 * volume_music;
+            output[start_index + i * 2 + 1] += frame.1 * volume_music;
+        }
+        //ending
+        let mut pos = o + length + musica;
+        while place(pos, &ending, volume_music) != 0 && params.config.ending_length > EndingScene::BPM_WAIT_TIME {
+            pos += ending.frame_count() as f64 / sample_rate_f64;
+        }
+        info!("Render Music Time:{:?}", music_time.elapsed())
+
+    }
+
+    let threshold = 1.0;
+    let attack_time = 0.0;
+    let release_time = 0.0;
+    let attack_coeff = (1.0 - (-2.0 / (attack_time * sample_rate as f32)).exp()).min(1.0);
+    let release_coeff = (1.0 - (-2.0 / (release_time * sample_rate as f32)).exp()).min(1.0);
+    let mut gain_reduction = 1.0;
+
+    fn apply_compressor(sample: f32, threshold: f32, ratio: f32, attack_coeff: f32, release_coeff: f32, gain_reduction: &mut f32) -> f32 {
+        let abs_sample = sample.abs();
+        let mut gain = 1.0;
+    
+        if abs_sample > threshold {
+            let excess = abs_sample - threshold;
+            let compressed_excess = excess / ratio;
+            let compressed_sample = threshold + compressed_excess;
+            gain = compressed_sample / abs_sample;
+        }
+    
+        if gain < *gain_reduction {
+            *gain_reduction += attack_coeff * (gain - *gain_reduction);
+        } else {
+            *gain_reduction += release_coeff * (gain - *gain_reduction);
+        }
+    
+        sample * *gain_reduction
+    }
+
     
 
     if volume_sfx != 0.0 {
-        let start_time = Instant::now();
+        let sfx_time = Instant::now();
         for line in &chart.lines {
             for note in &line.notes {
                 if !note.fake {
@@ -303,32 +342,44 @@ pub async fn main() -> Result<()> {
                 }
             }
         }
-        info!("sfx Time:{:?}", start_time.elapsed())
+        info!("Render Hit Effects Time:{:?}", sfx_time.elapsed())
         
     }
 
-    //ending
-    let mut pos = o + length + musica;
-    while place(pos, &ending, volume_music) != 0 && params.config.ending_length > 0.1 {
-        pos += ending.frame_count() as f64 / sample_rate_f64;
+    {
+        let mixing_time = Instant::now();
+        if params.config.compression_ratio > 1. { 
+            for i in 0..output2.len() {
+                output2[i] = apply_compressor(output2[i], threshold, params.config.compression_ratio, attack_coeff, release_coeff, &mut gain_reduction);
+            }
+        }   
+
+        for i in 0..output.len() {
+            output[i] += output2[i];
+        }
+        info!("Mixing Time:{:?}", mixing_time.elapsed());
     }
 
-    let mut proc = cmd_hidden(&ffmpeg)
-        .args(format!("-y -f f32le -ar {} -ac 2 -i - -c:a pcm_f32le -f wav", sample_rate).split_whitespace())
-        .arg(mixing_output.path())
-        .arg("-loglevel")
-        .arg("warning")
-        .stdin(Stdio::piped())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .with_context(|| tl!("run-ffmpeg-failed"))?;
-    let input = proc.stdin.as_mut().unwrap();
-    let mut writer = BufWriter::new(input);
-    for sample in output.into_iter() {
-        writer.write_all(&sample.to_le_bytes())?;
+    {
+        let output_audit_time = Instant::now();
+        let mut proc = cmd_hidden(&ffmpeg)
+            .args(format!("-y -f f32le -ar {} -ac 2 -i - -c:a pcm_f32le -f wav", sample_rate).split_whitespace())
+            .arg(mixing_output.path())
+            .arg("-loglevel")
+            .arg("warning")
+            .stdin(Stdio::piped())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .with_context(|| tl!("run-ffmpeg-failed"))?;
+        let input = proc.stdin.as_mut().unwrap();
+        let mut writer = BufWriter::new(input);
+        for sample in output.into_iter() {
+            writer.write_all(&sample.to_le_bytes())?;
+        }
+        drop(writer);
+        proc.wait()?;
+        info!("Output Audio Time:{:?}", output_audit_time.elapsed());
     }
-    drop(writer);
-    proc.wait()?;
 
     let (vw, vh) = params.config.resolution;
     let mst = Rc::new(MSRenderTarget::new((vw, vh), config.sample_count));
