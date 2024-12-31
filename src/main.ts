@@ -51,7 +51,7 @@ const i18n = createI18n({
         'non-empty': '不能为空',
         positive: '必须是正数',
         'positive-int': '必须是正整数',
-        resolution: "必须类似 '1920x1080'",
+        resolution: "必须为 '宽x高'",
         'sample-count': '必须是 2 的幂',
       },
       'has-error': '配置中有错误',
