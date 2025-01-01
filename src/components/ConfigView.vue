@@ -73,7 +73,7 @@ en:
   difficulty: Custom Difficulty
   offset: Offset
   phiraMode: Phira Features
-  phiraMode-tips: Sync some phira features(bug)
+  phiraMode-tips: Hold cover using head position
 
   presets: Presets
   preset-refresh: Refresh
@@ -161,7 +161,7 @@ zh-CN:
   difficulty: 自定义难度
   offset: 延时
   phiraMode: Phira模式
-  phiraMode-tips: 同步phira部分特性(bug)
+  phiraMode-tips: Hold 遮罩使用头部位置
 
   presets: 预设配置
   preset-refresh: 刷新
