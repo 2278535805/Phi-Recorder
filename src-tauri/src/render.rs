@@ -361,7 +361,7 @@ pub async fn main() -> Result<()> {
     }
 
     {
-        let output_audit_time = Instant::now();
+        let output_audio_time = Instant::now();
         let mut proc = cmd_hidden(&ffmpeg)
             .args(format!("-y -f f32le -ar {} -ac 2 -i - -c:a pcm_f32le -f wav", sample_rate).split_whitespace())
             .arg(mixing_output.path())
@@ -378,9 +378,10 @@ pub async fn main() -> Result<()> {
         }
         drop(writer);
         proc.wait()?;
-        info!("Output Audio Time:{:?}", output_audit_time.elapsed());
+        info!("Output Audio Time:{:?}", output_audio_time.elapsed());
     }
 
+    let preparing_render_time = Instant::now();
     let (vw, vh) = params.config.resolution;
     let mst = Rc::new(MSRenderTarget::new((vw, vh), config.sample_count));
     let my_time: Rc<RefCell<f64>> = Rc::new(RefCell::new(0.));
@@ -418,7 +419,6 @@ pub async fn main() -> Result<()> {
     let fps = params.config.fps;
     let frame_delta = 1. / fps as f32;
     let frames = (video_length / frame_delta as f64).ceil() as u64;
-    send(IPCEvent::StartRender(frames));
 
     let codecs = String::from_utf8(
         cmd_hidden(&ffmpeg)
@@ -481,6 +481,10 @@ pub async fn main() -> Result<()> {
         if params.config.hires {"mov"} else {"mp4"}
     );
 
+    info!("Preparing Render Time:{:?}", preparing_render_time.elapsed());
+    let render_time = Instant::now();
+    send(IPCEvent::StartRender(frames));
+    
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg(mixing_output.path())
@@ -541,10 +545,15 @@ pub async fn main() -> Result<()> {
                 std::ptr::null_mut(),
             );
         }
+        send(IPCEvent::Frame);
     }
 
 
     for frame in N as u64..frames {
+        let frames10 = frames / 10;
+        if frame % frames10 == 0 {
+            info!("Render Progress: {:.0}%", (frame as f32 / frames as f32 * 100.).ceil());
+        }
         *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         //clear_background(BLACK);
@@ -587,6 +596,7 @@ pub async fn main() -> Result<()> {
         send(IPCEvent::Frame);
     }
     drop(input);
+    info!("Render Time:{:?}", render_time.elapsed());
     proc.wait()?;
     info!("Task done in {:?}", render_start_time.elapsed());
     send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
