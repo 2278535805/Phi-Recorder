@@ -258,8 +258,8 @@ pub async fn main() -> Result<()> {
     assert_eq!(sample_rate, sfx_drag.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_drag.sample_rate());
     assert_eq!(sample_rate, sfx_flick.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_flick.sample_rate());
     
-    let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output = vec![0.0_f32; (video_length * sample_rate_f64) as usize * 2];
+    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64) as usize * 2];
 
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
@@ -426,8 +426,8 @@ pub async fn main() -> Result<()> {
 
 
     let fps = params.config.fps;
-    let frame_delta = 1. / fps as f32;
-    let frames = (video_length / frame_delta as f64).ceil() as u64;
+    //let frame_delta = 1. / fps as f64;
+    let frames = (video_length * fps as f64) as u64;
 
     let codecs = String::from_utf8(
         cmd_hidden(&ffmpeg)
@@ -460,7 +460,7 @@ pub async fn main() -> Result<()> {
     } else if has_amf {ffmpeg_preset_name_list.nth(2)
     } else {ffmpeg_preset_name_list.nth(0)};
 
-    let mut args = "-y -f rawvideo -c:v rawvideo".to_owned();
+    let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo".to_owned();
     if use_cuda {
         args += " -hwaccel_output_format cuda";
     }
@@ -510,7 +510,7 @@ pub async fn main() -> Result<()> {
     let byte_size = vw as usize * vh as usize * 4;
 
 
-    const N: usize = 30;
+    const N: usize = 60;
     let mut pbos: [GLuint; N] = [0; N];
     unsafe {
         use miniquad::gl::*;
@@ -527,9 +527,9 @@ pub async fn main() -> Result<()> {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
 
-
-    for i in 0..N {
-        *my_time.borrow_mut() = (i as f32 * frame_delta).max(0.) as f64;
+    let fps = fps as f64;
+    for frame in 0..N {
+        *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
         main.render(&mut painter)?;
@@ -543,7 +543,7 @@ pub async fn main() -> Result<()> {
             use miniquad::gl::*;
             //let tex = mst.output().texture.raw_miniquad_texture_handle();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[i]);
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame]);
             glReadPixels(
                 0,
                 0,
@@ -566,7 +566,7 @@ pub async fn main() -> Result<()> {
         if frame % frames10 == 0 && frame < frames9 {
             info!("Render progress: {:.0}% Time elapsed: {:.2}s", (frame as f32 / frames as f32 * 100.).ceil(), render_time.elapsed().as_secs_f32());
         }
-        *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
+        *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         //clear_background(BLACK);
         main.viewport = Some((0, 0, vw as _, vh as _));
