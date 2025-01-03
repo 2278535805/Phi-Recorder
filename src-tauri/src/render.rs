@@ -491,7 +491,7 @@ pub async fn main() -> Result<()> {
     );
 
     info!("Preparing Render Time:{:?}", preparing_render_time.elapsed());
-    let render_time = Instant::now();
+    let pre_render_time = Instant::now();
     send(IPCEvent::StartRender(frames));
     
     let mut proc = cmd_hidden(&ffmpeg)
@@ -556,11 +556,14 @@ pub async fn main() -> Result<()> {
         }
         send(IPCEvent::Frame);
     }
+    info!("Pre-Render Time:{:?}", pre_render_time.elapsed());
 
 
+    let render_time = Instant::now();
+    let frames10 = frames / 10;
+    let frames9 = (frames as f32 * 0.95) as u64;
     for frame in N as u64..frames {
-        let frames10 = frames / 10;
-        if frame % frames10 == 0 {
+        if frame % frames10 == 0 && frame < frames9 {
             info!("Render progress: {:.0}% Time elapsed: {:.2}s", (frame as f32 / frames as f32 * 100.).ceil(), render_time.elapsed().as_secs_f32());
         }
         *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
