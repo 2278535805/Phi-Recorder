@@ -354,12 +354,11 @@ pub async fn main() -> Result<()> {
                 output2[i] = apply_compressor(output2[i], threshold, params.config.compression_ratio, attack_coeff, release_coeff, &mut gain_reduction);
             }
         } else if params.config.compression_ratio >= 100. {
-            let max_value = 1.0;
             for i in 0..output2.len() {
-                if output2[i] > max_value {
-                    output2[i] = max_value;
-                } else if output2[i] < -max_value {
-                    output2[i] = -max_value;
+                if output2[i] > threshold {
+                    output2[i] = threshold;
+                } else if output2[i] < -threshold {
+                    output2[i] = -threshold;
                 }
             }            
         }
