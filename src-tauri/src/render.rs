@@ -349,11 +349,18 @@ pub async fn main() -> Result<()> {
 
     {
         let mixing_time = Instant::now();
-        if params.config.compression_ratio > 1. { 
+        if params.config.compression_ratio > 1. && params.config.compression_ratio < 100. {
             for i in 0..output2.len() {
                 output2[i] = apply_compressor(output2[i], threshold, params.config.compression_ratio, attack_coeff, release_coeff, &mut gain_reduction);
             }
-        }   
+        } else if params.config.compression_ratio >= 100. {
+            let max_value = 1.0;
+            for i in 0..output2.len() {
+                if output2[i] > max_value {
+                    output2[i] = max_value;
+                }
+            }            
+        }
 
         for i in 0..output.len() {
             output[i] += output2[i];
