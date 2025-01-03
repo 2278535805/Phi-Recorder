@@ -137,7 +137,10 @@ async function chooseChart(folder?: boolean) {
           anyFilter(),
         ],
       });
-  if (!file) return;
+  if (!file) {
+    choosingChart.value = false;
+    return;
+  };
 
   // noexcept
   await loadChart(file as string);
@@ -184,6 +187,18 @@ event.listen('tauri://file-drop', async (event) => {
   if (step.value === 'choose') {
     fileHovering.value = false;
     await loadChart((event.payload as string[])[0]);
+    await moveNext();
+  } else if (step.value === 'options') {
+    fileHovering.value = false;
+    stepIndex.value = 1;
+    await loadChart((event.payload as string[])[0]);
+    await moveNext();
+  }
+});
+
+document.addEventListener('keydown', async (event) => {
+  if (event.key === 'Enter') {
+    await moveNext();
   }
 });
 
@@ -206,7 +221,7 @@ async function postRender() {
     if (!(await invoke('test_ffmpeg'))) {
       await dialog.message(t('ffmpeg-not-found'));
       await invoke('open_app_folder');
-      await shell.open('https://mivik.moe/ffmpeg-windows/');
+      await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
       return false;
     }
     let params = await buildParams();
@@ -263,6 +278,8 @@ async function moveNext() {
   if (step.value === 'options') {
     if (await postRender()) {
       stepIndex.value++;
+      await router.push({ name: 'tasks' });
+      await router.push({ name: 'render1' });
     }
     return;
   }

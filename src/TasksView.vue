@@ -20,6 +20,10 @@ en:
 
   show-output: Show Output
   show-in-folder: Show in Folder
+  duration: 
+    hours: h
+    minutes: m
+    seconds: s
 
 zh-CN:
   empty: 空空如也
@@ -42,7 +46,12 @@ zh-CN:
 
   show-output: 查看输出
   show-in-folder: 在文件夹中显示
-
+  
+  duration: 
+    hours: 时
+    minutes: 分
+    seconds: 秒
+  
 </i18n>
 
 <script setup lang="ts">
@@ -71,6 +80,23 @@ await updateList();
 const updateTask = setInterval(updateList, 700);
 onUnmounted(() => clearInterval(updateTask));
 
+
+function formatDuration(seconds: number) {
+  const duration = moment.duration(Math.ceil(seconds), 'seconds');
+  const hours = Math.floor(duration.asHours());
+  const minutes = duration.minutes();
+  const secs = duration.seconds();
+
+  if (hours > 0) {
+    return `${t('duration.hours')} ${t('duration.minutes')} ${t('duration.seconds')}`;
+  } else if (minutes > 0) {
+    return `${minutes} ${t('duration.minutes')} ${secs} ${t('duration.seconds')}`;
+  } else {
+    return `${secs} ${t('duration.seconds')}`;
+  }
+}
+
+
 function describeStatus(status: TaskStatus): string {
   switch (status.type) {
     case 'pending':
@@ -83,11 +109,11 @@ function describeStatus(status: TaskStatus): string {
       return t('status.rendering', {
         progress: (status.progress * 100).toFixed(2),
         fps: status.fps,
-        estimate: status.estimate ? moment.duration(Math.ceil(status.estimate), 'seconds').humanize(true, { ss: 0, s: 60, m: 60 }) : '',
+        estimate: status.estimate ? formatDuration(status.estimate) : '',// status.estimate ? moment.duration(Math.ceil(status.estimate), 'seconds').humanize(true, { ss: 0, s: 120, m: 120, h: 120 })
       });
     case 'done':
       return t('status.done', {
-        duration: moment.duration(Math.ceil(status.duration), 'seconds').humanize(false, { ss: 0, s: 60, m: 60 }),
+        duration: status.duration ? formatDuration(status.duration) : '',
       });
     case 'canceled':
       return t('status.canceled');

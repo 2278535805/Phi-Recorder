@@ -330,6 +330,7 @@ pub async fn main() -> Result<()> {
 
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
+        let offset = offset as f64;
         for line in &chart.lines {
             for note in &line.notes {
                 if !note.fake {
@@ -338,7 +339,7 @@ pub async fn main() -> Result<()> {
                         NoteKind::Drag => &sfx_drag,
                         NoteKind::Flick => &sfx_flick,
                     };
-                    place(o + note.time as f64 + offset as f64, sfx, volume_sfx);
+                    place(o + note.time as f64 + offset, sfx, volume_sfx);
                 }
             }
         }

@@ -196,7 +196,7 @@ import TipTextField from './TipTextField.vue';
 
 const props = defineProps<{ initAspectRatio?: number }>();
 
-const RESOLUTIONS = [ '1280x720','1920x1080', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
+const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
 const ffmpegPresetPresetList = ['veryfast p1 speed', 'faster p2 speed','fast p3 balanced', 'medium p4 balanced', 'slow p5 balanced', 'slower p6 quality', 'veryslow p7 quality'];
 const bitrateControlList = ['CRF','CBR'];
 
