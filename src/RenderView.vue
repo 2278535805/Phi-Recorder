@@ -191,7 +191,6 @@ event.listen('tauri://file-drop', async (event) => {
   if (step.value === 'choose') {
     fileHovering.value = false;
     await loadChart((event.payload as string[])[0]);
-    await moveNext();
   } else if (step.value === 'options') {
     fileHovering.value = false;
     stepIndex.value = 1;
