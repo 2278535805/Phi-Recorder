@@ -358,6 +358,8 @@ pub async fn main() -> Result<()> {
             for i in 0..output2.len() {
                 if output2[i] > max_value {
                     output2[i] = max_value;
+                } else if output2[i] < -max_value {
+                    output2[i] = -max_value;
                 }
             }            
         }
