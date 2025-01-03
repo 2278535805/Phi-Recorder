@@ -558,10 +558,10 @@ pub async fn main() -> Result<()> {
 
 
     for frame in N as u64..frames {
-        let frames10 = frames / 10;
+        /*let frames10 = frames / 10;
         if frame % frames10 == 0 {
             info!("Render Progress: {:.0}%", (frame as f32 / frames as f32 * 100.).ceil());
-        }
+        }*/
         *my_time.borrow_mut() = (frame as f32 * frame_delta).max(0.) as f64;
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         //clear_background(BLACK);
