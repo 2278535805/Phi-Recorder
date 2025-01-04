@@ -195,7 +195,6 @@ event.listen('tauri://file-drop', async (event) => {
     fileHovering.value = false;
     stepIndex.value = 1;
     await loadChart((event.payload as string[])[0]);
-    await moveNext();
   }
 });
 
