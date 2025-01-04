@@ -238,7 +238,7 @@ pub async fn main() -> Result<()> {
     } else {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64
     };
-    let a: f64 = 0.7 + 0.3;
+    let a: f64 = -0.5; // fade out time
     let musica: f64 = 0.7 + 0.3 + EndingScene::BPM_WAIT_TIME;
 
     let length = track_length - chart.offset.min(0.) as f64 + 1.;
@@ -258,8 +258,8 @@ pub async fn main() -> Result<()> {
     assert_eq!(sample_rate, sfx_drag.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_drag.sample_rate());
     assert_eq!(sample_rate, sfx_flick.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_flick.sample_rate());
     
-    let mut output = vec![0.0_f32; (video_length * sample_rate_f64) as usize * 2];
-    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64) as usize * 2];
+    let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
 
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
@@ -281,7 +281,7 @@ pub async fn main() -> Result<()> {
     if volume_music != 0.0 {
         let music_time = Instant::now();
         let pos = o - chart.offset.min(0.) as f64;
-        let count = ((music.length() as f64 + params.config.ending_length + 2.) * sample_rate_f64) as usize;
+        let count = ((music.length() as f64 + 1. + a) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
         for i in 0..count {
@@ -427,7 +427,7 @@ pub async fn main() -> Result<()> {
 
     let fps = params.config.fps;
     //let frame_delta = 1. / fps as f64;
-    let frames = (video_length * fps as f64) as u64;
+    let frames = (video_length * fps as f64).ceil() as u64;
 
     let codecs = String::from_utf8(
         cmd_hidden(&ffmpeg)
@@ -533,7 +533,9 @@ pub async fn main() -> Result<()> {
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
         main.render(&mut painter)?;
-        draw_rectangle(0., 0., 0., 0., Color::default());
+        if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && !params.config.disable_loading {
+            draw_rectangle(0., 0., 0., 0., Color::default());
+        }
         gl.flush();
 
         if MSAA.load(Ordering::SeqCst) {
@@ -559,12 +561,14 @@ pub async fn main() -> Result<()> {
     info!("Pre-Render Time:{:?}", pre_render_time.elapsed());
 
 
-    let render_time = Instant::now();
     let frames10 = frames / 10;
-    let frames9 = (frames as f32 * 0.95) as u64;
-    for frame in N as u64..frames {
-        if frame % frames10 == 0 && frame < frames9 {
-            info!("Render progress: {:.0}% Time elapsed: {:.2}s", (frame as f32 / frames as f32 * 100.).ceil(), render_time.elapsed().as_secs_f32());
+    info!("video length: {}", video_length);
+    let render_time = Instant::now();
+    let mut step_time = Instant::now();
+    for frame in N as u64..(frames + N as u64 - 1) {
+        if frame % frames10 == 0 {
+            info!("Render progress: {:.0}% Time elapsed: {:.2}s", (frame as f32 / frames as f32 * 100.).ceil(), step_time.elapsed().as_secs_f32());
+            step_time = Instant::now();
         }
         *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));

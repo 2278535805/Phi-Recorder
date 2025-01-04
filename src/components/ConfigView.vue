@@ -287,7 +287,7 @@ const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
   compressionRatio = ref(100.0);
 
-const endingLength = ref('-1.0');
+const endingLength = ref('0.0');
 
 const disableLoading = ref(true)
 const hires = ref(true)
@@ -417,7 +417,7 @@ function applyConfig(config: RenderConfig) {
 const DEFAULT_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
   ffmpegPreset: 'medium p4 balanced',
-  endingLength: -1.0,
+  endingLength: 0.0,
   disableLoading: true,
   hires: true,
   chartDebug: false,
