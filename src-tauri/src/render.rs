@@ -426,7 +426,6 @@ pub async fn main() -> Result<()> {
 
 
     let fps = params.config.fps;
-    //let frame_delta = 1. / fps as f64;
     let frames = (video_length * fps as f64).ceil() as u64;
 
     let codecs = String::from_utf8(
@@ -441,19 +440,42 @@ pub async fn main() -> Result<()> {
     let has_qsv = params.config.hardware_accel && codecs.contains("h264_qsv");
     let has_amf = params.config.hardware_accel && codecs.contains("h264_amf");
 
-    let use_cuda_hevc = params.config.hardware_accel && codecs.contains("hevc_nvenc");
-    let has_qsv_hevc = params.config.hardware_accel && codecs.contains("hevc_qsv");
-    let has_amf_hevc = params.config.hardware_accel && codecs.contains("hevc_amf");
+    let use_cuda_hevc = params.config.hardware_accel && codecs.contains("hevc_nvenc") && params.config.hevc;
+    let has_qsv_hevc = params.config.hardware_accel && codecs.contains("hevc_qsv") && params.config.hevc;
+    let has_amf_hevc = params.config.hardware_accel && codecs.contains("hevc_amf") && params.config.hevc;
 
     let ffmpeg_preset =  if !use_cuda && !has_qsv && has_amf {"-quality"} else {"-preset"};
     let mut ffmpeg_preset_name_list = params.config.ffmpeg_preset.split_whitespace();
+    
+    if params.config.hardware_accel {
+        if !(use_cuda_hevc || has_qsv_hevc || has_amf_hevc) && params.config.hevc{
+            bail!(tl!("no-hwacc"));
+        } else if !(use_cuda || has_qsv || has_amf) {
+            bail!(tl!("no-hwacc"));
+        }
+    }
 
-    let (nvenc, qsv, _amf, cpu) = if params.config.hevc {
-        ("hevc_nvenc", "hevc_qsv", "hevc_amf", "libx265")
-    } else {
-        ("h264_nvenc", "h264_qsv", "h264_amf", "libx264")
+    let ffmpeg_encoder = 
+    if use_cuda_hevc {
+        "hevc_nvenc"
+    } else if use_cuda {
+        "h264_nvenc"
+    } else if has_qsv_hevc {
+        "hevc_qsv"
+    } else if has_qsv {
+        "h264_qsv"
+    } /*else if has_amf_hevc {
+        "hevc_amf"
+    } else if has_amf {
+        "h264_amf"
+    }*/ else {
+        warn!("No hardware acceleration available, using software encoding");
+        if params.config.hevc {
+            "libx265"
+        } else {
+            "libx264"
+        }
     };
-    if params.config.hardware_accel && !use_cuda_hevc && !has_qsv_hevc && !has_amf_hevc {bail!(tl!("no-hwacc"));}
 
     let ffmpeg_preset_name = if use_cuda {ffmpeg_preset_name_list.nth(1)
     } else if has_qsv {ffmpeg_preset_name_list.nth(0)
@@ -469,11 +491,7 @@ pub async fn main() -> Result<()> {
     let args2 = format!(
         "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f {}",
         if params.config.hires {"copy"} else {"aac -b:a 320k"},
-        if use_cuda {nvenc} 
-        else if has_qsv {qsv} 
-        //else if has_amf {amf}
-        else if params.config.hardware_accel {bail!(tl!("no-hwacc"));} 
-        else {cpu},
+        ffmpeg_encoder,
         if params.config.bitrate_control == "CRF" {
             if use_cuda {"-cq"}
             else if has_qsv {"-q"}
@@ -588,15 +606,15 @@ pub async fn main() -> Result<()> {
         }
         unsafe {
             use miniquad::gl::*;
-            let tex = mst.output().texture.raw_miniquad_texture_handle();
+            //let tex = mst.output().texture.raw_miniquad_texture_handle();
             glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
 
             glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
             glReadPixels(
                 0,
                 0,
-                tex.width as _,
-                tex.height as _,
+                vw as _,
+                vh as _,
                 GL_RGBA,
                 GL_UNSIGNED_BYTE,
                 std::ptr::null_mut(),
