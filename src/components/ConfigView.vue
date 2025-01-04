@@ -567,7 +567,7 @@ async function replacePreset() {
           <v-text-field :label="t('fps')" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('hw-accel')" :tooltip="t('hw-accel-tips')" v-model="hwAccel"></TipSwitch>
+          <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-1">

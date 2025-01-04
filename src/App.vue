@@ -40,7 +40,19 @@ declare global {
   }
 }
 
-export default {};
+export default {
+  data() {
+    return {
+      drawer: true,
+    };
+  },
+  methods: {
+    toggleNav() {
+      this.drawer = !this.drawer;
+    },
+  },
+
+};
 </script>
 
 <script setup lang="ts">
@@ -65,8 +77,11 @@ window.goto = (name: string) => {
 <template>
   <v-app id="phigros-recorder">
     <v-sonner position="top-center" />
-    <v-app-bar title="Phigros Recorder"></v-app-bar>
-    <v-navigation-drawer expand-on-hover rail permanent>
+    <v-app-bar :elevation="0">
+      <v-app-bar-nav-icon @click="toggleNav"></v-app-bar-nav-icon>
+      <v-app-bar-title>Phigros Recorder</v-app-bar-title>
+    </v-app-bar>
+    <v-navigation-drawer v-model="drawer" expand-on-hover rail permanent>
       <v-list density="compact" nav>
         <v-list-item
           v-for="key in ['render', 'render1', 'rpe', 'tasks', 'about']"
