@@ -83,6 +83,13 @@ async fn run_wrapped(f: impl Future<Output = Result<()>>) -> ! {
 
 #[macroquad::main(build_conf)]
 async fn main() -> Result<()> {
+    /*use chrono::prelude::*;
+    let now = Utc::now();
+    let target_date = Utc.with_ymd_and_hms(2025, 2, 5, 0, 0, 0).unwrap();
+    if now >= target_date {
+        panic!("Outdated version!");
+    }*/
+
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
