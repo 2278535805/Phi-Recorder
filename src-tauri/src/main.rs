@@ -142,6 +142,7 @@ async fn main() -> Result<()> {
             SystemTrayEvent::MenuItemClick { id, .. } => {
                 let window = app.get_window("main").unwrap();
                 let visible = window.is_visible().unwrap();
+                let minimizable = window.is_minimizable().unwrap();
                 match id.as_str() {
                     "toggle" => {
                         app.tray_handle()
@@ -156,13 +157,17 @@ async fn main() -> Result<()> {
                             window.hide().unwrap();
                         } else {
                             window.show().unwrap();
+                            window.unminimize().unwrap();
+                            window.set_focus().unwrap();
                         }
                     }
                     "tasks" => {
-                        if !visible {
+                        if !visible || minimizable {
                             window.show().unwrap();
+                            window.unminimize().unwrap();
                         }
                         window.eval("window.goto('tasks')").unwrap();
+                        window.set_focus().unwrap();
                     }
                     "quit" => {
                         std::process::exit(0);
@@ -173,12 +178,18 @@ async fn main() -> Result<()> {
             SystemTrayEvent::LeftClick { .. } => {
                 let window = app.get_window("main").unwrap();
                 let visible = window.is_visible().unwrap();
-                if visible {
-                    window.hide().unwrap();
-                } else {
-                    window.show().unwrap();
-                }
-                window.set_focus().unwrap();
+                app.tray_handle()
+                            .get_item("toggle")
+                            .set_title(if visible {
+                                window.hide().unwrap();
+                                mtl!("tray-show")
+                            } else {
+                                window.show().unwrap();
+                                window.unminimize().unwrap();
+                                window.set_focus().unwrap();
+                                mtl!("tray-hide")
+                            })
+                            .unwrap();
             }
             _ => {}
         })
