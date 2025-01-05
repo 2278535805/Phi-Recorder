@@ -1,6 +1,6 @@
 <i18n>
 en:
-  already-running: phigros-recorder is already running
+  already-running: Phigros Recorder is already running
 
   prev-step: Previous
   next-step: Next
@@ -11,7 +11,7 @@ en:
     render: 'Render'
 
   choose:
-    archive: Archive (.zip, .pez)
+    archive: Archive
     folder: Folder
     can-also-drop: You can also drag & drop the file to here
     drop: DROP CHART HERE
@@ -48,7 +48,7 @@ en:
   ffmpeg-not-found: You haven't installed ffmpeg yet. Please download FFmpeg.exe and put it in the specific folder.
 
 zh-CN:
-  already-running: phigros-recorder 已经在运行
+  already-running: Phigros Recorder 已经在运行
 
   prev-step: 上一步
   next-step: 下一步
@@ -59,7 +59,7 @@ zh-CN:
     render: '渲染视频'
 
   choose:
-    archive: 压缩包 (.zip, .pez)
+    archive: 压缩包
     folder: 文件夹
     can-also-drop: 也可以直接拖放谱面至此处
     drop: 拖放谱面至此处
@@ -73,7 +73,7 @@ zh-CN:
   illustrator: 画师
   level: 难度
   aspect: 宽高比
-  dim: 背景昏暗程度
+  dim: 背景亮度
 
   tip: Tip
   tip-placeholder: 留空则随机选择
