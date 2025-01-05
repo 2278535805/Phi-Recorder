@@ -280,7 +280,7 @@ updateRespacks();
 const noteScale = ref(1);
 
 const doubleHint = ref(true),
-  aggressive = ref(false),
+  aggressive = ref(true),
   disableParticle = ref(false),
   disableEffect = ref(false);
 
@@ -430,7 +430,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   bitrateControl: 'CRF',
   bitrate: '28',
 
-  aggressive: false,
+  aggressive: true,
   challengeColor: 'rainbow',
   challengeRank: 3,
   disableEffect: false,
