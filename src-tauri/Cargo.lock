@@ -3178,7 +3178,7 @@ dependencies = [
 [[package]]
 name = "prpr"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#77957a7b7e42711a44f31234157f857860b08c14"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#5a236f09791d41df73debc3e3b4d096a11c55962"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3246,7 +3246,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#77957a7b7e42711a44f31234157f857860b08c14"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#5a236f09791d41df73debc3e3b4d096a11c55962"
 dependencies = [
  "anyhow",
  "tracing",
