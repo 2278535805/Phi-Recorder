@@ -199,6 +199,7 @@ const props = defineProps<{ initAspectRatio?: number }>();
 const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
 const ffmpegPresetPresetList = ['veryfast p1 speed', 'faster p2 speed','fast p3 balanced', 'medium p4 balanced', 'slow p5 balanced', 'slower p6 quality', 'veryslow p7 quality'];
 const bitrateControlList = ['CRF','CBR'];
+const fpsList = ['60', '120', '30'];
 
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);
@@ -564,7 +565,7 @@ async function replacePreset() {
           <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetList" class="mx-2" :rules="[RULES.non_empty]" v-model="ffmpegPreset"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-text-field :label="t('fps')" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-text-field>
+          <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
@@ -578,7 +579,7 @@ async function replacePreset() {
           <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate" :tooltip="t('bitrate-tips')"></TipTextField>
         </v-col>
         <v-col cols="3">
-          <v-combobox :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-combobox>
+          <v-autocomplete :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-autocomplete>
         </v-col>
         <!--<v-col cols="3">
           <TipSwitch :label="t('fxaa')" :tooltip="t('fxaa-tips')" v-model="fxaa"></TipSwitch>
@@ -611,7 +612,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-combobox class="mx-2" :label="t('challenge-color')" :items="t('challenge-colors').split(',')" v-model="challengeColor" :rules="[RULES.non_empty]"></v-combobox>
+          <v-autocomplete class="mx-2" :label="t('challenge-color')" :items="t('challenge-colors').split(',')" v-model="challengeColor" :rules="[RULES.non_empty]"></v-autocomplete>
         </v-col>
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
@@ -623,7 +624,7 @@ async function replacePreset() {
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
         <v-col cols="8">
-          <v-combobox class="mx-2" :label="t('respack')" :items="respacks" item-title="name" v-model="respack"></v-combobox>
+          <v-autocomplete class="mx-2" :label="t('respack')" :items="respacks" item-title="name" v-model="respack"></v-autocomplete>
         </v-col>
         <v-col cols="2" class="mt-n5 d-flex justify-center">
           <v-btn class="pa-1" size="large" @click="updateRespacks" v-t="'respack-refresh'"></v-btn>
