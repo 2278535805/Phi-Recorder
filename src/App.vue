@@ -78,8 +78,8 @@ window.goto = (name: string) => {
   <v-app id="phigros-recorder">
     <v-sonner position="top-center" />
     <v-app-bar :elevation="0">
-      <v-app-bar-nav-icon @click="toggleNav"></v-app-bar-nav-icon>
-      <v-app-bar-title>Phigros Recorder</v-app-bar-title>
+      <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
+      <v-app-bar-title class="mx-5">Phigros Recorder</v-app-bar-title>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" expand-on-hover rail permanent>
       <v-list density="compact" nav>
