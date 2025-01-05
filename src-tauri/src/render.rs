@@ -426,7 +426,7 @@ pub async fn main() -> Result<()> {
 
 
     let fps = params.config.fps;
-    let frames = (video_length * fps as f64).ceil() as u64;
+    let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let codecs = String::from_utf8(
         cmd_hidden(&ffmpeg)
@@ -583,7 +583,7 @@ pub async fn main() -> Result<()> {
     info!("video length: {}", video_length);
     let render_time = Instant::now();
     let mut step_time = Instant::now();
-    for frame in N as u64..(frames + N as u64 - 1) {
+    for frame in N as u64..frames {
         if frame % frames10 == 0 {
             info!("Render progress: {:.0}% Time elapsed: {:.2}s", (frame as f32 / frames as f32 * 100.).ceil(), step_time.elapsed().as_secs_f32());
             step_time = Instant::now();
