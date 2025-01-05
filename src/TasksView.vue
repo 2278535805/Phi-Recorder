@@ -91,8 +91,10 @@ function formatDuration(seconds: number) {
     return `${t('duration.hours')} ${t('duration.minutes')} ${t('duration.seconds')}`;
   } else if (minutes > 0) {
     return `${minutes} ${t('duration.minutes')} ${secs} ${t('duration.seconds')}`;
-  } else {
+  } else if (secs > 0) {
     return `${secs} ${t('duration.seconds')}`;
+  } else {
+    return '';
   }
 }
 

@@ -630,8 +630,9 @@ pub async fn main() -> Result<()> {
         send(IPCEvent::Frame);
     }
     drop(input);
-    info!("Render Time:{:?}", render_time.elapsed());
+    info!("Render Time: {:?}", render_time.elapsed());
     proc.wait()?;
+    info!("Average FPS: {:.2}", frames as f64 / render_time.elapsed().as_secs_f64());
     info!("Task done in {:?}", render_start_time.elapsed());
     send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
     Ok(())
