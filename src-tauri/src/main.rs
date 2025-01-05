@@ -258,8 +258,11 @@ fn exit_program() {
 
 #[tauri::command]
 fn show_folder() -> Result<(), InvokeError> {
-    let dir = output_dir().unwrap();
-    show_in_folder(&dir)
+    (|| {
+        open::that_detached(output_dir().unwrap())?;
+        Ok(())
+    })()
+    .map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]
