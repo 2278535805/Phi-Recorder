@@ -1,0 +1,37 @@
+resolution: [1920, 1080]
+ffmpegPreset: medium
+endingLength: 5.0
+disableLoading: false
+hires: true
+fps: 60
+hardwareAccel: true
+hevc: false
+bitrateControl: CRF
+bitrate: 26
+aggressive: true
+challengeColor: rainbow
+challengeRank: 45
+disableEffect: false
+doubleHint: true
+fxaa: false
+noteScale: 1.0
+particle: true
+playerName: HLMC
+playerRks: 16.0
+sampleCount: 2
+res_pack_path: None
+speed: 1.0
+volumeMusic: 1.0
+volumeSfx: 0.7
+chartDebug: false
+chartRatio: 1.0
+allGood: false
+watermark: 
+roman: false
+chinese: false
+combo: AUTOPLAY
+difficulty: 
+phiraMode: false
+playerAvatar: 
+compressionRatio: 100.
+autoplay: true

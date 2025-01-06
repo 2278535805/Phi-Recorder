@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "phigros-recorder",
-    "version": "0.2.2"
+    "version": "0.2.3"
   },
   "tauri": {
     "allowlist": {
@@ -57,7 +57,8 @@
       },
       "resources": [
         "assets",
-        "WebView2Loader.dll"
+        "WebView2Loader.dll",
+        "config.yml"
       ],
       "shortDescription": "",
       "targets": "all",
