@@ -259,20 +259,21 @@ pub async fn main() -> Result<()> {
     assert_eq!(sample_rate, sfx_flick.sample_rate(), "Sample rate mismatch: expected {}, got {}", sample_rate, sfx_flick.sample_rate());
     
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
 
+    // let stereo_sfx = false; // TODO stereo sound effects
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
-        let position = (pos * sample_rate_f64).round() as usize * 2;
+        let position = (pos * sample_rate_f64).round() as usize;
         if position >= output2.len() {
             return 0;
         }
         let slice = &mut output2[position..];
-        let len = (slice.len() / 2).min(clip.frame_count());
+        let len = (slice.len()).min(clip.frame_count());
 
         let frames = clip.frames();
         for i in 0..len {
-            slice[i * 2] += frames[i].0 * volume;
-            slice[i * 2 + 1] += frames[i].1 * volume;
+            slice[i] += frames[i].0 * volume;
+            // slice[i * 2 + 1] += frames[i].1 * volume; hitfx does not require dual stereo
         }
     
         return len;
@@ -281,10 +282,10 @@ pub async fn main() -> Result<()> {
     if volume_music != 0.0 {
         let music_time = Instant::now();
         let pos = o - chart.offset.min(0.) as f64;
-        let count = ((music.length() as f64 + 1. + a) * sample_rate_f64) as usize;
+        let len = ((music.length() as f64 + 1. + a) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
-        for i in 0..count {
+        for i in 0..len {
             let position = i as f64 * ratio;
             let frame = music.sample(position as f32).unwrap_or_default();
             output[start_index + i * 2] += frame.0 * volume_music;
@@ -292,7 +293,15 @@ pub async fn main() -> Result<()> {
         }
         //ending
         let mut pos = o + length + musica;
-        while place(pos, &ending, volume_music) != 0 && params.config.ending_length > EndingScene::BPM_WAIT_TIME {
+        while pos < video_length && params.config.ending_length > EndingScene::BPM_WAIT_TIME {
+            let start_index = (pos * sample_rate_f64).round() as usize * 2;
+            let slice = &mut output[start_index..];
+            let len = (slice.len() / 2).min(ending.frame_count());
+            let frames = &ending.frames();
+            for i in 0..len {
+                slice[i * 2] += frames[i].0 * volume_music;
+                slice[i * 2 + 1] += frames[i].1 * volume_music;
+            }
             pos += ending.frame_count() as f64 / sample_rate_f64;
         }
         info!("Render Music Time:{:?}", music_time.elapsed())
@@ -363,8 +372,9 @@ pub async fn main() -> Result<()> {
             }            
         }
 
-        for i in 0..output.len() {
-            output[i] += output2[i];
+        for i in 0..output2.len() {
+            output[i * 2] += output2[i];
+            output[i * 2 + 1] += output2[i];
         }
         info!("Mixing Time:{:?}", mixing_time.elapsed());
     }
