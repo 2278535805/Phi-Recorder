@@ -20,6 +20,7 @@ use prpr::{
 };
 use render::{find_ffmpeg, RenderConfig, RenderParams};
 use serde::Serialize;
+use tracing::info;
 use std::{
     collections::HashMap,
     fs::File,
@@ -124,9 +125,11 @@ async fn main() -> Result<()> {
             }
             cmd => {
                 eprintln!("Unknown subcommand: {cmd:?}");
-                warn!("try to parse");
+                //warn!("Try to parse...");
                 let args = std::env::args().nth(1).unwrap_or_default();
-                if args.contains(":\\") || args.contains("/home/") || args.contains(".pez") || args.contains(".zip") {
+                let path = Path::new(&args);
+                if path.is_file() && (args.contains(".pez") || args.contains(".zip")) || path.is_dir() {
+                    info!("Find a valid path, send to render");
                     Command::new(std::env::current_exe()?)
                         .arg("--render")
                         .arg(args)
