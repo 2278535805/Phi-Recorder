@@ -349,7 +349,7 @@ function tryParseAspect(): number | undefined {
               <v-text-field class="mx-2" :label="t('chart-name')" v-model="chartInfo.name"></v-text-field>
             </v-col>
             <v-col cols="2">
-              <v-text-field class="mx-2" :label="t('chart-offset')" type="number" :rules="[RULES.greaterThanZero]" v-model="offset_text"></v-text-field>
+              <v-text-field class="mx-2" :label="t('chart-offset')" type="number" :rules="[RULES.int]" v-model="offset_text"></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field class="mx-2" :label="t('level')" v-model="chartInfo.level"></v-text-field>
