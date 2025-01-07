@@ -369,10 +369,23 @@ async fn parse_chart(path: &Path) -> Result<ChartInfo, InvokeError> {
     .await
 }
 
+pub fn cmd_hidden(program: impl AsRef<std::ffi::OsStr>) -> Command {
+    let cmd = tokio::process::Command::new(program);
+    #[cfg(target_os = "windows")]
+    {
+        let mut cmd = cmd;
+        #[cfg(not(debug_assertions))]
+        cmd.creation_flags(0x08000000);
+        cmd
+    }
+    #[cfg(not(target_os = "windows"))]
+    cmd
+}
+
 #[tauri::command]
 async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
-        let mut child = Command::new(std::env::current_exe()?)
+        let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("preview")
             .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
@@ -393,7 +406,7 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
 #[tauri::command]
 async fn preview_tweakoffset(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
-        let mut child = Command::new(std::env::current_exe()?)
+        let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("tweakoffset")
             .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())

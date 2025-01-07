@@ -1,4 +1,5 @@
 use crate::{
+    cmd_hidden,
     common::output_dir,
     render::{IPCEvent, RenderParams},
     ASSET_PATH,
@@ -96,7 +97,7 @@ impl Task {
 
         *self.status.lock().await = TaskStatus::Loading;
 
-        let mut child = tokio::process::Command::new(std::env::current_exe()?)
+        let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("render")
             .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
