@@ -1,4 +1,4 @@
-name: Build Phigros Recorder
+name: Build Phi Recorder
 on:
   push:
     tags:
@@ -70,7 +70,7 @@ jobs:
           PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
         with:
           tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
-          releaseName: 'Phigros Recorder v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          releaseName: 'Phi Recorder v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: 'From GitHub Action'
           releaseDraft: true
           prerelease: false
