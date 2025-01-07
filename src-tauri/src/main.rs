@@ -217,7 +217,7 @@ async fn main() -> Result<()> {
                         window.set_focus().unwrap();
                     }
                     "quit" => {
-                        std::process::exit(0);
+                        exit_program();
                     }
                     _ => {}
                 }
@@ -250,7 +250,7 @@ async fn main() -> Result<()> {
                     .get_item("toggle")
                     .set_title(mtl!("tray-show"))
                     .unwrap();*/
-                std::process::exit(0);
+                exit_program();
                 //event.window().hide().unwrap();
                 //api.prevent_close();
             }
@@ -311,6 +311,22 @@ fn is_the_only_instance() -> bool {
 
 #[tauri::command]
 fn exit_program() {
+    /*#[cfg(target_os = "windows")]
+    {
+        use sysinfo::{ProcessExt, System, SystemExt, PidExt};
+        let current_exe = std::env::current_exe().unwrap();
+        let exe_name = current_exe.file_name().unwrap().to_str().unwrap();
+        let mut system = System::new_all();
+        system.refresh_processes();
+        for (pid, process) in system.processes() {
+            if process.name() == exe_name {
+                if pid.as_u32() == std::process::id() {
+                    continue;
+                }
+                process.kill();
+            }
+        }
+    }*/
     std::process::exit(0);
 }
 
