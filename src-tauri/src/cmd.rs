@@ -327,7 +327,7 @@ pub async fn main() -> Result<()> {
         let video_length = o + length + a + config.ending_length;
         let offset = chart.offset.max(0.);
     
-        info!("Loading Resources Time:{:?}", loading_time.elapsed());
+        info!("Loading Resources Time:{:.2?}", loading_time.elapsed());
     
         let render_start_time = Instant::now();
     
@@ -386,7 +386,7 @@ pub async fn main() -> Result<()> {
                 }
                 pos += ending.frame_count() as f64 / sample_rate_f64;
             }
-            info!("Render Music Time:{:?}", music_time.elapsed())
+            info!("Render Music Time:{:.2?}", music_time.elapsed())
     
         }
     
@@ -434,7 +434,7 @@ pub async fn main() -> Result<()> {
                     }
                 }
             }
-            info!("Render Hit Effects Time:{:?}", sfx_time.elapsed())
+            info!("Render Hit Effects Time:{:.2?}", sfx_time.elapsed())
             
         }
     
@@ -458,7 +458,7 @@ pub async fn main() -> Result<()> {
                 output[i * 2] += output2[i];
                 output[i * 2 + 1] += output2[i];
             }
-            info!("Mixing Time:{:?}", mixing_time.elapsed());
+            info!("Mixing Time:{:.2?}", mixing_time.elapsed());
         }
     
         {
@@ -479,7 +479,7 @@ pub async fn main() -> Result<()> {
             }
             drop(writer);
             proc.wait()?;
-            info!("Output Audio Time:{:?}", output_audio_time.elapsed());
+            info!("Output Audio Time:{:.2?}", output_audio_time.elapsed());
         }
     
         let preparing_render_time = Instant::now();
@@ -600,7 +600,7 @@ pub async fn main() -> Result<()> {
             if config.hires {"mov"} else {"mp4"}
         );
     
-        info!("Preparing Render Time:{:?}", preparing_render_time.elapsed());
+        info!("Preparing Render Time:{:.2?}", preparing_render_time.elapsed());
         let pre_render_time = Instant::now();
         //send(IPCEvent::StartRender(frames));
         
@@ -668,11 +668,11 @@ pub async fn main() -> Result<()> {
             }
             //send(IPCEvent::Frame);
         }
-        info!("Pre-Render Time:{:?}", pre_render_time.elapsed());
+        info!("Pre-Render Time:{:.2?}", pre_render_time.elapsed());
     
     
         let frames10 = frames / 10;
-        info!("video length: {}", video_length);
+        info!("video length: {:.2}s", video_length);
         let render_time = Instant::now();
         let mut step_time = Instant::now();
         for frame in N as u64..frames {
@@ -722,10 +722,10 @@ pub async fn main() -> Result<()> {
             //send(IPCEvent::Frame);
         }
         drop(input);
-        info!("Render Time: {:?}", render_time.elapsed());
-        proc.wait()?;
+        info!("Render Time: {:.2?}", render_time.elapsed());
         info!("Average FPS: {:.2}", frames as f64 / render_time.elapsed().as_secs_f64());
-        info!("Task done in {:?}", render_start_time.elapsed());
+        proc.wait()?;
+        info!("Task done in {:.2?}", render_start_time.elapsed());
         //send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
         Ok(())
 }
