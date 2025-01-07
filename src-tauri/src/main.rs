@@ -85,7 +85,16 @@ async fn run_wrapped(f: impl Future<Output = Result<()>>) -> ! {
 fn hide_cmd() {
     #[cfg(all(target_os = "windows", not(debug_assertions)))]
     {
-        unsafe { winapi::um::wincon::FreeConsole() };
+        //unsafe { winapi::um::wincon::FreeConsole() };
+        unsafe {
+            use std::ptr::null_mut;
+            use winapi::um::winuser::{ShowWindow, SW_HIDE};
+            use winapi::um::wincon::GetConsoleWindow;
+            let console_window = GetConsoleWindow();
+            if console_window != null_mut() {
+                ShowWindow(console_window, SW_HIDE);
+            }
+        }
     }
 }
 
