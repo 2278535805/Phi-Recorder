@@ -243,9 +243,6 @@ pub async fn main() -> Result<()> {
     
     #[cfg(not(target_os = "windows"))]
     {
-        CONFIG_DIR
-            .set(ensure_dir(std::env::current_dir().unwrap().to_owned()))
-            .unwrap();
         DATA_DIR
             .set(ensure_dir(std::env::current_dir().unwrap().to_owned()))
             .unwrap();
