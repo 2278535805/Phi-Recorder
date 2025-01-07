@@ -13,7 +13,7 @@ mod cmd;
 use anyhow::{bail, Context, Result};
 use common::{ensure_dir, respack_dir, output_dir, CONFIG_DIR, DATA_DIR};
 use fs4::tokio::AsyncFileExt;
-use macroquad::{miniquad::conf::Icon, prelude::set_pc_assets_folder};
+use macroquad::{miniquad::conf::Icon, prelude::{set_pc_assets_folder, warn}};
 use prpr::{
     fs::{self, FileSystem},
     info::ChartInfo,
@@ -82,6 +82,13 @@ async fn run_wrapped(f: impl Future<Output = Result<()>>) -> ! {
     std::process::exit(0);
 }
 
+fn hide_cmd() {
+    #[cfg(target_os = "windows")]
+    {
+        unsafe { winapi::um::wincon::FreeConsole() };
+    }
+}
+
 #[macroquad::main(build_conf)]
 async fn main() -> Result<()> {
     /*use chrono::prelude::*;
@@ -101,12 +108,15 @@ async fn main() -> Result<()> {
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref() {
             Some("render") => {
+                hide_cmd();
                 run_wrapped(render::main()).await;
             }
             Some("preview") => {
+                hide_cmd();
                 run_wrapped(preview::main()).await;
             }
             Some("tweakoffset") => {
+                hide_cmd();
                 run_wrapped(preview::tweakoffset()).await;
             }
             Some("--render") => {
@@ -114,14 +124,23 @@ async fn main() -> Result<()> {
             }
             cmd => {
                 eprintln!("Unknown subcommand: {cmd:?}");
-                std::process::exit(1);
+                warn!("try to parse");
+                let args = std::env::args().nth(1).unwrap_or_default();
+                if args.contains(":\\") || args.contains("/home/") || args.contains(".pez") || args.contains(".zip") {
+                    Command::new(std::env::current_exe()?)
+                        .arg("--render")
+                        .arg(args)
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()?;
+                    std::process::exit(0);
+                } else {
+                    std::process::exit(1);
+                }
             }
         }
     } else {
-        #[cfg(target_os = "windows")]
-        {
-            unsafe { winapi::um::wincon::FreeConsole() };
-        }
+        hide_cmd();
     }
 
     let tray_menu = SystemTrayMenu::new()
