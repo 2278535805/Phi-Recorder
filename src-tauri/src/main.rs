@@ -20,7 +20,6 @@ use prpr::{
 };
 use render::{find_ffmpeg, RenderConfig, RenderParams};
 use serde::Serialize;
-use tracing::info;
 use std::{
     collections::HashMap,
     fs::File,
