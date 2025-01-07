@@ -1,6 +1,6 @@
 [package]
 name = "phi-recorder"
-version = "0.2.6"
+version = "0.2.7"
 description = "Phi Recorder"
 authors = ["HLMC", "Mivik"]
 license = ""
