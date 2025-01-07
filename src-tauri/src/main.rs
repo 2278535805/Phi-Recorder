@@ -546,7 +546,7 @@ pub struct RPEChartInfo {
 fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
     (|| {
         if !path.is_dir()
-            || ["Chartlist.txt", "Resources"]
+            || ["PhiEdit.exe", "Resources"]
                 .iter()
                 .any(|it| !path.join(*it).exists())
         {
@@ -600,27 +600,73 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                 })()
             };
         }
-        for line in BufReader::new(File::open(dir.join("Chartlist.txt"))?).lines() {
-            let line = line?;
-            let line = line.trim();
-            if line.is_empty() {
-                continue;
+
+        if dir.join("Chartlist.txt").exists() {
+            for line in BufReader::new(File::open(dir.join("Chartlist.txt"))?).lines() {
+                let line = line?;
+                let line = line.trim();
+                if line.is_empty() {
+                    continue;
+                }
+                if line == "#" {
+                    commit!();
+                    continue;
+                }
+                let Some((key, value)) = line.split_once(':') else { continue };
+                *(match key {
+                    "Name" => &mut name,
+                    "Path" => &mut id,
+                    "Chart" => &mut chart,
+                    "Picture" => &mut illustration,
+                    "Charter" => &mut charter,
+                    _ => continue,
+                }) = Some(value.trim().to_owned());
             }
-            if line == "#" {
-                commit!();
-                continue;
+            commit!();
+        } else {
+            use tauri::regex::Regex;
+        let onely_num = Regex::new(r"^\d+$").unwrap();
+        let mut folders = Vec::new();
+        let path = dir.join("Resources");
+        for entry in std::fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                if let Some(folder_name) = path.file_name() {
+                    if onely_num.is_match(folder_name.to_str().unwrap_or("")) {
+                        folders.push(path);
+                    }
+                }
             }
-            let Some((key, value)) = line.split_once(':') else { continue };
-            *(match key {
-                "Name" => &mut name,
-                "Path" => &mut id,
-                "Chart" => &mut chart,
-                "Picture" => &mut illustration,
-                "Charter" => &mut charter,
-                _ => continue,
-            }) = Some(value.trim().to_owned());
         }
-        commit!();
+        for folder in folders {
+            println!("Found numeric folder: {:?}", folder);
+            for line in BufReader::new(File::open(folder.join("info.txt"))?).lines() {
+                let line = line?;
+                let line = line.trim();
+                if line.is_empty() {
+                    continue;
+                }
+                if line == "#" {
+                    commit!();
+                    continue;
+                }
+                let Some((key, value)) = line.split_once(':') else { continue };
+                *(match key {
+                    "Name" => &mut name,
+                    "Path" => &mut id,
+                    "Chart" => &mut chart,
+                    "Picture" => &mut illustration,
+                    "Charter" => &mut charter,
+                    _ => continue,
+                }) = Some(value.trim().to_owned());
+            }
+            commit!();
+        }
+    
+
+        
+        }
 
         results.sort_by_key(|it| it.modified);
         results.reverse();
