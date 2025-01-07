@@ -228,7 +228,7 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 pub async fn main() -> Result<()> {
     //env_logger::init();
     let loading_time = Instant::now();
-    use crate::ipc::client::*;
+    //use crate::ipc::client::*;
 
     //set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     init_assets();
