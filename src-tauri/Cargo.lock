@@ -3041,7 +3041,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "phigros-recorder"
+name = "phi-recorder"
 version = "0.2.6"
 dependencies = [
  "anyhow",

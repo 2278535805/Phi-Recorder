@@ -1,6 +1,6 @@
 <i18n>
 en:
-  already-running: Phigros Recorder is already running
+  already-running: Phi Recorder is already running
 
   prev-step: Previous
   next-step: Next
@@ -48,7 +48,7 @@ en:
   ffmpeg-not-found: You haven't installed ffmpeg yet. Please download FFmpeg.exe and put it in the specific folder.
 
 zh-CN:
-  already-running: Phigros Recorder 已经在运行
+  already-running: Phi Recorder 已经在运行
 
   prev-step: 上一步
   next-step: 下一步

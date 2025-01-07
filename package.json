@@ -1,5 +1,5 @@
 {
-  "name": "phigros-recorder",
+  "name": "phi-recorder",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "@mdi/font": "^7.2.96",
     "@tauri-apps/api": "^1.4.0",
     "moment": "^2.29.4",
-    "phigros-recorder": "link:",
+    "phi-recorder": "link:",
     "vue": "^3.3.4",
     "vue-i18n": "9.3.0-beta.14-77e850b",
     "vue-router": "^4.2.4",

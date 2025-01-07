@@ -30,7 +30,7 @@ export function isNumeric(num: any) {
 }
 
 export function setTitle(title: string) {
-  document.title = title.length ? title + ' - Phigros' : 'Phigros';
+  document.title = title.length ? title + ' - Phi' : 'Phi';
 }
 
 export function changeLocale(locale: string) {

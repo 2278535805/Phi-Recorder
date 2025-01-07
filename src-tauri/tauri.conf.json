@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "phigros-recorder",
+    "productName": "phi-recorder",
     "version": "0.2.6"
   },
   "tauri": {
@@ -46,7 +46,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.hlmc.phigros.recorder",
+      "identifier": "com.hlmc.phi.recorder",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -79,7 +79,7 @@
         "fullscreen": false,
         "height": 660,
         "resizable": true,
-        "title": "phigros-recorder",
+        "title": "phi-recorder",
         "width": 880,
         "fileDropEnabled": true
       }

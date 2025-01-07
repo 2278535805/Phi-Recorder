@@ -1,11 +1,11 @@
 [package]
-name = "phigros-recorder"
+name = "phi-recorder"
 version = "0.2.6"
-description = "Phigros Recorder"
+description = "Phi Recorder"
 authors = ["HLMC", "Mivik"]
 license = ""
 repository = ""
-default-run = "phigros-recorder"
+default-run = "phi-recorder"
 edition = "2021"
 rust-version = "1.60"
 

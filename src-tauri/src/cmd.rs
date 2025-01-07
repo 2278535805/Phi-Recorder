@@ -235,7 +235,7 @@ pub async fn main() -> Result<()> {
     #[cfg(target_os = "windows")]
     {
         let app_data_dir = std::env::var("APPDATA").unwrap(); 
-        let data_dir = PathBuf::from(app_data_dir).join("com.hlmc.phigros.recorder");
+        let data_dir = PathBuf::from(app_data_dir).join("com.hlmc.phi.recorder");
         DATA_DIR
             .set(ensure_dir(data_dir.clone()))
             .unwrap();

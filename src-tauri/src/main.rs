@@ -58,7 +58,7 @@ async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeEr
 
 pub fn build_conf() -> macroquad::window::Conf {
     macroquad::window::Conf {
-        window_title: "Phigros".to_string(),
+        window_title: "Phi Recorder".to_string(),
         window_width: 1280,
         window_height: 720,
         icon: Some(Icon {
