@@ -117,6 +117,11 @@ async fn main() -> Result<()> {
                 std::process::exit(1);
             }
         }
+    } else {
+        #[cfg(target_os = "windows")]
+        {
+            unsafe { winapi::um::wincon::FreeConsole() };
+        }
     }
 
     let tray_menu = SystemTrayMenu::new()

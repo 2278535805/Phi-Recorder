@@ -101,6 +101,7 @@ impl RenderConfig {
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
             phira_mode: self.phira_mode,
+            disable_audio: false,
             ..Default::default()
         }
     }
@@ -208,6 +209,7 @@ pub async fn main() -> Result<()> {
 
     let mut config = params.config.to_config();
     config.mods = Mods::AUTOPLAY;
+    config.disable_audio = true;
 
     let info = params.info;
 

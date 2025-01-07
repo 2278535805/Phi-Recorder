@@ -107,6 +107,7 @@ impl RenderConfig {
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
             phira_mode: self.phira_mode,
+            disable_audio: false,
             ..Default::default()
         }
     }
@@ -260,6 +261,7 @@ pub async fn main() -> Result<()> {
             };
     let mut prpr_config = config.to_config();
     prpr_config.mods = Mods::AUTOPLAY;
+    prpr_config.disable_audio = true;
     let path = std::env::args().nth(2).unwrap();
 
 
@@ -600,7 +602,7 @@ pub async fn main() -> Result<()> {
     
         info!("Preparing Render Time:{:?}", preparing_render_time.elapsed());
         let pre_render_time = Instant::now();
-        send(IPCEvent::StartRender(frames));
+        //send(IPCEvent::StartRender(frames));
         
         let mut proc = cmd_hidden(&ffmpeg)
             .args(args.split_whitespace())

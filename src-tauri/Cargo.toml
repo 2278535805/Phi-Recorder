@@ -31,6 +31,7 @@ tempfile = "3.8.0"
 chrono = "0.4.28"
 open = "5.0.0"
 fs4 = { version = "0.6.6", features = ["tokio-async"] }
+winapi = {version = "0.3", features = ["wincon", "winuser"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
