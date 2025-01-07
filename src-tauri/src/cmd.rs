@@ -267,7 +267,7 @@ pub async fn main() -> Result<()> {
 
     let mut fs = fs::fs_from_file(path.as_ref())?;
     let info = fs::load_info(fs.deref_mut()).await?;
-    let level: String = info.level.split_whitespace().next().unwrap_or_default().to_string();
+    let level: String = info.level.split_whitespace().next().unwrap_or("UK").to_string();
     let safe_name: String = info
         .name
         .chars()
