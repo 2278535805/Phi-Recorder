@@ -27,6 +27,18 @@ pub fn output_dir() -> Result<PathBuf> {
     Ok(dir)
 }
 
+pub fn no_output_dir(dir: PathBuf) -> Result<PathBuf> {
+    //let dir = DATA_DIR.get().unwrap().clone();
+    if dir.exists() {
+        if !dir.is_dir() {
+            bail!("output directory is not a directory");
+        }
+    } else {
+        std::fs::create_dir(&dir)?;
+    }
+    Ok(dir)
+}
+
 pub fn respack_dir() -> Result<PathBuf> {
     let dir = CONFIG_DIR.get().unwrap().join("respack");
     if dir.exists() {

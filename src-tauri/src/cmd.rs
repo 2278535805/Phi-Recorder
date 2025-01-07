@@ -28,7 +28,7 @@ use std::{
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
 use crate::{
-    common::{output_dir, ensure_dir, DATA_DIR, CONFIG_DIR},
+    common::{output_dir, no_output_dir, ensure_dir, DATA_DIR},
     //render::{IPCEvent, RenderParams},
     //ASSET_PATH,
 };
@@ -226,31 +226,31 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 }
 
 pub async fn main() -> Result<()> {
-    //env_logger::init();
     let loading_time = Instant::now();
     //use crate::ipc::client::*;
 
     //set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     init_assets();
 
-    CONFIG_DIR
-        .set(ensure_dir(std::env::current_dir().unwrap().to_owned(),
-        ))
-        .unwrap();
-    DATA_DIR
-        .set(ensure_dir(std::env::current_dir().unwrap().to_owned(),
-        ))
-        .unwrap();
+    #[cfg(target_os = "windows")]
+    {
+        let app_data_dir = std::env::var("APPDATA").unwrap(); 
+        let data_dir = PathBuf::from(app_data_dir).join("com.hlmc.phigros.recorder");
+        DATA_DIR
+            .set(ensure_dir(data_dir.clone()))
+            .unwrap();
+    }
+    
+    #[cfg(not(target_os = "windows"))]
+    {
+        CONFIG_DIR
+            .set(ensure_dir(std::env::current_dir().unwrap().to_owned()))
+            .unwrap();
+        DATA_DIR
+            .set(ensure_dir(std::env::current_dir().unwrap().to_owned()))
+            .unwrap();
+    }
 
-    //let asset_dir = std::env::current_exe()?.parent().resolve_resource("assets").unwrap();
-    //ASSET_PATH.set(asset_dir.clone()).unwrap();
-
-    //let mut stdin = std::io::stdin().lock();
-    //let stdin = &mut stdin;
-
-    //let mut line = String::new();
-    //stdin.read_line(&mut line)?;
-    //let params: RenderParams = serde_json::from_str(line.trim())?;
     let mut config =
             match (|| -> Result<RenderConfig> { Ok(serde_yaml::from_str(&std::fs::read_to_string("config.yml").context("error reading config")?)?) })() {
                 Err(err) => {
@@ -275,10 +275,21 @@ pub async fn main() -> Result<()> {
         .collect();
     let format = if config.hires {"mov"} else {"mp4"};
 
-    let output_path = output_dir()?.join(format!(
-        "{} {safe_name}_{level}.{format}",
-        Local::now().format("%Y-%m-%d %H-%M-%S")
-    ));
+        
+    let output_path = if std::env::args().len() > 3 {
+        let app_data_dir = std::env::args().nth(3).unwrap(); 
+        let output_dir = PathBuf::from(app_data_dir);
+        info!("output dir: {:?}", output_dir);
+        no_output_dir(output_dir)?.join(format!(
+            "{} {safe_name}_{level}.{format}",
+            Local::now().format("%Y-%m-%d %H-%M-%S")
+        ))
+    } else {
+        output_dir()?.join(format!(
+            "{} {safe_name}_{level}.{format}",
+            Local::now().format("%Y-%m-%d %H-%M-%S")
+        ))
+    };
 
 
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
