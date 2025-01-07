@@ -542,6 +542,15 @@ pub struct RPEChartInfo {
     modified: SystemTime,
 }
 
+fn remove_verbatim_prefix(path: &PathBuf) -> PathBuf {
+    let path_str = path.to_str().unwrap_or("");
+    if path_str.starts_with(r"\\?\") {
+        PathBuf::from(&path_str[4..])
+    } else {
+        path.to_path_buf()
+    }
+}
+
 #[tauri::command]
 fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
     (|| {
@@ -554,7 +563,7 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
         }
         std::fs::write(
             CONFIG_DIR.get().unwrap().join("rpe_path.txt"),
-            path.canonicalize()?.display().to_string().as_bytes(),
+            remove_verbatim_prefix(&path.canonicalize()?).display().to_string().as_bytes(),
         )?;
         Ok(())
     })()
