@@ -128,14 +128,15 @@ async fn main() -> Result<()> {
                 let args = std::env::args().nth(1).unwrap_or_default();
                 let path = Path::new(&args);
                 if path.is_file() && (args.contains(".pez") || args.contains(".zip")) || path.is_dir() {
-                    info!("Find a valid path, send to render");
-                    Command::new(std::env::current_exe()?)
+                    println!("Find a valid path, send to render");
+                    let mut child = Command::new(std::env::current_exe()?)
                         .arg("--render")
                         .arg(args)
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())
                         .spawn()?;
-                    std::process::exit(0);
+                    let status = child.wait().await?;
+                    std::process::exit(status.code().unwrap_or_default());
                 } else {
                     std::process::exit(1);
                 }
