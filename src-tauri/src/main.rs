@@ -83,7 +83,7 @@ async fn run_wrapped(f: impl Future<Output = Result<()>>) -> ! {
 }
 
 fn hide_cmd() {
-    #[cfg(target_os = "windows")]
+    #[cfg(all(target_os = "windows", not(debug_assertions)))]
     {
         unsafe { winapi::um::wincon::FreeConsole() };
     }
