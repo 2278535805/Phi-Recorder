@@ -13,7 +13,7 @@ mod cmd;
 use anyhow::{bail, Context, Result};
 use common::{ensure_dir, respack_dir, output_dir, CONFIG_DIR, DATA_DIR};
 use fs4::tokio::AsyncFileExt;
-use macroquad::{miniquad::conf::Icon, prelude::{set_pc_assets_folder, warn}};
+use macroquad::{miniquad::conf::Icon, prelude::set_pc_assets_folder};
 use prpr::{
     fs::{self, FileSystem},
     info::ChartInfo,
