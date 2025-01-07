@@ -75,7 +75,6 @@ pub struct RenderConfig {
     combo: String,
     difficulty: String,
     phira_mode: bool,
-    autoplay: bool,
 }
 
 impl RenderConfig {
@@ -108,7 +107,6 @@ impl RenderConfig {
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
             phira_mode: self.phira_mode,
-            autoplay: Some(self.autoplay),
             ..Default::default()
         }
     }
@@ -151,7 +149,6 @@ impl RenderConfig {
             phira_mode: false,
             player_avatar: None,
             compression_ratio: 100.,
-            autoplay: true,
         }
     }
 }
@@ -261,8 +258,8 @@ pub async fn main() -> Result<()> {
                 }
                 Ok(config) => config,
             };
-        let mut prpr_config = config.to_config();
-        if config.autoplay { prpr_config.mods = Mods::AUTOPLAY; }
+    let mut prpr_config = config.to_config();
+    prpr_config.mods = Mods::AUTOPLAY;
     let path = std::env::args().nth(2).unwrap();
 
 
