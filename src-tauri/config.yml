@@ -33,4 +33,5 @@ combo: AUTOPLAY
 difficulty: 
 phiraMode: false
 playerAvatar: 
-compressionRatio: 100.
+compressionRatio: 100.0
+judgeOffset: 0.0

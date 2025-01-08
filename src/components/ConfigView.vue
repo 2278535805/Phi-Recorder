@@ -74,6 +74,7 @@ en:
   offset: Offset
   phiraMode: Phira Features
   phiraMode-tips: Hold cover using head position
+  judgeOffset: Judge Offset
 
   presets: Presets
   preset-refresh: Refresh
@@ -162,6 +163,7 @@ zh-CN:
   offset: 延时
   phiraMode: Phira模式
   phiraMode-tips: Hold 遮罩使用头部位置
+  judgeOffset: 判定偏移
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -301,6 +303,7 @@ const chinese = ref(false)
 const combo = ref('AUTOPLAY')
 const difficulty = ref('')
 const phiraMode = ref(false)
+const judgeOffset = ref('0')
 //const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
@@ -352,6 +355,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     combo: combo.value,
     difficulty: difficulty.value,
     phiraMode: phiraMode.value,
+    judgeOffset: parseInt(judgeOffset.value) / 1000,
   };
 }
 
@@ -413,6 +417,7 @@ function applyConfig(config: RenderConfig) {
   combo.value = config.combo;
   difficulty.value = config.difficulty;
   phiraMode.value = config.phiraMode;
+  judgeOffset.value = String(config.judgeOffset * 1000);
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -454,6 +459,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   combo: 'AUTOPLAY',
   difficulty: '',
   phiraMode: false,
+  judgeOffset: 0,
 };
 interface Preset {
   name: string;
@@ -711,6 +717,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('phiraMode')" :tooltip="t('phiraMode-tips')" v-model="phiraMode"></TipSwitch>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" :rules="[RULES.int]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

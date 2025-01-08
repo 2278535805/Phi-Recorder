@@ -69,6 +69,7 @@ pub struct RenderConfig {
     combo: String,
     difficulty: String,
     phira_mode: bool,
+    judge_offset: f32,
 }
 
 impl RenderConfig {
@@ -102,6 +103,7 @@ impl RenderConfig {
             difficulty: self.difficulty.clone(),
             phira_mode: self.phira_mode,
             disable_audio: false,
+            judge_offset: self.judge_offset,
             ..Default::default()
         }
     }
@@ -341,7 +343,7 @@ pub async fn main() -> Result<()> {
 
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
-        let offset = offset as f64;
+        let offset = offset as f64 + params.config.judge_offset as f64;
         for line in &chart.lines {
             for note in &line.notes {
                 if !note.fake {

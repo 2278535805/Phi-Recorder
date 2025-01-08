@@ -89,6 +89,7 @@ export interface RenderConfig {
   combo: string;
   difficulty: string;
   phiraMode: boolean;
+  judgeOffset: number;
 }
 
 export interface RPEChart {
