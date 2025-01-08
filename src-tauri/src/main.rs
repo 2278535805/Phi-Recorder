@@ -117,15 +117,12 @@ async fn main() -> Result<()> {
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref() {
             Some("render") => {
-                hide_cmd();
                 run_wrapped(render::main()).await;
             }
             Some("preview") | Some("play") => {
-                hide_cmd();
                 run_wrapped(preview::main()).await;
             }
             Some("tweakoffset") => {
-                hide_cmd();
                 run_wrapped(preview::tweakoffset()).await;
             }
             Some("--render") => {
@@ -133,7 +130,6 @@ async fn main() -> Result<()> {
             }
             cmd => {
                 eprintln!("Unknown subcommand: {cmd:?}");
-                //warn!("Try to parse...");
                 let args = std::env::args().nth(1).unwrap_or_default();
                 let path = Path::new(&args);
                 if path.is_file() && (args.contains(".pez") || args.contains(".zip")) || path.is_dir() {
@@ -440,14 +436,14 @@ async fn parse_chart(path: &Path) -> Result<ChartInfo, InvokeError> {
 
 pub fn cmd_hidden(program: impl AsRef<std::ffi::OsStr>) -> Command {
     let cmd = tokio::process::Command::new(program);
-    #[cfg(target_os = "windows")]
+    /*#[cfg(target_os = "windows")] // Without terminal, there is no log
     {
         let mut cmd = cmd;
         #[cfg(not(debug_assertions))]
         cmd.creation_flags(0x08000000);
         cmd
     }
-    #[cfg(not(target_os = "windows"))]
+    #[cfg(not(target_os = "windows"))]*/
     cmd
 }
 

@@ -166,7 +166,8 @@ impl Task {
                         .unwrap_or_else(|_| "Invalid output".to_owned());
                     *self.status.lock().await = TaskStatus::Done {
                         duration,
-                        output: format!("[STDOUT]\n{stdout}\n\n[STDERR]\n{stderr}"),
+                        //output: format!("[STDOUT]\n{stdout}\n\n[STDERR]\n{stderr}"),
+                        output: format!("{stdout}\n{stderr}"),
                     };
                     return Ok(());
                 }
@@ -182,8 +183,9 @@ impl Task {
         if !output.status.success() {
             *self.status.lock().await = TaskStatus::Failed {
                 error: format!(
-                    "Child process exited abnormally ({:?})\n\n{}",
-                    output.status.code(),
+                    "Child process exited abnormally ({:?})\n{}\n{}",
+                    output.status.code().unwrap_or_default(),
+                    String::from_utf8(output.stdout)?,
                     String::from_utf8(output.stderr)?
                 ),
             };
