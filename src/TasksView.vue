@@ -20,6 +20,7 @@ en:
 
   show-output: Show Output
   show-in-folder: Show in Folder
+  open-file: Open File
   duration: 
     hours: h
     minutes: m
@@ -32,7 +33,7 @@ zh-CN:
     pending: 等待中…
     loading: 加载中…
     mixing: 混音中…
-    rendering: 渲染中（{ progress }%），{ fps } FPS，预计 { estimate } 结束
+    rendering: 渲染中 ({ progress }%), { fps } FPS, 预计 { estimate } 结束
     done: 已完成，耗时 { duration }
     canceled: 已取消
     failed: 失败
@@ -46,6 +47,7 @@ zh-CN:
 
   show-output: 查看输出
   show-in-folder: 在文件夹中显示
+  open-file: 打开文件
   
   duration: 
     hours: 时
@@ -138,6 +140,14 @@ async function showInFolder(path: string) {
   }
 }
 
+async function openFile(path: string) {
+  try {
+    await invoke('open_file', { path });
+  } catch (e) {
+    toastError(e);
+  }
+}
+
 async function showFolder() {
   try {
     await invoke('show_folder');
@@ -191,6 +201,7 @@ async function showFolder() {
                 v-t="'details'"></v-btn>
             </div>
             <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
+              <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'"></v-btn>
               <v-btn
                 variant="text"
                 @click="

@@ -168,6 +168,7 @@ async fn main() -> Result<()> {
             exit_program,
             show_folder,
             show_in_folder,
+            open_file,
             preview_chart,
             preview_tweakoffset,
             preview_play,
@@ -381,6 +382,45 @@ fn show_in_folder(path: &Path) -> Result<(), InvokeError> {
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+fn open_file(path: &Path) -> Result<(), InvokeError> {
+    let result = (move || {
+        println!("Opening file: {}", path.display());
+
+        #[cfg(target_os = "windows")]
+        {
+            Command::new("explorer")
+                .arg(path)
+                .spawn()?;
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            Command::new("open")
+                .arg(path)
+                .spawn()?;
+        }
+
+        #[cfg(target_os = "linux")]
+        {
+            Command::new("gdbus")
+                .args(&[
+                    "call",
+                    "--session",
+                    "--dest=org.freedesktop.portal.Desktop",
+                    "--object-path=/org/freedesktop/portal/desktop",
+                    "--method=org.freedesktop.portal.OpenURI.OpenFile",
+                    &format!("'file://{}'", path.to_str().unwrap())
+                ])
+                .spawn()?;
+        }
+
+        Ok(())
+    })();
+    
+    result.map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]
