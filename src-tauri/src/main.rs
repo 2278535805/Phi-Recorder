@@ -334,7 +334,9 @@ fn exit_program() {
 #[tauri::command]
 fn show_folder() -> Result<(), InvokeError> {
     (|| {
-        open::that_detached(output_dir().unwrap())?;
+        let path = output_dir().unwrap();
+        println!("Opening output folder: {}", path.display());
+        open::that_detached(path)?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
@@ -343,6 +345,7 @@ fn show_folder() -> Result<(), InvokeError> {
 #[tauri::command]
 fn show_in_folder(path: &Path) -> Result<(), InvokeError> {
     (move || {
+        println!("Show in folder: {}", path.display());
         #[cfg(target_os = "windows")]
         {
             Command::new("explorer")
@@ -520,7 +523,9 @@ fn get_respacks() -> Result<Vec<RespackInfo>, InvokeError> {
 #[tauri::command]
 fn open_respack_folder() -> Result<(), InvokeError> {
     (|| {
-        open::that_detached(respack_dir()?)?;
+        let path = respack_dir()?;
+        println!("Opening respack folder: {}", path.display());
+        open::that_detached(path)?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
@@ -621,8 +626,10 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
         {
             bail!(mtl!("not-valid-rpe"));
         }
+        let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+        println!("Create {}", file.display());
         std::fs::write(
-            CONFIG_DIR.get().unwrap().join("rpe_path.txt"),
+            file,
             remove_verbatim_prefix(&path.canonicalize()?).display().to_string().as_bytes(),
         )?;
         Ok(())
@@ -633,7 +640,9 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
 #[tauri::command]
 fn unset_rpe_dir() -> Result<(), InvokeError> {
     (|| {
-        std::fs::remove_file(CONFIG_DIR.get().unwrap().join("rpe_path.txt"))?;
+        let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+        println!("Delete {}", file.display());
+        std::fs::remove_file(file)?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
@@ -671,7 +680,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
         }
 
         if dir.join("Chartlist.txt").exists() {
-            //println!("Found Chartlist.txt");
+            println!("Reading Chartlist.txt");
             for line in BufReader::new(File::open(dir.join("Chartlist.txt"))?).lines() {
                 let line = line?;
                 let line = line.trim();
@@ -691,10 +700,13 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                     "Charter" => &mut charter,
                     _ => continue,
                 }) = Some(value.trim().to_owned());
+                if key == "Name" {
+                    println!("Found {}", value);
+                }
             }
             commit!();
         } else {
-            //println!("Not found Chartlist.txt, start reading folder");
+            println!("Not found Chartlist.txt, start reading folder");
             use tauri::regex::Regex;
             let onely_num = Regex::new(r"^\d+$").unwrap();
             let mut folders = Vec::new();
@@ -711,8 +723,9 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                 }
             }
             for folder in folders {
-                println!("Found numeric folder: {:?}", folder);
+                println!("Found chart folder: {}", folder.display());
                 if !folder.join("info.txt").exists() {
+                    println!("Not found info.txt, skip");
                     continue;
                 }
                 for line in BufReader::new(File::open(folder.join("info.txt"))?).lines() {
@@ -734,7 +747,9 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                         "Charter" => &mut charter,
                         _ => continue,
                     }) = Some(value.trim().to_owned());
-                    //println!("Found {} {}", key, value);
+                    if key == "Name" {
+                        println!("Found {}", value);
+                    }
                 }
                 commit!();
             }
@@ -756,7 +771,10 @@ fn test_ffmpeg() -> Result<bool, InvokeError> {
 #[tauri::command]
 fn open_app_folder() -> Result<(), InvokeError> {
     (|| {
-        open::that_detached(std::env::current_exe()?.parent().unwrap())?;
+        let exe_path = std::env::current_exe()?;
+        let path = exe_path.parent().unwrap();
+        println!("Opening current exe folder: {}", path.display());
+        open::that_detached(path)?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
