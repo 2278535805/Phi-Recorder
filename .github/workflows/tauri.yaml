@@ -48,7 +48,8 @@ jobs:
         uses: suisei-cn/actions-download-file@v1.3.0
         id: downlod-static-lib
         with:
-          url: "https://files-cf.phira.cn/prpr-avc-static-lib.tar.gz"
+          # url: "https://files-cf.phira.cn/prpr-avc-static-lib.tar.gz"
+          url: "https://raw.githubusercontent.com/2278535805/Phi-Recorder/main/prpr-avc-static-lib.tar.gz"
           target: ./
 
       - name: Mkdir static-lib
