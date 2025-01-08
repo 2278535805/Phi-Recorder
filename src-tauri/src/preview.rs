@@ -67,7 +67,9 @@ pub async fn main() -> Result<()> {
     let fs = fs::fs_from_file(&params.path)?;
     let info = params.info;
     let mut config: Config = params.config.to_config();
-    config.mods |= Mods::AUTOPLAY;
+    if std::env::args().nth(1).as_deref() == Some("preview") {
+        config.mods |= Mods::AUTOPLAY;
+    }
 
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);

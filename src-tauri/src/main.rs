@@ -68,7 +68,7 @@ pub fn build_conf() -> macroquad::window::Conf {
         }),
         headless: !matches!(
             std::env::args().skip(1).next().as_deref(),
-            Some("preview") | Some("tweakoffset")
+            Some("preview") | Some("tweakoffset") | Some("play")
         ),
         ..Default::default()
     }
@@ -120,7 +120,7 @@ async fn main() -> Result<()> {
                 hide_cmd();
                 run_wrapped(render::main()).await;
             }
-            Some("preview") => {
+            Some("preview") | Some("play") => {
                 hide_cmd();
                 run_wrapped(preview::main()).await;
             }
@@ -170,6 +170,7 @@ async fn main() -> Result<()> {
             show_in_folder,
             preview_chart,
             preview_tweakoffset,
+            preview_play,
             parse_chart,
             post_render,
             get_tasks,
@@ -433,6 +434,27 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("tweakoffset")
+            .arg(ASSET_PATH.get().unwrap())
+            .stdin(Stdio::piped())
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn()?;
+
+        let mut stdin = child.stdin.take().unwrap();
+        let info = format!("{}\n", serde_json::to_string(&params)?);
+        stdin
+            .write_all(info.as_bytes())
+            .await?;
+        Ok(())
+    })
+    .await
+}
+
+#[tauri::command]
+async fn preview_play(params: RenderParams) -> Result<(), InvokeError> {
+    wrap_async(async move {
+        let mut child = cmd_hidden(std::env::current_exe()?)
+            .arg("play")
             .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
             .stdout(Stdio::inherit())

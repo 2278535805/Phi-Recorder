@@ -41,6 +41,7 @@ en:
   tweakoffset: Tweak Offset
   preview: Preview
   render: Render
+  play: Play
 
   render-started: Rendering has started!
   see-tasks: See tasks
@@ -84,6 +85,7 @@ zh-CN:
   tweakoffset: 调整延时
   preview: 预览
   render: 渲染
+  play: 游玩
 
   render-started: 视频已开始渲染！
   see-tasks: 查看任务列表
@@ -261,6 +263,18 @@ async function previewTweakoffset() {
   }
 }
 
+async function previewPlay() {
+  try {
+    let params = await buildParams();
+    if (!params) return false;
+    await invoke('preview_play', { params });
+    return true;
+  } catch (e) {
+    toastError(e);
+    return false;
+  }
+}
+
 const renderMsg = ref(''),
   renderProgress = ref<number>(),
   renderDuration = ref<number>();
@@ -321,6 +335,7 @@ function tryParseAspect(): number | undefined {
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn variant="text" @click="stepIndex && stepIndex--" v-t="'prev-step'"></v-btn>
         <div class="flex-grow-1"></div>
+        <v-btn v-if="step === 'options'" variant="tonal" @click="previewPlay" class="mr-2" v-t="'play'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewChart" class="mr-2" v-t="'preview'"></v-btn>
         <v-btn variant="tonal" @click="moveNext">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
