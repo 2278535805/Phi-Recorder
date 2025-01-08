@@ -284,7 +284,7 @@ pub async fn main() -> Result<()> {
     if volume_music != 0.0 {
         let music_time = Instant::now();
         let pos = o - chart.offset.min(0.) as f64;
-        let len = ((music.length() as f64 + 1. + a) * sample_rate_f64) as usize;
+        let len = ((music.length() as f64 + 1. + a + params.config.ending_length) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
         for i in 0..len {
