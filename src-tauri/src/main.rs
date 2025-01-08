@@ -88,11 +88,11 @@ fn hide_cmd() {
         //unsafe { winapi::um::wincon::FreeConsole() };
         unsafe {
             use std::ptr::null_mut;
-            use winapi::um::winuser::{ShowWindow, SW_HIDE};
+            use winapi::um::winuser::{ShowWindow, SW_HIDE, SW_MINIMIZE};
             use winapi::um::wincon::GetConsoleWindow;
             let console_window = GetConsoleWindow();
             if console_window != null_mut() {
-                ShowWindow(console_window, SW_HIDE);
+                ShowWindow(console_window, SW_MINIMIZE);
             }
         }
     }
