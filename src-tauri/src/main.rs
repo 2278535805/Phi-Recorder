@@ -582,7 +582,7 @@ pub struct RPEChartInfo {
 
 fn remove_verbatim_prefix(path: &PathBuf) -> PathBuf {
     let path_str = path.to_str().unwrap_or("");
-    if path_str.starts_with(r"\\?\") {
+    if path_str.starts_with(r"\\?\") && path_str.len() < 260 {
         PathBuf::from(&path_str[4..])
     } else {
         path.to_path_buf()
@@ -649,6 +649,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
         }
 
         if dir.join("Chartlist.txt").exists() {
+            //println!("Found Chartlist.txt");
             for line in BufReader::new(File::open(dir.join("Chartlist.txt"))?).lines() {
                 let line = line?;
                 let line = line.trim();
@@ -671,6 +672,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
             }
             commit!();
         } else {
+            //println!("Not found Chartlist.txt, start reading folder");
             use tauri::regex::Regex;
             let onely_num = Regex::new(r"^\d+$").unwrap();
             let mut folders = Vec::new();
@@ -707,6 +709,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                         "Charter" => &mut charter,
                         _ => continue,
                     }) = Some(value.trim().to_owned());
+                    //println!("Found {} {}", key, value);
                 }
                 commit!();
             }
