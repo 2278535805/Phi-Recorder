@@ -712,6 +712,9 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
             }
             for folder in folders {
                 println!("Found numeric folder: {:?}", folder);
+                if !folder.join("info.txt").exists() {
+                    continue;
+                }
                 for line in BufReader::new(File::open(folder.join("info.txt"))?).lines() {
                     let line = line?;
                     let line = line.trim();
