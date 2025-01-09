@@ -58,7 +58,9 @@ en:
 
   volume-music: Music Volume
   volume-sfx: SFX Volume
-  compression-ratio: SFX Compression Ratio
+  compression-ratio: SFX Comp Ratio
+  force-limit: Force Limit
+  limit-threshold: Max SFX Volume
 
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
@@ -148,6 +150,8 @@ zh-CN:
   volume-music: 音乐音量
   volume-sfx: 音效音量
   compression-ratio: 音效压缩比
+  limit-threshold: 最大音效音量
+  force-limit: 强制限幅
 
   ending-length: 结算画面时长
   disable-loading: 禁用加载
@@ -288,7 +292,9 @@ const doubleHint = ref(true),
 
 const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
-  compressionRatio = ref(100.0);
+  compressionRatio = ref(100.0),
+  forceLilit = ref(false),
+  limitThreshold = ref(1.0);
 
 const endingLength = ref('0.0');
 
@@ -348,6 +354,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     compressionRatio: compressionRatio.value,
+    forceLilit: forceLilit.value,
+    limitThreshold: limitThreshold.value,
     allGood: allGood.value,
     watermark: watermark.value,
     roman: roman.value,
@@ -411,6 +419,8 @@ function applyConfig(config: RenderConfig) {
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
+  forceLilit.value = config.forceLilit;
+  limitThreshold.value = config.limitThreshold;
   watermark.value = config.watermark;
   roman.value = config.roman;
   chinese.value = config.chinese;
@@ -453,6 +463,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   volumeMusic: 1.0,
   volumeSfx: 0.7,
   compressionRatio: 100.0,
+  forceLilit: false,
+  limitThreshold: 1.0,
   watermark: '',
   roman: false,
   chinese: false,
@@ -666,14 +678,18 @@ async function replacePreset() {
     <div class="mt-2">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
-        <v-col cols="4">
+        <v-col cols="3">
           <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeMusic"> </v-slider>
         </v-col>
-        <v-col cols="4">
+        <v-col cols="3">
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
-        <v-col cols="4">
-          <v-slider :label="t('compression-ratio')" thumb-label="always" :min="1" :max="100" :step="0.1" v-model="compressionRatio"> </v-slider>
+        <v-col cols="3">
+          <v-slider  v-if="forceLilit === false" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider  v-if="forceLilit === true" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('force-lilit')" class="mt-n5" v-model="forceLilit"></TipSwitch>
         </v-col>
       </v-row>
     </div>

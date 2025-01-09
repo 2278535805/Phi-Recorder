@@ -69,6 +69,8 @@ pub struct RenderConfig {
     volume_music: f32,
     volume_sfx: f32,
     compression_ratio: f32,
+    force_limit: bool,
+    limit_threshold: f32,
     watermark: String,
     roman: bool,
     chinese: bool,
@@ -141,6 +143,9 @@ impl RenderConfig {
             speed: 1.0,
             volume_music: 1.0,
             volume_sfx: 0.7,
+            compression_ratio: 100.,
+            force_limit: false,
+            limit_threshold: 1.0,
             chart_debug: false,
             chart_ratio: 1.0,
             all_good: false,
@@ -151,7 +156,6 @@ impl RenderConfig {
             difficulty: "".to_string(),
             phira_mode: false,
             player_avatar: None,
-            compression_ratio: 100.,
             judge_offset: 0.,
         }
     }
@@ -451,19 +455,15 @@ pub async fn main() -> Result<()> {
     
         {
             let mixing_time = Instant::now();
-            if config.compression_ratio > 1. && config.compression_ratio < 100. {
+            if config.force_limit {
+                for i in 0..output2.len() {
+                    output2[i] = output2[i].max(-config.limit_threshold).min(config.limit_threshold);
+                }
+            } else if config.compression_ratio > 1. {
                 for i in 0..output2.len() {
                     output2[i] = apply_compressor(output2[i], threshold, config.compression_ratio, attack_coeff, release_coeff, &mut gain_reduction);
                 }
-            } else if config.compression_ratio >= 100. {
-                for i in 0..output2.len() {
-                    if output2[i] > threshold {
-                        output2[i] = threshold;
-                    } else if output2[i] < -threshold {
-                        output2[i] = -threshold;
-                    }
-                }            
-            }
+            } 
     
             for i in 0..output2.len() {
                 output[i * 2] += output2[i];

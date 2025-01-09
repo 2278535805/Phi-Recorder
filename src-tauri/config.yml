@@ -23,6 +23,9 @@ res_pack_path: None
 speed: 1.0
 volumeMusic: 1.0
 volumeSfx: 0.7
+compressionRatio: 100.0
+forceLimit: false
+limitThreshold: 1.0
 chartDebug: false
 chartRatio: 1.0
 allGood: false
@@ -33,5 +36,4 @@ combo: AUTOPLAY
 difficulty: 
 phiraMode: false
 playerAvatar: 
-compressionRatio: 100.0
 judgeOffset: 0.0

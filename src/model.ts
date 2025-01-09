@@ -90,6 +90,8 @@ export interface RenderConfig {
   difficulty: string;
   phiraMode: boolean;
   judgeOffset: number;
+  forceLilit: boolean;
+  limitThreshold: number;
 }
 
 export interface RPEChart {

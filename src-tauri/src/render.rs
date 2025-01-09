@@ -63,6 +63,8 @@ pub struct RenderConfig {
     volume_music: f32,
     volume_sfx: f32,
     compression_ratio: f32,
+    force_limit: bool,
+    limit_threshold: f32,
     watermark: String,
     roman: bool,
     chinese: bool,
@@ -362,19 +364,15 @@ pub async fn main() -> Result<()> {
 
     {
         let mixing_time = Instant::now();
-        if params.config.compression_ratio > 1. && params.config.compression_ratio < 100. {
+        if params.config.force_limit {
+            for i in 0..output2.len() {
+                output2[i] = output2[i].max(-params.config.limit_threshold).min(params.config.limit_threshold);
+            }
+        } else if params.config.compression_ratio > 1. {
             for i in 0..output2.len() {
                 output2[i] = apply_compressor(output2[i], threshold, params.config.compression_ratio, attack_coeff, release_coeff, &mut gain_reduction);
             }
-        } else if params.config.compression_ratio >= 100. {
-            for i in 0..output2.len() {
-                if output2[i] > threshold {
-                    output2[i] = threshold;
-                } else if output2[i] < -threshold {
-                    output2[i] = -threshold;
-                }
-            }            
-        }
+        } 
 
         for i in 0..output2.len() {
             output[i * 2] += output2[i];
