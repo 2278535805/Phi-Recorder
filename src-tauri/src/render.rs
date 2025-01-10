@@ -510,7 +510,9 @@ pub async fn main(cmd: bool) -> Result<()> {
                             NoteKind::Drag => &sfx_drag,
                             NoteKind::Flick => &sfx_flick,
                         };
-                        place(o + note.time as f64 + offset, sfx, volume_sfx);
+                        if !matches!(note.kind, NoteKind::Click) {
+                            place(o + note.time as f64 + offset, sfx, volume_sfx);
+                        }
                     }
                 }
             }
@@ -523,9 +525,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                             NoteKind::Drag => &sfx_drag,
                             NoteKind::Flick => &sfx_flick,
                         };
-                        if !matches!(note.kind, NoteKind::Click) {
-                            place(o + note.time as f64 + offset, sfx, volume_sfx);
-                        }
+                        place(o + note.time as f64 + offset, sfx, volume_sfx);
                     }
                 }
             }
