@@ -8,7 +8,6 @@ mod ipc;
 mod preview;
 mod render;
 mod task;
-mod cmd;
 
 use anyhow::{bail, Context, Result};
 use common::{ensure_dir, respack_dir, output_dir, CONFIG_DIR, DATA_DIR};
@@ -117,7 +116,7 @@ async fn main() -> Result<()> {
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref() {
             Some("render") => {
-                run_wrapped(render::main()).await;
+                run_wrapped(render::main(false)).await;
             }
             Some("preview") | Some("play") => {
                 run_wrapped(preview::main()).await;
@@ -126,7 +125,7 @@ async fn main() -> Result<()> {
                 run_wrapped(preview::tweakoffset()).await;
             }
             Some("--render") => {
-                run_wrapped(cmd::main()).await;
+                run_wrapped(render::main(true)).await;
             }
             cmd => {
                 eprintln!("Unknown subcommand: {cmd:?}");
