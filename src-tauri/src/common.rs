@@ -27,7 +27,7 @@ pub fn output_dir() -> Result<PathBuf> {
     Ok(dir)
 }
 
-pub fn no_output_dir(dir: PathBuf) -> Result<PathBuf> {
+pub fn let_output_dir(dir: PathBuf) -> Result<PathBuf> {
     //let dir = DATA_DIR.get().unwrap().clone();
     if dir.exists() {
         if !dir.is_dir() {

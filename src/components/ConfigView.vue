@@ -293,7 +293,7 @@ const doubleHint = ref(true),
 const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
   compressionRatio = ref(100.0),
-  forceLimit = ref(false),
+  forceLimit = ref(true),
   limitThreshold = ref(1.0);
 
 const endingLength = ref('0.0');
@@ -310,6 +310,7 @@ const combo = ref('AUTOPLAY')
 const difficulty = ref('')
 const phiraMode = ref(false)
 const judgeOffset = ref('0')
+const simpleFileName = ref(false)
 //const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
@@ -364,6 +365,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     difficulty: difficulty.value,
     phiraMode: phiraMode.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
+    simpleFileName: simpleFileName.value,
   };
 }
 
@@ -462,8 +464,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
-  compressionRatio: 100.0,
-  forceLimit: false,
+  compressionRatio: 30.0,
+  forceLimit: true,
   limitThreshold: 1.0,
   watermark: '',
   roman: false,
@@ -472,6 +474,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   difficulty: '',
   phiraMode: false,
   judgeOffset: 0,
+  simpleFileName: false,
 };
 interface Preset {
   name: string;

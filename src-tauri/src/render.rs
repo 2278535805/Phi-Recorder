@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 prpr::tl_file!("render");
 
-use crate::common::{ensure_dir, no_output_dir, output_dir, DATA_DIR};
+use crate::common::{ensure_dir, let_output_dir, output_dir, DATA_DIR};
 use chrono::Local;
 use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::GLuint, prelude::*};
@@ -74,6 +74,7 @@ pub struct RenderConfig {
     difficulty: String,
     phira_mode: bool,
     judge_offset: f32,
+    simple_file_name: bool,
 }
 
 impl RenderConfig {
@@ -153,6 +154,7 @@ impl RenderConfig {
             phira_mode: false,
             player_avatar: None,
             judge_offset: 0.,
+            simple_file_name: false,
         }
     }
 }
@@ -280,19 +282,23 @@ pub async fn main(cmd: bool) -> Result<()> {
             .collect();
         let format = if config.hires { "mov" } else { "mp4" };
 
-        let output_path = if std::env::args().len() > 3 {
-            let app_data_dir = std::env::args().nth(3).unwrap();
-            let output_dir = PathBuf::from(app_data_dir);
-            info!("output dir: {:?}", output_dir);
-            no_output_dir(output_dir)?.join(format!(
-                "{} {safe_name}_{level}.{format}",
-                Local::now().format("%Y-%m-%d %H-%M-%S")
-            ))
+        let file_name = if config.simple_file_name {
+            format!(
+                "{safe_name}_{level}.{format}"
+            )
         } else {
-            output_dir()?.join(format!(
+            format!(
                 "{} {safe_name}_{level}.{format}",
                 Local::now().format("%Y-%m-%d %H-%M-%S")
-            ))
+            )
+        };
+        let output_path = if std::env::args().len() > 3 {
+            let dir = std::env::args().nth(3).unwrap();
+            let output_dir = PathBuf::from(dir);
+            info!("output dir: {:?}", output_dir);
+            let_output_dir(output_dir)?.join(file_name)
+        } else {
+            output_dir()?.join(file_name)
         };
 
         (fs, output_path, config, info)

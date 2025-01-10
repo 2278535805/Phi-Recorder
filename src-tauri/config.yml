@@ -1,31 +1,36 @@
 resolution: [1920, 1080]
 ffmpegPreset: medium
-endingLength: 5.0
-disableLoading: false
-hires: true
+endingLength: 0.0
+disableLoading: true
 fps: 60
 hardwareAccel: true
 hevc: false
 bitrateControl: CRF
 bitrate: 26
 aggressive: true
-challengeColor: rainbow
-challengeRank: 45
+
 disableEffect: false
 doubleHint: true
 fxaa: false
 noteScale: 1.0
 particle: true
+
+challengeColor: rainbow
+challengeRank: 45
 playerName: HLMC
 playerRks: 16.0
+playerAvatar: 
 sampleCount: 2
-res_pack_path: None
+res_pack_path: 
 speed: 1.0
+
+hires: true
 volumeMusic: 1.0
 volumeSfx: 0.7
-compressionRatio: 100.0
-forceLimit: false
+compressionRatio: 30.0
+forceLimit: true
 limitThreshold: 1.0
+
 chartDebug: false
 chartRatio: 1.0
 allGood: false
@@ -35,5 +40,5 @@ chinese: false
 combo: AUTOPLAY
 difficulty: 
 phiraMode: false
-playerAvatar: 
 judgeOffset: 0.0
+simpleFileName: false

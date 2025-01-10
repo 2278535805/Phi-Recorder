@@ -92,6 +92,7 @@ export interface RenderConfig {
   judgeOffset: number;
   forceLimit: boolean;
   limitThreshold: number;
+  simpleFileName: boolean;
 }
 
 export interface RPEChart {
