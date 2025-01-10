@@ -211,11 +211,15 @@ pub async fn main() -> Result<()> {
 
     let mut painter = TextPainter::new(font);
 
-    let mut config = params.config.to_config();
-    config.mods = Mods::AUTOPLAY;
-    config.disable_audio = true;
+    let config = params.config;
+    let info = params.info;
+    let mut prpr_config = params.config.to_config();
+    prpr_config.mods = Mods::AUTOPLAY;
+    prpr_config.disable_audio = true;
 
     let info = params.info;
+
+    //-------------split line-------------
 
     let (chart, ..) = GameScene::load_chart(fs.deref_mut(), &info)
         .await
@@ -236,8 +240,8 @@ pub async fn main() -> Result<()> {
 
     let mut gl = unsafe { get_internal_gl() };
 
-    let volume_music = std::mem::take(&mut config.volume_music);
-    let volume_sfx = std::mem::take(&mut config.volume_sfx);
+    let volume_music = config.volume_music; //std::mem::take()
+    let volume_sfx = config.volume_sfx;
 
     let o: f64 = if params.config.disable_loading {
         GameScene::BEFORE_TIME as f64
@@ -248,7 +252,7 @@ pub async fn main() -> Result<()> {
     let musica: f64 = 0.7 + 0.3 + EndingScene::BPM_WAIT_TIME;
 
     let length = track_length - chart.offset.min(0.) as f64 + 1.;
-    let video_length = o + length + a + params.config.ending_length;
+    let video_length = o + length + a + config.ending_length;
     let offset = chart.offset.max(0.);
 
     info!("Loading Resources Time:{:?}", loading_time.elapsed());
