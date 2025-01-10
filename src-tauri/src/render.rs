@@ -30,7 +30,7 @@ use std::{
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct RenderConfig {
     resolution: (u32, u32),
@@ -41,6 +41,7 @@ pub struct RenderConfig {
     chart_debug: bool,
     chart_ratio: f32,
     all_good: bool,
+    all_bad: bool,
     fps: u32,
     hardware_accel: bool,
     hevc: bool,
@@ -101,6 +102,7 @@ impl RenderConfig {
             chart_debug: self.chart_debug,
             chart_ratio: self.chart_ratio,
             all_good: self.all_good,
+            all_bad: self.all_bad,
             watermark: self.watermark.clone(),
             roman: self.roman,
             chinese: self.chinese,
@@ -146,6 +148,7 @@ impl RenderConfig {
             chart_debug: false,
             chart_ratio: 1.0,
             all_good: false,
+            all_bad: false,
             watermark: "".to_string(),
             roman: false,
             chinese: false,
@@ -498,15 +501,32 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let offset = offset as f64 + config.judge_offset as f64;
-        for line in &chart.lines {
-            for note in &line.notes {
-                if !note.fake {
-                    let sfx = match note.kind {
-                        NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
-                        NoteKind::Drag => &sfx_drag,
-                        NoteKind::Flick => &sfx_flick,
-                    };
-                    place(o + note.time as f64 + offset, sfx, volume_sfx);
+        if config.all_bad {
+            for line in &chart.lines {
+                for note in &line.notes {
+                    if !note.fake {
+                        let sfx = match note.kind { //TODO custom hit sound
+                            NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
+                            NoteKind::Drag => &sfx_drag,
+                            NoteKind::Flick => &sfx_flick,
+                        };
+                        place(o + note.time as f64 + offset, sfx, volume_sfx);
+                    }
+                }
+            }
+        } else {
+            for line in &chart.lines {
+                for note in &line.notes {
+                    if !note.fake {
+                        let sfx = match note.kind {
+                            NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
+                            NoteKind::Drag => &sfx_drag,
+                            NoteKind::Flick => &sfx_flick,
+                        };
+                        if !matches!(note.kind, NoteKind::Click) {
+                            place(o + note.time as f64 + offset, sfx, volume_sfx);
+                        }
+                    }
                 }
             }
         }

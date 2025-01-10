@@ -67,7 +67,12 @@ en:
   hires: Lossless Audio
   chart_debug: Debug Mode
   chart_ratio: Chart Zoom
+
+  judge-mode: Judge Mode
+  judge-modes: Default,Good,Bad
   all_good: Force Good judgment
+  all_bad: Force Bad judgment
+
   watermark: Watermark
   roman: Roman Mode
   chinese: Chinese Mode
@@ -158,7 +163,12 @@ zh-CN:
   hires: 无损音频
   chart_debug: 调试模式
   chart_ratio: 谱面缩放
+
+  judge-mode: 判定模式
+  judge-modes: 默认,Good,Bad
   all_good: 强制Good
+  all_bad: 强制Bad
+
   watermark: 水印
   roman: 罗马模式
   chinese: 中文模式
@@ -303,7 +313,12 @@ const hires = ref(true)
 
 const chartDebug = ref(false)
 const chartRatio = ref(1.0)
+
+const judgeMode = ref(t('judge-modes').split(',')[0])
 const allGood = ref(false)
+const allBad = ref(false)
+
+
 const roman = ref(false)
 const chinese = ref(false)
 const combo = ref('AUTOPLAY')
@@ -357,7 +372,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     compressionRatio: compressionRatio.value,
     forceLimit: forceLimit.value,
     limitThreshold: limitThreshold.value,
-    allGood: allGood.value,
+    allGood: judgeMode.value === t('judge-modes').split(',')[1] ? true : false,
+    allBad: judgeMode.value === t('judge-modes').split(',')[2] ? true : false,
     watermark: watermark.value,
     roman: roman.value,
     chinese: chinese.value,
@@ -397,7 +413,11 @@ function applyConfig(config: RenderConfig) {
   hires.value = config.hires;
   chartDebug.value = config.chartDebug;
   chartRatio.value = config.chartRatio;
-  allGood.value = config.allGood;
+  allGood.value = judgeMode.value === t('judge-modes').split(',')[1] ? true : false;
+  allBad.value = judgeMode.value === t('judge-modes').split(',')[2] ? true : false;
+  if (config.allGood) judgeMode.value = t('judge-modes').split(',')[1]
+  else if (config.allBad) judgeMode.value = t('judge-modes').split(',')[2]
+  else judgeMode.value = t('judge-modes').split(',')[0];
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
   hevc.value = config.hevc;
@@ -441,6 +461,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   chartDebug: false,
   chartRatio: 1,
   allGood: false,
+  allBad: false,
   fps: 60,
   hardwareAccel: true,
   hevc: false,
@@ -724,7 +745,8 @@ async function replacePreset() {
           <TipSwitch :label="t('hires')" v-model="hires"></TipSwitch>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>
+          <!--<TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>-->
+          <v-autocomplete class="mx-2" :label="t('judge-mode')" :items="t('judge-modes').split(',')" v-model="judgeMode" :rules="[RULES.non_empty]"></v-autocomplete>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

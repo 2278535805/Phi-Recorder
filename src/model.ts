@@ -59,6 +59,7 @@ export interface RenderConfig {
   chartDebug: boolean;
   chartRatio: number;
   allGood: boolean;
+  allBad: boolean;
   fps: number;
   hardwareAccel: boolean;
   hevc: boolean;
