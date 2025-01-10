@@ -293,7 +293,7 @@ const doubleHint = ref(true),
 const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
   compressionRatio = ref(100.0),
-  forceLilit = ref(false),
+  forceLimit = ref(false),
   limitThreshold = ref(1.0);
 
 const endingLength = ref('0.0');
@@ -354,7 +354,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     compressionRatio: compressionRatio.value,
-    forceLilit: forceLilit.value,
+    forceLimit: forceLimit.value,
     limitThreshold: limitThreshold.value,
     allGood: allGood.value,
     watermark: watermark.value,
@@ -419,7 +419,7 @@ function applyConfig(config: RenderConfig) {
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
-  forceLilit.value = config.forceLilit;
+  forceLimit.value = config.forceLilit;
   limitThreshold.value = config.limitThreshold;
   watermark.value = config.watermark;
   roman.value = config.roman;
@@ -685,11 +685,11 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="3">
-          <v-slider  v-if="forceLilit === false" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
-          <v-slider  v-if="forceLilit === true" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
+          <v-slider  v-if="forceLimit === false" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider  v-if="forceLimit === true" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('force-lilit')" class="mt-n5" v-model="forceLilit"></TipSwitch>
+          <TipSwitch :label="t('force-limit')" class="mt-n5" v-model="forceLimit"></TipSwitch>
         </v-col>
       </v-row>
     </div>

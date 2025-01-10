@@ -688,7 +688,8 @@ pub async fn main() -> Result<()> {
         let mut step_time = Instant::now();
         for frame in N as u64..frames {
             if frame % frames10 == 0 {
-                info!("Render progress: {:.0}% Time elapsed: {:.2}s", (frame as f32 / frames as f32 * 100.).ceil(), step_time.elapsed().as_secs_f32());
+                let proc = (frame as f32 / frames as f32 * 100.) as i8 / 10 * 10;
+                info!("Render progress: {:.0}% Time elapsed: {:.2}s", proc, step_time.elapsed().as_secs_f32());
                 step_time = Instant::now();
             }
             *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
