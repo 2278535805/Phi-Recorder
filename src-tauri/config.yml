@@ -34,6 +34,7 @@ limitThreshold: 1.0
 chartDebug: false
 chartRatio: 1.0
 allGood: false
+allBad: false
 watermark: 
 roman: false
 chinese: false
