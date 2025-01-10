@@ -419,7 +419,7 @@ function applyConfig(config: RenderConfig) {
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
-  forceLimit.value = config.forceLilit;
+  forceLimit.value = config.forceLimit;
   limitThreshold.value = config.limitThreshold;
   watermark.value = config.watermark;
   roman.value = config.roman;
@@ -463,7 +463,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   volumeMusic: 1.0,
   volumeSfx: 0.7,
   compressionRatio: 100.0,
-  forceLilit: false,
+  forceLimit: false,
   limitThreshold: 1.0,
   watermark: '',
   roman: false,

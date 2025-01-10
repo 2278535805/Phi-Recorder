@@ -90,7 +90,7 @@ export interface RenderConfig {
   difficulty: string;
   phiraMode: boolean;
   judgeOffset: number;
-  forceLilit: boolean;
+  forceLimit: boolean;
   limitThreshold: number;
 }
 
