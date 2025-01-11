@@ -558,6 +558,12 @@ pub async fn main(cmd: bool) -> Result<()> {
             output[i * 2] += output2[i];
             output[i * 2 + 1] += output2[i];
         }
+
+        if !config.hires {
+            for i in 0..output.len() {
+                output[i] = output[i].min(1.).max(-1.);
+            }
+        }
         info!("Mixing Time:{:.2?}", mixing_time.elapsed());
     }
 
