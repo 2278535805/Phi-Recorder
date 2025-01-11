@@ -730,7 +730,7 @@ async function replacePreset() {
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="align-center">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" :rules="[RULES.non_empty]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
