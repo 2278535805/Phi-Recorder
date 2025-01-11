@@ -25,10 +25,8 @@ en:
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA, which can improve the quality of the picture while increasing the performance cost
 
   bitrate-control: Bitrate Control
-  bitrate: Quantization parameters/Bitrate
-  bitrate-tips: |
-    CRF-CRF level.
-    CBR-bitrate.
+  bitrate: Bitrate
+  bitrate-crf: Quantization parameters
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -121,10 +119,8 @@ zh-CN:
   sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
 
   bitrate-control: 码率控制
-  bitrate: 量化参数/码率
-  bitrate-tips: |
-    CRF-CRF级别
-    CBR-码率
+  bitrate: 码率
+  bitrate-crf: 量化参数
 
   player-avatar: 玩家头像
   player-name: 玩家名
@@ -215,6 +211,8 @@ const props = defineProps<{ initAspectRatio?: number }>();
 const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
 const ffmpegPresetPresetList = ['veryfast p1 speed', 'faster p2 speed','fast p3 balanced', 'medium p4 balanced', 'slow p5 balanced', 'slower p6 quality', 'veryslow p7 quality'];
 const bitrateControlList = ['CRF','CBR'];
+const bitrateList = ['7M', '5M'];
+const bitrateCrfList = ['28', '24', '40'];
 const fpsList = ['60', '120', '30'];
 
 function parseResolution(resolution: string): [number, number] | null {
@@ -618,7 +616,9 @@ async function replacePreset() {
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
         <v-col cols="3">
-          <TipTextField :label="t('bitrate')" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate" :tooltip="t('bitrate-tips')"></TipTextField>
+          <v-combobox v-if="bitrateControl === bitrateControlList[0]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControl === bitrateControlList[1]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate"></v-combobox>
+
         </v-col>
         <v-col cols="3">
           <v-autocomplete :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-autocomplete>
