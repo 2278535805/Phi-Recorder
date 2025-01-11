@@ -403,6 +403,14 @@ function StickyLabel(props: { title: string }) {
   return h('div', { class: 'mb-4 bg-surface', style: 'position: sticky; top: 0; z-index: 2' }, [h('h3', { class: 'pa-1' }, props.title), h(VDivider)]);
 }
 
+/*function applyCrf() { // not working in combo box
+  if (bitrateControl.value === bitrateControlList[0]) {
+    bitrate.value = bitrateCrfList[0];
+  } else if (bitrateControl.value === bitrateControlList[1]) {
+    bitrate.value = bitrateList[0];
+  }
+}*/
+
 function applyConfig(config: RenderConfig) {
   resolution.value = config.resolution.join('x');
   ffmpegPreset.value = config.ffmpegPreset;
@@ -616,8 +624,8 @@ async function replacePreset() {
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="bitrateControl === bitrateControlList[0]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="bitrateControl === bitrateControlList[1]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControl === bitrateControlList[0]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControl === bitrateControlList[1]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
 
         </v-col>
         <v-col cols="3">

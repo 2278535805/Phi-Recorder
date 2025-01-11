@@ -24,6 +24,24 @@ export const RULES = {
   positiveInt: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4 && Number(value) > 0) || i18n.global.t('rules.positive-int'),
   int: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4) || i18n.global.t('rules.int'),
   // greaterThanZero: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.greater-than-zero'),
+  crf: (value: string) => (Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= 51) || i18n.global.t('rules.crf'),
+  bitrate: (value: string) => {
+    if (!value || value.trim() === '') {
+      return i18n.global.t('rules.bitrate');
+    }
+    const regex = /^(\d+)(Kbps|Mbps|K|M)$/i;
+    const match = value.match(regex);
+    if (!match) return i18n.global.t('rules.bitrate');
+    
+    const number = Number(match[1]);
+    const unit = match[2].toLowerCase();
+  
+    if ((unit === 'kbps' || unit === 'k') && number > 0 && number <= 1000000) return true;
+    if ((unit === 'mbps' || unit === 'm') && number > 0 && number <= 1000) return true;
+  
+    return i18n.global.t('rules.bitrate');
+  }
+  
 };
 
 export function isNumeric(num: any) {

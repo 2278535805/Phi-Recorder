@@ -38,11 +38,13 @@ const i18n = createI18n({
     en: {
       rules: {
         'non-empty': 'Must not be empty',
-        positive: 'Must be a positive number',
+        'positive': 'Must be a positive number',
         'positive-int': 'Must be a positive integer',
-        resolution: "Must be like '1920x1080'",
+        'resolution': "Must be like '1920x1080'",
         'sample-count': 'Must be a power of 2',
-        int: 'Must be a integer',
+        'int': 'Must be a integer',
+        'crf': 'Must be an integer between 0 and 51',
+        'bitrate': 'Must be a valid bitrate',
       },
       'has-error': 'There are errors in the configuration',
       'any-filter': 'All files',
@@ -50,11 +52,13 @@ const i18n = createI18n({
     'zh-CN': {
       rules: {
         'non-empty': '不能为空',
-        positive: '必须是正数',
+        'positive': '必须是正数',
         'positive-int': '必须是正整数',
-        resolution: "必须为 '宽x高'",
+        'resolution': "必须为 '宽x高'",
         'sample-count': '必须是 2 的幂',
-        int: '必须是整数',
+        'int': '必须是整数',
+        'crf': '必须是 0 到 51 之间的整数',
+        'bitrate': '必须是有效的码率',
       },
       'has-error': '配置中有错误',
       'any-filter': '所有文件',
