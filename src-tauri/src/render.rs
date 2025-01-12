@@ -374,7 +374,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let length = track_length - chart.offset.min(0.) as f64 + 1.;
     let video_length = o + length + a + config.ending_length;
-    let offset = chart.offset.max(0.);
+    let offset = chart.offset.min(0.);
 
     info!("Loading Resources Time:{:.2?}", loading_time.elapsed());
 
@@ -438,7 +438,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = o - chart.offset.min(0.) as f64;
+        let pos = o - chart.offset.max(0.) as f64;
         let len = ((music.length() as f64 + 1. + a) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
