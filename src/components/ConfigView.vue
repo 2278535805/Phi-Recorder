@@ -81,6 +81,9 @@ en:
   phiraMode-tips: Hold cover using head position
   judgeOffset: Judge Offset
 
+  render: Render
+  renders: Chart,UI,Background,Particle,Effect,Double Hint,Loading Screen
+
   presets: Presets
   preset-refresh: Refresh
   preset-create: Create
@@ -175,6 +178,9 @@ zh-CN:
   phiraMode-tips: Hold 遮罩使用头部位置
   judgeOffset: 判定偏移
 
+  render: 渲染内容
+  renders: 谱面,UI,背景,粒子,特效,双押提示,加载画面
+
   presets: 预设配置
   preset-refresh: 刷新
   preset-create: 创建
@@ -266,6 +272,9 @@ async function chooseAvatar() {
 const challengeColor = ref(t('challenge-colors').split(',')[5]),
   challengeRank = ref('3');
 
+const render = ref(t('renders').split(','));
+
+
 interface Respack {
   name: string;
   path: string | null;
@@ -324,6 +333,10 @@ const difficulty = ref('')
 const phiraMode = ref(false)
 const judgeOffset = ref('0')
 const simpleFileName = ref(false)
+
+const renderChart = ref(true)
+const renderUi = ref(true)
+const renderBg = ref(true)
 //const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
@@ -340,7 +353,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
-    disableLoading: disableLoading.value,
+    //disableLoading: disableLoading.value,
+    disableLoading: !render.value.includes(t('renders').split(',')[6]),
     hires: hires.value,
     chartDebug: chartDebug.value,
     chartRatio: chartRatio.value,
@@ -353,11 +367,14 @@ async function buildConfig(): Promise<RenderConfig | null> {
     aggressive: aggressive.value,
     challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
     challengeRank: parseInt(challengeRank.value),
-    disableEffect: disableEffect.value,
-    doubleHint: doubleHint.value,
+    //disableEffect: disableEffect.value,
+    disableEffect: !render.value.includes(t('renders').split(',')[4]),
+    //doubleHint: doubleHint.value,
+    doubleHint: render.value.includes(t('renders').split(',')[5]),
     fxaa: false, //Disable FXAA
     noteScale: noteScale.value,
-    particle: !disableParticle.value,
+    //particle: !disableParticle.value,
+    particle: render.value.includes(t('renders').split(',')[3]),
     //offset: parseFloat(offset.value) / 1000,
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
@@ -380,6 +397,10 @@ async function buildConfig(): Promise<RenderConfig | null> {
     phiraMode: phiraMode.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
     simpleFileName: simpleFileName.value,
+
+    renderChart: render.value.includes(t('renders').split(',')[0]),
+    renderUi: render.value.includes(t('renders').split(',')[1]),
+    renderBg: render.value.includes(t('renders').split(',')[2]),
   };
 }
 
@@ -456,6 +477,9 @@ function applyConfig(config: RenderConfig) {
   difficulty.value = config.difficulty;
   phiraMode.value = config.phiraMode;
   judgeOffset.value = String(config.judgeOffset * 1000);
+  renderChart.value = config.renderChart;
+  renderUi.value = config.renderUi;
+  renderBg.value = config.renderBg;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -502,6 +526,9 @@ const DEFAULT_CONFIG: RenderConfig = {
   phiraMode: false,
   judgeOffset: 0,
   simpleFileName: false,
+  renderChart: true,
+  renderUi: true,
+  renderBg: true,
 };
 interface Preset {
   name: string;
@@ -692,18 +719,15 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="3">
-          <TipSwitch :label="t('double-hint')" v-model="doubleHint"></TipSwitch>
-        </v-col>
+          <!--<TipSwitch :label="t('double-hint')" v-model="doubleHint"></TipSwitch>-->
         <v-col cols="3">
           <TipSwitch :label="t('aggressive')" :tooltip="t('aggressive-tips')" v-model="aggressive"></TipSwitch>
         </v-col>
-        <v-col cols="3">
-          <TipSwitch :label="t('disable-particle')" v-model="disableParticle"></TipSwitch>
+        <v-col cols="6">
+          <!--<TipSwitch :label="t('disable-particle')" v-model="disableParticle"></TipSwitch>-->
+          <v-select v-model="render" :items="t('renders').split(',')" :label="t('render')" chips multiple></v-select>
         </v-col>
-        <v-col cols="3">
-          <TipSwitch :label="t('disable-effect')" v-model="disableEffect"></TipSwitch>
-        </v-col>
+          <!--<TipSwitch :label="t('disable-effect')" v-model="disableEffect"></TipSwitch>-->
       </v-row>
     </div>
 
@@ -743,9 +767,7 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="3">
-          <TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>
-        </v-col>
+          <!--<TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>-->
         <v-col cols="3">
           <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
         </v-col>

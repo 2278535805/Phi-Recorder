@@ -94,6 +94,10 @@ export interface RenderConfig {
   forceLimit: boolean;
   limitThreshold: number;
   simpleFileName: boolean;
+
+  renderChart: boolean;
+  renderUi: boolean;
+  renderBg: boolean;
 }
 
 export interface RPEChart {

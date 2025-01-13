@@ -76,6 +76,10 @@ pub struct RenderConfig {
     phira_mode: bool,
     judge_offset: f32,
     simple_file_name: bool,
+
+    render_chart: bool,
+    render_ui: bool,
+    render_bg: bool,
 }
 
 impl RenderConfig {
@@ -111,6 +115,10 @@ impl RenderConfig {
             phira_mode: self.phira_mode,
             disable_audio: false,
             judge_offset: self.judge_offset,
+
+            render_chart: self.render_chart,
+            render_ui: self.render_ui,
+            render_bg: self.render_bg,
             ..Default::default()
         }
     }
@@ -158,6 +166,10 @@ impl RenderConfig {
             player_avatar: None,
             judge_offset: 0.,
             simple_file_name: false,
+
+            render_chart: true,
+            render_ui: true,
+            render_bg: true,
         }
     }
 }

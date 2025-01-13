@@ -43,3 +43,7 @@ difficulty:
 phiraMode: false
 judgeOffset: 0.0
 simpleFileName: false
+
+renderChart: true
+renderUi: true
+renderBg: true
