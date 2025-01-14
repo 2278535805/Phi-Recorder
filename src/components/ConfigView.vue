@@ -82,7 +82,9 @@ en:
   judgeOffset: Judge Offset
 
   render: Render
-  renders: Chart,UI,Background,Particle,Effect,Double Hint,Loading Screen
+  renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Particle,Effect,Double Hint
+  expand: Expand
+  expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
 
   presets: Presets
   preset-refresh: Refresh
@@ -177,9 +179,10 @@ zh-CN:
   phiraMode: Phira模式
   phiraMode-tips: Hold 遮罩使用头部位置
   judgeOffset: 判定偏移
-
   render: 渲染内容
-  renders: 谱面,UI,背景,粒子,特效,双押提示,加载画面
+  renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
+  expand: 拓展内容
+  expands: 激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -272,8 +275,11 @@ async function chooseAvatar() {
 const challengeColor = ref(t('challenge-colors').split(',')[5]),
   challengeRank = ref('3');
 
-const render = ref(t('renders').split(','));
-
+const renderList = ref(t('renders').split(','));
+const render = ref<string[]>([]);
+render.value.push(...renderList.value.slice(1, 12));
+const expandList = ref(t('expands').split(','));
+const expand = ref([expandList.value[0], expandList.value[1]]);
 
 interface Respack {
   name: string;
@@ -302,21 +308,14 @@ updateRespacks();
 
 const noteScale = ref(1);
 
-const doubleHint = ref(true),
-  aggressive = ref(true),
-  disableParticle = ref(false),
-  disableEffect = ref(false);
 
 const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
   compressionRatio = ref(100.0),
-  forceLimit = ref(true),
   limitThreshold = ref(1.0);
 
 const endingLength = ref('0.0');
 
-const disableLoading = ref(true)
-const hires = ref(true)
 
 const chartDebug = ref(false)
 const chartRatio = ref(1.0)
@@ -326,18 +325,12 @@ const allGood = ref(false)
 const allBad = ref(false)
 
 
-const roman = ref(false)
-const chinese = ref(false)
 const combo = ref('AUTOPLAY')
 const difficulty = ref('')
 const phiraMode = ref(false)
 const judgeOffset = ref('0')
 const simpleFileName = ref(false)
 
-const renderChart = ref(true)
-const renderUi = ref(true)
-const renderBg = ref(true)
-//const offset = ref('0.0')
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -353,10 +346,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
-    //disableLoading: disableLoading.value,
-    disableLoading: !render.value.includes(t('renders').split(',')[6]),
-    hires: hires.value,
-    chartDebug: chartDebug.value,
+    hires: expand.value.includes(expandList.value[1]),
+    chartDebug: expand.value.includes(expandList.value[2]),
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
@@ -364,18 +355,11 @@ async function buildConfig(): Promise<RenderConfig | null> {
     bitrateControl: bitrateControl.value,
     bitrate: bitrate.value,
 
-    aggressive: aggressive.value,
+    aggressive: expand.value.includes(expandList.value[0]),
     challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
     challengeRank: parseInt(challengeRank.value),
-    //disableEffect: disableEffect.value,
-    disableEffect: !render.value.includes(t('renders').split(',')[4]),
-    //doubleHint: doubleHint.value,
-    doubleHint: render.value.includes(t('renders').split(',')[5]),
     fxaa: false, //Disable FXAA
     noteScale: noteScale.value,
-    //particle: !disableParticle.value,
-    particle: render.value.includes(t('renders').split(',')[3]),
-    //offset: parseFloat(offset.value) / 1000,
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
     playerRks: parseFloat(playerRks.value),
@@ -385,23 +369,33 @@ async function buildConfig(): Promise<RenderConfig | null> {
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     compressionRatio: compressionRatio.value,
-    forceLimit: forceLimit.value,
+    forceLimit: expand.value.includes(expandList.value[3]),
     limitThreshold: limitThreshold.value,
     allGood: judgeMode.value === t('judge-modes').split(',')[1] ? true : false,
     allBad: judgeMode.value === t('judge-modes').split(',')[2] ? true : false,
     watermark: watermark.value,
-    roman: roman.value,
-    chinese: chinese.value,
+    roman: expand.value.includes(expandList.value[4]),
+    chinese: expand.value.includes(expandList.value[5]),
     combo: combo.value,
     difficulty: difficulty.value,
     phiraMode: phiraMode.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
     simpleFileName: simpleFileName.value,
-
-    renderChart: render.value.includes(t('renders').split(',')[0]),
-    renderUi: render.value.includes(t('renders').split(',')[1]),
-    renderBg: render.value.includes(t('renders').split(',')[2]),
-  };
+    
+//加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
+    disableLoading: !render.value.includes(renderList.value[0]),
+    renderLine: render.value.includes(renderList.value[1]),
+    renderLineExtra: render.value.includes(renderList.value[2]),
+    renderNote: render.value.includes(renderList.value[3]),
+    renderUiPause: render.value.includes(renderList.value[4]),
+    renderUiScore: render.value.includes(renderList.value[5]),
+    renderUiCombo: render.value.includes(renderList.value[6]),
+    renderUiBar: render.value.includes(renderList.value[7]),
+    renderBg: render.value.includes(renderList.value[8]),
+    particle: render.value.includes(renderList.value[9]),
+    disableEffect: !render.value.includes(renderList.value[10]),
+    doubleHint: render.value.includes(renderList.value[11]),
+};
 }
 
 function onEnter() {
@@ -436,30 +430,18 @@ function applyConfig(config: RenderConfig) {
   resolution.value = config.resolution.join('x');
   ffmpegPreset.value = config.ffmpegPreset;
   endingLength.value = String(config.endingLength);
-  disableLoading.value = config.disableLoading;
-  hires.value = config.hires;
   chartDebug.value = config.chartDebug;
   chartRatio.value = config.chartRatio;
-  allGood.value = judgeMode.value === t('judge-modes').split(',')[1] ? true : false;
-  allBad.value = judgeMode.value === t('judge-modes').split(',')[2] ? true : false;
-  if (config.allGood) judgeMode.value = t('judge-modes').split(',')[1]
-  else if (config.allBad) judgeMode.value = t('judge-modes').split(',')[2]
-  else judgeMode.value = t('judge-modes').split(',')[0];
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
   hevc.value = config.hevc;
   bitrateControl.value = config.bitrateControl;
   bitrate.value = config.bitrate;
 
-  aggressive.value = config.aggressive;
   challengeColor.value = t('challenge-colors').split(',')[STD_CHALLENGE_COLORS.indexOf(config.challengeColor)];
   challengeRank.value = String(config.challengeRank);
-  disableEffect.value = config.disableEffect;
-  doubleHint.value = config.doubleHint;
   //fxaa.value = config.fxaa;
   noteScale.value = config.noteScale;
-  //offset.value = String(config.offset);
-  disableParticle.value = !config.particle;
   playerAvatar.value = config.playerAvatar || undefined;
   playerName.value = config.playerName;
   playerRks.value = String(config.playerRks);
@@ -468,18 +450,42 @@ function applyConfig(config: RenderConfig) {
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
-  forceLimit.value = config.forceLimit;
   limitThreshold.value = config.limitThreshold;
   watermark.value = config.watermark;
-  roman.value = config.roman;
-  chinese.value = config.chinese;
   combo.value = config.combo;
   difficulty.value = config.difficulty;
   phiraMode.value = config.phiraMode;
   judgeOffset.value = String(config.judgeOffset * 1000);
-  renderChart.value = config.renderChart;
-  renderUi.value = config.renderUi;
-  renderBg.value = config.renderBg;
+
+  allGood.value = judgeMode.value === t('judge-modes').split(',')[1] ? true : false;
+  allBad.value = judgeMode.value === t('judge-modes').split(',')[2] ? true : false;
+  if (config.allGood) judgeMode.value = t('judge-modes').split(',')[1]
+  else if (config.allBad) judgeMode.value = t('judge-modes').split(',')[2]
+  else judgeMode.value = t('judge-modes').split(',')[0];
+
+  render.value = [];
+  //加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
+  if (!config.disableLoading) render.value.push(renderList.value[0]);
+  if (config.renderLine) render.value.push(renderList.value[1]);
+  if (config.renderLineExtra) render.value.push(renderList.value[2]);
+  if (config.renderNote) render.value.push(renderList.value[3]);
+  if (config.renderUiPause) render.value.push(renderList.value[4]);
+  if (config.renderUiScore) render.value.push(renderList.value[5]);
+  if (config.renderUiCombo) render.value.push(renderList.value[6]);
+  if (config.renderUiBar) render.value.push(renderList.value[7]);
+  if (config.renderBg) render.value.push(renderList.value[8]);
+  if (config.particle) render.value.push(renderList.value[9]);
+  if (!config.disableEffect) render.value.push(renderList.value[10]);
+  if (config.doubleHint) render.value.push(renderList.value[11]);
+
+  expand.value = [];
+  //激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
+  if (config.aggressive) expand.value.push(expandList.value[0]);
+  if (config.hires) expand.value.push(expandList.value[1]);
+  if (config.chartDebug) expand.value.push(expandList.value[2]);
+  if (config.forceLimit) expand.value.push(expandList.value[3]);
+  if (config.roman) expand.value.push(expandList.value[4]);
+  if (config.chinese) expand.value.push(expandList.value[5]);
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -505,7 +511,6 @@ const DEFAULT_CONFIG: RenderConfig = {
   doubleHint: true,
   fxaa: false,
   noteScale: 1,
-  //offset: 0.0,
   particle: true,
   playerAvatar: null,
   playerName: '',
@@ -526,8 +531,13 @@ const DEFAULT_CONFIG: RenderConfig = {
   phiraMode: false,
   judgeOffset: 0,
   simpleFileName: false,
-  renderChart: true,
-  renderUi: true,
+  renderLine: true,
+  renderLineExtra: true,
+  renderNote: true,
+  renderUiPause: true,
+  renderUiScore: true,
+  renderUiCombo: true,
+  renderUiBar: true,
   renderBg: true,
 };
 interface Preset {
@@ -658,9 +668,6 @@ async function replacePreset() {
         <v-col cols="3">
           <v-autocomplete :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-autocomplete>
         </v-col>
-        <!--<v-col cols="3">
-          <TipSwitch :label="t('fxaa')" :tooltip="t('fxaa-tips')" v-model="fxaa"></TipSwitch>
-        </v-col>-->
         <v-col cols="3">
           <TipSwitch :label="t('hevc')" v-model="hevc"></TipSwitch>
         </v-col>
@@ -699,7 +706,7 @@ async function replacePreset() {
 
     <div class="mt-2">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 mt-4 align-center">
+      <v-row no-gutters class="mx-n2 mt-4 px-2 align-center">
         <v-col cols="8">
           <v-autocomplete class="mx-2" :label="t('respack')" :items="respacks" item-title="name" v-model="respack"></v-autocomplete>
         </v-col>
@@ -718,34 +725,28 @@ async function replacePreset() {
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-2">
-          <!--<TipSwitch :label="t('double-hint')" v-model="doubleHint"></TipSwitch>-->
-        <v-col cols="3">
-          <TipSwitch :label="t('aggressive')" :tooltip="t('aggressive-tips')" v-model="aggressive"></TipSwitch>
+      <v-row no-gutters class="mx-n2 mt-2 px-2">
+        <v-col cols="6" class="px-2">
+          <v-select v-model="render" :items="renderList" :label="t('render')" chips multiple></v-select>
         </v-col>
-        <v-col cols="6">
-          <!--<TipSwitch :label="t('disable-particle')" v-model="disableParticle"></TipSwitch>-->
-          <v-select v-model="render" :items="t('renders').split(',')" :label="t('render')" chips multiple></v-select>
+        <v-col cols="6" class="px-2">
+          <v-select v-model="expand" :items="expandList" :label="t('expand')" chips multiple></v-select>
         </v-col>
-          <!--<TipSwitch :label="t('disable-effect')" v-model="disableEffect"></TipSwitch>-->
       </v-row>
     </div>
 
     <div class="mt-2">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
-        <v-col cols="3">
+        <v-col cols="4">
           <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeMusic"> </v-slider>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="4">
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
-        <v-col cols="3">
-          <v-slider  v-if="forceLimit === false" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
-          <v-slider  v-if="forceLimit === true" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
-        </v-col>
-        <v-col cols="3">
-          <TipSwitch :label="t('force-limit')" class="mt-n5" v-model="forceLimit"></TipSwitch>
+        <v-col cols="4">
+          <v-slider v-if="!expand.includes(expandList[3])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider v-if="expand.includes(expandList[3])" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
     </div>
@@ -766,31 +767,15 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-2">
-          <!--<TipSwitch :label="t('disable-loading')" v-model="disableLoading"></TipSwitch>-->
+      <v-row no-gutters class="mt-2">
         <v-col cols="3">
-          <TipSwitch :label="t('chart_debug')" v-model="chartDebug"></TipSwitch>
-        </v-col>
-        <v-col cols="3">
-          <TipSwitch :label="t('hires')" v-model="hires"></TipSwitch>
-        </v-col>
-        <v-col cols="3">
-          <!--<TipSwitch :label="t('all_good')" v-model="allGood"></TipSwitch>-->
           <v-autocomplete class="mx-2" :label="t('judge-mode')" :items="t('judge-modes').split(',')" v-model="judgeMode" :rules="[RULES.non_empty]"></v-autocomplete>
         </v-col>
-      </v-row>
-      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
-          <TipSwitch :label="t('roman')" v-model="roman"></TipSwitch>
-        </v-col>
-        <v-col cols="3">
-          <TipSwitch :label="t('chinese')" v-model="chinese"></TipSwitch>
+          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('phiraMode')" :tooltip="t('phiraMode-tips')" v-model="phiraMode"></TipSwitch>
-        </v-col>
-        <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" :rules="[RULES.int]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

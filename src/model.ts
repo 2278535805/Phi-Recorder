@@ -95,8 +95,13 @@ export interface RenderConfig {
   limitThreshold: number;
   simpleFileName: boolean;
 
-  renderChart: boolean;
-  renderUi: boolean;
+  renderLine: boolean;
+  renderLineExtra: boolean;
+  renderNote: boolean;
+  renderUiPause: boolean;
+  renderUiScore: boolean;
+  renderUiCombo: boolean;
+  renderUiBar: boolean;
   renderBg: boolean;
 }
 

@@ -77,8 +77,13 @@ pub struct RenderConfig {
     judge_offset: f32,
     simple_file_name: bool,
 
-    render_chart: bool,
-    render_ui: bool,
+    render_line: bool,
+    render_line_extra: bool,
+    render_note: bool,
+    render_ui_pause: bool,
+    render_ui_score: bool,
+    render_ui_combo: bool,
+    render_ui_bar: bool,
     render_bg: bool,
 }
 
@@ -116,8 +121,13 @@ impl RenderConfig {
             disable_audio: false,
             judge_offset: self.judge_offset,
 
-            render_chart: self.render_chart,
-            render_ui: self.render_ui,
+            render_line: self.render_line,
+            render_line_extra: self.render_line_extra,
+            render_note: self.render_note,
+            render_ui_pause: self.render_ui_pause,
+            render_ui_score: self.render_ui_score,
+            render_ui_combo: self.render_ui_combo,
+            render_ui_bar: self.render_ui_bar,
             render_bg: self.render_bg,
             ..Default::default()
         }
@@ -167,8 +177,13 @@ impl RenderConfig {
             judge_offset: 0.,
             simple_file_name: false,
 
-            render_chart: true,
-            render_ui: true,
+            render_line: true,
+            render_line_extra: true,
+            render_note: true,
+            render_ui_pause: true,
+            render_ui_score: true,
+            render_ui_combo: true,
+            render_ui_bar: true,
             render_bg: true,
         }
     }
