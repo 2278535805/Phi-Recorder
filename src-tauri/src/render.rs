@@ -308,13 +308,18 @@ pub async fn main(cmd: bool) -> Result<()> {
         let safe_name: String = info
             .name
             .chars()
-            .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
+            .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
+            .collect();
+        let safe_name2: String = info
+            .composer
+            .chars()
+            .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
             .collect();
         let format = if config.hires { "mov" } else { "mp4" };
 
         let file_name = if config.simple_file_name {
             format!(
-                "{safe_name}_{level}.{format}"
+                "{safe_name}.{safe_name2}_{level}.{format}",
             )
         } else {
             format!(
