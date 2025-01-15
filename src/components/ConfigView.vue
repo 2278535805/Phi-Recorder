@@ -696,7 +696,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-autocomplete class="mx-2" :label="t('challenge-color')" :rules="[RULES.non_empty]" :items="t('challenge-colors').split(',')" v-model="challengeColor" :rules="[RULES.non_empty]"></v-autocomplete>
+          <v-autocomplete class="mx-2" :label="t('challenge-color')" :rules="[RULES.non_empty]" :items="t('challenge-colors').split(',')" v-model="challengeColor"></v-autocomplete>
         </v-col>
         <v-col cols="4">
           <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
@@ -769,7 +769,7 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mt-2">
         <v-col cols="3">
-          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode" :rules="[RULES.non_empty]"></v-autocomplete>
+          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
