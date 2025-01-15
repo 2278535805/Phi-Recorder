@@ -443,21 +443,39 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
+    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output2_agg = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
+    let agg = config.aggressive;
 
     // let stereo_sfx = false; // TODO stereo sound effects
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
-        let position = (pos * sample_rate_f64).round() as usize;
+        let position = (pos * sample_rate_f64).round() as usize * 2;
         if position >= output2.len() {
             return 0;
         }
         let slice = &mut output2[position..];
+        let len = (slice.len() / 2).min(clip.frame_count());
+
+        let frames = clip.frames();
+        for i in 0..len {
+            slice[i * 2] += frames[i].0 * volume;
+            slice[i * 2 + 1] += frames[i].1 * volume;
+        }
+
+        return len;
+    };
+
+    let mut place_agg = |pos: f64, clip: &AudioClip, volume: f32| {
+        let position = (pos * sample_rate_f64).round() as usize;
+        if position >= output2_agg.len() {
+            return 0;
+        }
+        let slice = &mut output2_agg[position..];
         let len = (slice.len()).min(clip.frame_count());
 
         let frames = clip.frames();
         for i in 0..len {
             slice[i] += frames[i].0 * volume;
-            // slice[i * 2 + 1] += frames[i].1 * volume; hitfx does not require dual stereo
         }
 
         return len;
@@ -528,18 +546,16 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let offset = offset as f64 + config.judge_offset as f64;
-        if config.all_bad {
+        if agg {
             for line in &chart.lines {
                 for note in &line.notes {
                     if !note.fake {
-                        let sfx = match note.kind { //TODO custom hit sound
+                        let sfx = match note.kind {
                             NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
                             NoteKind::Drag => &sfx_drag,
                             NoteKind::Flick => &sfx_flick,
                         };
-                        if !matches!(note.kind, NoteKind::Click) {
-                            place(o + note.time as f64 + offset, sfx, volume_sfx);
-                        }
+                        place_agg(o + note.time as f64 + offset, sfx, volume_sfx);
                     }
                 }
             }
@@ -581,9 +597,15 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         }
 
-        for i in 0..output2.len() {
-            output[i * 2] += output2[i];
-            output[i * 2 + 1] += output2[i];
+        if agg {
+            for i in 0..output2_agg.len() {
+                output[i * 2] += output2_agg[i];
+                output[i * 2 + 1] += output2_agg[i];
+            }
+        } else {
+            for i in 0..output2.len() {
+                output[i] += output2[i];
+            }
         }
 
         if !config.hires {

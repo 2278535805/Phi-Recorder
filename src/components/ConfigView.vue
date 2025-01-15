@@ -67,7 +67,7 @@ en:
   chart_ratio: Chart Zoom
 
   judge-mode: Judge Mode
-  judge-modes: Default,Good,Bad
+  judge-modes: Default,Good
   all_good: Force Good judgment
   all_bad: Force Bad judgment
 
@@ -166,7 +166,7 @@ zh-CN:
   chart_ratio: 谱面缩放
 
   judge-mode: 判定模式
-  judge-modes: 默认,Good,Bad
+  judge-modes: 默认,Good
   all_good: 强制Good
   all_bad: 强制Bad
 
@@ -279,7 +279,7 @@ const renderList = ref(t('renders').split(','));
 const render = ref<string[]>([]);
 render.value.push(...renderList.value.slice(1, 12));
 const expandList = ref(t('expands').split(','));
-const expand = ref([expandList.value[0], expandList.value[1]]);
+const expand = ref([expandList.value[0], expandList.value[1], expandList.value[3]]);
 
 interface Respack {
   name: string;
@@ -372,7 +372,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     forceLimit: expand.value.includes(expandList.value[3]),
     limitThreshold: limitThreshold.value,
     allGood: judgeMode.value === t('judge-modes').split(',')[1] ? true : false,
-    allBad: judgeMode.value === t('judge-modes').split(',')[2] ? true : false,
+    allBad: false,
     watermark: watermark.value,
     roman: expand.value.includes(expandList.value[4]),
     chinese: expand.value.includes(expandList.value[5]),
@@ -458,7 +458,7 @@ function applyConfig(config: RenderConfig) {
   judgeOffset.value = String(config.judgeOffset * 1000);
 
   allGood.value = judgeMode.value === t('judge-modes').split(',')[1] ? true : false;
-  allBad.value = judgeMode.value === t('judge-modes').split(',')[2] ? true : false;
+  allBad.value = false;
   if (config.allGood) judgeMode.value = t('judge-modes').split(',')[1]
   else if (config.allBad) judgeMode.value = t('judge-modes').split(',')[2]
   else judgeMode.value = t('judge-modes').split(',')[0];
