@@ -26,6 +26,7 @@ prpr = { git = "https://github.com/2278535805/render-lib", package = "prpr", bra
 sasa = { git = "https://github.com/2278535805/sasa" }
 serde_yaml = "0.9"
 tokio = { version = "1.36.0", features = ["process", "rt-multi-thread", "fs"] }
+rayon = { version = "1.6.0" }
 tracing = "0.1.37"
 tempfile = "3.8.0"
 chrono = "0.4.28"
