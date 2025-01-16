@@ -264,7 +264,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
     let (mut fs, output_path, config, info) = 
-    if cmd{
+    if cmd {
         init_assets();
 
         #[cfg(target_os = "windows")]
@@ -470,7 +470,10 @@ pub async fn main(cmd: bool) -> Result<()> {
         return len;
     };
 
-    let mut place_agg = |pos: f64, clip: &AudioClip, volume: f32| {
+    use rayon::prelude::*;
+    use std::sync::Mutex;
+
+    let place_agg = Mutex::new(|pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize;
         if position >= output2_agg.len() {
             return 0;
@@ -484,7 +487,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
 
         return len;
-    };
+    });
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
@@ -553,18 +556,18 @@ pub async fn main(cmd: bool) -> Result<()> {
         let sfx_time = Instant::now();
         let offset = offset as f64 + config.judge_offset as f64;
         if agg {
-            for line in &chart.lines {
-                for note in &line.notes {
+            chart.lines.par_iter().for_each(|line| {
+                line.notes.par_iter().for_each(|note| {
                     if !note.fake {
                         let sfx = match note.kind {
                             NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
                             NoteKind::Drag => &sfx_drag,
                             NoteKind::Flick => &sfx_flick,
                         };
-                        place_agg(o + note.time as f64 + offset, sfx, volume_sfx);
+                        place_agg.lock().unwrap()(o + note.time as f64 + offset, sfx, volume_sfx);
                     }
-                }
-            }
+                });
+            });
         } else {
             for line in &chart.lines {
                 for note in &line.notes {
