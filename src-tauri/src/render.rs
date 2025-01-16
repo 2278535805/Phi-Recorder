@@ -492,11 +492,12 @@ pub async fn main(cmd: bool) -> Result<()> {
         let len = ((music.length() as f64 + 1. + a) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
+        let slice = &mut output[start_index..];
         for i in 0..len {
             let position = i as f64 * ratio;
             let frame = music.sample(position as f32).unwrap_or_default();
-            output[start_index + i * 2] += frame.0 * volume_music;
-            output[start_index + i * 2 + 1] += frame.1 * volume_music;
+            slice[i * 2] += frame.0 * volume_music;
+            slice[i * 2 + 1] += frame.1 * volume_music;
         }
         //ending
         let mut pos = o + length + musica;
