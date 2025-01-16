@@ -557,7 +557,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let offset = offset as f64 + config.judge_offset as f64;
         if agg {
             chart.lines.par_iter().for_each(|line| {
-                line.notes.iter().for_each(|note| {
+                line.notes.par_iter().for_each(|note| {
                     if !note.fake {
                         let sfx = match note.kind {
                             NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
