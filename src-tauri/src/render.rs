@@ -397,16 +397,16 @@ pub async fn main(cmd: bool) -> Result<()> {
     let volume_sfx = config.volume_sfx;
 
     let o: f64 = if config.disable_loading {
-        GameScene::BEFORE_TIME as f64
+        GameScene::BEFORE_DURATION as f64
     } else {
-        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_TIME as f64
+        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
     };
     let a: f64 = -0.5; // fade out time
-    let musica: f64 = 0.7 + 0.3 + EndingScene::BPM_WAIT_TIME;
+    let musica: f64 = GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME;
 
-    let length = track_length - chart.offset.min(0.) as f64 + 1.;
+    let offset = chart.offset + info.offset;
+    let length = track_length - offset.min(0.) as f64 + 1.;
     let video_length = o + length + a + config.ending_length;
-    let offset = chart.offset.min(0.);
 
     info!("Loading Resources Time:{:.2?}", loading_time.elapsed());
 
@@ -488,19 +488,19 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = o - chart.offset.max(0.) as f64;
-        let len = ((music.length() as f64 + 1. + a + config.ending_length) * sample_rate_f64) as usize;
+        let pos = o - offset.min(0.) as f64;
+        let len = ((track_length + config.ending_length) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
         let slice = &mut output[start_index..];
-        for i in 0..len {
-            let position = i as f64 * ratio;
+        for i in 0..len.min(slice.len() / 2) {
+            let position = i as f64 * ratio + offset.max(0.) as f64;
             let frame = music.sample(position as f32).unwrap_or_default();
             slice[i * 2] += frame.0 * volume_music;
             slice[i * 2 + 1] += frame.1 * volume_music;
         }
         //ending
-        let mut pos = o + length + musica;
+        let mut pos = o + length + musica - offset as f64;
         while pos < video_length && config.ending_length > EndingScene::BPM_WAIT_TIME {
             let start_index = (pos * sample_rate_f64).round() as usize * 2;
             let slice = &mut output[start_index..];
@@ -551,7 +551,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
-        let offset = offset as f64 + config.judge_offset as f64;
+        let offset = config.judge_offset as f64;
         if agg {
             for line in &chart.lines {
                 for note in &line.notes {
