@@ -256,6 +256,7 @@ async function previewTweakoffset() {
     let params = await buildParams();
     if (!params) return false;
     await invoke('preview_tweakoffset', { params });
+    stepIndex.value--;
     return true;
   } catch (e) {
     toastError(e);
@@ -333,10 +334,10 @@ function tryParseAspect(): number | undefined {
   <div class="pa-8 w-100 h-100" style="max-width: 1280px">
     <v-stepper alt-labels v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))">
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
-        <v-btn variant="text" @click="stepIndex && stepIndex--" v-t="'prev-step'"></v-btn>
+        <v-btn @click="stepIndex && stepIndex--" variant="text" v-t="'prev-step'"></v-btn>
+        <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
         <div class="flex-grow-1"></div>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewPlay" class="mr-2" v-t="'play'"></v-btn>
-        <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewChart" class="mr-2" v-t="'preview'"></v-btn>
         <v-btn variant="tonal" @click="moveNext">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
       </div>
