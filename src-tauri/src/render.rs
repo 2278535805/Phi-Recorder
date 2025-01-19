@@ -585,10 +585,16 @@ pub async fn main(cmd: bool) -> Result<()> {
     {
         let mixing_time = Instant::now();
         if config.force_limit {
-            for i in 0..output2.len() {
-                output2[i] = output2[i]
-                    .max(-config.limit_threshold)
-                    .min(config.limit_threshold);
+            if config.aggressive {
+                for i in 0..output2_agg.len() {
+                    output2_agg[i] = output2_agg[i]
+                        .clamp(-config.limit_threshold, config.limit_threshold)
+                }
+            } else {
+                for i in 0..output2.len() {
+                    output2[i] = output2[i]
+                        .clamp(-config.limit_threshold, config.limit_threshold)
+                }
             }
         } else if config.compression_ratio > 1. {
             for i in 0..output2.len() {
@@ -616,7 +622,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         if !config.hires {
             for i in 0..output.len() {
-                output[i] = output[i].min(1.).max(-1.);
+                output[i] = output[i].clamp(-config.limit_threshold, config.limit_threshold);
             }
         }
         info!("Mixing Time:{:.2?}", mixing_time.elapsed());

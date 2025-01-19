@@ -346,8 +346,6 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
-    hires: expand.value.includes(expandList.value[1]),
-    chartDebug: expand.value.includes(expandList.value[2]),
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
@@ -355,7 +353,6 @@ async function buildConfig(): Promise<RenderConfig | null> {
     bitrateControl: bitrateControl.value,
     bitrate: bitrate.value,
 
-    aggressive: expand.value.includes(expandList.value[0]),
     challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
     challengeRank: parseInt(challengeRank.value),
     fxaa: false, //Disable FXAA
@@ -369,20 +366,17 @@ async function buildConfig(): Promise<RenderConfig | null> {
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     compressionRatio: compressionRatio.value,
-    forceLimit: expand.value.includes(expandList.value[3]),
     limitThreshold: limitThreshold.value,
     allGood: judgeMode.value === t('judge-modes').split(',')[1] ? true : false,
     allBad: false,
     watermark: watermark.value,
-    roman: expand.value.includes(expandList.value[4]),
-    chinese: expand.value.includes(expandList.value[5]),
     combo: combo.value,
     difficulty: difficulty.value,
     phiraMode: phiraMode.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
     simpleFileName: simpleFileName.value,
     
-//加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
+    //加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
     disableLoading: !render.value.includes(renderList.value[0]),
     renderLine: render.value.includes(renderList.value[1]),
     renderLineExtra: render.value.includes(renderList.value[2]),
@@ -395,6 +389,15 @@ async function buildConfig(): Promise<RenderConfig | null> {
     particle: render.value.includes(renderList.value[9]),
     disableEffect: !render.value.includes(renderList.value[10]),
     doubleHint: render.value.includes(renderList.value[11]),
+
+    //激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
+    aggressive: expand.value.includes(expandList.value[0]),
+    hires: expand.value.includes(expandList.value[1]),
+    chartDebug: expand.value.includes(expandList.value[2]),
+    forceLimit: expand.value.includes(expandList.value[3]),
+    roman: expand.value.includes(expandList.value[4]),
+    chinese: expand.value.includes(expandList.value[5]),
+
 };
 }
 
