@@ -279,7 +279,7 @@ const renderList = ref(t('renders').split(','));
 const render = ref<string[]>([]);
 render.value.push(...renderList.value.slice(1, 12));
 const expandList = ref(t('expands').split(','));
-const expand = ref([expandList.value[0], expandList.value[1], expandList.value[3]]);
+const expand = ref([expandList.value[1], expandList.value[3]]);
 
 interface Respack {
   name: string;
@@ -507,7 +507,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   bitrateControl: 'CRF',
   bitrate: '28',
 
-  aggressive: true,
+  aggressive: false,
   challengeColor: 'rainbow',
   challengeRank: 3,
   disableEffect: false,
