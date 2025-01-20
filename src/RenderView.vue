@@ -323,6 +323,7 @@ function tryParseAspect(): number | undefined {
     let width = parseFloat(aspectWidth.value);
     let height = parseFloat(aspectHeight.value);
     if (isNaN(width) || isNaN(height)) return undefined;
+    chartInfo.value!.aspectRatio = width / height;
     return width / height;
   } catch (e) {
     return undefined;
