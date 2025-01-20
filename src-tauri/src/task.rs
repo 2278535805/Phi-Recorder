@@ -233,7 +233,7 @@ impl TaskQueue {
         let task = tokio::spawn(async move {
             loop {
                 let Ok(task) = receiver.try_recv() else {
-                    std::thread::sleep(std::time::Duration::from_millis(200));
+                    std::thread::sleep(std::time::Duration::from_secs(30));
                     continue
                 };
                 if let Err(err) = task.run().await {
