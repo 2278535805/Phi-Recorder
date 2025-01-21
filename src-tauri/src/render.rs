@@ -85,6 +85,8 @@ pub struct RenderConfig {
     render_ui_combo: bool,
     render_ui_bar: bool,
     render_bg: bool,
+
+    max_particles: usize,
 }
 
 impl RenderConfig {
@@ -129,6 +131,8 @@ impl RenderConfig {
             render_ui_combo: self.render_ui_combo,
             render_ui_bar: self.render_ui_bar,
             render_bg: self.render_bg,
+
+            max_particles: self.max_particles,
             ..Default::default()
         }
     }
@@ -185,6 +189,8 @@ impl RenderConfig {
             render_ui_combo: true,
             render_ui_bar: true,
             render_bg: true,
+
+            max_particles: 600000,
         }
     }
 }

@@ -86,6 +86,9 @@ en:
   expand: Expand
   expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
 
+  max-particles: Particle Limit
+  max-particles-list: Low,Medium,High,Very High
+
   presets: Presets
   preset-refresh: Refresh
   preset-create: Create
@@ -183,6 +186,9 @@ zh-CN:
   renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
   expand: 拓展内容
   expands: 激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
+
+  max-particles: 粒子限制
+  max-particles-list: 低,中,高,非常高
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -331,6 +337,23 @@ const phiraMode = ref(false)
 const judgeOffset = ref('0')
 const simpleFileName = ref(false)
 
+const maxParticlesText = ref(t('max-particles-list').split(',')[1]);
+const maxParticles = ref(600000);
+const maxParticlesTextList = t('max-particles-list').split(',');
+const maxParticlesList =[12000, 600000, 20000000, 100000000];
+
+function updateMaxParticles() {
+  const index = maxParticlesTextList.indexOf(maxParticlesText.value);
+  const textNum = Number(maxParticlesText.value);
+  if (index >= 0 && index < maxParticlesTextList.length) {
+    maxParticles.value = maxParticlesList[index];
+  } else if (Number.isInteger(textNum) && textNum > 0) {
+    maxParticles.value = parseInt(maxParticlesText.value);
+  } else {
+    toast(t('has-error'), 'warning');
+    maxParticles.value = 600000;
+  }
+}
 
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
@@ -339,6 +362,9 @@ async function buildConfig(): Promise<RenderConfig | null> {
     toast(t('has-error'), 'error');
     return null;
   }
+
+  updateMaxParticles();
+
   return {
     resolution: (() => {
       let parts = resolution.value.split('x');
@@ -398,6 +424,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     roman: expand.value.includes(expandList.value[4]),
     chinese: expand.value.includes(expandList.value[5]),
 
+    maxParticles: maxParticles.value,
 };
 }
 
@@ -489,6 +516,8 @@ function applyConfig(config: RenderConfig) {
   if (config.forceLimit) expand.value.push(expandList.value[3]);
   if (config.roman) expand.value.push(expandList.value[4]);
   if (config.chinese) expand.value.push(expandList.value[5]);
+
+  maxParticles.value = config.maxParticles;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -542,6 +571,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   renderUiCombo: true,
   renderUiBar: true,
   renderBg: true,
+
+  maxParticles: 600000,
 };
 interface Preset {
   name: string;
@@ -776,6 +807,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('phiraMode')" :tooltip="t('phiraMode-tips')" v-model="phiraMode"></TipSwitch>
