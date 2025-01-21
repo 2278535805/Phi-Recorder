@@ -44,6 +44,13 @@ phiraMode: false
 judgeOffset: 0.0
 simpleFileName: false
 
-renderChart: true
-renderUi: true
+renderLine: true
+renderLineExtra: true
+renderNote: true
+renderUiPause: true
+renderUiScore: true
+renderUiCombo: true
+renderUiBar: true
 renderBg: true
+
+maxParticles: 600000
