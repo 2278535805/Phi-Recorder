@@ -103,6 +103,8 @@ export interface RenderConfig {
   renderUiCombo: boolean;
   renderUiBar: boolean;
   renderBg: boolean;
+
+  maxParticles: number;
 }
 
 export interface RPEChart {
