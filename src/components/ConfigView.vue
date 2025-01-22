@@ -87,7 +87,7 @@ en:
   expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
 
   max-particles: Particle Limit
-  max-particles-list: Low,Medium,High,Very High
+  max-particles-list: Low,Medium,High
 
   presets: Presets
   preset-refresh: Refresh
@@ -188,7 +188,7 @@ zh-CN:
   expands: 激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
 
   max-particles: 粒子限制
-  max-particles-list: 低,中,高,非常高
+  max-particles-list: 低,中,高
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -338,9 +338,9 @@ const judgeOffset = ref('0')
 const simpleFileName = ref(false)
 
 const maxParticlesText = ref(t('max-particles-list').split(',')[1]);
-const maxParticles = ref(600000);
+const maxParticles = ref(100000);
 const maxParticlesTextList = t('max-particles-list').split(',');
-const maxParticlesList =[12000, 600000, 20000000, 100000000];
+const maxParticlesList =[20000, 100000, 800000];
 
 function updateMaxParticles() {
   const index = maxParticlesTextList.indexOf(maxParticlesText.value);
@@ -351,7 +351,7 @@ function updateMaxParticles() {
     maxParticles.value = parseInt(maxParticlesText.value);
   } else {
     toast(t('has-error'), 'warning');
-    maxParticles.value = 600000;
+    maxParticles.value = 100000;
   }
 }
 
@@ -518,6 +518,12 @@ function applyConfig(config: RenderConfig) {
   if (config.chinese) expand.value.push(expandList.value[5]);
 
   maxParticles.value = config.maxParticles;
+  const index = maxParticlesList.indexOf(maxParticles.value);
+  if (index >= 0 && index < maxParticlesTextList.length) {
+    maxParticlesText.value = maxParticlesTextList[index];
+  } else {
+    maxParticlesText.value = String(maxParticles.value);
+  }
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -572,7 +578,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   renderUiBar: true,
   renderBg: true,
 
-  maxParticles: 600000,
+  maxParticles: 100000,
 };
 interface Preset {
   name: string;

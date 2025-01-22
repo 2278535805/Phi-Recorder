@@ -53,4 +53,4 @@ renderUiCombo: true
 renderUiBar: true
 renderBg: true
 
-maxParticles: 600000
+maxParticles: 100000

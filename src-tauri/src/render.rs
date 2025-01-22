@@ -190,7 +190,7 @@ impl RenderConfig {
             render_ui_bar: true,
             render_bg: true,
 
-            max_particles: 600000,
+            max_particles: 100000,
         }
     }
 }
