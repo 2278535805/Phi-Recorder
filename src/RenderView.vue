@@ -50,7 +50,7 @@ en:
   open-download: Download FFmpeg
   ffmpeg-not-found: FFmpeg not found!
   ffmpeg-not-found-detail: |
-    Please download "ffmpeg-master-latest-win64-gpl.zip"
+    Please download ffmpeg, Windows users usually only need to download "ffmpeg-master-latest-win64-gpl.zip"
     Place all files in the bin folder in the program folder or configure the ffmpeg environment variables
   
   confirm: Confirm
@@ -101,7 +101,7 @@ zh-CN:
   open-download: 下载 FFmpeg
   ffmpeg-not-found: 未找到 FFmpeg!
   ffmpeg-not-found-detail: |
-    请下载 ffmpeg
+    请下载 ffmpeg, Windows 用户一般只需下载 "ffmpeg-master-latest-win64-gpl.zip"
     将 bin 文件夹内的所有文件放置在程序文件夹内或配置 ffmpeg 环境变量
 
   confirm: 确定
@@ -238,7 +238,7 @@ async function buildParams() {
 const ffmpegDialog = ref(false);
 async function postRender() {
   try {
-    if (!(await invoke('test_ffmpeg'))) {
+    if (!(await invoke('test_ffmpeg')) || true) {
       ffmpegDialog.value = true;
       //await dialog.message(t('ffmpeg-not-found'));
       return false;
@@ -452,7 +452,7 @@ function tryParseAspect(): number | undefined {
       <v-card>
         <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('ffmpeg-not-found-detail') }}</pre>
+          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
@@ -469,4 +469,3 @@ function tryParseAspect(): number | undefined {
   transition: none;
 }
 </style>
-}
