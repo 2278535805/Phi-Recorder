@@ -7,7 +7,7 @@ defineProps<{ tooltip: string }>();
 <template>
   <v-text-field>
     <template v-slot:append>
-      <TooltipIcon :tooltip="tooltip" btn-class="ml-n2"></TooltipIcon>
+      <TooltipIcon :tooltip="tooltip" btn-class="ml-n2 whitespace-pre"></TooltipIcon>
     </template>
   </v-text-field>
 </template>

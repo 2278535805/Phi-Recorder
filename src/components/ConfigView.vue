@@ -22,7 +22,7 @@ en:
   hevc-tips: Use HEVC encoding, which has higher compression rate and slower speed
 
   sample-count: Sample Count
-  sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA, which can improve the quality of the picture while increasing the performance cost
+  sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA
 
   bitrate-control: Bitrate Control
   bitrate: Bitrate
@@ -30,7 +30,7 @@ en:
 
   player-avatar: Player Avatar
   player-name: Player Name
-  player-rks: Player Rks.
+  player-rks: Player Rks
 
   image-filter: Image
 
@@ -78,7 +78,8 @@ en:
   difficulty: Custom Difficulty
   offset: Offset
   phiraMode: Phira Features
-  phiraMode-tips: Hold cover using head position
+  phiraMode-tips: |
+    Hold cover using head position
   judgeOffset: Judge Offset
 
   render: Render
@@ -124,7 +125,7 @@ zh-CN:
   hevc-tips: 使用 HEVC 编码，压缩率更高，渲染速度更慢
 
   sample-count: 采样数
-  sample-count-tips: 非 1 的采样数(必须为 2 的幂)会启用 MSAA(若开头无画面请关闭此项)
+  sample-count-tips: 大于 1 的采样数(必须为 2 的幂)会启用 MSAA
 
   bitrate-control: 码率控制
   bitrate: 码率
@@ -180,7 +181,8 @@ zh-CN:
   difficulty: 自定义难度
   offset: 延时
   phiraMode: Phira模式
-  phiraMode-tips: Hold 遮罩使用头部位置
+  phiraMode-tips: |
+    Hold 遮罩使用头部位置
   judgeOffset: 判定偏移
   render: 渲染内容
   renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
