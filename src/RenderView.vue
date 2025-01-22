@@ -21,6 +21,7 @@ en:
   chart-name: Chart name
   chart-offset: Offset
   charter: Charter
+  composer: Composer
   illustrator: Illustrator
   level: Level
   aspect: Aspect ratio
@@ -215,7 +216,7 @@ event.listen('tauri://file-drop', async (event) => {
 });
 
 document.addEventListener('keydown', async (event) => {
-  if (event.key === 'Enter') {
+  if (document.hasFocus() && event.key === 'Enter') {
     await moveNext();
   }
 });
@@ -238,7 +239,7 @@ async function buildParams() {
 const ffmpegDialog = ref(false);
 async function postRender() {
   try {
-    if (!(await invoke('test_ffmpeg')) || true) {
+    if (!(await invoke('test_ffmpeg'))) {
       ffmpegDialog.value = true;
       //await dialog.message(t('ffmpeg-not-found'));
       return false;
@@ -261,7 +262,12 @@ async function openDownload() {
   await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
 }
 
+const loadingNext = ref(false);
+const loadingPreview = ref(false);
+const loadingPlay = ref(false);
+
 async function previewChart() {
+  loadingPreview.value = true;
   try {
     let params = await buildParams();
     if (!params) return false;
@@ -270,6 +276,8 @@ async function previewChart() {
   } catch (e) {
     toastError(e);
     return false;
+  } finally {
+    setTimeout(() => (loadingPreview.value = false), 1000)
   }
 }
 
@@ -287,6 +295,7 @@ async function previewTweakoffset() {
 }
 
 async function previewPlay() {
+  loadingPlay.value = true;
   try {
     let params = await buildParams();
     if (!params) return false;
@@ -295,6 +304,8 @@ async function previewPlay() {
   } catch (e) {
     toastError(e);
     return false;
+  } finally {
+    setTimeout(() => (loadingPlay.value = false), 1000)
   }
 }
 
@@ -328,9 +339,11 @@ async function moveNext() {
     return;
   }
   if (step.value === 'options') {
+    loadingNext.value = true;
     if (await postRender()) {
       stepIndex.value++;
     }
+    loadingNext.value = false;
     return;
   }
 }
@@ -360,9 +373,9 @@ function tryParseAspect(): number | undefined {
         <v-btn @click="stepIndex && stepIndex--" variant="text" v-t="'prev-step'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
         <div class="flex-grow-1"></div>
-        <v-btn v-if="step === 'options'" variant="tonal" @click="previewPlay" class="mr-2" v-t="'play'"></v-btn>
-        <v-btn v-if="step === 'options'" variant="tonal" @click="previewChart" class="mr-2" v-t="'preview'"></v-btn>
-        <v-btn variant="tonal" @click="moveNext">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
+        <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
+        <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
+        <v-btn :loading="loadingNext" variant="tonal" @click="moveNext">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
       </div>
 
       <template v-slot:item.1>

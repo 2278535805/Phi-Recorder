@@ -718,6 +718,10 @@ pub async fn main(cmd: bool) -> Result<()> {
     let fps = config.fps;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
+    if ipc {
+        send(IPCEvent::StartRender(frames));
+    }
+
     let test_encoder = |encoder: &str| -> bool {
         let output = Command::new(&ffmpeg)
             .args(&["-f", "lavfi", "-i", "color=c=black:s=320x240:d=0", "-c:v", encoder, "-f", "null", "-"])
@@ -832,9 +836,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         preparing_render_time.elapsed()
     );
     let pre_render_time = Instant::now();
-    if ipc {
-        send(IPCEvent::StartRender(frames));
-    }
 
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())

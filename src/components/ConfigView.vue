@@ -669,16 +669,16 @@ async function replacePreset() {
         <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" class="mx-2" :label="t('presets')" :items="presets" item-title="name" v-model="preset"></v-combobox>
       </v-col>
       <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-refresh'" @click="updatePresets"></v-btn>
+        <v-btn class="px-2" v-t="'preset-refresh'" size="large" @click="updatePresets"></v-btn>
       </v-col>
       <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-create'" @click="createPreset"></v-btn>
+        <v-btn class="px-2" v-t="'preset-create'" size="large" @click="createPreset"></v-btn>
       </v-col>
       <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-delete'" :disabled="preset.key === 'default'" @click="deletePreset"></v-btn>
+        <v-btn class="px-2" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'" @click="deletePreset"></v-btn>
       </v-col>
       <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-replace'" :disabled="preset.key === 'default'" @click="replacePreset"></v-btn>
+        <v-btn class="px-2" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'" @click="replacePreset"></v-btn>
       </v-col>
     </v-row>
 
@@ -750,7 +750,7 @@ async function replacePreset() {
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-4 px-2 align-center">
         <v-col cols="8">
-          <v-autocomplete class="mx-2" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-autocomplete>
+          <v-combobox class="mx-2" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
         <v-col cols="2" class="mt-n5 d-flex justify-center">
           <v-btn class="pa-1" size="large" @click="updateRespacks" v-t="'respack-refresh'"></v-btn>

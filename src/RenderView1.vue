@@ -199,7 +199,7 @@ event.listen('tauri://file-drop', async (event) => {
 });
 
 document.addEventListener('keydown', async (event) => {
-  if (event.key === 'Enter') {
+  if (document.hasFocus() && event.key === 'Enter') {
     await moveNext();
   }
 });
