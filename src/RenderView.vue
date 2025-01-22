@@ -238,7 +238,7 @@ async function buildParams() {
 const ffmpegDialog = ref(false);
 async function postRender() {
   try {
-    if (!(await invoke('test_ffmpeg')) || true) {
+    if (!(await invoke('test_ffmpeg'))) {
       ffmpegDialog.value = true;
       //await dialog.message(t('ffmpeg-not-found'));
       return false;
