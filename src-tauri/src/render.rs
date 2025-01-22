@@ -7,7 +7,7 @@ use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use prpr::{
     config::{ChallengeModeColor, Config, Mods},
-    core::{init_assets, internal_id, MSRenderTarget, NoteKind},
+    core::{init_assets, internal_id, MSRenderTarget, HitSound, Note},
     fs,
     info::ChartInfo,
     scene::{BasicPlayer, GameMode, GameScene, LoadingScene, EndingScene},
@@ -380,7 +380,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
     info!("ffmpeg: {}", &ffmpeg);
 
-    let (chart, ..) = GameScene::load_chart(fs.deref_mut(), &info)
+    let (mut chart, ..) = GameScene::load_chart(fs.deref_mut(), &info)
         .await
         .with_context(|| tl!("load-chart-failed"))?;
     macro_rules! ld {
@@ -555,6 +555,23 @@ pub async fn main(cmd: bool) -> Result<()> {
         sample * *gain_reduction
     }
 
+    type AudioMap = std::collections::HashMap<String, AudioClip>;
+    let mut extra_sfxs: AudioMap = AudioMap::new();
+
+    chart.hitsounds.drain().for_each(|(name, clip)| {
+        extra_sfxs.insert(name, clip);
+    });
+
+    let get_hitsound = |note: &Note| {
+        match &note.hitsound {
+            HitSound::None => None,
+            HitSound::Click => Some(&sfx_click),
+            HitSound::Flick => Some(&sfx_flick),
+            HitSound::Drag => Some(&sfx_drag),
+            HitSound::Custom(s) => extra_sfxs.get(s)
+        }
+    };
+
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let offset = config.judge_offset as f64;
@@ -562,12 +579,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             for line in &chart.lines {
                 for note in &line.notes {
                     if !note.fake {
-                        let sfx = match note.kind {
-                            NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
-                            NoteKind::Drag => &sfx_drag,
-                            NoteKind::Flick => &sfx_flick,
-                        };
-                        place_agg(o + note.time as f64 + offset, sfx, volume_sfx);
+                        if let Some(sfx) = get_hitsound(note) {
+                            place_agg(o + note.time as f64 + offset, sfx, volume_sfx);
+                        }
                     }
                 }
             }
@@ -575,12 +589,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             for line in &chart.lines {
                 for note in &line.notes {
                     if !note.fake {
-                        let sfx = match note.kind {
-                            NoteKind::Click | NoteKind::Hold { .. } => &sfx_click,
-                            NoteKind::Drag => &sfx_drag,
-                            NoteKind::Flick => &sfx_flick,
-                        };
-                        place(o + note.time as f64 + offset, sfx, volume_sfx);
+                        if let Some(sfx) = get_hitsound(note) {
+                            place(o + note.time as f64 + offset, sfx, volume_sfx);
+                        }
                     }
                 }
             }
