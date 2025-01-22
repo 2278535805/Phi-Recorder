@@ -46,7 +46,14 @@ en:
   render-started: Rendering has started!
   see-tasks: See tasks
 
-  ffmpeg-not-found: You haven't installed ffmpeg yet. Please download FFmpeg.exe and put it in the specific folder.
+  open-app-folder: Open app folder
+  open-download: Download FFmpeg
+  ffmpeg-not-found: FFmpeg not found!
+  ffmpeg-not-found-detail: |
+    Please download "ffmpeg-master-latest-win64-gpl.zip"
+    Place "ffmpeg.exe" in the program folder or configure the ffmpeg environment variable
+  
+  confirm: Confirm
 
 zh-CN:
   already-running: Phi Recorder 已经在运行
@@ -87,10 +94,17 @@ zh-CN:
   render: 渲染
   play: 游玩
 
-  render-started: 视频已开始渲染！
+  render-started: 视频已开始渲染!
   see-tasks: 查看任务列表
 
-  ffmpeg-not-found: 您尚未安装 FFmpeg。请下载 FFmpeg.exe 并放置在指定文件夹内。
+  open-app-folder: 打开程序文件夹
+  open-download: 下载 FFmpeg
+  ffmpeg-not-found: 未找到 FFmpeg!
+  ffmpeg-not-found-detail: |
+    请下载 "ffmpeg-master-latest-win64-gpl.zip"
+    将 "ffmpeg.exe" 放置在程序文件夹内或配置 ffmpeg 环境变量
+
+  confirm: 确定
 
 </i18n>
 
@@ -221,12 +235,12 @@ async function buildParams() {
   };
 }
 
+const ffmpegDialog = ref(false);
 async function postRender() {
   try {
-    if (!(await invoke('test_ffmpeg'))) {
-      await dialog.message(t('ffmpeg-not-found'));
-      await invoke('open_app_folder');
-      await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
+    if (!(await invoke('test_ffmpeg')) || true) {
+      ffmpegDialog.value = true;
+      //await dialog.message(t('ffmpeg-not-found'));
       return false;
     }
     let params = await buildParams();
@@ -237,6 +251,14 @@ async function postRender() {
     toastError(e);
     return false;
   }
+}
+
+async function openAppFolder() {
+  await invoke('open_app_folder');
+}
+
+async function openDownload() {
+  await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
 }
 
 async function previewChart() {
@@ -425,6 +447,20 @@ function tryParseAspect(): number | undefined {
       <h1 v-t="'choose.drop'"></h1>
     </v-overlay>
   </div>
+
+  <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px">
+      <v-card>
+        <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
+        <v-card-text>
+          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('ffmpeg-not-found-detail') }}</pre>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
+          <v-btn variant="text" @click="openAppFolder" v-t="t('open-app-folder')"></v-btn>
+          <v-btn color="primary" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 </template>
 
 <style scoped>
