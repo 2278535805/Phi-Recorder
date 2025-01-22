@@ -82,7 +82,7 @@ en:
   judgeOffset: Judge Offset
 
   render: Render
-  renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Particle,Effect,Double Hint
+  renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
   expand: Expand
   expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
 
@@ -183,7 +183,7 @@ zh-CN:
   phiraMode-tips: Hold 遮罩使用头部位置
   judgeOffset: 判定偏移
   render: 渲染内容
-  renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
+  renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
   expand: 拓展内容
   expands: 激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
 
