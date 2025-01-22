@@ -51,7 +51,7 @@ en:
   ffmpeg-not-found: FFmpeg not found!
   ffmpeg-not-found-detail: |
     Please download "ffmpeg-master-latest-win64-gpl.zip"
-    Place "ffmpeg.exe" in the program folder or configure the ffmpeg environment variable
+    Place all files in the bin folder in the program folder or configure the ffmpeg environment variables
   
   confirm: Confirm
 
@@ -101,8 +101,8 @@ zh-CN:
   open-download: 下载 FFmpeg
   ffmpeg-not-found: 未找到 FFmpeg!
   ffmpeg-not-found-detail: |
-    请下载 "ffmpeg-master-latest-win64-gpl.zip"
-    将 "ffmpeg.exe" 放置在程序文件夹内或配置 ffmpeg 环境变量
+    请下载 ffmpeg
+    将 bin 文件夹内的所有文件放置在程序文件夹内或配置 ffmpeg 环境变量
 
   confirm: 确定
 
