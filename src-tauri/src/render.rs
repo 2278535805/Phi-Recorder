@@ -718,21 +718,26 @@ pub async fn main(cmd: bool) -> Result<()> {
     let fps = config.fps;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
-    let codecs = String::from_utf8(
-        cmd_hidden(&ffmpeg)
-            .arg("-codecs")
+    let test_encoder = |encoder: &str| -> bool {
+        let output = Command::new(&ffmpeg)
+            .args(&["-f", "lavfi", "-i", "color=c=black:s=320x240:d=0", "-c:v", encoder, "-f", "null", "-"])
+            .arg("-loglevel")
+            .arg("fatal")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
             .output()
-            .with_context(|| tl!("run-ffmpeg-failed"))?
-            .stdout,
-    )?;
+            .expect("Failed to test encoder");
+    
+        output.status.success()
+    };
 
-    let use_cuda = config.hardware_accel && codecs.contains("h264_nvenc");
-    let has_qsv = config.hardware_accel && codecs.contains("h264_qsv");
-    let has_amf = config.hardware_accel && codecs.contains("h264_amf");
+    let use_cuda = config.hardware_accel && test_encoder("h264_nvenc");
+    let has_qsv = config.hardware_accel && test_encoder("h264_qsv");
+    let has_amf = config.hardware_accel && test_encoder("h264_amf");
 
-    let use_cuda_hevc = config.hardware_accel && codecs.contains("hevc_nvenc") && config.hevc;
-    let has_qsv_hevc = config.hardware_accel && codecs.contains("hevc_qsv") && config.hevc;
-    let has_amf_hevc = config.hardware_accel && codecs.contains("hevc_amf") && config.hevc;
+    let use_cuda_hevc = config.hardware_accel && test_encoder("hevc_nvenc") && config.hevc;
+    let has_qsv_hevc = config.hardware_accel && test_encoder("hevc_qsv") && config.hevc;
+    let has_amf_hevc = config.hardware_accel && test_encoder("hevc_amf") && config.hevc;
 
     let ffmpeg_preset = if !use_cuda && !has_qsv && has_amf {
         "-quality"
