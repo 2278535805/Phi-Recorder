@@ -769,7 +769,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         "h264_amf"
     }*/
     else {
-        warn!("No hardware acceleration available, using software encoding");
         if config.hevc {
             "libx265"
         } else {
