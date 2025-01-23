@@ -228,7 +228,6 @@ import type { RenderConfig } from '../model';
 
 import TipSwitch from './TipSwitch.vue';
 import TipTextField from './TipTextField.vue';
-import { Tooltip } from '@mui/material';
 
 const props = defineProps<{ initAspectRatio?: number }>();
 
