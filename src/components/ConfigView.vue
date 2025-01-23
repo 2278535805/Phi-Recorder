@@ -21,6 +21,9 @@ en:
   hevc: HEVC encoding
   hevc-tips: Use HEVC encoding, which has higher compression rate and slower speed
 
+  encoder: Encoder
+  encoder-list: Default(AVC),High Quality(HEVC),Fast(MPEG4)
+
   sample-count: Sample Count
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA
 
@@ -124,6 +127,9 @@ zh-CN:
   hevc: HEVC编码
   hevc-tips: 使用 HEVC 编码，压缩率更高，渲染速度更慢
 
+  encoder: 编码器
+  encoder-list: 默认(AVC),高质量(HEVC),快速(MPEG4)
+
   sample-count: 采样数
   sample-count-tips: 大于 1 的采样数(必须为 2 的幂)会启用 MSAA
 
@@ -222,6 +228,7 @@ import type { RenderConfig } from '../model';
 
 import TipSwitch from './TipSwitch.vue';
 import TipTextField from './TipTextField.vue';
+import { Tooltip } from '@mui/material';
 
 const props = defineProps<{ initAspectRatio?: number }>();
 
@@ -251,8 +258,9 @@ const form = ref<VForm>();
 const resolution = ref('1920x1080'),
   ffmpegPreset = ref('medium p4 balanced'),
   fps = ref('60'),
-  hwAccel = ref(true),
-  hevc = ref(false);
+  hwAccel = ref(true);
+const encoderList = ref(t('encoder-list').split(','));
+const encoder = ref(t('encoder-list').split(',')[0]);
 
 const fxaa = ref(false),
   sampleCount = ref('2'),
@@ -357,6 +365,12 @@ function updateMaxParticles() {
   }
 }
 
+function updateEncoder() {
+  if (encoder.value === encoderList.value[2]) {
+    bitrate.value = '5';
+  }
+}
+
 const STD_CHALLENGE_COLORS = ['white', 'green', 'blue', 'red', 'golden', 'rainbow'];
 
 async function buildConfig(): Promise<RenderConfig | null> {
@@ -377,9 +391,10 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
-    hevc: hevc.value,
-    bitrateControl: bitrateControl.value,
-    bitrate: bitrate.value,
+    hevc: encoder.value === encoderList.value[1],
+    mpeg4: encoder.value === encoderList.value[2],
+    bitrateControl: encoder.value === encoderList.value[2] ? 'CRF' : bitrateControl.value,
+    bitrate: encoder.value === encoderList.value[2] ? '7' : bitrate.value,
 
     challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
     challengeRank: parseInt(challengeRank.value),
@@ -466,7 +481,12 @@ function applyConfig(config: RenderConfig) {
   chartRatio.value = config.chartRatio;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
-  hevc.value = config.hevc;
+  if (config.hevc) {
+    encoder.value = encoderList.value[1];
+  }
+  if (config.mpeg4) {
+    encoder.value = encoderList.value[2];
+  }
   bitrateControl.value = config.bitrateControl;
   bitrate.value = config.bitrate;
 
@@ -541,6 +561,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   fps: 60,
   hardwareAccel: true,
   hevc: false,
+  mpeg4: false,
   bitrateControl: 'CRF',
   bitrate: '28',
 
@@ -689,29 +710,28 @@ async function replacePreset() {
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetList" class="mx-2" :rules="[RULES.non_empty]" v-model="ffmpegPreset"></v-combobox>
-        </v-col>
-        <v-col cols="3">
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="3" v-if="encoder !== encoderList[2]">
+          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetList" class="mx-2" :rules="[RULES.non_empty]" v-model="ffmpegPreset"></v-combobox>
+        </v-col>
+        <v-col cols="3" v-if="encoder !== encoderList[2]">
           <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-1">
+      <v-row no-gutters class="mx-n2">
         <v-col cols="3">
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
-        <v-col cols="3">
-          <v-combobox v-if="bitrateControl === bitrateControlList[0]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="bitrateControl === bitrateControlList[1]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
-
+        <v-col cols="3" class="px-2">
+          <v-select v-model="encoder" :items="encoderList" :label="t('encoder')"></v-select>
         </v-col>
         <v-col cols="3">
-          <v-autocomplete :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-autocomplete>
+          <v-combobox v-if="bitrateControl === bitrateControlList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControl === bitrateControlList[1] && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('hevc')" v-model="hevc"></TipSwitch>
+          <v-autocomplete v-if="encoder !== encoderList[2]" :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-autocomplete>
         </v-col>
       </v-row>
     </div>

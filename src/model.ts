@@ -63,6 +63,7 @@ export interface RenderConfig {
   fps: number;
   hardwareAccel: boolean;
   hevc: boolean;
+  mpeg4: boolean;
   bitrateControl: string;
   bitrate: string;
 

@@ -5,6 +5,7 @@ disableLoading: true
 fps: 60
 hardwareAccel: true
 hevc: false
+mpeg4: false
 bitrateControl: CRF
 bitrate: 26
 aggressive: true

@@ -45,6 +45,7 @@ pub struct RenderConfig {
     fps: u32,
     hardware_accel: bool,
     hevc: bool,
+    mpeg4: bool,
     bitrate_control: String,
     bitrate: String,
 
@@ -147,6 +148,7 @@ impl RenderConfig {
             fps: 60,
             hardware_accel: true,
             hevc: false,
+            mpeg4: false,
             bitrate_control: "CRF".to_string(),
             bitrate: "1000k".to_string(),
             aggressive: true,
@@ -729,6 +731,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             .args(&["-f", "lavfi", "-i", "color=c=black:s=320x240:d=0", "-c:v", encoder, "-f", "null", "-"])
             .arg("-loglevel")
             .arg("fatal")
+            .arg("-hide_banner")
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .output()
@@ -752,7 +755,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
     let mut ffmpeg_preset_name_list = config.ffmpeg_preset.split_whitespace();
 
-    if config.hardware_accel {
+    if config.hardware_accel && !config.mpeg4 {
         if !(use_cuda_hevc || has_qsv_hevc || has_amf_hevc) && config.hevc {
             bail!(tl!("no-hwacc"));
         } else if !(use_cuda || has_qsv || has_amf) {
@@ -760,7 +763,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     }
 
-    let ffmpeg_encoder = if use_cuda_hevc {
+    let ffmpeg_encoder = if config.mpeg4 {
+        "mpeg4"
+    } else if use_cuda_hevc {
         "hevc_nvenc"
     } else if use_cuda {
         "h264_nvenc"
@@ -782,6 +787,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     };
 
+    info!("encoder: {}", ffmpeg_encoder);
+
     let ffmpeg_preset_name = if use_cuda {
         ffmpeg_preset_name_list.nth(1)
     } else if has_qsv {
@@ -791,6 +798,23 @@ pub async fn main(cmd: bool) -> Result<()> {
     } else {
         ffmpeg_preset_name_list.nth(0)
     };
+
+    let bitrate_control = 
+    if config.bitrate_control == "CRF" {
+        if use_cuda && !config.mpeg4 {
+            "-cq"
+        } else if has_qsv || config.mpeg4 {
+            "-q"
+        }
+        //else if has_amf {"-qp_p"}
+        else {
+            "-crf"
+        }
+    } else {
+        "-b:v"
+    };
+
+    let bitrate = config.bitrate;
 
     let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo".to_owned();
     if use_cuda {
@@ -809,20 +833,8 @@ pub async fn main(cmd: bool) -> Result<()> {
             "aac -b:a 320k"
         },
         ffmpeg_encoder,
-        if config.bitrate_control == "CRF" {
-            if use_cuda {
-                "-cq"
-            } else if has_qsv {
-                "-q"
-            }
-            //else if has_amf {"-qp_p"}
-            else {
-                "-crf"
-            }
-        } else {
-            "-b:v"
-        },
-        config.bitrate,
+        bitrate_control,
+        bitrate,
         ffmpeg_preset,
         ffmpeg_preset_name.unwrap_or("medium"),
         if config.disable_loading {
