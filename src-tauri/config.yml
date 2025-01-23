@@ -1,5 +1,5 @@
 resolution: [1920, 1080]
-ffmpegPreset: medium
+ffmpegPreset: medium p4 balanced
 endingLength: 0.0
 disableLoading: true
 fps: 60
