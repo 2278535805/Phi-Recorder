@@ -90,7 +90,7 @@ function formatDuration(seconds: number) {
   const secs = duration.seconds();
 
   if (hours > 0) {
-    return `${t('duration.hours')} ${t('duration.minutes')} ${t('duration.seconds')}`;
+    return `${hours} ${t('duration.hours')} ${minutes} ${t('duration.minutes')} ${secs} ${t('duration.seconds')}`;
   } else if (minutes > 0) {
     return `${minutes} ${t('duration.minutes')} ${secs} ${t('duration.seconds')}`;
   } else if (secs > 0) {

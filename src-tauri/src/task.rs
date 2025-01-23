@@ -127,6 +127,9 @@ impl Task {
             let Some(line) = line else { break };
             let Ok(event): Result<IPCEvent, _> = serde_json::from_str(line.trim()) else { continue };
             match event {
+                IPCEvent::Loading => {
+                    *self.status.lock().await = TaskStatus::Loading;
+                }
                 IPCEvent::StartMixing => {
                     *self.status.lock().await = TaskStatus::Mixing;
                 }

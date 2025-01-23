@@ -205,6 +205,7 @@ pub struct RenderParams {
 
 #[derive(Serialize, Deserialize)]
 pub enum IPCEvent {
+    Loading,
     StartMixing,
     StartRender(u64),
     Frame,
@@ -672,6 +673,10 @@ pub async fn main(cmd: bool) -> Result<()> {
         info!("Output Audio Time:{:.2?}", output_audio_time.elapsed());
     }
 
+    if ipc {
+        send(IPCEvent::Loading);
+    }
+
     let preparing_render_time = Instant::now();
     let (vw, vh) = config.resolution;
     let mst = Rc::new(MSRenderTarget::new((vw, vh), config.sample_count));
@@ -718,9 +723,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let fps = config.fps;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
-    if ipc {
-        send(IPCEvent::StartRender(frames));
-    }
 
     let test_encoder = |encoder: &str| -> bool {
         let output = Command::new(&ffmpeg)
@@ -739,9 +741,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     let has_qsv = config.hardware_accel && test_encoder("h264_qsv");
     let has_amf = config.hardware_accel && test_encoder("h264_amf");
 
-    let use_cuda_hevc = config.hardware_accel && test_encoder("hevc_nvenc") && config.hevc;
-    let has_qsv_hevc = config.hardware_accel && test_encoder("hevc_qsv") && config.hevc;
-    let has_amf_hevc = config.hardware_accel && test_encoder("hevc_amf") && config.hevc;
+    let use_cuda_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_nvenc");
+    let has_qsv_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_qsv");
+    let has_amf_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_amf");
 
     let ffmpeg_preset = if !use_cuda && !has_qsv && has_amf {
         "-quality"
@@ -867,6 +869,10 @@ pub async fn main(cmd: bool) -> Result<()> {
             );
         }
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    }
+
+    if ipc {
+        send(IPCEvent::StartRender(frames));
     }
 
     let fps = fps as f64;
