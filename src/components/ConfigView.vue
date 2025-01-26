@@ -117,7 +117,7 @@ zh-CN:
     other: 其他
 
   resolution: 分辨率
-  ffmpeg-preset: 预设
+  ffmpeg-preset: 编码质量
   fps: FPS
 
   hw-accel: 硬件加速
@@ -137,7 +137,7 @@ zh-CN:
 
   bitrate-control: 码率控制
   bitrate: 码率
-  bitrate-crf: 量化参数
+  bitrate-crf: 质量参数
 
   player-avatar: 玩家头像
   player-name: 玩家名

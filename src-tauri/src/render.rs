@@ -769,13 +769,11 @@ pub async fn main(cmd: bool) -> Result<()> {
         "hevc_qsv"
     } else if has_qsv {
         "h264_qsv"
-    }
-    else if has_amf_hevc {
+    } else if has_amf_hevc {
         "hevc_amf"
     } else if has_amf {
         "h264_amf"
-    }
-    else {
+    } else {
         if config.hevc {
             "libx265"
         } else {
