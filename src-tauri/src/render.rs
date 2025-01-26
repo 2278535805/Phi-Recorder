@@ -748,11 +748,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let has_qsv_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_qsv");
     let has_amf_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_amf");
 
-    let ffmpeg_preset = if !use_cuda && !has_qsv && has_amf {
-        "-quality"
-    } else {
-        "-preset"
-    };
+    let ffmpeg_preset = "-preset";
     let mut ffmpeg_preset_name_list = config.ffmpeg_preset.split_whitespace();
 
     if config.hardware_accel && !config.mpeg4 {
