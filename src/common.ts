@@ -40,8 +40,8 @@ export const RULES = {
     if ((unit === 'mbps' || unit === 'm') && number > 0 && number <= 1000) return true;
   
     return i18n.global.t('rules.bitrate');
-  }
-  
+  },
+  nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
 };
 
 export function isNumeric(num: any) {

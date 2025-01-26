@@ -774,11 +774,11 @@ pub async fn main(cmd: bool) -> Result<()> {
     } else if has_qsv {
         "h264_qsv"
     }
-    /*else if has_amf_hevc {
+    else if has_amf_hevc {
         "hevc_amf"
     } else if has_amf {
         "h264_amf"
-    }*/
+    }
     else {
         if config.hevc {
             "libx265"
@@ -790,24 +790,29 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("encoder: {}", ffmpeg_encoder);
 
     let ffmpeg_preset_name = if use_cuda {
-        ffmpeg_preset_name_list.nth(1)
+        ffmpeg_preset_name_list.nth(1).unwrap_or(
+            ffmpeg_preset_name_list.nth(0).unwrap_or("p4")
+        )
     } else if has_qsv {
-        ffmpeg_preset_name_list.nth(0)
+        ffmpeg_preset_name_list.nth(2).unwrap_or("medium")
     } else if has_amf {
-        ffmpeg_preset_name_list.nth(2)
+        ffmpeg_preset_name_list.nth(3).unwrap_or(
+            ffmpeg_preset_name_list.nth(0).unwrap_or("balanced")
+        )
     } else {
-        ffmpeg_preset_name_list.nth(0)
+        ffmpeg_preset_name_list.nth(0).unwrap_or("medium")
     };
 
     let bitrate_control = 
-    if config.bitrate_control == "CRF" {
+    if config.bitrate_control.to_lowercase() == "crf" {
         if use_cuda && !config.mpeg4 {
             "-cq"
         } else if has_qsv || config.mpeg4 {
             "-q"
         }
-        //else if has_amf {"-qp_p"}
-        else {
+        else if has_amf {
+            "-qp_p"
+        } else {
             "-crf"
         }
     } else {
@@ -836,7 +841,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         bitrate_control,
         bitrate,
         ffmpeg_preset,
-        ffmpeg_preset_name.unwrap_or("medium"),
+        ffmpeg_preset_name,
         if config.disable_loading {
             format!("-ss {}", o)
         } else {

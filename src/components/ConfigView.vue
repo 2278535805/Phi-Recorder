@@ -89,6 +89,8 @@ en:
   renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
   expand: Expand
   expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
+  ffmpeg-preset-list: Very Fast,Faster,Fast,Medium,Slow,Slower,Very Slow
+  bitrate-control-list: CRF,CBR
 
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
@@ -194,6 +196,8 @@ zh-CN:
   renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
   expand: 拓展内容
   expands: 激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
+  ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
+  bitrate-control-list: 动态码率,固定码率
 
   max-particles: 粒子限制
   max-particles-list: 低,中,高
@@ -232,8 +236,15 @@ import TipTextField from './TipTextField.vue';
 const props = defineProps<{ initAspectRatio?: number }>();
 
 const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
-const ffmpegPresetPresetList = ['veryfast p1 speed', 'faster p2 speed','fast p3 balanced', 'medium p4 balanced', 'slow p5 balanced', 'slower p6 quality', 'veryslow p7 quality'];
-const bitrateControlList = ['CRF','CBR'];
+const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
+  ffmpegPresetPresetList = ['veryfast p1 veryfast speed', 'faster p2 faster speed','fast p3 fast speed', 'medium p4 medium balanced', 'slow p5 slow quality', 'slower p6 slower quality', 'veryslow p7 veryslow quality'],
+  ffmpegPresetText = ref(ffmpegPresetPresetTextList[3]),
+  ffmpegPreset = ref(ffmpegPresetPresetList[3]);
+const bitrateControlTextList = t('bitrate-control-list').split(','),
+  bitrateControlList = ['crf','cbr'],
+  bitrateControlText = ref(bitrateControlTextList[0]),
+  bitrateControl = ref(bitrateControlList[0]),
+  bitrate = ref('28');
 const bitrateList = ['7M', '5M'];
 const bitrateCrfList = ['28', '24', '40'];
 const fpsList = ['60', '120', '30'];
@@ -255,16 +266,13 @@ const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number
 const form = ref<VForm>();
 
 const resolution = ref('1920x1080'),
-  ffmpegPreset = ref('medium p4 balanced'),
   fps = ref('60'),
   hwAccel = ref(true);
 const encoderList = ref(t('encoder-list').split(','));
 const encoder = ref(t('encoder-list').split(',')[0]);
 
 const fxaa = ref(false),
-  sampleCount = ref('2'),
-  bitrateControl = ref('CRF'),
-  bitrate = ref('28');
+  sampleCount = ref('2');
 
 const playerAvatar = ref<string>(),
   playerName = ref(''),
@@ -364,9 +372,21 @@ function updateMaxParticles() {
   }
 }
 
-function updateEncoder() {
-  if (encoder.value === encoderList.value[2]) {
-    bitrate.value = '5';
+function updateList(value: any, text: any, list: any, textList: any) {
+  const index = textList.indexOf(text.value);
+  if (index >= 0 && index < textList.length) {
+    value.value = list[index];
+  } else {
+    value.value = text.value;
+  }
+}
+
+function setList(config: any, text: any, textList: any) {
+  const index = textList.indexOf(text.value);
+  if (index >= 0 && index < textList.length) {
+    text.value = textList[index];
+  } else {
+    text.value = config;
   }
 }
 
@@ -379,6 +399,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
   }
 
   updateMaxParticles();
+  updateList(ffmpegPreset, ffmpegPresetText, ffmpegPresetPresetList, ffmpegPresetPresetTextList);
 
   return {
     resolution: (() => {
@@ -474,7 +495,8 @@ function StickyLabel(props: { title: string }) {
 
 function applyConfig(config: RenderConfig) {
   resolution.value = config.resolution.join('x');
-  ffmpegPreset.value = config.ffmpegPreset;
+  setList(config.ffmpegPreset, ffmpegPresetText, ffmpegPresetPresetTextList);
+  //ffmpegPresetText.value = ffmpegPresetPresetTextList[ffmpegPresetPresetList.indexOf(config.ffmpegPreset)];
   endingLength.value = String(config.endingLength);
   chartDebug.value = config.chartDebug;
   chartRatio.value = config.chartRatio;
@@ -712,7 +734,7 @@ async function replacePreset() {
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
-          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetList" class="mx-2" :rules="[RULES.non_empty]" v-model="ffmpegPreset"></v-combobox>
+          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" class="mx-2" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
           <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
@@ -726,11 +748,11 @@ async function replacePreset() {
           <v-select v-model="encoder" :items="encoderList" :label="t('encoder')"></v-select>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="bitrateControl === bitrateControlList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="bitrateControl === bitrateControlList[1] && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControlText === bitrateControlTextList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControlText === bitrateControlTextList[1] && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-autocomplete v-if="encoder !== encoderList[2]" :label="t('bitrate-control')" :items="bitrateControlList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControl"></v-autocomplete>
+          <v-autocomplete v-if="encoder !== encoderList[2]" :label="t('bitrate-control')" :items="bitrateControlTextList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControlText"></v-autocomplete>
         </v-col>
       </v-row>
     </div>
