@@ -42,6 +42,10 @@ export const RULES = {
     return i18n.global.t('rules.bitrate');
   },
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
+  nonCOMBO: (value: string) => {
+    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g, '').trim();
+    return filteredValue !== 'COMBO' || i18n.global.t('rules.combo');
+  }
 };
 
 export function isNumeric(num: any) {
