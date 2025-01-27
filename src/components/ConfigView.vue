@@ -89,7 +89,7 @@ en:
   renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
   expand: Expand
   expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
-  ffmpeg-preset-list: Very Fast,Faster,Fast,Medium,Slow,Slower,Very Slow
+  ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
   bitrate-control-list: CRF,CBR
 
   max-particles: Particle Limit
