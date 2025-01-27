@@ -418,6 +418,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let video_length = o + length + a + config.ending_length;
 
     info!("Loading Resources Time:{:.2?}", loading_time.elapsed());
+    info!("video length: {:.2}s", video_length);
 
     let render_start_time = Instant::now();
 
@@ -781,7 +782,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     };
 
-    info!("encoder: {}", ffmpeg_encoder);
+    info!("Encoder: {}", ffmpeg_encoder);
 
     let ffmpeg_preset_name = if use_cuda {
         ffmpeg_preset_name_list.nth(1).unwrap_or(
@@ -850,6 +851,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
     let pre_render_time = Instant::now();
 
+    //info!("Command: {} {} {} {} {}", "ffmpeg", args,"-", args2, output_path.display());
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg(mixing_output.path())
@@ -922,7 +924,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("Pre-Render Time:{:.2?}", pre_render_time.elapsed());
 
     let frames10 = frames / 10;
-    info!("video length: {:.2}s", video_length);
     let render_time = Instant::now();
     let mut step_time = Instant::now();
     for frame in N as u64..frames {
