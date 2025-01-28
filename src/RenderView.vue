@@ -432,7 +432,7 @@ function tryParseAspect(): number | undefined {
               </div>
             </v-col>
             <v-col cols="8" class="px-6">
-              <v-slider :label="t('dim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="chartInfo.backgroundDim"></v-slider>
+              <v-slider :label="t('dim')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
           </v-row>
 
