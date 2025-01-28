@@ -79,7 +79,7 @@
         "fullscreen": false,
         "height": 660,
         "resizable": true,
-        "title": "phi-recorder",
+        "title": "Phi Recorder",
         "width": 880,
         "fileDropEnabled": true
       }
