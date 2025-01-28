@@ -273,7 +273,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
     let (mut fs, output_path, config, info) = 
-    if cmd{
+    if cmd {
         init_assets();
 
         #[cfg(target_os = "windows")]
@@ -301,9 +301,6 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
             Ok(config) => config,
         };
-        let mut prpr_config = config.to_config();
-        prpr_config.mods = Mods::AUTOPLAY;
-        prpr_config.disable_audio = true;
         let path = std::env::args().nth(2).unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;

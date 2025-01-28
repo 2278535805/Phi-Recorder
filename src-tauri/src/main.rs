@@ -32,8 +32,7 @@ use std::{
 };
 use task::{TaskQueue, TaskView};
 use tauri::{
-    CustomMenuItem, InvokeError, Manager, State, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem, WindowEvent,
+    CustomMenuItem, InvokeError, Manager, State, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, WindowEvent
 };
 use tokio::{io::AsyncWriteExt, process::Command};
 
@@ -65,9 +64,9 @@ pub fn build_conf() -> macroquad::window::Conf {
             big: BIG_ICON,
             small: SMALL_ICON
         }),
-        headless: !matches!(
+        headless: matches!(
             std::env::args().skip(1).next().as_deref(),
-            Some("preview") | Some("tweakoffset") | Some("play")
+            None | Some("render") | Some("--render")
         ),
         ..Default::default()
     }
@@ -119,22 +118,28 @@ async fn main() -> Result<()> {
                 run_wrapped(render::main(false)).await;
             }
             Some("preview") | Some("play") => {
-                run_wrapped(preview::main()).await;
+                run_wrapped(preview::main(false, false)).await;
             }
             Some("tweakoffset") => {
-                run_wrapped(preview::tweakoffset()).await;
+                run_wrapped(preview::main(false, true)).await;
             }
             Some("--render") => {
                 run_wrapped(render::main(true)).await;
             }
+            Some("--preview") | Some("--play") => {
+                run_wrapped(preview::main(true, false)).await;
+            }
+            Some("--tweakoffset") => {
+                run_wrapped(preview::main(true, true)).await;
+            }
             cmd => {
-                eprintln!("Unknown subcommand: {cmd:?}");
+                eprintln!("Command: {cmd:?}");
                 let args = std::env::args().nth(1).unwrap_or_default();
                 let path = Path::new(&args);
                 if path.is_file() && (args.contains(".pez") || args.contains(".zip")) || path.is_dir() {
-                    println!("Find a valid path, send to render");
+                    println!("Find a valid path, start preview");
                     let mut child = Command::new(std::env::current_exe()?)
-                        .arg("--render")
+                        .arg("--preview")
                         .arg(args)
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())

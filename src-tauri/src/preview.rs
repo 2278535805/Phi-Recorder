@@ -1,15 +1,10 @@
-use crate::render::{build_player, RenderParams};
-use anyhow::Result;
+use crate::render::{build_player, RenderConfig, RenderParams};
+use anyhow::{Context, Result};
 use macroquad::prelude::*;
 use prpr::{
-    config::{Config, Mods},
-    fs,
-    scene::{show_error, GameMode, LoadingScene, NextScene, Scene},
-    time::TimeManager,
-    ui::{FontArc, TextPainter, Ui},
-    Main,
+    config::{Config, Mods}, core::init_assets, fs, scene::{show_error, GameMode, LoadingScene, NextScene, Scene}, time::TimeManager, ui::{FontArc, TextPainter, Ui}, Main
 };
-use std::io::BufRead;
+use std::{io::BufRead, ops::DerefMut};
 
 struct BaseScene(Option<NextScene>, bool);
 impl Scene for BaseScene {
@@ -54,91 +49,77 @@ impl Scene for BaseScene {
     }
 }
 
-pub async fn main() -> Result<()> {
-    set_pc_assets_folder(&std::env::args().nth(2).unwrap());
+pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
+    let (fs, config, info) = 
+    if cmd {
+        init_assets();
 
-    let mut stdin = std::io::stdin().lock();
-    let stdin = &mut stdin;
+        let config = match (|| -> Result<RenderConfig> {
+            Ok(serde_yaml::from_str(
+                &std::fs::read_to_string("config.yml").context("error reading config")?,
+            )?)
+        })() {
+            Err(err) => {
+                warn!("error loading config: {:?}", err);
+                RenderConfig::default()
+            }
+            Ok(config) => config,
+        };
+        let path = std::env::args().nth(2).unwrap();
 
-    let mut line = String::new();
-    stdin.read_line(&mut line)?;
-    let params: RenderParams = serde_json::from_str(line.trim())?;
+        let mut fs = fs::fs_from_file(path.as_ref())?;
+        let info = fs::load_info(fs.deref_mut()).await?;
 
-    let fs = fs::fs_from_file(&params.path)?;
-    let info = params.info;
-    let mut config: Config = params.config.to_config();
-    if std::env::args().nth(1).as_deref() == Some("preview") {
-        config.mods |= Mods::AUTOPLAY;
+        (fs, config, info)
+    }
+    else {
+        set_pc_assets_folder(&std::env::args().nth(2).unwrap());
+    
+        let mut stdin = std::io::stdin().lock();
+        let stdin = &mut stdin;
+    
+        let mut line = String::new();
+        stdin.read_line(&mut line)?;
+        let params: RenderParams = serde_json::from_str(line.trim())?;
+        let path = params.path;
+    
+        let fs = fs::fs_from_file(&path)?;
+    
+        let config = params.config;
+        let info = params.info;
+
+        (fs, config, info)
+    };
+
+
+    let mut prpr_config: Config = config.to_config();
+    if matches!(std::env::args().nth(1).as_deref(), Some("preview") | Some("--preview")) {
+        prpr_config.mods |= Mods::AUTOPLAY;
     }
 
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);
 
-    let player = build_player(&params.config).await?;
+    let player = build_player(&config).await?;
 
     let tm = TimeManager::default();
-    let ctm = TimeManager::from_config(&config); // strange variable name...
+    let ctm = TimeManager::from_config(&prpr_config); // strange variable name...
     let mut main = Main::new(
         Box::new(BaseScene(
             Some(NextScene::Overlay(Box::new(
-                LoadingScene::new(GameMode::Normal, info, &config, fs, Some(player), None, None)
-                    .await?,
-            ))),
-            false,
-        )),
-        ctm,
-        None,
-    )
-    .await?;
-    let mut fps_time = -1;
-
-    'app: loop {
-        let frame_start = tm.real_time();
-        main.update()?;
-        main.render(&mut painter)?;
-        if main.should_exit() {
-            break 'app;
-        }
-
-        let t = tm.real_time();
-        let fps_now = t as i32;
-        if fps_now != fps_time {
-            fps_time = fps_now;
-            info!("| {}", (1. / (t - frame_start)) as u32);
-        }
-
-        next_frame().await;
-    }
-
-    Ok(())
-}
-
-pub async fn tweakoffset() -> Result<()> {
-    set_pc_assets_folder(&std::env::args().nth(2).unwrap());
-
-    let mut stdin = std::io::stdin().lock();
-    let stdin = &mut stdin;
-
-    let mut line = String::new();
-    stdin.read_line(&mut line)?;
-    let params: RenderParams = serde_json::from_str(line.trim())?;
-
-    let fs = fs::fs_from_file(&params.path)?;
-    let info = params.info;
-    let mut config: Config = params.config.to_config();
-    config.mods |= Mods::AUTOPLAY;
-
-    let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
-    let mut painter = TextPainter::new(font);
-
-    let player = build_player(&params.config).await?;
-
-    let tm = TimeManager::default();
-    let ctm = TimeManager::from_config(&config);
-    let mut main = Main::new(
-        Box::new(BaseScene(
-            Some(NextScene::Overlay(Box::new(
-                LoadingScene::new(GameMode::TweakOffset, info, &config, fs, Some(player), None, None)
+                LoadingScene::new(
+                    if tweak_offset {
+                        GameMode::TweakOffset
+                    } else {
+                        GameMode::Normal
+                    }, 
+                    info, 
+                    &prpr_config, 
+                    fs, 
+                    Some(player), 
+                    None, 
+                    None
+                )
                     .await?,
             ))),
             false,
