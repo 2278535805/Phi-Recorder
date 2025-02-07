@@ -266,7 +266,7 @@ const encoderList = ref(t('encoder-list').split(','));
 const encoder = ref(t('encoder-list').split(',')[0]);
 
 const fxaa = ref(false),
-  sampleCount = ref('2');
+  sampleCount = ref('8');
 
 const playerAvatar = ref<string>(),
   playerName = ref(''),
@@ -588,7 +588,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   playerAvatar: null,
   playerName: '',
   playerRks: 16.00,
-  sampleCount: 2,
+  sampleCount: 8,
   resPackPath: null,
   speed: 1,
   volumeMusic: 1.0,

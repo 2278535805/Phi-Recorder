@@ -159,7 +159,7 @@ impl RenderConfig {
             particle: true,
             player_name: "HLMC".to_string(),
             player_rks: 16.0,
-            sample_count: 2,
+            sample_count: 8,
             res_pack_path: None,
             speed: 1.0,
             volume_music: 1.0,
