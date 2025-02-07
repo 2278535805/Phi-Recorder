@@ -296,7 +296,7 @@ const renderList = ref(t('renders').split(','));
 const render = ref<string[]>([]);
 render.value.push(...renderList.value.slice(1, 12));
 const expandList = ref(t('expands').split(','));
-const expand = ref([expandList.value[1], expandList.value[3]]);
+const expand = ref([expandList.value[3]]);
 
 interface Respack {
   name: string;
@@ -565,7 +565,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   ffmpegPreset: 'medium p4 balanced',
   endingLength: 0.0,
   disableLoading: true,
-  hires: true,
+  hires: false,
   chartDebug: false,
   chartRatio: 1,
   allGood: false,

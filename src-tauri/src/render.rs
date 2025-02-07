@@ -142,7 +142,7 @@ impl RenderConfig {
             ffmpeg_preset: "medium".to_string(),
             ending_length: 5.0,
             disable_loading: false,
-            hires: true,
+            hires: false,
             fps: 60,
             hardware_accel: true,
             hevc: false,
