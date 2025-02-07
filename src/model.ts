@@ -90,7 +90,6 @@ export interface RenderConfig {
   chinese: boolean;
   combo: string;
   difficulty: string;
-  phiraMode: boolean;
   judgeOffset: number;
   forceLimit: boolean;
   limitThreshold: number;

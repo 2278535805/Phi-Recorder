@@ -74,7 +74,6 @@ pub struct RenderConfig {
     chinese: bool,
     combo: String,
     difficulty: String,
-    phira_mode: bool,
     judge_offset: f32,
     simple_file_name: bool,
 
@@ -120,7 +119,6 @@ impl RenderConfig {
             chinese: self.chinese,
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
-            phira_mode: self.phira_mode,
             disable_audio: false,
             judge_offset: self.judge_offset,
 
@@ -178,7 +176,6 @@ impl RenderConfig {
             chinese: false,
             combo: "AUTOPLAY".to_string(),
             difficulty: "".to_string(),
-            phira_mode: false,
             player_avatar: None,
             judge_offset: 0.,
             simple_file_name: false,

@@ -80,9 +80,6 @@ en:
   combo: COMBO text
   difficulty: Custom Difficulty
   offset: Offset
-  phiraMode: Phira Features
-  phiraMode-tips: |
-    Hold cover using head position
   judgeOffset: Judge Offset
 
   render: Render
@@ -188,9 +185,6 @@ zh-CN:
   combo: COMBO文字
   difficulty: 自定义难度
   offset: 延时
-  phiraMode: Phira模式
-  phiraMode-tips: |
-    Hold 遮罩使用头部位置
   judgeOffset: 判定偏移
   render: 渲染内容
   renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
@@ -350,7 +344,6 @@ const allBad = ref(false)
 
 const combo = ref('AUTOPLAY')
 const difficulty = ref('')
-const phiraMode = ref(false)
 const judgeOffset = ref('0')
 const simpleFileName = ref(false)
 
@@ -435,7 +428,6 @@ async function buildConfig(): Promise<RenderConfig | null> {
     watermark: watermark.value,
     combo: combo.value,
     difficulty: difficulty.value,
-    phiraMode: phiraMode.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
     simpleFileName: simpleFileName.value,
     
@@ -527,7 +519,6 @@ function applyConfig(config: RenderConfig) {
   watermark.value = config.watermark;
   combo.value = config.combo;
   difficulty.value = config.difficulty;
-  phiraMode.value = config.phiraMode;
   judgeOffset.value = String(config.judgeOffset * 1000);
 
   allGood.value = judgeMode.value === t('judge-modes').split(',')[1] ? true : false;
@@ -610,7 +601,6 @@ const DEFAULT_CONFIG: RenderConfig = {
   chinese: false,
   combo: 'AUTOPLAY',
   difficulty: '',
-  phiraMode: false,
   judgeOffset: 0,
   simpleFileName: false,
   renderLine: true,
@@ -859,9 +849,6 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
-        </v-col>
-        <v-col cols="3">
-          <TipSwitch :label="t('phiraMode')" :tooltip="t('phiraMode-tips')" v-model="phiraMode"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
