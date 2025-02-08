@@ -105,6 +105,7 @@ export interface RenderConfig {
   renderBg: boolean;
 
   maxParticles: number;
+  fade: number;
 }
 
 export interface RPEChart {

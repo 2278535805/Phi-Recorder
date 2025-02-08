@@ -92,6 +92,8 @@ en:
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
 
+  fade: Fade In/Out
+
   presets: Presets
   preset-refresh: Refresh
   preset-create: Create
@@ -195,6 +197,8 @@ zh-CN:
 
   max-particles: 粒子限制
   max-particles-list: 低,中,高
+
+  fade: 上隐/下隐
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -350,7 +354,9 @@ const simpleFileName = ref(false)
 const maxParticlesText = ref(t('max-particles-list').split(',')[1]);
 const maxParticles = ref(100000);
 const maxParticlesTextList = t('max-particles-list').split(',');
-const maxParticlesList =[20000, 100000, 800000];
+const maxParticlesList = [20000, 100000, 800000];
+
+const fade = ref('0.0');
 
 function updateMaxParticles() {
   const index = maxParticlesTextList.indexOf(maxParticlesText.value);
@@ -454,6 +460,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chinese: expand.value.includes(expandList.value[5]),
 
     maxParticles: maxParticles.value,
+    fade: parseFloat(fade.value),
 };
 }
 
@@ -558,6 +565,7 @@ function applyConfig(config: RenderConfig) {
   } else {
     maxParticlesText.value = String(maxParticles.value);
   }
+  fade.value = String(config.fade);
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -613,6 +621,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   renderBg: true,
 
   maxParticles: 100000,
+  fade: 0.0,
 };
 interface Preset {
   name: string;
@@ -849,6 +858,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('fade')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

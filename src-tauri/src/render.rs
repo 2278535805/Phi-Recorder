@@ -87,6 +87,8 @@ pub struct RenderConfig {
     render_bg: bool,
 
     max_particles: usize,
+
+    fade: f32,
 }
 
 impl RenderConfig {
@@ -132,6 +134,7 @@ impl RenderConfig {
             render_bg: self.render_bg,
 
             max_particles: self.max_particles,
+            fade: self.fade,
             ..Default::default()
         }
     }
@@ -190,6 +193,7 @@ impl RenderConfig {
             render_bg: true,
 
             max_particles: 100000,
+            fade: 0.0,
         }
     }
 }
