@@ -55,3 +55,4 @@ renderUiBar: true
 renderBg: true
 
 maxParticles: 100000
+fade: 0.0
