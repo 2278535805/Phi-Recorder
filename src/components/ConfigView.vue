@@ -1,6 +1,7 @@
 <i18n>
 en:
   title:
+    common: Common
     output: Output
     player: Player
     graphics: Graphics
@@ -108,6 +109,7 @@ en:
 
 zh-CN:
   title:
+    common: 常用
     output: 输出
     player: 玩家
     graphics: 图像
@@ -262,6 +264,8 @@ const resolutionRule = (value: string) => parseResolution(value) !== null || t('
 const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number(value)) % 1 === 0) || t('rules.sample-count');
 
 const form = ref<VForm>();
+
+const page = ref(0);
 
 const resolution = ref('1920x1080'),
   fps = ref('60'),
@@ -704,7 +708,45 @@ async function replacePreset() {
 </script>
 
 <template>
-  <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll">
+      <v-layout class="overflow-visible" style="height: 56px;">
+        <v-bottom-navigation
+          v-model="page"
+          color="primary"
+          horizontal
+        >
+          <v-btn>
+            <v-icon>mdi-star-box</v-icon>
+            {{ t('title.common') }}
+          </v-btn>
+
+          <v-btn>
+            <v-icon>mdi-video-box</v-icon>
+            {{ t('title.output') }}
+          </v-btn>
+
+          <v-btn>
+            <v-icon>mdi-account</v-icon>
+            {{ t('title.player') }}
+          </v-btn>
+
+          <v-btn>
+            <v-icon>mdi-image-area</v-icon>
+            {{ t('title.graphics') }}
+          </v-btn>
+
+          <v-btn>
+            <v-icon>mdi-music</v-icon>
+            {{ t('title.audio') }}
+          </v-btn>
+
+          <v-btn>
+            <v-icon>mdi-toolbox</v-icon>
+            {{ t('title.other') }}
+          </v-btn>
+        </v-bottom-navigation>
+      </v-layout>
+
+  <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 20px;">
     <v-row no-gutters class="mx-n2 align-center">
       <v-col cols="8">
         <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" class="mx-2" :label="t('presets')" :items="presets" item-title="name" v-model="preset"></v-combobox>
@@ -723,7 +765,48 @@ async function replacePreset() {
       </v-col>
     </v-row>
 
-    <div>
+    <div v-if = "page === 0">
+      <StickyLabel :title="t('title.common')"></StickyLabel>
+      <v-row no-gutters class="mx-n2">
+        <v-col cols="3">
+          <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
+        </v-col>
+        <v-col cols="3">
+          <v-combobox v-if="bitrateControlText === bitrateControlTextList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="bitrateControlText === bitrateControlTextList[1] && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field
+            readonly
+            class="mx-2"
+            accept="image/*"
+            :label="t('player-avatar')"
+            @click="chooseAvatar"
+            @click.clear="playerAvatar = undefined"
+            clearable
+            :model-value="playerAvatar ? playerAvatar.split('\\').pop()!.split('/').pop() : ''"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('player-name')" v-model="playerName"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2">
+        <v-col cols="3" class="px-2">
+          <v-select v-model="expand" :items="expandList" :label="t('expand')" chips multiple></v-select>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
+        </v-col>
+      </v-row>
+    </div>
+
+    <div v-if = "page === 1 || page === undefined">
       <StickyLabel :title="t('title.output')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
@@ -755,7 +838,7 @@ async function replacePreset() {
         </v-col>
       </v-row>
     </div>
-    <div class="mt-2">
+    <div class="mt-2" v-if = "page === 2 || page === undefined">
       <StickyLabel :title="t('title.player')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="4">
@@ -786,9 +869,9 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2">
+    <div class="mt-2" v-if = "page === 3 || page === undefined">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 mt-4 px-2 align-center">
+      <v-row no-gutters class="mx-n2 mt-4 align-center">
         <v-col cols="8">
           <v-combobox class="mx-2" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
@@ -817,7 +900,7 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2">
+    <div class="mt-2" v-if = "page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
         <v-col cols="4">
@@ -833,9 +916,9 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2">
+    <div class="mt-2" v-if = "page === 5 || page === undefined">
       <StickyLabel :title="t('title.other')"></StickyLabel>
-      <v-row no-gutters class="align-center">
+      <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
@@ -849,7 +932,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-2">
+      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
           <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
         </v-col>

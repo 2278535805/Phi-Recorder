@@ -77,10 +77,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 660,
+        "height": 690,
         "resizable": true,
         "title": "Phi Recorder",
-        "width": 880,
+        "width": 900,
         "fileDropEnabled": true
       }
     ],

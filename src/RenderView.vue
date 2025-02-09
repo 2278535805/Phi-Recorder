@@ -368,7 +368,7 @@ function tryParseAspect(): number | undefined {
 
 <template>
   <div class="pa-8 w-100 h-100" style="max-width: 1280px">
-    <v-stepper alt-labels v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))">
+    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))">
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn @click="stepIndex && stepIndex--" variant="text" v-t="'prev-step'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
