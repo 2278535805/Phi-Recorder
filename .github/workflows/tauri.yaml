@@ -34,6 +34,7 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
+          cache-all-crates: "true"
 
       - name: Sync node version and setup cache
         uses: pnpm/action-setup@v2
