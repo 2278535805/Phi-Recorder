@@ -74,25 +74,27 @@ async function unbindRPE() {
       <div class="d-flex justify-center mb-4">
         <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn>
       </div>
-      <v-card v-for="chart in charts" :key="chart.id" class="chart-card">
-        <div class="d-flex flex-row align-stretch">
-          <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
-            <div
-              class="cover-image"
-              style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-              :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }"></div>
-          </div>
-          <div class="d-flex flex-column w-100 chart-content">
-            <v-card-title class="chart-name">{{ chart.name }}</v-card-title>
-            <v-card-subtitle class="mt-n2 chart-id">{{ chart.id }}</v-card-subtitle>
-            <div class="w-100 pa-4 mt-2">
-              <div class="pt-4 d-flex justify-end">
-                <v-btn class="render-btn hover-scale" color="primary" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
+      <transition-group name="fade" tag="div" class="chart-list">
+        <v-card v-for="(chart, index) in charts" :key="chart.id" class="chart-card" :style="{ animationDelay: index * 0.1 + 's' }">
+          <div class="d-flex flex-row align-stretch">
+            <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
+              <div
+                class="cover-image"
+                style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
+                :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }"></div>
+            </div>
+            <div class="d-flex flex-column w-100 chart-content">
+              <v-card-title class="chart-name">{{ chart.name }}</v-card-title>
+              <v-card-subtitle class="mt-n2 chart-id">{{ chart.id }}</v-card-subtitle>
+              <div class="w-100 pa-4 mt-2">
+                <div class="pt-4 d-flex justify-end">
+                  <v-btn class="render-btn hover-scale" color="primary" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </v-card>
+        </v-card>
+      </transition-group>
     </template>
   </div>
 </template>
@@ -128,13 +130,16 @@ async function unbindRPE() {
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 20px 20px;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+  opacity: 0; /* 初始状态透明 */
 }
 
 .chart-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.3);
 }
 
 .chart-cover {
@@ -195,4 +200,31 @@ async function unbindRPE() {
   background-clip: text;
   color: transparent;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    scale: 0.8;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hoverUp {
+  from {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0px);
+  }
+  to {
+    opacity: 1;
+    scale: 1.05;
+    transform: translateY(-4px);
+  }
+}
+
 </style>
