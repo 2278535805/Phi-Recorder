@@ -164,7 +164,7 @@ async function showFolder() {
     <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
       <v-row>
         <v-col cols="12" style="margin: -20px 0px;">
-          <v-btn size="large" class="hover-scale" @click="showFolder()" v-t="'show-folder'"></v-btn>
+          <v-btn size="large" class="hover-scale margin-btn" @click="showFolder()" v-t="'show-folder'"></v-btn>
         </v-col>
       </v-row>
     </v-form>
@@ -277,7 +277,7 @@ async function showFolder() {
 .task-card {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.05);
-  margin: 20px 20px;
+  margin: 5px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
@@ -310,6 +310,10 @@ async function showFolder() {
 
 .hover-scale {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.margin-btn {
+  margin-bottom: 14px !important;
 }
 
 .fade-in {
