@@ -47,7 +47,7 @@ zh-CN:
   output: 输出
 
   show-output: 查看输出
-  show-in-folder: 打开输出文件夹
+  show-folder: 打开输出文件夹
   show-in-folder: 在文件夹中显示
   open-file: 打开文件
   
