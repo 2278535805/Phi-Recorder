@@ -76,7 +76,7 @@ const tasks = ref<Task[]>();
 
 async function updateList() {
   tasks.value = await invoke<Task[]>('get_tasks');
-  console.log(tasks.value[0]);
+  //console.log(tasks.value[0]);
 }
 
 await updateList();

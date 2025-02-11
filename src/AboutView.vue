@@ -1,11 +1,15 @@
 <i18n>
 en:
   app: Phi Recorder
+  check: Check Update
   new-version: New version available!
+  non-version: It's the latest version
 
 zh-CN:
   app: Phi Recorder
+  check: 检查更新
   new-version: 有新版本可用!
+  non-version: 已是最近版本
 
 </i18n>
 
@@ -21,23 +25,30 @@ const appVersion = await getVersion();
 
 import axios from 'axios';
 import semver from 'semver';
+import { ref } from 'vue';
 
 async function checkForUpdates() {
-      try {
-        const response = await axios.get('https://api.github.com/repos/2278535805/Phi-Recorder/tags');
-        const tags = response.data;
-        if (tags.length === 0) {
-          throw new Error('No tags found');
-        }
-        const latestVersion = tags[0].name;
-        return semver.gt(latestVersion, appVersion);
-      } catch (error) {
-        console.error('Error fetching tags:', error);
-        return false;
-      }
+  checking.value = true;
+  try {
+    const response = await axios.get('https://api.github.com/repos/2278535805/Phi-Recorder/tags');
+    const tags = response.data;
+    if (tags.length === 0) {
+      throw new Error('No tags found');
     }
+    const latestVersion = tags[0].name;
+    console.log(latestVersion);
+    updates.value = semver.gt(latestVersion, appVersion);
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+    updates.value = false;
+  }
+  check.value = true;
+  checking.value = false;
+}
 
-const updates = await checkForUpdates();
+const updates = ref(false);
+const checking = ref(false);
+const check = ref(false);
 </script>
 
 <template>
@@ -46,7 +57,9 @@ const updates = await checkForUpdates();
       <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
+      <v-btn class="github-btn hover-scale" prepend-icon="mdi-update" :loading="checking" @click="checkForUpdates">{{ t('check') }}</v-btn>
       <p v-if="updates" class="mt-n4 text-glow">{{ t('new-version') }}</p>
+      <p v-if="!updates && check" class="mt-n4 text-glow">{{ t('non-version') }}</p>
       <p class="license-text text-gradient">Licensed by GPLv3</p>
     </div>
   </div>
@@ -55,8 +68,8 @@ const updates = await checkForUpdates();
 <style scoped>
 .about-container {
   padding: 2rem;
-  width: 600px;
-  height: 300px;
+  min-width: 600px;
+  min-height: 300px;
   max-width: 1280px;
   display: flex;
   flex-direction: column;
@@ -96,7 +109,7 @@ const updates = await checkForUpdates();
 
 .github-btn {
   background: rgba(147, 147, 147, 0.2);
-  padding: 12px 24px;
+  padding: 0px 24px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
