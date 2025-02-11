@@ -43,7 +43,7 @@ export const RULES = {
   },
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
   nonCOMBO: (value: string) => {
-    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g, '').trim();
+    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~ΜΟΒСՕ]/g, '').trim();
     if (value.length > 50) {
       return i18n.global.t('rules.long');
     }
