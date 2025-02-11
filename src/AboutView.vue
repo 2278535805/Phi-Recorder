@@ -9,7 +9,7 @@ zh-CN:
   app: Phi Recorder
   check: 检查更新
   new-version: 有新版本可用!
-  non-version: 已是最近版本
+  non-version: 已是最新版本
 
 </i18n>
 
@@ -57,9 +57,9 @@ const check = ref(false);
       <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
-      <v-btn class="github-btn hover-scale" prepend-icon="mdi-update" :loading="checking" @click="checkForUpdates">{{ t('check') }}</v-btn>
-      <p v-if="updates" class="mt-n4 text-glow">{{ t('new-version') }}</p>
-      <p v-if="!updates && check" class="mt-n4 text-glow">{{ t('non-version') }}</p>
+      <v-btn v-if="!check" class="github-btn hover-scale" prepend-icon="mdi-update" :loading="checking" @click="checkForUpdates">{{ t('check') }}</v-btn>
+      <p v-if="updates" class="mt-2 text-glow">{{ t('new-version') }}</p>
+      <p v-if="!updates && check" class="mt-2 text-glow">{{ t('non-version') }}</p>
       <p class="license-text text-gradient">Licensed by GPLv3</p>
     </div>
   </div>
