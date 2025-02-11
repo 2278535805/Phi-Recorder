@@ -118,7 +118,7 @@ window.goto = (name: string) => {
 }
 
 .app-bar-shadow {
-  box-shadow: 10px 4px 20px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 .nav-drawer-border {
@@ -127,7 +127,7 @@ window.goto = (name: string) => {
 
 .list-item {
   transition: all 0.3s ease;
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
 .list-item-hover {

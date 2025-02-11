@@ -238,7 +238,7 @@ async function showFolder() {
     </v-card>
 
     <v-dialog v-model="errorDialog" width="auto" min-width="400px">
-      <v-card>
+      <v-card class="log-card">
         <v-card-title v-t="'error'"> </v-card-title>
         <v-card-text>
           <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ errorDialogMessage }}</pre>
@@ -250,7 +250,7 @@ async function showFolder() {
     </v-dialog>
 
     <v-dialog v-model="outputDialog" width="auto" min-width="400px">
-      <v-card>
+      <v-card class="log-card">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
           <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ outputDialogMessage }}</pre>
@@ -264,6 +264,14 @@ async function showFolder() {
 </template>
 
 <style scoped>
+.log-card {
+  border-radius: 16px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(80px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .task-card {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.03) !important;
@@ -326,7 +334,7 @@ pre {
 .v-btn {
   background: rgba(255, 255, 255, 0.05);
   padding: 8px 14px;
-  margin: 4px 4px;
+  margin: 4px 8px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
