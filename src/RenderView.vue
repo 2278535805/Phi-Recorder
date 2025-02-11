@@ -368,24 +368,24 @@ function tryParseAspect(): number | undefined {
 
 <template>
   <div class="pa-8 w-100 h-100" style="max-width: 1280px">
-    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))">
+    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))" class="elevated-stepper v-stepper">
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn @click="stepIndex && stepIndex--" variant="text" v-t="'prev-step'"></v-btn>
         <v-btn v-if="step === 'options'" variant="tonal" @click="previewTweakoffset" class="mr-2" v-t="'tweakoffset'"></v-btn>
         <div class="flex-grow-1"></div>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
-        <v-btn :loading="loadingNext" variant="tonal" @click="moveNext">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
+        <v-btn :loading="loadingNext" variant="tonal" @click="moveNext" class="gradient-primary">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
       </div>
 
       <template v-slot:item.1>
         <div class="mt-8 d-flex" style="gap: 1rem">
           <div class="flex-grow-1 d-flex align-center justify-center w-0 py-8">
-            <v-btn class="w-75" style="overflow: hidden" size="large" color="primary" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
+            <v-btn class="w-75 gradient-primary" style="overflow: hidden" size="large" color="primary" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
           </div>
           <v-divider vertical></v-divider>
           <div class="flex-grow-1 d-flex align-center justify-center w-0">
-            <v-btn class="w-75" size="large" color="primary" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
+            <v-btn class="w-75 gradient-primary" size="large" color="primary" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
           </div>
         </div>
         <p class="mb-8 w-100 text-center mt-2 text-disabled" v-t="'choose.can-also-drop'"></p>
@@ -452,12 +452,14 @@ function tryParseAspect(): number | undefined {
         <div class="d-flex flex-column justify-center align-center mb-2" style="gap: 1rem">
           <span style="font-size: 84px">🎉</span>
           <h2>{{ t('render-started') }}</h2>
-          <v-btn @click="router.push({ name: 'tasks' })" v-t="'see-tasks'"></v-btn>
+          <v-btn class="gradient-primary" @click="router.push({ name: 'tasks' })" v-t="'see-tasks'"></v-btn>
         </div>
       </template>
     </v-stepper>
-    <v-overlay v-model="fileHovering" contained class="align-center justify-center" persistent :close-on-content-click="false">
-      <h1 v-t="'choose.drop'"></h1>
+    <v-overlay v-model="fileHovering" contained class="align-center justify-center drop-zone-overlay" persistent :close-on-content-click="false">
+      <div class="drop-pulse">
+        <h1 v-t="'choose.drop'"></h1>
+      </div>
     </v-overlay>
   </div>
 
@@ -481,4 +483,106 @@ function tryParseAspect(): number | undefined {
 .v-progress-linear__determinate {
   transition: none;
 }
+
+.gradient-primary {
+  background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
+  box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gradient-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.3);
+}
+
+.elevated-stepper {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(8px);
+}
+
+.v-text-field :deep(.v-field--focused) {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2);
+}
+
+.v-stepper {
+  font-family: 'Inter var', system-ui, sans-serif;
+}
+
+h2 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  background: linear-gradient(45deg, #3b82f6, #6366f1);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:deep(.v-stepper-header__item) .v-stepper-header__title {
+  font-weight: 500;
+  color: #64748b;
+}
+
+:deep(.v-stepper-header__item--active) .v-stepper-header__title {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.drop-zone-overlay {
+  background: rgba(99, 102, 241, 0.15) !important;
+  backdrop-filter: blur(4px);
+}
+
+.drop-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.v-progress-circular {
+  color: #6366f1;
+  --v-progress-circular-size: 48px;
+}
+
+:deep(.v-slider__thumb) {
+  background: #6366f1 !important;
+  box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2) !important;
+}
+
+:deep(.v-slider__track-fill) {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+}
+
+.v-text-field.type-number {
+  --v-field-padding-start: 1rem;
+  --v-field-border-radius: 8px;
+}
+
+.v-stepper__content {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.v-stepper__content-leave-active {
+  position: absolute;
+}
+
+.v-stepper__content-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+  .v-stepper__content-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.v-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+  
 </style>
