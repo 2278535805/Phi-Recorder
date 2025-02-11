@@ -167,12 +167,13 @@ async function showFolder() {
       </v-row>
     </v-form>
     <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled" v-t="'empty'"></h1>
-    <v-card v-for="task in tasks" :key="task.id">
+    <v-card v-for="task in tasks" :key="task.id" class="task-card">
       <div class="d-flex flex-row align-stretch">
         <div class="d-flex flex-row align-center" style="width: 35%">
           <div
             style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-            :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"></div>
+            :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"
+            class="task-cover"></div>
         </div>
         <div class="d-flex flex-column w-100">
           <v-card-title>{{ task.name }}</v-card-title>
@@ -181,15 +182,23 @@ async function showFolder() {
             <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
             <template v-if="['loading', 'mixing', 'rendering'].includes(task.status.type)">
               <v-progress-linear
-                :indeterminate="task.status.type !== 'rendering'"
-                :model-value="task.status.type === 'rendering' ? task.status.progress * 100 : 0"></v-progress-linear>
+                v-if="task.status.type !== 'rendering'"
+                :indeterminate="true"
+                class="glow-spinner"
+              ></v-progress-linear>
+              <v-progress-linear
+                v-else
+                :model-value="task.status.progress * 100"
+                rounded
+              ></v-progress-linear>
               <div class="pt-4 d-flex justify-end">
-                <v-btn variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"></v-btn>
+                <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"></v-btn>
               </div>
             </template>
             <div v-if="task.status.type === 'failed'" class="pt-4 d-flex justify-end">
               <v-btn
-                variant="text"
+                variant="flat"
+                prepend-icon="mdi-alert-circle-outline"
                 @click="
                   () => {
                     if (task.status.type === 'failed') {
@@ -198,12 +207,14 @@ async function showFolder() {
                     }
                   }
                 "
-                v-t="'details'"></v-btn>
+                v-t="'details'"
+                class="hover-scale"></v-btn>
             </div>
             <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
               <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'"></v-btn>
               <v-btn
-                variant="text"
+                variant="flat"
+                prepend-icon="mdi-text-box-outline"
                 @click="
                   () => {
                     if (task.status.type === 'done') {
@@ -212,8 +223,14 @@ async function showFolder() {
                     }
                   }
                 "
-                v-t="'show-output'"></v-btn>
-              <v-btn variant="text" @click="showInFolder(task.output)" v-t="'show-in-folder'"></v-btn>
+                v-t="'show-output'"
+                class="hover-scale"></v-btn>
+              <v-btn 
+              variant="flat"
+              prepend-icon="mdi-folder-open-outline" 
+              @click="showInFolder(task.output)" 
+              v-t="'show-in-folder'"
+              class="hover-scale"></v-btn>
             </div>
           </div>
         </div>
@@ -245,3 +262,73 @@ async function showFolder() {
     </v-dialog>
   </div>
 </template>
+
+<style scoped>
+.task-card {
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.task-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.task-cover {
+  border-radius: 16px 0 0 16px;
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.glass-background {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-gradient {
+  background: linear-gradient(45deg, #2196F3, #E91E63);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow-spinner {
+  filter: drop-shadow(0 0 8px #2196F3);
+}
+
+pre {
+  background: rgba(0, 0, 0, 0.3) !important;
+  padding: 16px !important;
+  border-radius: 8px;
+  font-family: 'Fira Code', monospace;
+}
+
+.animated-form {
+  transition: opacity 0.1s ease, transform 0.1s ease;
+}
+
+.v-slide-y-transition-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.v-btn {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 14px;
+  margin: 4px 4px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
+}
+</style>

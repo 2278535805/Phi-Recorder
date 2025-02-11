@@ -708,8 +708,9 @@ async function replacePreset() {
 </script>
 
 <template>
-      <v-layout class="overflow-visible" style="height: 56px;">
-        <v-bottom-navigation
+      <v-layout class="overflow-visible gradient-primary" style="height: 56px;">
+        <v-bottom-navigation 
+          class="navigation"
           v-model="page"
           color="primary"
           horizontal
@@ -766,7 +767,7 @@ async function replacePreset() {
     </v-row>
 
     <div v-if = "page === 0">
-      <StickyLabel :title="t('title.common')"></StickyLabel>
+      <StickyLabel :title="t('title.common')" class="sticky-label"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
@@ -807,7 +808,7 @@ async function replacePreset() {
     </div>
 
     <div v-if = "page === 1 || page === undefined">
-      <StickyLabel :title="t('title.output')"></StickyLabel>
+      <StickyLabel :title="t('title.output')" class="sticky-label"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
@@ -839,7 +840,7 @@ async function replacePreset() {
       </v-row>
     </div>
     <div class="mt-2" v-if = "page === 2 || page === undefined">
-      <StickyLabel :title="t('title.player')"></StickyLabel>
+      <StickyLabel :title="t('title.player')" class="sticky-label"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="4">
           <v-text-field
@@ -870,7 +871,7 @@ async function replacePreset() {
     </div>
 
     <div class="mt-2" v-if = "page === 3 || page === undefined">
-      <StickyLabel :title="t('title.graphics')"></StickyLabel>
+      <StickyLabel :title="t('title.graphics')" class="sticky-label"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
         <v-col cols="8">
           <v-combobox class="mx-2" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
@@ -901,7 +902,7 @@ async function replacePreset() {
     </div>
 
     <div class="mt-2" v-if = "page === 4 || page === undefined">
-      <StickyLabel :title="t('title.audio')"></StickyLabel>
+      <StickyLabel :title="t('title.audio')" class="sticky-label"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
         <v-col cols="4">
           <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeMusic"> </v-slider>
@@ -917,7 +918,7 @@ async function replacePreset() {
     </div>
 
     <div class="mt-2" v-if = "page === 5 || page === undefined">
-      <StickyLabel :title="t('title.other')"></StickyLabel>
+      <StickyLabel :title="t('title.other')" class="sticky-label"></StickyLabel>
       <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
@@ -952,3 +953,41 @@ async function replacePreset() {
     </div>
   </v-form>
 </template>
+
+<style scoped>
+.gradient-primary {
+  background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
+  box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.elevated-stepper {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+  background: rgba(23, 9, 99, 0.8) !important;
+  backdrop-filter: blur(8px);
+}
+
+.sticky-label {
+  background: rgba(54, 50, 98, 0.9) !important;
+}
+
+.navigation {
+  background: rgba(54, 50, 98, 1) !important;
+}
+
+.v-btn {
+  background: rgba(54, 50, 98, 1) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.v-switch {
+  color:#c7c0ff;
+}
+
+.v-slider {
+  color:#c7c0ff;
+}
+
+
+</style>
