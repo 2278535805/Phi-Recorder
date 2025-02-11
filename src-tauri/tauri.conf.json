@@ -11,6 +11,11 @@
   },
   "tauri": {
     "allowlist": {
+      "http": {
+        "all": true,
+        "scope": [ "https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest" ],
+        "request": true
+      },
       "dialog": {
         "message": true,
         "open": true
@@ -69,7 +74,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost https://api.github.com; style-src 'self' 'unsafe-inline'"
     },
     "updater": {
       "active": false

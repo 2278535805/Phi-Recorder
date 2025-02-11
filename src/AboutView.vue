@@ -23,20 +23,31 @@ import { open } from '@tauri-apps/api/shell';
 
 const appVersion = await getVersion();
 
-import axios from 'axios';
+import { fetch } from '@tauri-apps/api/http';
 import semver from 'semver';
 import { ref } from 'vue';
+
+type Release = {
+  id: number,
+  tag_name: string,
+};
 
 async function checkForUpdates() {
   checking.value = true;
   try {
-    const response = await axios.get('https://api.github.com/repos/2278535805/Phi-Recorder/tags');
-    const tags = response.data;
-    if (tags.length === 0) {
+    const response = await fetch<Release | null>('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'Phi-Recorder',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    });
+    const release = response.data;
+    if (!release) {
       throw new Error('No tags found');
     }
-    const latestVersion = tags[0].name;
-    console.log(latestVersion);
+    const latestVersion = release.tag_name;
     updates.value = semver.gt(latestVersion, appVersion);
   } catch (error) {
     console.error('Error fetching tags:', error);
