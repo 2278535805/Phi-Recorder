@@ -464,7 +464,7 @@ function tryParseAspect(): number | undefined {
   </div>
 
   <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px">
-      <v-card>
+      <v-card class="log-card">
         <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
         <v-card-text>
           <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
@@ -479,6 +479,14 @@ function tryParseAspect(): number | undefined {
 </template>
 
 <style scoped>
+.log-card {
+  border-radius: 16px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(80px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .v-progress-linear,
 .v-progress-linear__determinate {
   transition: none;
