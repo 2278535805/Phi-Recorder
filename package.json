@@ -14,15 +14,16 @@
   "dependencies": {
     "@mdi/font": "^7.2.96",
     "@tauri-apps/api": "^1.4.0",
+    "@types/semver": "^7.5.8",
+    "axios": "^1.7.0",
     "moment": "^2.29.4",
-    "phi-recorder": "link:",
+    "phi-recorder": "file:",
+    "semver": "^7.7.0",
     "vue": "^3.3.4",
     "vue-i18n": "9.3.0-beta.14-77e850b",
     "vue-router": "^4.2.4",
     "vuetify": "3.3.14",
-    "vuetify-sonner": "0.3.2",
-    "axios": "^1.7.0",
-    "semver": "^7.7.0"
+    "vuetify-sonner": "0.3.2"
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^0.12.3",
