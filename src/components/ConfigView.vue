@@ -748,7 +748,7 @@ async function replacePreset() {
       </v-layout>
 
   <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 20px;">
-    <v-row no-gutters class="mx-n2 align-center">
+    <v-row v-if = "page === 0 || page === undefined" no-gutters class="mx-n2 align-center">
       <v-col cols="8">
         <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" class="mx-2" :label="t('presets')" :items="presets" item-title="name" v-model="preset"></v-combobox>
       </v-col>
