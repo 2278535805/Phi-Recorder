@@ -8,7 +8,6 @@ en:
 
 zh-CN:
   render: 渲染
-  render1: 快速渲染
   rpe: RPE
   tasks: 任务列表
   about: 关于
@@ -138,7 +137,7 @@ window.goto = (name: string) => {
 .list-item-hover:hover {
   background: rgba(255, 255, 255, 0.05) !important;
   margin: 8px 4px;
-  transform: translateX(8px);
+  transform: translateX(4px);
 }
 
 .active-item {

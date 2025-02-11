@@ -19,33 +19,49 @@ const appVersion = await getVersion();
 
 <template>
   <div class="pa-8 w-100 h-100 d-flex flex-column align-center" style="max-width: 1280px; gap: 1rem">
-    <h1 class="app-title gradient-text" v-t="'app'"></h1>
-    <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
-    <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder')">GitHub</v-btn>
-    <p class="license-text text-gradient">Licensed by GPLv3</p>
+    <div class="about-container">
+      <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
+      <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
+      <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder')">GitHub</v-btn>
+      <p class="license-text text-gradient">Licensed by GPLv3</p>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .about-container {
   padding: 2rem;
-  width: 100%;
-  height: 100%;
+  width: 600px;
+  height: 300px;
   max-width: 1280px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+  opacity: 0; /* 初始状态透明 */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.8;
+    transform: translateY(0px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0px);
+  }
 }
 
 .app-title {
   font-size: 3rem;
   font-weight: 700;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.02em;
 }
 
 .version-label {
