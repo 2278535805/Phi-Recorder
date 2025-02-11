@@ -507,7 +507,6 @@ function tryParseAspect(): number | undefined {
   border-radius: 16px !important;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
   background: rgba(255, 255, 255, 0.03) !important;
-  backdrop-filter: blur(8px);
 }
 
 .v-text-field :deep(.v-field--focused) {
@@ -517,6 +516,8 @@ function tryParseAspect(): number | undefined {
 
 .v-stepper {
   font-family: 'Inter var', system-ui, sans-serif;
+  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+  opacity: 0; /* 初始状态透明 */
 }
 
 h2 {
@@ -593,4 +594,16 @@ h2 {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
   
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.8;
+    transform: translateY(0px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0px);
+  }
+}
 </style>
