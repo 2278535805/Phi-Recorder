@@ -128,6 +128,7 @@ async function unbindRPE() {
   background: rgba(255, 255, 255, 0.05);
   font-weight: 600;
   padding: 12px 24px;
+  margin-bottom: 12px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -156,7 +157,7 @@ async function unbindRPE() {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  margin: 20px 20px;
+  margin: 5px;
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
   animation: fadeUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   opacity: 0; /* 初始状态透明 */
