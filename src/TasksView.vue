@@ -19,6 +19,7 @@ en:
   output: Output
 
   show-output: Show Output
+  show-folder: Open Output Folder
   show-in-folder: Show in Folder
   open-file: Open File
   duration: 
@@ -46,6 +47,7 @@ zh-CN:
   output: 输出
 
   show-output: 查看输出
+  show-in-folder: 打开输出文件夹
   show-in-folder: 在文件夹中显示
   open-file: 打开文件
   
@@ -162,7 +164,7 @@ async function showFolder() {
     <v-form ref="form" style="max-height: 48vh;">
       <v-row class = "text-center">
         <v-col cols="12" class="mt-n4">
-          <v-btn @click="showFolder()" v-t="'show-in-folder'"></v-btn>
+          <v-btn class="hover-scale" @click="showFolder()" v-t="'show-folder'"></v-btn>
         </v-col>
       </v-row>
     </v-form>
