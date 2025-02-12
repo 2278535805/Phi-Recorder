@@ -32,6 +32,7 @@
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "0.13.0",
     "@rushstack/eslint-patch": "^1.10.5",
+    "@tauri-apps/cli": "^2.2.7",
     "@tsconfig/node18": "^18.2.4",
     "@types/node": "^18.19.75",
     "@vitejs/plugin-vue": "5.2.1",
