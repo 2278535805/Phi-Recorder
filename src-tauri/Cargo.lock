@@ -3002,6 +3002,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "os_info"
+version = "3.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a604e53c24761286860eba4e2c8b23a0161526476b1de520139d69cdb85a6b5"
+dependencies = [
+ "log",
+ "serde",
+ "windows-sys 0.52.0",
+]
+
+[[package]]
 name = "overload"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3407,7 +3418,7 @@ dependencies = [
  "sha2",
  "subtle",
  "symphonia",
- "sys-locale",
+ "sys-locale 0.2.4",
  "tempfile",
  "tokio",
  "tracing",
@@ -4509,6 +4520,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "sys-locale"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8eab9a99a024a169fe8a903cf9d4a3b3601109bcc13bd9e3c6fff259138626c4"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "system-configuration"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4659,6 +4679,7 @@ dependencies = [
  "objc",
  "once_cell",
  "open 3.2.0",
+ "os_info",
  "percent-encoding",
  "plist",
  "rand 0.8.5",
@@ -4672,6 +4693,7 @@ dependencies = [
  "serde_repr",
  "serialize-to-javascript",
  "state",
+ "sys-locale 0.3.2",
  "tar",
  "tauri-macros",
  "tauri-runtime",
