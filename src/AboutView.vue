@@ -43,11 +43,13 @@ async function checkForUpdates() {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = response.json as unknown as Release;
+    const release = response.json() as Promise<Release>;
+    
     if (!release) {
       throw new Error('No tags found');
     }
-    const latestVersion = release.tag_name;
+    const latestVersion = (await release).tag_name;
+    console.log(latestVersion);
     updates.value = semver.gt(latestVersion, appVersion);
   } catch (error) {
     console.error('Error fetching tags:', error);
