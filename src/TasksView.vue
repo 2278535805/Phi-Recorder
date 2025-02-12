@@ -168,7 +168,7 @@ async function showFolder() {
         </v-col>
       </v-row>
     </v-form>
-    <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled" v-t="'empty'"></h1>
+    <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in" v-t="'empty'"></h1>
     <v-card v-for="(task, index) in tasks" :key="task.id" class="task-card" :style="{ animationDelay: index * 0.1 + 's' }">
       <div class="d-flex flex-row align-stretch">
         <div class="d-flex flex-row align-center" style="width: 35%">
