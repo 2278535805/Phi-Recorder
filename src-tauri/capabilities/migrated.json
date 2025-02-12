@@ -1,0 +1,33 @@
+{
+  "identifier": "migrated",
+  "description": "permissions that were migrated from v1",
+  "local": true,
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "fs:allow-read-file",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$RESOURCE/*"
+      ]
+    },
+    "shell:allow-open",
+    "dialog:allow-open",
+    "dialog:allow-message",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest"
+        }
+      ]
+    },
+    "fs:default",
+    "shell:default",
+    "dialog:default",
+    "http:default"
+  ]
+}

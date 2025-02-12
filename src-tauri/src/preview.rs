@@ -2,7 +2,13 @@ use crate::render::{build_player, RenderConfig, RenderParams};
 use anyhow::{Context, Result};
 use macroquad::prelude::*;
 use prpr::{
-    config::{Config, Mods}, core::init_assets, fs, scene::{show_error, GameMode, LoadingScene, NextScene, Scene}, time::TimeManager, ui::{FontArc, TextPainter, Ui}, Main
+    config::{Config, Mods},
+    core::init_assets,
+    fs,
+    scene::{show_error, GameMode, LoadingScene, NextScene, Scene},
+    time::TimeManager,
+    ui::{FontArc, TextPainter, Ui},
+    Main,
 };
 use std::{io::BufRead, ops::DerefMut};
 
@@ -50,8 +56,7 @@ impl Scene for BaseScene {
 }
 
 pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
-    let (fs, config, info) = 
-    if cmd {
+    let (fs, config, info) = if cmd {
         init_assets();
 
         let config = match (|| -> Result<RenderConfig> {
@@ -71,29 +76,30 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
         let info = fs::load_info(fs.deref_mut()).await?;
 
         (fs, config, info)
-    }
-    else {
+    } else {
         set_pc_assets_folder(&std::env::args().nth(2).unwrap());
-    
+
         let mut stdin = std::io::stdin().lock();
         let stdin = &mut stdin;
-    
+
         let mut line = String::new();
         stdin.read_line(&mut line)?;
         let params: RenderParams = serde_json::from_str(line.trim())?;
         let path = params.path;
-    
+
         let fs = fs::fs_from_file(&path)?;
-    
+
         let config = params.config;
         let info = params.info;
 
         (fs, config, info)
     };
 
-
     let mut prpr_config: Config = config.to_config();
-    if matches!(std::env::args().nth(1).as_deref(), Some("preview") | Some("--preview")) {
+    if matches!(
+        std::env::args().nth(1).as_deref(),
+        Some("preview") | Some("--preview")
+    ) {
         prpr_config.mods |= Mods::AUTOPLAY;
     }
 
@@ -112,15 +118,15 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
                         GameMode::TweakOffset
                     } else {
                         GameMode::Normal
-                    }, 
-                    info, 
-                    &prpr_config, 
-                    fs, 
-                    Some(player), 
-                    None, 
-                    None
+                    },
+                    info,
+                    &prpr_config,
+                    fs,
+                    Some(player),
+                    None,
+                    None,
                 )
-                    .await?,
+                .await?,
             ))),
             false,
         )),

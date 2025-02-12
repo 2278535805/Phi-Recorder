@@ -116,7 +116,8 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { invoke, event, dialog, shell } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
+import { event,   } from '@tauri-apps/api';
 
 import { toastError, RULES, toast, anyFilter, isString } from './common';
 import type { ChartInfo } from './model';
@@ -126,6 +127,8 @@ import { VForm } from 'vuetify/components';
 import ConfigView from './components/ConfigView.vue';
 
 import moment from 'moment';
+import * as dialog from "@tauri-apps/plugin-dialog"
+import * as shell from "@tauri-apps/plugin-shell"
 
 if (!(await invoke('is_the_only_instance'))) {
   await dialog.message(t('already-running'));

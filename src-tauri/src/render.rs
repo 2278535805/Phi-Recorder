@@ -2,15 +2,15 @@
 prpr::tl_file!("render");
 
 use crate::common::{ensure_dir, let_output_dir, output_dir, DATA_DIR};
-use chrono::Local;
 use anyhow::{bail, Context, Result};
+use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use prpr::{
     config::{ChallengeModeColor, Config, Mods},
-    core::{init_assets, internal_id, MSRenderTarget, HitSound, Note},
+    core::{init_assets, internal_id, HitSound, MSRenderTarget, Note},
     fs,
     info::ChartInfo,
-    scene::{BasicPlayer, GameMode, GameScene, LoadingScene, EndingScene},
+    scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
     time::TimeManager,
     ui::{FontArc, TextPainter},
     Main,
@@ -273,8 +273,7 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
-    let (mut fs, output_path, config, info) = 
-    if cmd {
+    let (mut fs, output_path, config, info) = if cmd {
         init_assets();
 
         #[cfg(target_os = "windows")]
@@ -325,9 +324,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let format = if config.hires { "mov" } else { "mp4" };
 
         let file_name = if config.simple_file_name {
-            format!(
-                "{safe_name}.{safe_name2}_{level}.{format}",
-            )
+            format!("{safe_name}.{safe_name2}_{level}.{format}",)
         } else {
             format!(
                 "{} {safe_name}_{level}.{format}",
@@ -344,30 +341,28 @@ pub async fn main(cmd: bool) -> Result<()> {
         };
 
         (fs, output_path, config, info)
-    }
-    else {
+    } else {
         set_pc_assets_folder(&std::env::args().nth(2).unwrap());
-    
+
         let mut stdin = std::io::stdin().lock();
         let stdin = &mut stdin;
-    
+
         let mut line = String::new();
         stdin.read_line(&mut line)?;
         let params: RenderParams = serde_json::from_str(line.trim())?;
         let path = params.path;
-    
+
         line.clear();
         stdin.read_line(&mut line)?;
         let output_path: PathBuf = serde_json::from_str(line.trim())?;
-    
+
         let fs = fs::fs_from_file(&path)?;
-    
+
         let config = params.config;
         let info = params.info;
 
         (fs, output_path, config, info)
     };
-
 
     use crate::ipc::client::*;
     let ipc = if cmd { false } else { true };
@@ -564,14 +559,12 @@ pub async fn main(cmd: bool) -> Result<()> {
         extra_sfxs.insert(name, clip);
     });
 
-    let get_hitsound = |note: &Note| {
-        match &note.hitsound {
-            HitSound::None => None,
-            HitSound::Click => Some(&sfx_click),
-            HitSound::Flick => Some(&sfx_flick),
-            HitSound::Drag => Some(&sfx_drag),
-            HitSound::Custom(s) => extra_sfxs.get(s)
-        }
+    let get_hitsound = |note: &Note| match &note.hitsound {
+        HitSound::None => None,
+        HitSound::Click => Some(&sfx_click),
+        HitSound::Flick => Some(&sfx_flick),
+        HitSound::Drag => Some(&sfx_drag),
+        HitSound::Custom(s) => extra_sfxs.get(s),
     };
 
     if volume_sfx != 0.0 {
@@ -606,13 +599,12 @@ pub async fn main(cmd: bool) -> Result<()> {
         if config.force_limit {
             if config.aggressive {
                 for i in 0..output2_agg.len() {
-                    output2_agg[i] = output2_agg[i]
-                        .clamp(-config.limit_threshold, config.limit_threshold)
+                    output2_agg[i] =
+                        output2_agg[i].clamp(-config.limit_threshold, config.limit_threshold)
                 }
             } else {
                 for i in 0..output2.len() {
-                    output2[i] = output2[i]
-                        .clamp(-config.limit_threshold, config.limit_threshold)
+                    output2[i] = output2[i].clamp(-config.limit_threshold, config.limit_threshold)
                 }
             }
         } else if config.compression_ratio > 1. {
@@ -724,10 +716,19 @@ pub async fn main(cmd: bool) -> Result<()> {
     let fps = config.fps;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
-
     let test_encoder = |encoder: &str| -> bool {
         let output = Command::new(&ffmpeg)
-            .args(&["-f", "lavfi", "-i", "color=c=black:s=320x240:d=0", "-c:v", encoder, "-f", "null", "-"])
+            .args(&[
+                "-f",
+                "lavfi",
+                "-i",
+                "color=c=black:s=320x240:d=0",
+                "-c:v",
+                encoder,
+                "-f",
+                "null",
+                "-",
+            ])
             .arg("-loglevel")
             .arg("fatal")
             .arg("-hide_banner")
@@ -735,7 +736,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             .stderr(Stdio::inherit())
             .output()
             .expect("Failed to test encoder");
-    
+
         output.status.success()
     };
 
@@ -783,27 +784,25 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("Encoder: {}", ffmpeg_encoder);
 
     let ffmpeg_preset_name = if use_cuda {
-        ffmpeg_preset_name_list.nth(1).unwrap_or(
-            ffmpeg_preset_name_list.nth(0).unwrap_or("p4")
-        )
+        ffmpeg_preset_name_list
+            .nth(1)
+            .unwrap_or(ffmpeg_preset_name_list.nth(0).unwrap_or("p4"))
     } else if has_qsv {
         ffmpeg_preset_name_list.nth(2).unwrap_or("medium")
     } else if has_amf {
-        ffmpeg_preset_name_list.nth(3).unwrap_or(
-            ffmpeg_preset_name_list.nth(0).unwrap_or("balanced")
-        )
+        ffmpeg_preset_name_list
+            .nth(3)
+            .unwrap_or(ffmpeg_preset_name_list.nth(0).unwrap_or("balanced"))
     } else {
         ffmpeg_preset_name_list.nth(0).unwrap_or("medium")
     };
 
-    let bitrate_control = 
-    if config.bitrate_control.to_lowercase() == "crf" {
+    let bitrate_control = if config.bitrate_control.to_lowercase() == "crf" {
         if use_cuda && !config.mpeg4 {
             "-cq"
         } else if has_qsv || config.mpeg4 {
             "-q"
-        }
-        else if has_amf {
+        } else if has_amf {
             "-qp_p"
         } else {
             "-crf"

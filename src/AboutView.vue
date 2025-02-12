@@ -19,11 +19,11 @@ useI18n();
 const { t } = useI18n();
 
 import { getVersion } from '@tauri-apps/api/app';
-import { open } from '@tauri-apps/api/shell';
+import { open } from '@tauri-apps/plugin-shell';
 
 const appVersion = await getVersion();
 
-import { fetch } from '@tauri-apps/api/http';
+import { fetch } from '@tauri-apps/plugin-http';
 import semver from 'semver';
 import { ref } from 'vue';
 
@@ -35,7 +35,7 @@ type Release = {
 async function checkForUpdates() {
   checking.value = true;
   try {
-    const response = await fetch<Release | null>('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
+    const response = await fetch('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
       method: 'GET',
       headers: {
         Accept: 'application/vnd.github+json',
@@ -43,7 +43,7 @@ async function checkForUpdates() {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = response.data;
+    const release = response.json as unknown as Release;
     if (!release) {
       throw new Error('No tags found');
     }

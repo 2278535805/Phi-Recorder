@@ -2,83 +2,52 @@
   "build": {
     "beforeBuildCommand": "pnpm run build",
     "beforeDevCommand": "pnpm dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../dist"
-  },
-  "package": {
-    "productName": "phi-recorder",
-    "version": "0.2.26"
-  },
-  "tauri": {
-    "allowlist": {
-      "http": {
-        "all": true,
-        "scope": [ "https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest" ],
-        "request": true
-      },
-      "dialog": {
-        "message": true,
-        "open": true
-      },
-      "fs": {
-        "readFile": true,
-        "scope": ["$RESOURCE/*"]
-      },
-      "protocol": {
-        "asset": true,
-        "assetScope": {
-          "allow": ["**"],
-          "requireLiteralLeadingDot": false
-        }
-      },
-      "shell": {
-        "open": true
-      }
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173"},
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": "all",
+    "externalBin": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
     },
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "resources": [
+      "assets",
+      "WebView2Loader.dll",
+      "config.yml"
+    ],
+    "shortDescription": "",
+    "linux": {
       "deb": {
         "depends": []
-      },
-      "externalBin": [
-      ],
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "identifier": "com.hlmc.phi.recorder",
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [
-        "assets",
-        "WebView2Loader.dll",
-        "config.yml"
-      ],
-      "shortDescription": "",
-      "targets": "all",
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
       }
-    },
-    "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost https://api.github.com; style-src 'self' 'unsafe-inline'"
-    },
-    "updater": {
-      "active": false
-    },
+    }
+  },
+  "productName": "phi-recorder",
+  "mainBinaryName": "phi-recorder",
+  "version": "0.2.26",
+  "identifier": "com.hlmc.phi.recorder",
+  "plugins": {},
+  "app": {
     "windows": [
       {
         "fullscreen": false,
@@ -86,12 +55,22 @@
         "resizable": true,
         "title": "Phi Recorder",
         "width": 900,
-        "fileDropEnabled": true
+        "dragDropEnabled": true,
+        "useHttpsScheme": true
       }
     ],
-    "systemTray": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true
+    "security": {
+      "assetProtocol": {
+        "scope": {
+          "allow": [
+            "**"
+          ],
+          "deny": [],
+          "requireLiteralLeadingDot": false
+        },
+        "enable": true
+      },
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost https://api.github.com; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost"
     }
   }
 }
