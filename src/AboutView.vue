@@ -161,8 +161,8 @@ const dialog_download = ref(false);
     </div>
   </div>
 
-  <v-dialog v-model="dialog_update" width="auto" min-width="400px">
-    <v-card class="log-card">
+  <v-dialog v-model="dialog_update" width="auto" min-width="400px" class="log-card-bg">
+    <v-card class="log-card-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('new-version') }}</pre>
@@ -174,8 +174,8 @@ const dialog_download = ref(false);
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog_non" width="auto" min-width="400px">
-    <v-card class="log-card">
+  <v-dialog v-model="dialog_non" width="auto" min-width="400px" class="log-card-bg">
+    <v-card class="log-card-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('non-version') }}</pre>
@@ -186,8 +186,8 @@ const dialog_download = ref(false);
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog_error" width="auto" min-width="400px">
-    <v-card class="log-card">
+  <v-dialog v-model="dialog_error" width="auto" min-width="400px" class="log-card-bg">
+    <v-card class="log-card-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('err-version') }}</pre>
@@ -198,8 +198,8 @@ const dialog_download = ref(false);
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog_download" width="auto" min-width="400px">
-    <v-card class="log-card">
+  <v-dialog v-model="dialog_download" width="auto" min-width="400px" class="log-card-bg">
+    <v-card class="log-card-window">
       <v-card-title v-t="t('download')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ '111' }}</pre>
@@ -215,20 +215,37 @@ const dialog_download = ref(false);
 </template>
 
 <style scoped>
-.about-container {
-  padding: 2rem;
-  min-width: 600px;
-  min-height: 300px;
-  max-width: 1280px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
-  opacity: 0; /* 初始状态透明 */
+  .about-container {
+    padding: 2rem;
+    min-width: none;
+    min-height: 300px;
+    max-width: 1280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+    opacity: 0; /* 初始状态透明 */
+  }
+
+@media (max-width: 720px) {
+  .about-container {
+    min-width: 350px;
+    width: 100%;
+    min-height: 300px;
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 721px) {
+  .about-container {
+    min-width: 600px;
+    min-height: 300px;
+    max-width: 1280px;
+  }
 }
 
 @keyframes fadeIn {
@@ -295,11 +312,16 @@ const dialog_download = ref(false);
   color: transparent;
 }
 
-.log-card {
+.log-card-bg {
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.log-card-window {
   border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(80px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>

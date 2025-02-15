@@ -154,7 +154,7 @@ async function unbindRPE() {
 .chart-card {
   border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin: 5px;
@@ -166,22 +166,6 @@ async function unbindRPE() {
 .chart-card:hover {
   background: rgba(255, 255, 255, 0.06);
   box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.3);
-}
-
-.chart-cover {
-  width: 35%;
-  min-height: 100px;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.cover-image {
-  width: 100%;
-  height: 100%;
-}
-
-.chart-content {
-  width: 65%;
-  padding: 1rem;
 }
 
 .chart-name {
@@ -247,6 +231,64 @@ async function unbindRPE() {
     opacity: 1;
     scale: 1.05;
     transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 600px) {
+  .cover-image {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-cover {
+    max-width: 0%;
+    min-height: 100px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-content {
+    max-width: 100%;
+    width: 65%;
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1336px) {
+  .cover-image {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-cover {
+    max-width: 35%;
+    min-height: 100px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-content {
+    max-width: 69%;
+    width: 65%;
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 1336px) {
+  .cover-image {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-cover {
+    min-width: 310px;
+    max-width: 35%;
+    min-height: 100px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-content {
+    max-width: 69%;
+    width: 65%;
+    padding: 1rem;
   }
 }
 

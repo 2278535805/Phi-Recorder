@@ -463,11 +463,11 @@ function tryParseAspect(): number | undefined {
     </v-overlay>
   </div>
 
-  <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px">
-      <v-card class="log-card">
+  <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px" class="log-card-bg">
+      <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
+          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
@@ -479,11 +479,23 @@ function tryParseAspect(): number | undefined {
 </template>
 
 <style scoped>
-.log-card {
+.log-card-bg {
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.log-card-window {
   border-radius: 16px !important;
   background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(80px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-msg {
+  border-radius: 12px !important;
+  background: rgba(0, 0, 0, 0.40) !important;
+  transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 

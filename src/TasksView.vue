@@ -171,13 +171,13 @@ async function showFolder() {
     <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in" v-t="'empty'"></h1>
     <v-card v-for="(task, index) in tasks" :key="task.id" class="task-card" :style="{ animationDelay: index * 0.1 + 's' }">
       <div class="d-flex flex-row align-stretch">
-        <div class="d-flex flex-row align-center" style="width: 35%">
+        <div class="d-flex flex-row align-center img-cover" style="width: 30%">
           <div
             style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
             :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"
-            class="task-cover"></div>
+            ></div>
         </div>
-        <div class="d-flex flex-column w-100">
+        <div class="d-flex flex-column w-100 name-cover">
           <v-card-title>{{ task.name }}</v-card-title>
           <v-card-subtitle class="mt-n2">{{ task.path }}</v-card-subtitle>
           <div class="w-100 pa-4 pb-2 pr-2 mt-2">
@@ -239,11 +239,11 @@ async function showFolder() {
       </div>
     </v-card>
 
-    <v-dialog v-model="errorDialog" width="auto" min-width="400px">
-      <v-card class="log-card">
+    <v-dialog v-model="errorDialog" width="auto" min-width="400px" class="log-card-bg">
+      <v-card class="log-card-window">
         <v-card-title v-t="'error'"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ errorDialogMessage }}</pre>
+          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ errorDialogMessage }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="primary" variant="text" @click="errorDialog = false" v-t="'confirm'"></v-btn>
@@ -251,11 +251,11 @@ async function showFolder() {
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="outputDialog" width="auto" min-width="400px">
-      <v-card class="log-card">
+    <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
+      <v-card class="log-card-window">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ outputDialogMessage }}</pre>
+          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="primary" variant="text" @click="outputDialog = false" v-t="'confirm'"></v-btn>
@@ -266,11 +266,23 @@ async function showFolder() {
 </template>
 
 <style scoped>
-.log-card {
+.log-card-bg {
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.log-card-window {
   border-radius: 16px !important;
   background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(80px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-msg {
+  border-radius: 12px !important;
+  background: rgba(0, 0, 0, 0.40) !important;
+  transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -278,7 +290,7 @@ async function showFolder() {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.05);
   margin: 5px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
   animation: fadeUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
@@ -304,12 +316,12 @@ async function showFolder() {
   }
 }
 
-.task-cover {
-  border-radius: 16px 0 0 16px;
-}
-
 .hover-scale {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
 }
 
 .margin-btn {
@@ -332,10 +344,6 @@ async function showFolder() {
     scale: 1;
     transform: translateY(0px);
   }
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
 }
 
 .glass-background {
@@ -380,4 +388,41 @@ pre {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+@media (max-width: 600px) {
+  .img-cover {
+    min-width: none;
+    max-width: 0%;
+  }
+
+  .name-cover {
+    min-width: 100%;
+    max-width: none;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1065px) {
+  .img-cover {
+    min-width: 30%;
+    max-width: none;
+  }
+
+  .name-cover {
+    min-width: none;
+    max-width: 70%;
+  }
+}
+
+@media (min-width: 1065px) {
+  .img-cover {
+    min-width: 280px;
+    max-width: none;
+  }
+
+  .name-cover {
+    min-width: none;
+    max-width: none;
+  }
+}
+
 </style>

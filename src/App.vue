@@ -124,7 +124,7 @@ window.goto = (name: string) => {
 }
 
 .list-item {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.2, 0, 0.1, 1);
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important;
 }
 
