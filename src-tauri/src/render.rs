@@ -390,13 +390,30 @@ pub async fn main(cmd: bool) -> Result<()> {
                     .with_context(|| tl!("load-sfx-failed", "name" => $path))?
             };
         }
+
+    let sample_rate = 48000;
+    let sample_rate_f64 = sample_rate as f64;
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
     let ending = ld!("ending.ogg");
     let track_length = music.length() as f64;
-    let sfx_click = ld!("click.ogg");
-    let sfx_drag = ld!("drag.ogg");
-    let sfx_flick = ld!("flick.ogg");
+
+    fn re_sample(music: &AudioClip, sample_rate: usize) -> Vec<f32> {
+        let len = sample_rate as usize;
+        let ratio = 1.0 / sample_rate as f64;
+        let mut output = vec![0.0_f32; (music.length() * sample_rate as f32).ceil() as usize * 2];
+        for i in 0..len {
+            let position = i as f64 * ratio;
+            let frame = music.sample(position as f32).unwrap_or_default();
+            output[i * 2] = frame.0;
+            output[i * 2 + 1] = frame.1;
+        }
+        output
+    }
+
+    let sfx_click = re_sample(&ld!("click.ogg"), sample_rate);
+    let sfx_drag = re_sample(&ld!("drag.ogg"), sample_rate);
+    let sfx_flick = re_sample(&ld!("drag.ogg"), sample_rate);
 
     let mut gl = unsafe { get_internal_gl() };
 
@@ -424,36 +441,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         send(IPCEvent::StartMixing);
     }
     let mixing_output = NamedTempFile::new()?;
-    let sample_rate = 48000;
-    let sample_rate_f64 = sample_rate as f64;
-    assert_eq!(
-        sample_rate,
-        ending.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        ending.sample_rate()
-    );
-    assert_eq!(
-        sample_rate,
-        sfx_click.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        sfx_click.sample_rate()
-    );
-    assert_eq!(
-        sample_rate,
-        sfx_drag.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        sfx_drag.sample_rate()
-    );
-    assert_eq!(
-        sample_rate,
-        sfx_flick.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        sfx_flick.sample_rate()
-    );
 
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
     let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
@@ -461,34 +448,32 @@ pub async fn main(cmd: bool) -> Result<()> {
     let agg = config.aggressive;
 
     // let stereo_sfx = false; // TODO stereo sound effects
-    let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
+    let mut place = |pos: f64, clip: &Vec<f32>, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
         if position >= output2.len() {
             return 0;
         }
         let slice = &mut output2[position..];
-        let len = (slice.len() / 2).min(clip.frame_count());
+        let len = (slice.len() / 2).min(clip.len() / 2);
 
-        let frames = clip.frames();
         for i in 0..len {
-            slice[i * 2] += frames[i].0 * volume;
-            slice[i * 2 + 1] += frames[i].1 * volume;
+            slice[i * 2] += clip[i] * volume;
+            slice[i * 2 + 1] += clip[i] * volume;
         }
 
         return len;
     };
 
-    let mut place_agg = |pos: f64, clip: &AudioClip, volume: f32| {
+    let mut place_agg = |pos: f64, clip: &Vec<f32>, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize;
         if position >= output2_agg.len() {
             return 0;
         }
         let slice = &mut output2_agg[position..];
-        let len = (slice.len()).min(clip.frame_count());
+        let len = (slice.len()).min(clip.len());
 
-        let frames = clip.frames();
         for i in 0..len {
-            slice[i] += frames[i].0 * volume;
+            slice[i] += clip[i * 2] * volume;
         }
 
         return len;
@@ -513,10 +498,11 @@ pub async fn main(cmd: bool) -> Result<()> {
             let start_index = (pos * sample_rate_f64).round() as usize * 2;
             let slice = &mut output[start_index..];
             let len = (slice.len() / 2).min(ending.frame_count());
-            let frames = &ending.frames();
             for i in 0..len {
-                slice[i * 2] += frames[i].0 * volume_music;
-                slice[i * 2 + 1] += frames[i].1 * volume_music;
+                let position = i as f64 * ratio;
+                let frame = ending.sample(position as f32).unwrap_or_default();
+                slice[i * 2] += frame.0 * volume_music;
+                slice[i * 2 + 1] += frame.1 * volume_music;
             }
             pos += ending.frame_count() as f64 / sample_rate_f64;
         }
@@ -557,11 +543,11 @@ pub async fn main(cmd: bool) -> Result<()> {
         sample * *gain_reduction
     }
 
-    type AudioMap = std::collections::HashMap<String, AudioClip>;
+    type AudioMap = std::collections::HashMap<String, Vec<f32>>;
     let mut extra_sfxs: AudioMap = AudioMap::new();
 
     chart.hitsounds.drain().for_each(|(name, clip)| {
-        extra_sfxs.insert(name, clip);
+        extra_sfxs.insert(name, re_sample(&clip, sample_rate));
     });
 
     let get_hitsound = |note: &Note| {
