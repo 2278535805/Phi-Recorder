@@ -415,7 +415,29 @@ pub async fn main(cmd: bool) -> Result<()> {
     let length = track_length - offset.min(0.) as f64 + 1.;
     let video_length = o + length + a + config.ending_length;
 
-    info!("Loading Resources Time:{:.2?}", loading_time.elapsed());
+    let test_encoder = |encoder: &str| -> bool {
+        let output = Command::new(&ffmpeg)
+            .args(&["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
+            .arg("-loglevel")
+            .arg("fatal")
+            .arg("-hide_banner")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .output()
+            .expect("Failed to test encoder");
+    
+        output.status.success()
+    };
+
+    let use_cuda = config.hardware_accel && test_encoder("h264_nvenc");
+    let has_qsv = config.hardware_accel && test_encoder("h264_qsv");
+    let has_amf = config.hardware_accel && test_encoder("h264_amf");
+
+    let use_cuda_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_nvenc");
+    let has_qsv_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_qsv");
+    let has_amf_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_amf");
+
+    info!("Loading Time:{:.2?}", loading_time.elapsed());
     info!("video length: {:.2}s", video_length);
 
     let render_start_time = Instant::now();
@@ -726,27 +748,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
 
-    let test_encoder = |encoder: &str| -> bool {
-        let output = Command::new(&ffmpeg)
-            .args(&["-f", "lavfi", "-i", "color=c=black:s=320x240:d=0", "-c:v", encoder, "-f", "null", "-"])
-            .arg("-loglevel")
-            .arg("fatal")
-            .arg("-hide_banner")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .output()
-            .expect("Failed to test encoder");
-    
-        output.status.success()
-    };
-
-    let use_cuda = config.hardware_accel && test_encoder("h264_nvenc");
-    let has_qsv = config.hardware_accel && test_encoder("h264_qsv");
-    let has_amf = config.hardware_accel && test_encoder("h264_amf");
-
-    let use_cuda_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_nvenc");
-    let has_qsv_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_qsv");
-    let has_amf_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_amf");
 
     let ffmpeg_preset = "-preset";
     let mut ffmpeg_preset_name_list = config.ffmpeg_preset.split_whitespace();
