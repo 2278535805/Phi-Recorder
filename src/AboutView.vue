@@ -157,7 +157,7 @@ const dialog_download = ref(false);
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-update" :loading="checking" @click="checkForUpdates">{{ t('check') }}</v-btn>
-      <p class="license-text text-gradient">Licensed by GPLv3</p>
+      <p class="license-text license-text-gradient">Licensed by GPLv3</p>
     </div>
   </div>
 
@@ -269,11 +269,6 @@ const dialog_download = ref(false);
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.license-text {
-  font-size: 0.9rem;
-  opacity: 0.7;
-}
-
 .gradient-text {
   background: linear-gradient(45deg, #2196f3, #e91e63);
   -webkit-background-clip: text;
@@ -281,11 +276,12 @@ const dialog_download = ref(false);
   color: transparent;
 }
 
-.text-glow {
-  text-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+.license-text {
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
 
-.text-gradient {
+.license-text-gradient {
   background: linear-gradient(45deg, #4caf50, #ffeb3b);
   -webkit-background-clip: text;
   background-clip: text;

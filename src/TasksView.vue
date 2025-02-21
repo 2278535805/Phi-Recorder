@@ -246,7 +246,7 @@ async function showFolder() {
           <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ errorDialogMessage }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn color="primary" variant="text" @click="errorDialog = false" v-t="'confirm'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="errorDialog = false" v-t="'confirm'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -258,7 +258,7 @@ async function showFolder() {
           <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn color="primary" variant="text" @click="outputDialog = false" v-t="'confirm'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'confirm'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

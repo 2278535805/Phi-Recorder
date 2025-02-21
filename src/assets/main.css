@@ -12,7 +12,9 @@
   }
 }
 
-
+.text-glow {
+  text-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+}
 
 .log-card-bg {
   backdrop-filter: blur(20px);
@@ -48,6 +50,7 @@
 
 .hover-scale:hover {
   transform: scale(1.05);
+  filter: drop-shadow(0 0 8px #ffffff50);
 }
 
 .v-text-field.type-number {

@@ -472,7 +472,7 @@ function tryParseAspect(): number | undefined {
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
           <v-btn variant="text" @click="openAppFolder" v-t="t('open-app-folder')"></v-btn>
-          <v-btn color="primary" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
+          <v-btn color="primary" class="hover-scale" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

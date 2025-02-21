@@ -77,7 +77,9 @@ window.goto = (name: string) => {
     <v-sonner position="top-center" />
     <v-app-bar :elevation="0" class="app-bar-shadow blur-background">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
-      <v-app-bar-title class="mx-5">Phi Recorder</v-app-bar-title>
+      <div class="gradient-text">
+        <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
+      </div>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" expand-on-hover rail permanent class="nav-drawer-border blur-background list-item">
       <v-list density="compact" nav>
@@ -123,6 +125,13 @@ window.goto = (name: string) => {
   border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
+.gradient-text {
+  background: linear-gradient(30deg, #04c9ff, #ff13d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .list-item {
   transition: all 0.3s cubic-bezier(0.2, 0, 0.1, 1);
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important;
@@ -138,6 +147,7 @@ window.goto = (name: string) => {
   background: rgba(255, 255, 255, 0.05) !important;
   margin: 8px 4px;
   transform: translateX(4px);
+  filter: drop-shadow(0 0 8px #ffffff8a);
 }
 
 .active-item {

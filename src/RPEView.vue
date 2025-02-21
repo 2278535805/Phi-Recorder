@@ -96,7 +96,7 @@ async function unbindRPE() {
             <v-card-subtitle class="chart-id">{{ chart.charter }}</v-card-subtitle>
             <div class="w-100 mt-2">
               <div class="pt-4 d-flex justify-end">
-                <v-btn class="render-btn hover-scale" color="primary" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
+                <v-btn class="render-btn" color="primary" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
               </div>
             </div>
           </div>
