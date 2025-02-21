@@ -162,7 +162,7 @@ const dialog_download = ref(false);
   </div>
 
   <v-dialog v-model="dialog_update" width="auto" min-width="400px" class="log-card-bg">
-    <v-card class="log-card-window">
+    <v-card class="log-card-only-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('new-version') }}</pre>
@@ -175,7 +175,7 @@ const dialog_download = ref(false);
   </v-dialog>
 
   <v-dialog v-model="dialog_non" width="auto" min-width="400px" class="log-card-bg">
-    <v-card class="log-card-window">
+    <v-card class="log-card-only-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('non-version') }}</pre>
@@ -187,7 +187,7 @@ const dialog_download = ref(false);
   </v-dialog>
 
   <v-dialog v-model="dialog_error" width="auto" min-width="400px" class="log-card-bg">
-    <v-card class="log-card-window">
+    <v-card class="log-card-only-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('err-version') }}</pre>
@@ -199,7 +199,7 @@ const dialog_download = ref(false);
   </v-dialog>
 
   <v-dialog v-model="dialog_download" width="auto" min-width="400px" class="log-card-bg">
-    <v-card class="log-card-window">
+    <v-card class="log-card-only-window">
       <v-card-title v-t="t('download')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ '111' }}</pre>
@@ -248,18 +248,6 @@ const dialog_download = ref(false);
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    scale: 0.8;
-    transform: translateY(0px);
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0px);
-  }
-}
 
 .app-title {
   font-size: 3rem;
@@ -297,31 +285,10 @@ const dialog_download = ref(false);
   text-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
 }
 
-.hover-scale {
-  transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-
 .text-gradient {
   background: linear-gradient(45deg, #4caf50, #ffeb3b);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-.log-card-bg {
-  backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
-}
-
-.log-card-window {
-  border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(80px) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>

@@ -133,24 +133,6 @@ async function unbindRPE() {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 0.75) forwards;
-  opacity: 0; /* 初始状态透明 */
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    scale: 0.8;
-    transform: translateY(0px);
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0px);
-  }
-}
-
 .chart-card {
   border-radius: 12px;
   overflow: hidden;
@@ -193,45 +175,11 @@ async function unbindRPE() {
   box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.3);
 }
 
-.hover-scale {
-  transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-
 .text-gradient {
   background: linear-gradient(45deg, #2196f3, #e91e63);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    scale: 0.8;
-    transform: translateY(100px);
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes hoverUp {
-  from {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0px);
-  }
-  to {
-    opacity: 1;
-    scale: 1.05;
-    transform: translateY(-4px);
-  }
 }
 
 @media (max-width: 600px) {

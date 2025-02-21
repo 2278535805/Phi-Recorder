@@ -266,25 +266,7 @@ async function showFolder() {
 </template>
 
 <style scoped>
-.log-card-bg {
-  backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
-}
 
-.log-card-window {
-  border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(80px) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.log-card-msg {
-  border-radius: 12px !important;
-  background: rgba(0, 0, 0, 0.40) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 .task-card {
   border-radius: 16px !important;
@@ -303,47 +285,8 @@ async function showFolder() {
   background: rgba(255, 255, 255, 0.06);
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    scale: 0.8;
-    transform: translateY(100px);
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0);
-  }
-}
-
-.hover-scale {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-
 .margin-btn {
   margin-bottom: 14px !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 0.75) forwards;
-  opacity: 0; /* 初始状态透明 */
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    scale: 0.8;
-    transform: translateY(0px);
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0px);
-  }
 }
 
 .glass-background {
@@ -358,10 +301,6 @@ async function showFolder() {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-.glow-spinner {
-  filter: drop-shadow(0 0 8px #2196F3);
 }
 
 pre {

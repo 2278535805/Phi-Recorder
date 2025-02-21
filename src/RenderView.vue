@@ -479,25 +479,6 @@ function tryParseAspect(): number | undefined {
 </template>
 
 <style scoped>
-.log-card-bg {
-  backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
-}
-
-.log-card-window {
-  border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(80px) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.log-card-msg {
-  border-radius: 12px !important;
-  background: rgba(0, 0, 0, 0.40) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 .v-progress-linear,
 .v-progress-linear__determinate {
@@ -565,11 +546,6 @@ h2 {
   100% { transform: scale(1); }
 }
 
-.v-progress-circular {
-  color: #6366f1;
-  --v-progress-circular-size: 48px;
-}
-
 :deep(.v-slider__thumb) {
   background: #6366f1 !important;
   box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2) !important;
@@ -579,43 +555,4 @@ h2 {
   background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
 }
 
-.v-text-field.type-number {
-  --v-field-padding-start: 1rem;
-  --v-field-border-radius: 8px;
-}
-
-.v-stepper__content {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.v-stepper__content-leave-active {
-  position: absolute;
-}
-
-.v-stepper__content-leave-to {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-  .v-stepper__content-enter-from {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.v-btn {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-  
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    scale: 0.8;
-    transform: translateY(0px);
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-    transform: translateY(0px);
-  }
-}
 </style>

@@ -11,3 +11,132 @@
     transition: background-color 0.5s;
   }
 }
+
+
+
+.log-card-bg {
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.log-card-window {
+  border-radius: 16px !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-only-window {
+  border-radius: 16px !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-msg {
+  border-radius: 12px !important;
+  background: rgba(0, 0, 0, 0.40) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.v-text-field.type-number {
+  --v-field-padding-start: 1rem;
+  --v-field-border-radius: 8px;
+}
+
+.v-progress-linear {
+  filter: drop-shadow(0 0 8px #ffffff50);
+}
+
+.v-progress-circular {
+  filter: drop-shadow(0 0 8px #ffff50);
+}
+
+.glow-spinner {
+  filter: drop-shadow(0 0 8px #2196F3);
+}
+
+.v-stepper__content {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.v-stepper__content-leave-active {
+  position: absolute;
+}
+
+.v-stepper__content-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+  .v-stepper__content-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.v-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.v-switch {
+  color:#c7c0ff;
+}
+
+.v-slider {
+  color:#c7c0ff;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 0.75) forwards;
+  opacity: 0; /* 初始状态透明 */
+}
+  
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    scale: 0.8;
+    transform: translateY(0px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0px);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    scale: 0.8;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hoverUp {
+  from {
+    opacity: 1;
+    scale: 1;
+    transform: translateY(0px);
+  }
+  to {
+    opacity: 1;
+    scale: 1.05;
+    transform: translateY(-4px);
+  }
+}
