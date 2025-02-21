@@ -415,27 +415,56 @@ pub async fn main(cmd: bool) -> Result<()> {
     let length = track_length - offset.min(0.) as f64 + 1.;
     let video_length = o + length + a + config.ending_length;
 
-    let test_encoder = |encoder: &str| -> bool {
-        let output = Command::new(&ffmpeg)
-            .args(&["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
-            .arg("-loglevel")
-            .arg("fatal")
-            .arg("-hide_banner")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .output()
-            .expect("Failed to test encoder");
-    
-        output.status.success()
+    let encoders =  if config.hevc {
+        ["hevc_nvenc", "hevc_qsv", "hevc_amf", "hevc_vaapi"]
+    } else {
+        ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"]
     };
 
-    let use_cuda = config.hardware_accel && test_encoder("h264_nvenc");
-    let has_qsv = config.hardware_accel && test_encoder("h264_qsv");
-    let has_amf = config.hardware_accel && test_encoder("h264_amf");
+    fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoders: [&str; 4]) -> Option<String> {
+        if config.mpeg4 {
+            return Some("mpeg4".to_string());
+        };
 
-    let use_cuda_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_nvenc");
-    let has_qsv_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_qsv");
-    let has_amf_hevc = config.hardware_accel && config.hevc && test_encoder("hevc_amf");
+        if !config.hardware_accel {
+            if config.hevc {
+                return Some("libx265".to_string());
+            } else {
+                return Some("libx264".to_string());
+            }
+        }
+
+        let test_encoder = |encoder: &str| -> bool {
+            info!("Testing encoder: {}", encoder);
+            let output = Command::new(&ffmpeg)
+                .args(&["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
+                .arg("-loglevel")
+                .arg("error")
+                .arg("-hide_banner")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .output()
+                .expect("Failed to test encoder");
+        
+            output.status.success()
+        };
+
+        for encoder in encoders {
+            if test_encoder(encoder) {
+                return Some(encoder.to_string());
+            }
+        }
+
+        None
+    }
+
+    let ffmpeg_encoder = if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoders) {
+        ffmpeg_encoder
+    } else {
+        bail!(tl!("no-hwacc"))
+    };
+
+    info!("Encoder: {}", ffmpeg_encoder);
 
     info!("Loading Time:{:.2?}", loading_time.elapsed());
     info!("video length: {:.2}s", video_length);
@@ -752,45 +781,14 @@ pub async fn main(cmd: bool) -> Result<()> {
     let ffmpeg_preset = "-preset";
     let mut ffmpeg_preset_name_list = config.ffmpeg_preset.split_whitespace();
 
-    if config.hardware_accel && !config.mpeg4 {
-        if !(use_cuda_hevc || has_qsv_hevc || has_amf_hevc) && config.hevc {
-            bail!(tl!("no-hwacc"));
-        } else if !(use_cuda || has_qsv || has_amf) {
-            bail!(tl!("no-hwacc"));
-        }
-    }
 
-    let ffmpeg_encoder = if config.mpeg4 {
-        "mpeg4"
-    } else if use_cuda_hevc {
-        "hevc_nvenc"
-    } else if use_cuda {
-        "h264_nvenc"
-    } else if has_qsv_hevc {
-        "hevc_qsv"
-    } else if has_qsv {
-        "h264_qsv"
-    } else if has_amf_hevc {
-        "hevc_amf"
-    } else if has_amf {
-        "h264_amf"
-    } else {
-        if config.hevc {
-            "libx265"
-        } else {
-            "libx264"
-        }
-    };
-
-    info!("Encoder: {}", ffmpeg_encoder);
-
-    let ffmpeg_preset_name = if use_cuda {
+    let ffmpeg_preset_name = if ffmpeg_encoder == encoders[0] {
         ffmpeg_preset_name_list.nth(1).unwrap_or(
             ffmpeg_preset_name_list.nth(0).unwrap_or("p4")
         )
-    } else if has_qsv {
+    } else if ffmpeg_encoder == encoders[1] {
         ffmpeg_preset_name_list.nth(2).unwrap_or("medium")
-    } else if has_amf {
+    } else if ffmpeg_encoder == encoders[2] {
         ffmpeg_preset_name_list.nth(3).unwrap_or(
             ffmpeg_preset_name_list.nth(0).unwrap_or("balanced")
         )
@@ -800,12 +798,12 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let bitrate_control = 
     if config.bitrate_control.to_lowercase() == "crf" {
-        if use_cuda && !config.mpeg4 {
+        if ffmpeg_encoder == encoders[0] && !config.mpeg4 {
             "-cq"
-        } else if has_qsv || config.mpeg4 {
+        } else if ffmpeg_encoder == encoders[1] || config.mpeg4 || ffmpeg_encoder == encoders[3] {
             "-q"
         }
-        else if has_amf {
+        else if ffmpeg_encoder == encoders[2] {
             "-qp_p"
         } else {
             "-crf"
@@ -817,7 +815,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let bitrate = config.bitrate;
 
     let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo".to_owned();
-    if use_cuda {
+    if ffmpeg_encoder == encoders[0] {
         args += " -hwaccel_output_format cuda";
     }
     write!(
