@@ -554,7 +554,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let slice = &mut output[start_index..];
         for i in 0..len.min(slice.len() / 2) {
             let position = i as f64 * ratio + offset.max(0.) as f64;
-            let frame = music.sample(position as f32).unwrap_or_default();
+            let frame = music.sample_f64(position).unwrap_or_default();
             slice[i * 2] += frame.0 * volume_music;
             slice[i * 2 + 1] += frame.1 * volume_music;
         }
@@ -566,7 +566,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             let len = (slice.len() / 2).min(ending.frame_count());
             for i in 0..len {
                 let position = i as f64 * ratio;
-                let frame = ending.sample(position as f32).unwrap_or_default();
+                let frame = ending.sample_f64(position).unwrap_or_default();
                 slice[i * 2] += frame.0 * volume_music;
                 slice[i * 2 + 1] += frame.1 * volume_music;
             }
