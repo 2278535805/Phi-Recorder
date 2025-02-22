@@ -20,8 +20,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Get commit message
+        id: commit_message
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const commitMessage = context.payload.head_commit.message;
+            return commitMessage;
+
       - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.platform == 'ubuntu-20.04' && "!startsWith(github.event.head_commit.message, 'chore')"
         # You can remove libayatana-appindicator3-dev if you don't use the system tray feature.
         run: |
           sudo apt-get update
@@ -32,12 +40,14 @@ jobs:
           toolchain: stable-x86_64-gnu
 
       - name: Rust cache
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
           cache-all-crates: "true"
 
       - name: Sync node version and setup cache
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -47,6 +57,7 @@ jobs:
         run: pnpm install # Change this to npm, yarn or pnpm.
 
       - name: Download static-lib
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: suisei-cn/actions-download-file@v1.3.0
         id: downlod-static-lib
         with:
@@ -55,9 +66,11 @@ jobs:
           target: ./
 
       - name: Mkdir static-lib
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         run: mkdir static-lib
 
       - name: Extract static-lib
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: a7ul/tar-action@v1.1.0
         id: extract-static-lib
         with:
@@ -66,6 +79,7 @@ jobs:
           files: prpr-avc-static-lib.tar.gz
 
       - name: Build the app
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: tauri-apps/tauri-action@v0
 
         env:
@@ -73,6 +87,7 @@ jobs:
           PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
 
       - name: Upload Windows Installer
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: actions/upload-artifact@v4
         if: matrix.platform == 'windows-latest'
         with:
@@ -81,6 +96,7 @@ jobs:
             src-tauri/target/release/bundle/msi/*.msi
             src-tauri/target/release/bundle/nsis/*.exe
       - name: Upload Linux Installer
+        if: "!startsWith(github.event.head_commit.message, 'chore')"
         uses: actions/upload-artifact@v4
         if: matrix.platform == 'ubuntu-20.04'
         with:
