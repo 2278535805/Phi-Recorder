@@ -103,7 +103,7 @@ window.goto = (name: string) => {
           </template>
           <template #fallback>
             <div class="flex justify-center pa-8">
-              <v-progress-circular indeterminate size="large" />
+              <v-progress-circular class="waitIn" indeterminate size="large" />
             </div>
           </template>
         </Suspense>
@@ -113,6 +113,19 @@ window.goto = (name: string) => {
 </template>
 
 <style>
+.waitIn {
+  animation: Up 0.5s cubic-bezier(1, 0, 1, 0) forwards;
+}
+
+@keyframes Up {
+  from {
+    transform: translateY(-1000px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 .dark-theme {
   background: linear-gradient(45deg, #292364, #302b63, #24243e);
 }
