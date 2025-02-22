@@ -62,7 +62,7 @@ jobs:
         run: mkdir static-lib
 
       - name: Extract static-lib
-        uses: a7ul/tar-action@v1.1.0
+        uses: a7ul/tar-action@v1.2.0
         id: extract-static-lib
         with:
           command: x
