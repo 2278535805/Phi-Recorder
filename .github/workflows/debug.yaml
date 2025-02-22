@@ -77,10 +77,10 @@ jobs:
         with:
           name: tauri-installers-${{ matrix.os }}
           path: |
-            src-tauri/target/release/**/*.msi
-            src-tauri/target/release/**/*.exe
-            src-tauri/target/release/**/*.dmg
-            src-tauri/target/release/**/*.AppImage
-            src-tauri/target/release/**/*.deb
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.deb
           if-no-files-found: warn
           retention-days: 5
