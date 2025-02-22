@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-20.04, windows-latest]
+        platform: [ubuntu-24.04, windows-latest]
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.platform == 'ubuntu-24.04'
         # You can remove libayatana-appindicator3-dev if you don't use the system tray feature.
         run: |
           sudo apt-get update
@@ -72,30 +72,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
 
-      - name: Move and rename builds
-        run: |
-          IFS=','
-          SPACE='.SPACE_PLACEHOLDER.'
-          mkdir -p ~/artifacts/tauri/
-          artifact_paths=$(echo '${{ steps.build.outputs.artifactPaths }}' | sed -e 's/\[//g; s/\]//g' -e 's/["]//g' -e 's/ /$SPACE/g')
-          for artifact_path in $artifact_paths; do
-            original_path=$(echo "$artifact_path" | sed -e 's/$SPACE/ /g')
-            if [[ "$original_path" == *.app ]]; then
-              echo "Skipping $original_path"
-              continue
-            fi
-            renamed_path=$(echo "$original_path" | sed -E "s/PhiZone Player[_-]${{ needs.metadata.outputs.version }}(-1)?/PhiZone.Player_${{ needs.metadata.outputs.version-name }}/g")
-            echo "Renaming: $original_path -> $renamed_path"
-            mv "$original_path" "$renamed_path"
-            mv "$renamed_path" ~/artifacts/tauri/
-          done
-
-      - name: Generate artifact info
-        id: info
-        run: echo "NAME=tauri-${{ matrix.platform }}-$(echo ${{ matrix.args || '--target x86_64' }} | sed 's/.* //')-${{ needs.metadata.outputs.version-name }}" >> $GITHUB_OUTPUT
-
-      - name: Upload artifact
+      - name: Upload Tauri Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.info.outputs.NAME }}
-          path: ~/artifacts/tauri/*
+          name: tauri-installers-${{ matrix.os }}
+          path: |
+            src-tauri/target/release/**/*.msi
+            src-tauri/target/release/**/*.exe
+            src-tauri/target/release/**/*.dmg
+            src-tauri/target/release/**/*.AppImage
+            src-tauri/target/release/**/*.deb
+          if-no-files-found: warn
+          retention-days: 5
