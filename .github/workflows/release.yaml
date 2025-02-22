@@ -1,0 +1,78 @@
+name: Phi Recorder Release
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-20.04, windows-latest]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-20.04'
+        # You can remove libayatana-appindicator3-dev if you don't use the system tray feature.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libssl-dev pkg-config libswresample-dev
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable-x86_64-gnu
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+          cache-all-crates: "true"
+
+      - name: Sync node version and setup cache
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install frontend dependencies
+        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
+        run: pnpm install # Change this to npm, yarn or pnpm.
+
+      - name: Download static-lib
+        uses: suisei-cn/actions-download-file@v1.3.0
+        id: downlod-static-lib
+        with:
+          # url: "https://files-cf.phira.cn/prpr-avc-static-lib.tar.gz"
+          url: "https://raw.githubusercontent.com/2278535805/Phi-Recorder/main/prpr-avc-static-lib.tar.gz"
+          target: ./
+
+      - name: Mkdir static-lib
+        run: mkdir static-lib
+
+      - name: Extract static-lib
+        uses: a7ul/tar-action@v1.1.0
+        id: extract-static-lib
+        with:
+          command: x
+          cwd: ./static-lib
+          files: prpr-avc-static-lib.tar.gz
+
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
+        with:
+          tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
+          releaseName: 'Phi Recorder v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          releaseBody: 'From GitHub Action'
+          releaseDraft: true
+          prerelease: false

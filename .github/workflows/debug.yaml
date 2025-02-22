@@ -1,9 +1,10 @@
-name: Build Phi Recorder
+name: Phi Recorder CI
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'main'
   workflow_dispatch:
+
 
 jobs:
   release:
@@ -70,9 +71,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
+
+      - name: Upload Tauri artifacts
+        uses: actions/upload-artifact@v2
         with:
-          tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
-          releaseName: 'Phi Recorder v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
-          releaseBody: 'From GitHub Action'
-          releaseDraft: true
-          prerelease: false
+          name: tauri-artifacts
+          path: |
+            src-tauri/target/release/bundle/**/*
