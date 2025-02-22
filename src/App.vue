@@ -114,15 +114,13 @@ window.goto = (name: string) => {
 
 <style>
 .waitIn {
-  animation: Up 0.5s cubic-bezier(1, 0, 1, 0) forwards;
+  visibility: hidden;
+  animation: Up 0.5s 0.5s forwards;
 }
 
 @keyframes Up {
-  from {
-    transform: translateY(-1000px);
-  }
   to {
-    transform: translateY(0);
+    visibility: visible;
   }
 }
 
