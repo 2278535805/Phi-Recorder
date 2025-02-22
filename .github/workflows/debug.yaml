@@ -6,7 +6,6 @@ on:
     paths:
       - 'src/**'
       - 'src-tauri/src/**'
-      - 'src-tauri/Cargo.lock'
   workflow_dispatch:
 
 
