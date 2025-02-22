@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-22.04, windows-latest]
+        platform: [ubuntu-20.04, windows-latest]
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-20.04'
         # You can remove libayatana-appindicator3-dev if you don't use the system tray feature.
         run: |
           sudo apt-get update
@@ -72,15 +72,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
 
-      - name: Upload Tauri Artifacts
+      - name: Upload Windows Installer
         uses: actions/upload-artifact@v4
+        if: matrix.platform == 'windows-latest'
         with:
-          name: tauri-installers-${{ matrix.os }}
+          name: windows-installer
+          path: src-tauri/target/release/bundle/**/*.msi
+      - name: Upload macOS Installer
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'ubuntu-20.04'
+        with:
+          name: macos-installer
+          path: src-tauri/target/release/bundle/**/*.dmg
+      - name: Upload Linux Installer
+        uses: actions/upload-artifact@v4
+        if: matrix.platform == 'ubuntu-20.04'
+        with:
+          name: linux-installer
           path: |
-            src-tauri/target/release/bundle/**/*.msi
-            src-tauri/target/release/bundle/**/*.exe
-            src-tauri/target/release/bundle/**/*.dmg
             src-tauri/target/release/bundle/**/*.AppImage
             src-tauri/target/release/bundle/**/*.deb
-          if-no-files-found: warn
-          retention-days: 5
