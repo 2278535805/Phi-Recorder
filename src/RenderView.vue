@@ -70,7 +70,7 @@ zh-CN:
   choose:
     archive: 压缩包
     folder: 文件夹
-    can-also-drop: 也可以直接拖放谱面至此处
+    can-also-drop: 可直接拖放谱面至此处
     drop: 拖放谱面至此处
 
   chart-file: 谱面文件
