@@ -72,9 +72,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRPR_AVC_LIBS: ${{ github.workspace }}/static-lib
 
-      - name: Upload Tauri artifacts
+      - name: Move and rename builds
+        run: |
+          IFS=','
+          SPACE='.SPACE_PLACEHOLDER.'
+          mkdir -p ~/artifacts/tauri/
+          artifact_paths=$(echo '${{ steps.build.outputs.artifactPaths }}' | sed -e 's/\[//g; s/\]//g' -e 's/["]//g' -e 's/ /$SPACE/g')
+          for artifact_path in $artifact_paths; do
+            original_path=$(echo "$artifact_path" | sed -e 's/$SPACE/ /g')
+            if [[ "$original_path" == *.app ]]; then
+              echo "Skipping $original_path"
+              continue
+            fi
+            renamed_path=$(echo "$original_path" | sed -E "s/PhiZone Player[_-]${{ needs.metadata.outputs.version }}(-1)?/PhiZone.Player_${{ needs.metadata.outputs.version-name }}/g")
+            echo "Renaming: $original_path -> $renamed_path"
+            mv "$original_path" "$renamed_path"
+            mv "$renamed_path" ~/artifacts/tauri/
+          done
+
+      - name: Generate artifact info
+        id: info
+        run: echo "NAME=tauri-${{ matrix.platform }}-$(echo ${{ matrix.args || '--target x86_64' }} | sed 's/.* //')-${{ needs.metadata.outputs.version-name }}" >> $GITHUB_OUTPUT
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tauri-artifacts
-          path: |
-            src-tauri/target/release/bundle/**/*
+          name: ${{ steps.info.outputs.NAME }}
+          path: ~/artifacts/tauri/*
