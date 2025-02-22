@@ -46,6 +46,7 @@ pub struct RenderConfig {
     hardware_accel: bool,
     hevc: bool,
     mpeg4: bool,
+    custom_encoder: Option<String>,
     bitrate_control: String,
     bitrate: String,
 
@@ -150,6 +151,7 @@ impl RenderConfig {
             hardware_accel: true,
             hevc: false,
             mpeg4: false,
+            custom_encoder: None,
             bitrate_control: "CRF".to_string(),
             bitrate: "1000k".to_string(),
             aggressive: true,
@@ -422,6 +424,10 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
 
     fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoders: [&str; 4]) -> Option<String> {
+        if let Some(custom_encoder) = &config.custom_encoder {
+            return Some(custom_encoder.to_string());
+        };
+
         if config.mpeg4 {
             return Some("mpeg4".to_string());
         };
@@ -802,9 +808,10 @@ pub async fn main(cmd: bool) -> Result<()> {
             "-cq"
         } else if ffmpeg_encoder == encoders[1] || config.mpeg4 || ffmpeg_encoder == encoders[3] {
             "-q"
-        }
-        else if ffmpeg_encoder == encoders[2] {
+        } else if ffmpeg_encoder == encoders[2] {
             "-qp_p"
+        } else if ffmpeg_encoder == config.custom_encoder.unwrap_or_default() {
+            "-q"
         } else {
             "-crf"
         }

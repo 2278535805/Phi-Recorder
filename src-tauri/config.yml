@@ -6,6 +6,7 @@ fps: 60
 hardwareAccel: true
 hevc: false
 mpeg4: false
+customEncoder: 
 bitrateControl: CRF
 bitrate: 26
 aggressive: true

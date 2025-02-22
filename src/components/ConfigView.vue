@@ -416,6 +416,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     hardwareAccel: hwAccel.value,
     hevc: encoder.value === encoderList.value[1],
     mpeg4: encoder.value === encoderList.value[2],
+    customEncoder: encoderList.value.includes(encoder.value) ? null : encoder.value,
     bitrateControl: encoder.value === encoderList.value[2] ? 'CRF' : bitrateControl.value,
     bitrate: encoder.value === encoderList.value[2] ? '7' : bitrate.value,
 
@@ -586,6 +587,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   hardwareAccel: true,
   hevc: false,
   mpeg4: false,
+  customEncoder: null,
   bitrateControl: 'CRF',
   bitrate: '28',
 
@@ -828,7 +830,7 @@ async function replacePreset() {
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
         <v-col cols="3" class="px-2">
-          <v-select v-model="encoder" :items="encoderList" :label="t('encoder')"></v-select>
+          <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-combobox v-if="bitrateControlText === bitrateControlTextList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
