@@ -120,7 +120,7 @@ async function getNewVersion() {
     }
     const asset = assets.find((asset) => {
       if (isWindows) {
-        return asset.name.endsWith('.exe');
+        return asset.name.endsWith('.msi');
       } else if (isMacOS) {
         return asset.name.endsWith('.dmg');
       } else if (isLinux) {
