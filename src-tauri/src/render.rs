@@ -414,7 +414,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let musica: f64 = GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME;
 
     let offset = chart.offset + info.offset;
-    let length = track_length - offset.min(0.) as f64 + 1.;
+    let length = track_length - offset as f64 + 1.;
     let video_length = o + length + a + config.ending_length;
 
     let encoders =  if config.hevc {
@@ -565,7 +565,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             slice[i * 2 + 1] += frame.1 * volume_music;
         }
         //ending
-        let mut pos = o + length + musica - offset as f64;
+        let mut pos = o + length + musica;
         while pos < video_length && config.ending_length > EndingScene::BPM_WAIT_TIME {
             let start_index = (pos * sample_rate_f64).round() as usize * 2;
             let slice = &mut output[start_index..];
@@ -634,13 +634,13 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
-        let offset = config.judge_offset as f64;
+        let judge_offset = config.judge_offset as f64;
         if agg {
             for line in &chart.lines {
                 for note in &line.notes {
                     if !note.fake {
                         if let Some(sfx) = get_hitsound(note) {
-                            place_agg(o + note.time as f64 + offset, sfx, volume_sfx);
+                            place_agg(o + note.time as f64 + judge_offset, sfx, volume_sfx);
                         }
                     }
                 }
@@ -650,7 +650,10 @@ pub async fn main(cmd: bool) -> Result<()> {
                 for note in &line.notes {
                     if !note.fake {
                         if let Some(sfx) = get_hitsound(note) {
-                            place(o + note.time as f64 + offset, sfx, volume_sfx);
+                            if note.time as f64 > length {
+                                continue;
+                            }
+                            place(o + note.time as f64 + judge_offset, sfx, volume_sfx);
                         }
                     }
                 }
