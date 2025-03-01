@@ -895,6 +895,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     if ipc {
         send(IPCEvent::StartRender(frames));
     }
+    let render_time = Instant::now();
 
     let fps = fps as f64;
     for frame in 0..N {
@@ -932,7 +933,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("Pre-Render Time:{:.2?}", pre_render_time.elapsed());
 
     let frames10 = frames / 10;
-    let render_time = Instant::now();
     let mut step_time = Instant::now();
     for frame in N as u64..frames {
         if frame % frames10 == 0 {
