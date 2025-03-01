@@ -47,7 +47,7 @@ export const RULES = {
     if (value.length > 50) {
       return i18n.global.t('rules.long');
     }
-    return filteredValue !== 'COMBO' || i18n.global.t('rules.combo');
+    return !/^[CС][OՕΟ][MΜ][BΒ][OՕΟ]$/.test(filteredValue) || i18n.global.t('rules.combo');
   }
 };
 
