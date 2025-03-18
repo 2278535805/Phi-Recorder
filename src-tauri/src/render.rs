@@ -395,7 +395,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
     let ending = ld!("ending.ogg");
-    let track_length = music.length() as f64;
+    let music_length = music.length() as f64;
     let sfx_click = ld!("click.ogg");
     let sfx_drag = ld!("drag.ogg");
     let sfx_flick = ld!("flick.ogg");
@@ -405,19 +405,18 @@ pub async fn main(cmd: bool) -> Result<()> {
     let volume_music = config.volume_music;
     let volume_sfx = config.volume_sfx;
 
-    let o: f64 = if config.disable_loading {
+    let before_time: f64 = if config.disable_loading {
         GameScene::BEFORE_DURATION as f64
     } else {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
     };
-    let a: f64 = -0.5; // fade out time
-    let musica: f64 = GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME;
+    let fade_out_time: f64 = -0.5;
 
     let offset = chart.offset + info.offset;
-    let length = track_length - offset as f64 + 1.;
-    let video_length = o + length + a + config.ending_length;
+    let chart_length = before_time + music_length - offset as f64 + 1.;
+    let video_length = chart_length + fade_out_time + config.ending_length;
 
-    let encoders =  if config.hevc {
+    let encoder_list =  if config.hevc {
         ["hevc_nvenc", "hevc_qsv", "hevc_amf", "hevc_vaapi"]
     } else {
         ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"]
@@ -464,7 +463,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         None
     }
 
-    let ffmpeg_encoder = if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoders) {
+    let ffmpeg_encoder = if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoder_list) {
         ffmpeg_encoder
     } else {
         bail!(tl!("no-hwacc"))
@@ -480,7 +479,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     if ipc {
         send(IPCEvent::StartMixing);
     }
-    let mixing_output = NamedTempFile::new()?;
+    let audio_output = NamedTempFile::new()?;
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
     assert_eq!(
@@ -513,17 +512,16 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output2 = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output2_agg = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
-    let agg = config.aggressive;
+    let mut output_hitfx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output_hitfx_agg = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
 
     // let stereo_sfx = false; // TODO stereo sound effects
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
-        if position >= output2.len() {
+        if position >= output_hitfx.len() {
             return 0;
         }
-        let slice = &mut output2[position..];
+        let slice = &mut output_hitfx[position..];
         let len = (slice.len() / 2).min(clip.frame_count());
 
         let frames = clip.frames();
@@ -537,10 +535,10 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut place_agg = |pos: f64, clip: &AudioClip, volume: f32| {
         let position = (pos * sample_rate_f64).round() as usize;
-        if position >= output2_agg.len() {
+        if position >= output_hitfx_agg.len() {
             return 0;
         }
-        let slice = &mut output2_agg[position..];
+        let slice = &mut output_hitfx_agg[position..];
         let len = (slice.len()).min(clip.frame_count());
 
         let frames = clip.frames();
@@ -553,8 +551,8 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = o - offset.min(0.) as f64;
-        let len = ((track_length + config.ending_length) * sample_rate_f64) as usize;
+        let pos = before_time - offset.min(0.) as f64;
+        let len = ((music_length + config.ending_length) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
         let slice = &mut output[start_index..];
@@ -565,7 +563,8 @@ pub async fn main(cmd: bool) -> Result<()> {
             slice[i * 2 + 1] += frame.1 * volume_music;
         }
         //ending
-        let mut pos = o + length + musica;
+        let ending_wait_time: f64 = GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME;
+        let mut pos = chart_length + ending_wait_time;
         while pos < video_length && config.ending_length > EndingScene::BPM_WAIT_TIME {
             let start_index = (pos * sample_rate_f64).round() as usize * 2;
             let slice = &mut output[start_index..];
@@ -635,12 +634,12 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        if agg {
+        if config.aggressive {
             for line in &chart.lines {
                 for note in &line.notes {
                     if !note.fake {
                         if let Some(sfx) = get_hitsound(note) {
-                            place_agg(o + note.time as f64 + judge_offset, sfx, volume_sfx);
+                            place_agg(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
                         }
                     }
                 }
@@ -650,10 +649,10 @@ pub async fn main(cmd: bool) -> Result<()> {
                 for note in &line.notes {
                     if !note.fake {
                         if let Some(sfx) = get_hitsound(note) {
-                            if note.time as f64 > length {
+                            if note.time as f64 > chart_length {
                                 continue;
                             }
-                            place(o + note.time as f64 + judge_offset, sfx, volume_sfx);
+                            place(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
                         }
                     }
                 }
@@ -666,20 +665,20 @@ pub async fn main(cmd: bool) -> Result<()> {
         let mixing_time = Instant::now();
         if config.force_limit {
             if config.aggressive {
-                for i in 0..output2_agg.len() {
-                    output2_agg[i] = output2_agg[i]
+                for i in 0..output_hitfx_agg.len() {
+                    output_hitfx_agg[i] = output_hitfx_agg[i]
                         .clamp(-config.limit_threshold, config.limit_threshold)
                 }
             } else {
-                for i in 0..output2.len() {
-                    output2[i] = output2[i]
+                for i in 0..output_hitfx.len() {
+                    output_hitfx[i] = output_hitfx[i]
                         .clamp(-config.limit_threshold, config.limit_threshold)
                 }
             }
         } else if config.compression_ratio > 1. {
-            for i in 0..output2.len() {
-                output2[i] = apply_compressor(
-                    output2[i],
+            for i in 0..output_hitfx.len() {
+                output_hitfx[i] = apply_compressor(
+                    output_hitfx[i],
                     threshold,
                     config.compression_ratio,
                     attack_coeff,
@@ -689,14 +688,14 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         }
 
-        if agg {
-            for i in 0..output2_agg.len() {
-                output[i * 2] += output2_agg[i];
-                output[i * 2 + 1] += output2_agg[i];
+        if config.aggressive {
+            for i in 0..output_hitfx_agg.len() {
+                output[i * 2] += output_hitfx_agg[i];
+                output[i * 2 + 1] += output_hitfx_agg[i];
             }
         } else {
-            for i in 0..output2.len() {
-                output[i] += output2[i];
+            for i in 0..output_hitfx.len() {
+                output[i] += output_hitfx[i];
             }
         }
 
@@ -718,7 +717,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 )
                 .split_whitespace(),
             )
-            .arg(mixing_output.path())
+            .arg(audio_output.path())
             .arg("-loglevel")
             .arg("warning")
             .stdin(Stdio::piped())
@@ -790,14 +789,13 @@ pub async fn main(cmd: bool) -> Result<()> {
     let ffmpeg_preset = "-preset";
     let mut ffmpeg_preset_name_list = config.ffmpeg_preset.split_whitespace();
 
-
-    let ffmpeg_preset_name = if ffmpeg_encoder == encoders[0] {
+    let ffmpeg_preset_name = if ffmpeg_encoder == encoder_list[0] {
         ffmpeg_preset_name_list.nth(1).unwrap_or(
             ffmpeg_preset_name_list.nth(0).unwrap_or("p4")
         )
-    } else if ffmpeg_encoder == encoders[1] {
+    } else if ffmpeg_encoder == encoder_list[1] {
         ffmpeg_preset_name_list.nth(2).unwrap_or("medium")
-    } else if ffmpeg_encoder == encoders[2] {
+    } else if ffmpeg_encoder == encoder_list[2] {
         ffmpeg_preset_name_list.nth(3).unwrap_or(
             ffmpeg_preset_name_list.nth(0).unwrap_or("balanced")
         )
@@ -807,11 +805,11 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let bitrate_control = 
     if config.bitrate_control.to_lowercase() == "crf" {
-        if ffmpeg_encoder == encoders[0] && !config.mpeg4 {
+        if ffmpeg_encoder == encoder_list[0] && !config.mpeg4 {
             "-cq"
-        } else if ffmpeg_encoder == encoders[1] || config.mpeg4 || ffmpeg_encoder == encoders[3] {
+        } else if ffmpeg_encoder == encoder_list[1] || config.mpeg4 || ffmpeg_encoder == encoder_list[3] {
             "-q"
-        } else if ffmpeg_encoder == encoders[2] {
+        } else if ffmpeg_encoder == encoder_list[2] {
             "-qp_p"
         } else if ffmpeg_encoder == config.custom_encoder.unwrap_or_default() {
             "-q"
@@ -822,10 +820,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         "-b:v"
     };
 
-    let bitrate = config.bitrate;
 
     let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo".to_owned();
-    if ffmpeg_encoder == encoders[0] {
+    if ffmpeg_encoder == encoder_list[0] {
         args += " -hwaccel_output_format cuda";
     }
     write!(
@@ -842,11 +839,11 @@ pub async fn main(cmd: bool) -> Result<()> {
         },
         ffmpeg_encoder,
         bitrate_control,
-        bitrate,
+        config.bitrate,
         ffmpeg_preset,
         ffmpeg_preset_name,
         if config.disable_loading {
-            format!("-ss {}", o)
+            format!("-ss {}", before_time)
         } else {
             "".to_string()
         },
@@ -862,7 +859,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     //info!("Command: {} {} {} {} {}", "ffmpeg", args,"-", args2, output_path.display());
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
-        .arg(mixing_output.path())
+        .arg(audio_output.path())
         .args(args2.split_whitespace())
         .arg(output_path)
         .arg("-loglevel")
