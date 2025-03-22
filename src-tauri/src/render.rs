@@ -51,6 +51,7 @@ pub struct RenderConfig {
     bitrate: String,
 
     aggressive: bool,
+    aggressive_audio: bool,
     challenge_color: ChallengeModeColor,
     challenge_rank: u32,
     disable_effect: bool,
@@ -154,7 +155,8 @@ impl RenderConfig {
             custom_encoder: None,
             bitrate_control: "CRF".to_string(),
             bitrate: "1000k".to_string(),
-            aggressive: true,
+            aggressive: false,
+            aggressive_audio: false,
             challenge_color: ChallengeModeColor::Rainbow,
             challenge_rank: 45,
             disable_effect: false,
@@ -634,7 +636,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        if config.aggressive {
+        if config.aggressive_audio {
             for line in &chart.lines {
                 for note in &line.notes {
                     if !note.fake {
@@ -664,7 +666,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     {
         let mixing_time = Instant::now();
         if config.force_limit {
-            if config.aggressive {
+            if config.aggressive_audio {
                 for i in 0..output_hitfx_agg.len() {
                     output_hitfx_agg[i] = output_hitfx_agg[i]
                         .clamp(-config.limit_threshold, config.limit_threshold)
@@ -688,7 +690,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         }
 
-        if config.aggressive {
+        if config.aggressive_audio {
             for i in 0..output_hitfx_agg.len() {
                 output[i * 2] += output_hitfx_agg[i];
                 output[i * 2 + 1] += output_hitfx_agg[i];

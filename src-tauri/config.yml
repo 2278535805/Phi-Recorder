@@ -9,7 +9,8 @@ mpeg4: false
 customEncoder: 
 bitrateControl: CRF
 bitrate: 26
-aggressive: true
+aggressive: false
+aggressiveAudio: false
 
 disableEffect: false
 doubleHint: true

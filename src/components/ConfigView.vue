@@ -86,7 +86,8 @@ en:
   render: Render
   renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
   expand: Expand
-  expands: Aggressive Optimization,Lossless Audio,Debug Mode,Force Limit,Roman Mode,Chinese Mode
+  expands: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
+  audios: Force Limit,Audio Aggressive Optimization,Lossless Audio
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
   bitrate-control-list: CRF,CBR
 
@@ -193,7 +194,8 @@ zh-CN:
   render: 渲染内容
   renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
   expand: 拓展内容
-  expands: 激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
+  expands: 激进优化,谱面调试,罗马模式,中文模式
+  audios: 强制限幅,音频激进优化,无损音频
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
   bitrate-control-list: 动态码率,固定码率
 
@@ -303,8 +305,12 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
 const renderList = ref(t('renders').split(','));
 const render = ref<string[]>([]);
 render.value.push(...renderList.value.slice(1, 12));
+
 const expandList = ref(t('expands').split(','));
-const expand = ref([expandList.value[3]]);
+const expand = ref<string[]>([]);
+
+const audioList = ref(t('audios').split(','));
+const audio = ref([audioList.value[0]]);
 
 interface Respack {
   name: string;
@@ -456,13 +462,15 @@ async function buildConfig(): Promise<RenderConfig | null> {
     disableEffect: !render.value.includes(renderList.value[10]),
     doubleHint: render.value.includes(renderList.value[11]),
 
-    //激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
+    //激进优化,谱面调试,罗马模式,中文模式
     aggressive: expand.value.includes(expandList.value[0]),
-    hires: expand.value.includes(expandList.value[1]),
-    chartDebug: expand.value.includes(expandList.value[2]),
-    forceLimit: expand.value.includes(expandList.value[3]),
-    roman: expand.value.includes(expandList.value[4]),
-    chinese: expand.value.includes(expandList.value[5]),
+    chartDebug: expand.value.includes(expandList.value[1]),
+    roman: expand.value.includes(expandList.value[2]),
+    chinese: expand.value.includes(expandList.value[3]),
+
+    forceLimit: audio.value.includes(audioList.value[0]),
+    aggressiveAudio: audio.value.includes(audioList.value[1]),
+    hires: audio.value.includes(audioList.value[2]),
 
     maxParticles: maxParticles.value,
     fade: parseFloat(fade.value),
@@ -557,11 +565,14 @@ function applyConfig(config: RenderConfig) {
   expand.value = [];
   //激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
   if (config.aggressive) expand.value.push(expandList.value[0]);
-  if (config.hires) expand.value.push(expandList.value[1]);
-  if (config.chartDebug) expand.value.push(expandList.value[2]);
-  if (config.forceLimit) expand.value.push(expandList.value[3]);
-  if (config.roman) expand.value.push(expandList.value[4]);
-  if (config.chinese) expand.value.push(expandList.value[5]);
+  if (config.chartDebug) expand.value.push(expandList.value[1]);
+  if (config.roman) expand.value.push(expandList.value[2]);
+  if (config.chinese) expand.value.push(expandList.value[3]);
+
+  audio.value = [];
+  if (config.forceLimit) audio.value.push(audioList.value[0]);
+  if (config.aggressiveAudio) audio.value.push(audioList.value[1]);
+  if (config.hires) audio.value.push(audioList.value[2]);
 
   maxParticles.value = config.maxParticles;
   const index = maxParticlesList.indexOf(maxParticles.value);
@@ -592,6 +603,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   bitrate: '28',
 
   aggressive: false,
+  aggressiveAudio: false,
   challengeColor: 'rainbow',
   challengeRank: 3,
   disableEffect: false,
@@ -905,6 +917,9 @@ async function replacePreset() {
 
     <div class="mt-2" v-if = "page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
+      <v-col cols="12" class="px-2">
+        <v-select v-model="audio" :items="audioList" :label="t('expand')" chips multiple></v-select>
+      </v-col>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
         <v-col cols="4">
           <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeMusic"> </v-slider>
@@ -913,8 +928,8 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider v-if="!expand.includes(expandList[3])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
-          <v-slider v-if="expand.includes(expandList[3])" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
+          <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
     </div>
