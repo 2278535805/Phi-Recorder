@@ -84,10 +84,10 @@ en:
   judgeOffset: Judge Offset
 
   render: Render
-  renders: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
+  render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
   expand: Expand
-  expands: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
-  audios: Force Limit,Audio Aggressive Optimization,Lossless Audio
+  expand-list: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
+  audio-list: Force Limit,Audio Aggressive Optimization,Lossless Audio
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
   bitrate-control-list: CRF,CBR
 
@@ -192,10 +192,10 @@ zh-CN:
   offset: 延时
   judgeOffset: 判定偏移
   render: 渲染内容
-  renders: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
+  render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
   expand: 拓展内容
-  expands: 激进优化,谱面调试,罗马模式,中文模式
-  audios: 强制限幅,音频激进优化,无损音频
+  expand-list: 激进优化,谱面调试,罗马模式,中文模式
+  audio-list: 强制限幅,音频激进优化,无损音频
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
   bitrate-control-list: 动态码率,固定码率
 
@@ -302,14 +302,14 @@ async function chooseAvatar() {
 const challengeColor = ref(t('challenge-colors').split(',')[5]),
   challengeRank = ref('3');
 
-const renderList = ref(t('renders').split(','));
+const renderList = ref(t('render-list').split(','));
 const render = ref<string[]>([]);
 render.value.push(...renderList.value.slice(1, 12));
 
-const expandList = ref(t('expands').split(','));
+const expandList = ref(t('expand-list').split(','));
 const expand = ref<string[]>([]);
 
-const audioList = ref(t('audios').split(','));
+const audioList = ref(t('audio-list').split(','));
 const audio = ref([audioList.value[0]]);
 
 interface Respack {
