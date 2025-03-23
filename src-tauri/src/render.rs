@@ -32,6 +32,7 @@ use tempfile::NamedTempFile;
 
 #[derive(Deserialize, Serialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct RenderConfig {
     resolution: (u32, u32),
     ffmpeg_preset: String,
