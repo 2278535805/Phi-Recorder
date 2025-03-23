@@ -32,6 +32,7 @@ use tempfile::NamedTempFile;
 
 #[derive(Deserialize, Serialize, Default, Debug)]
 #[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct RenderConfig {
     resolution: (u32, u32),
     ffmpeg_preset: String,
@@ -51,7 +52,6 @@ pub struct RenderConfig {
     bitrate: String,
 
     aggressive: bool,
-    #[serde(default="default_as_false")]
     aggressive_audio: bool,
     challenge_color: ChallengeModeColor,
     challenge_rank: u32,
@@ -92,10 +92,6 @@ pub struct RenderConfig {
     max_particles: usize,
 
     fade: f32,
-}
-
-fn default_as_false() -> bool {
-    false
 }
 
 impl RenderConfig {
