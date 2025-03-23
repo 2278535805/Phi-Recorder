@@ -136,7 +136,7 @@ async function getNewVersion() {
     
   } catch (error) {
     console.error('Error fetching tags:', error);
-    await download("https://github.com/2278535805/Phi-Recorder/releases/latest");
+    await open("https://github.com/2278535805/Phi-Recorder/releases/latest");
   }
 }
 
