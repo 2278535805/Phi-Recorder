@@ -51,6 +51,7 @@ pub struct RenderConfig {
     bitrate: String,
 
     aggressive: bool,
+    #[serde(default="default_as_false")]
     aggressive_audio: bool,
     challenge_color: ChallengeModeColor,
     challenge_rank: u32,
@@ -91,6 +92,10 @@ pub struct RenderConfig {
     max_particles: usize,
 
     fade: f32,
+}
+
+fn default_as_false() -> bool {
+    false
 }
 
 impl RenderConfig {
