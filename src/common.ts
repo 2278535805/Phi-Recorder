@@ -43,11 +43,11 @@ export const RULES = {
   },
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
   nonCOMBO: (value: string) => {
-    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~ΜΟΒСՕ]/g, '').trim();
+    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕ]/g, '').trim();
     if (value.length > 50) {
       return i18n.global.t('rules.long');
     }
-    return !/^[CС][OՕΟ0][MΜ][BΒ][OՕΟ0]$/.test(filteredValue) || i18n.global.t('rules.combo');
+    return !/^[CС][OՕΟ0][MΜ][BΒ8][OՕΟ0]$/.test(filteredValue) || i18n.global.t('rules.combo');
   }
 };
 
