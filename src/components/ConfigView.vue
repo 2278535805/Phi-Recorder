@@ -87,6 +87,7 @@ en:
   render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
   expand: Expand
   expand-list: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
+  audio-expand: Audio Expand
   audio-list: Force Limit,Audio Aggressive Optimization,Lossless Audio
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
   bitrate-control-list: CRF,CBR
@@ -195,6 +196,7 @@ zh-CN:
   render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
   expand: 拓展内容
   expand-list: 激进优化,谱面调试,罗马模式,中文模式
+  audio-expand: 音频拓展内容
   audio-list: 强制限幅,音频激进优化,无损音频
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
   bitrate-control-list: 动态码率,固定码率
@@ -807,7 +809,7 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3" class="px-2">
-          <v-select v-model="expand" :items="expandList" :label="t('expand')" chips multiple></v-select>
+          <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
@@ -918,7 +920,7 @@ async function replacePreset() {
     <div class="mt-2" v-if = "page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-col cols="12" class="px-2">
-        <v-select v-model="audio" :items="audioList" :label="t('expand')" chips multiple></v-select>
+        <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
       </v-col>
       <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
         <v-col cols="4">
