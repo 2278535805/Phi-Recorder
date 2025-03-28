@@ -89,6 +89,8 @@ en:
   expand-list: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
   audio-list: Force Limit,Audio Aggressive Optimization,Lossless Audio
+  others: More
+  selects: Selected
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
   bitrate-control-list: CRF,CBR
 
@@ -198,6 +200,8 @@ zh-CN:
   expand-list: 激进优化,谱面调试,罗马模式,中文模式
   audio-expand: 音频拓展内容
   audio-list: 强制限幅,音频激进优化,无损音频
+  others: 更多
+  selects: 已选中
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
   bitrate-control-list: 动态码率,固定码率
 
@@ -809,7 +813,13 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3" class="px-2">
-          <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
+          <v-select v-model="render" :items="renderList" :label="t('render')" multiple>
+            <template v-slot:selection="{ index }">
+              <span v-if="index === 0" class="text-caption">
+                ({{ render.length }} {{ t('selects') }})
+              </span>
+            </template>
+          </v-select>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
@@ -909,10 +919,24 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2 px-2">
         <v-col cols="6" class="px-2">
-          <v-select v-model="render" :items="renderList" :label="t('render')" chips multiple></v-select>
+          <v-select v-model="render" :items="renderList" :label="t('render')" multiple>
+            <template v-slot:selection="{ item, index }">
+              <v-chip size="small" v-if="index < 1" :text="item.title"></v-chip>
+              <span v-if="index === 1" class="text-grey text-caption align-self-center">
+                (+{{ render.length - 1 }} {{ t('others') }})
+              </span>
+            </template>
+          </v-select>
         </v-col>
         <v-col cols="6" class="px-2">
-          <v-select v-model="expand" :items="expandList" :label="t('expand')" chips multiple></v-select>
+          <v-select v-model="expand" :items="expandList" :label="t('expand')" multiple>
+            <template v-slot:selection="{ item, index }">
+              <v-chip size="small" v-if="index < 1" :text="item.title"></v-chip>
+              <span v-if="index === 1" class="text-grey text-caption align-self-center">
+                (+{{ expand.length - 1 }} {{ t('others') }})
+              </span>
+            </template>
+          </v-select>
         </v-col>
       </v-row>
     </div>
@@ -999,6 +1023,7 @@ async function replacePreset() {
   background: rgba(54, 50, 98, 1) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 
 
 </style>
