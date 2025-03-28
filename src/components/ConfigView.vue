@@ -88,7 +88,7 @@ en:
   expand: Expand
   expand-list: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
-  audio-list: Force Limit,Audio Aggressive Optimization,Lossless Audio
+  audio-list: Force Limit,Lossless Audio
   others: More
   selects: Selected
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
@@ -199,7 +199,7 @@ zh-CN:
   expand: 拓展内容
   expand-list: 激进优化,谱面调试,罗马模式,中文模式
   audio-expand: 音频拓展内容
-  audio-list: 强制限幅,音频激进优化,无损音频
+  audio-list: 强制限幅,无损音频
   others: 更多
   selects: 已选中
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
@@ -348,7 +348,7 @@ const noteScale = ref(1);
 
 const volumeMusic = ref(1.0),
   volumeSfx = ref(0.7),
-  compressionRatio = ref(100.0),
+  compressionRatio = ref(20.0),
   limitThreshold = ref(1.0);
 
 const endingLength = ref('0.0');
@@ -475,8 +475,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chinese: expand.value.includes(expandList.value[3]),
 
     forceLimit: audio.value.includes(audioList.value[0]),
-    aggressiveAudio: audio.value.includes(audioList.value[1]),
-    hires: audio.value.includes(audioList.value[2]),
+    hires: audio.value.includes(audioList.value[1]),
 
     maxParticles: maxParticles.value,
     fade: parseFloat(fade.value),
@@ -577,8 +576,7 @@ function applyConfig(config: RenderConfig) {
 
   audio.value = [];
   if (config.forceLimit) audio.value.push(audioList.value[0]);
-  if (config.aggressiveAudio) audio.value.push(audioList.value[1]);
-  if (config.hires) audio.value.push(audioList.value[2]);
+  if (config.hires) audio.value.push(audioList.value[1]);
 
   maxParticles.value = config.maxParticles;
   const index = maxParticlesList.indexOf(maxParticles.value);
@@ -609,7 +607,6 @@ const DEFAULT_CONFIG: RenderConfig = {
   bitrate: '28',
 
   aggressive: false,
-  aggressiveAudio: false,
   challengeColor: 'rainbow',
   challengeRank: 3,
   disableEffect: false,
@@ -954,7 +951,7 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="30" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
           <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
