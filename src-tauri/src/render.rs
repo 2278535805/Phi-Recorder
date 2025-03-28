@@ -514,7 +514,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut output_fx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
 
     // let stereo_sfx = false; // TODO stereo sound effects
-    let mut place = |pos: f64, clip: &AudioClip| {
+    let mut place_fx = |pos: f64, clip: &AudioClip| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
         if position >= output_fx.len() {
             return 0;
@@ -590,7 +590,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                         if note.time as f64 > chart_length {
                             continue;
                         }
-                        place(before_time + note.time as f64 + judge_offset, sfx);
+                        place_fx(before_time + note.time as f64 + judge_offset, sfx);
                     }
                 }
             }
@@ -598,8 +598,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         info!("Process Hit Effects Time:{:.2?}", sfx_time.elapsed())
     }
 
-    let music_output = NamedTempFile::new()?;
-    let fx_output = NamedTempFile::new()?;
+    let output_music_temp = NamedTempFile::new()?;
+    let output_fx_temp = NamedTempFile::new()?;
 
     {
         
@@ -614,7 +614,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 )
                 .split_whitespace(),
             )
-            .arg(music_output.path())
+            .arg(output_music_temp.path())
             .arg("-loglevel")
             .arg("warning")
             .stdin(Stdio::piped())
@@ -638,7 +638,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 )
                 .split_whitespace(),
             )
-            .arg(fx_output.path())
+            .arg(output_fx_temp.path())
             .arg("-loglevel")
             .arg("warning")
             .stdin(Stdio::piped())
@@ -798,9 +798,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg("-i")
-        .arg(music_output.path())
+        .arg(output_music_temp.path())
         .arg("-i")
-        .arg(fx_output.path())
+        .arg(output_fx_temp.path())
         .args(args2.split_whitespace())
         .arg(output_path)
         .arg("-loglevel")
