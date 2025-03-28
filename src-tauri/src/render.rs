@@ -395,6 +395,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
     let music_length = music.length() as f64;
+    let music_sample_rate = music.sample_rate();
     let ending_music = ld!("ending.ogg");
     let sfx_click = ld!("click.ogg");
     let sfx_drag = ld!("drag.ogg");
@@ -510,7 +511,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         sfx_flick.sample_rate()
     );
 
-    let mut output_music = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output_music = vec![0.0_f32; (video_length * music_sample_rate as f64).ceil() as usize * 2];
     let mut output_fx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
 
     // let stereo_sfx = false; // TODO stereo sound effects
@@ -544,21 +545,6 @@ pub async fn main(cmd: bool) -> Result<()> {
             let frame = music.sample_f64(position).unwrap_or_default();
             slice[i * 2] += frame.0;
             slice[i * 2 + 1] += frame.1;
-        }
-        //ending
-        let ending_wait_time: f64 = GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME;
-        let mut pos = chart_length + ending_wait_time;
-        while pos < video_length && config.ending_length > EndingScene::BPM_WAIT_TIME {
-            let start_index = (pos * sample_rate_f64).round() as usize * 2;
-            let slice = &mut output_music[start_index..];
-            let len = (slice.len() / 2).min(ending_music.frame_count());
-            for i in 0..len {
-                let position = i as f64 * ratio;
-                let frame = ending_music.sample_f64(position).unwrap_or_default();
-                slice[i * 2] += frame.0;
-                slice[i * 2 + 1] += frame.1;
-            }
-            pos += ending_music.frame_count() as f64 / sample_rate_f64;
         }
         info!("Process Music Time:{:.2?}", music_time.elapsed())
     }
@@ -610,7 +596,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             .args(
                 format!(
                     "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
-                    sample_rate
+                    music_sample_rate
                 )
                 .split_whitespace(),
             )
@@ -753,18 +739,21 @@ pub async fn main(cmd: bool) -> Result<()> {
         " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
     )?;
 
+    let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
+    let delay_ending = format!("{}|{}", delay_ending, delay_ending);
+
     let mut ffmpeg_audio_effect = if config.force_limit {
-        format!("[1:a]volume={}[a1];[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];", config.volume_music, config.volume_sfx, config.limit_threshold)
+        format!("[1:a]volume={}[a1];[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];[3:a]adelay={}[a3];", config.volume_music, config.volume_sfx, config.limit_threshold, delay_ending)
     } else if config.compression_ratio > 1. {
-        format!("[1:a]volume={}[a1];[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];", config.volume_music, config.volume_sfx, config.compression_ratio)
+        format!("[1:a]volume={}[a1];[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];[3:a]adelay={}[a3];", config.volume_music, config.volume_sfx, config.compression_ratio, delay_ending)
     } else {
-        format!("[1:a]volume={}[a1];[2:a]volume={}[a2];", config.volume_music, config.volume_sfx)
+        format!("[1:a]volume={}[a1];[2:a]volume={}[a2];[3:a]adelay={}[a3];", config.volume_music, config.volume_sfx, delay_ending)
     };
 
     if config.hires{
-        ffmpeg_audio_effect += "[a1][a2]amix=inputs=2:normalize=0[a]"
+        ffmpeg_audio_effect += "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
     } else {
-        ffmpeg_audio_effect += "[a1][a2]amix=inputs=2:normalize=0[a3];[a3]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]";
+        ffmpeg_audio_effect += "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a4];[a4]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]";
     }
 
     let args2 = format!(
@@ -801,6 +790,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         .arg(output_music_temp.path())
         .arg("-i")
         .arg(output_fx_temp.path())
+        .args("-i ./assets/ending.ogg".split_whitespace())
         .args(args2.split_whitespace())
         .arg(output_path)
         .arg("-loglevel")
