@@ -396,8 +396,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
-    let ending = ld!("ending.ogg");
     let music_length = music.length() as f64;
+    let ending_music = ld!("ending.ogg");
     let sfx_click = ld!("click.ogg");
     let sfx_drag = ld!("drag.ogg");
     let sfx_flick = ld!("flick.ogg");
@@ -486,10 +486,10 @@ pub async fn main(cmd: bool) -> Result<()> {
     let sample_rate_f64 = sample_rate as f64;
     assert_eq!(
         sample_rate,
-        ending.sample_rate(),
+        ending_music.sample_rate(),
         "Sample rate mismatch: expected {}, got {}",
         sample_rate,
-        ending.sample_rate()
+        ending_music.sample_rate()
     );
     assert_eq!(
         sample_rate,
@@ -515,7 +515,6 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
     let mut output_hitfx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output_hitfx_agg = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
 
     // let stereo_sfx = false; // TODO stereo sound effects
     let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
@@ -535,21 +534,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         return len;
     };
 
-    let mut place_agg = |pos: f64, clip: &AudioClip, volume: f32| {
-        let position = (pos * sample_rate_f64).round() as usize;
-        if position >= output_hitfx_agg.len() {
-            return 0;
-        }
-        let slice = &mut output_hitfx_agg[position..];
-        let len = (slice.len()).min(clip.frame_count());
-
-        let frames = clip.frames();
-        for i in 0..len {
-            slice[i] += frames[i].0 * volume;
-        }
-
-        return len;
-    };
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
@@ -570,14 +554,14 @@ pub async fn main(cmd: bool) -> Result<()> {
         while pos < video_length && config.ending_length > EndingScene::BPM_WAIT_TIME {
             let start_index = (pos * sample_rate_f64).round() as usize * 2;
             let slice = &mut output[start_index..];
-            let len = (slice.len() / 2).min(ending.frame_count());
+            let len = (slice.len() / 2).min(ending_music.frame_count());
             for i in 0..len {
                 let position = i as f64 * ratio;
-                let frame = ending.sample_f64(position).unwrap_or_default();
+                let frame = ending_music.sample_f64(position).unwrap_or_default();
                 slice[i * 2] += frame.0 * volume_music;
                 slice[i * 2 + 1] += frame.1 * volume_music;
             }
-            pos += ending.frame_count() as f64 / sample_rate_f64;
+            pos += ending_music.frame_count() as f64 / sample_rate_f64;
         }
         info!("Render Music Time:{:.2?}", music_time.elapsed())
     }
@@ -636,26 +620,14 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        if config.aggressive_audio {
-            for line in &chart.lines {
-                for note in &line.notes {
-                    if !note.fake {
-                        if let Some(sfx) = get_hitsound(note) {
-                            place_agg(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
+        for line in &chart.lines {
+            for note in &line.notes {
+                if !note.fake {
+                    if let Some(sfx) = get_hitsound(note) {
+                        if note.time as f64 > chart_length {
+                            continue;
                         }
-                    }
-                }
-            }
-        } else {
-            for line in &chart.lines {
-                for note in &line.notes {
-                    if !note.fake {
-                        if let Some(sfx) = get_hitsound(note) {
-                            if note.time as f64 > chart_length {
-                                continue;
-                            }
-                            place(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
-                        }
+                        place(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
                     }
                 }
             }
@@ -666,16 +638,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     {
         let mixing_time = Instant::now();
         if config.force_limit {
-            if config.aggressive_audio {
-                for i in 0..output_hitfx_agg.len() {
-                    output_hitfx_agg[i] = output_hitfx_agg[i]
-                        .clamp(-config.limit_threshold, config.limit_threshold)
-                }
-            } else {
-                for i in 0..output_hitfx.len() {
-                    output_hitfx[i] = output_hitfx[i]
-                        .clamp(-config.limit_threshold, config.limit_threshold)
-                }
+            for i in 0..output_hitfx.len() {
+                output_hitfx[i] = output_hitfx[i]
+                    .clamp(-config.limit_threshold, config.limit_threshold)
             }
         } else if config.compression_ratio > 1. {
             for i in 0..output_hitfx.len() {
@@ -690,16 +655,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         }
 
-        if config.aggressive_audio {
-            for i in 0..output_hitfx_agg.len() {
-                output[i * 2] += output_hitfx_agg[i];
-                output[i * 2 + 1] += output_hitfx_agg[i];
-            }
-        } else {
             for i in 0..output_hitfx.len() {
                 output[i] += output_hitfx[i];
             }
-        }
 
         if !config.hires {
             for i in 0..output.len() {
