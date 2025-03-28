@@ -69,7 +69,6 @@ export interface RenderConfig {
   bitrate: string;
 
   aggressive: boolean;
-  aggressiveAudio: boolean;
   challengeColor: string;
   challengeRank: number;
   disableEffect: boolean;

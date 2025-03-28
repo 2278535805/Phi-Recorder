@@ -51,7 +51,6 @@ pub struct RenderConfig {
     bitrate: String,
 
     aggressive: bool,
-    aggressive_audio: bool,
     challenge_color: ChallengeModeColor,
     challenge_rank: u32,
     disable_effect: bool,
@@ -156,7 +155,6 @@ impl RenderConfig {
             bitrate_control: "CRF".to_string(),
             bitrate: "1000k".to_string(),
             aggressive: false,
-            aggressive_audio: false,
             challenge_color: ChallengeModeColor::Rainbow,
             challenge_rank: 45,
             disable_effect: false,
@@ -396,8 +394,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
-    let ending = ld!("ending.ogg");
     let music_length = music.length() as f64;
+    let ending_music = ld!("ending.ogg");
     let sfx_click = ld!("click.ogg");
     let sfx_drag = ld!("drag.ogg");
     let sfx_flick = ld!("flick.ogg");
@@ -481,15 +479,14 @@ pub async fn main(cmd: bool) -> Result<()> {
     if ipc {
         send(IPCEvent::StartMixing);
     }
-    let audio_output = NamedTempFile::new()?;
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
     assert_eq!(
         sample_rate,
-        ending.sample_rate(),
+        ending_music.sample_rate(),
         "Sample rate mismatch: expected {}, got {}",
         sample_rate,
-        ending.sample_rate()
+        ending_music.sample_rate()
     );
     assert_eq!(
         sample_rate,
@@ -513,43 +510,27 @@ pub async fn main(cmd: bool) -> Result<()> {
         sfx_flick.sample_rate()
     );
 
-    let mut output = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output_hitfx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
-    let mut output_hitfx_agg = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize];
+    let mut output_music = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+    let mut output_fx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
 
     // let stereo_sfx = false; // TODO stereo sound effects
-    let mut place = |pos: f64, clip: &AudioClip, volume: f32| {
+    let mut place_fx = |pos: f64, clip: &AudioClip| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
-        if position >= output_hitfx.len() {
+        if position >= output_fx.len() {
             return 0;
         }
-        let slice = &mut output_hitfx[position..];
+        let slice = &mut output_fx[position..];
         let len = (slice.len() / 2).min(clip.frame_count());
 
         let frames = clip.frames();
         for i in 0..len {
-            slice[i * 2] += frames[i].0 * volume;
-            slice[i * 2 + 1] += frames[i].1 * volume;
+            slice[i * 2] += frames[i].0;
+            slice[i * 2 + 1] += frames[i].1;
         }
 
         return len;
     };
 
-    let mut place_agg = |pos: f64, clip: &AudioClip, volume: f32| {
-        let position = (pos * sample_rate_f64).round() as usize;
-        if position >= output_hitfx_agg.len() {
-            return 0;
-        }
-        let slice = &mut output_hitfx_agg[position..];
-        let len = (slice.len()).min(clip.frame_count());
-
-        let frames = clip.frames();
-        for i in 0..len {
-            slice[i] += frames[i].0 * volume;
-        }
-
-        return len;
-    };
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
@@ -557,63 +538,29 @@ pub async fn main(cmd: bool) -> Result<()> {
         let len = ((music_length + config.ending_length) * sample_rate_f64) as usize;
         let start_index = (pos * sample_rate_f64).round() as usize * 2;
         let ratio = 1.0 / sample_rate_f64;
-        let slice = &mut output[start_index..];
+        let slice = &mut output_music[start_index..];
         for i in 0..len.min(slice.len() / 2) {
             let position = i as f64 * ratio + offset.max(0.) as f64;
             let frame = music.sample_f64(position).unwrap_or_default();
-            slice[i * 2] += frame.0 * volume_music;
-            slice[i * 2 + 1] += frame.1 * volume_music;
+            slice[i * 2] += frame.0;
+            slice[i * 2 + 1] += frame.1;
         }
         //ending
         let ending_wait_time: f64 = GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME;
         let mut pos = chart_length + ending_wait_time;
         while pos < video_length && config.ending_length > EndingScene::BPM_WAIT_TIME {
             let start_index = (pos * sample_rate_f64).round() as usize * 2;
-            let slice = &mut output[start_index..];
-            let len = (slice.len() / 2).min(ending.frame_count());
+            let slice = &mut output_music[start_index..];
+            let len = (slice.len() / 2).min(ending_music.frame_count());
             for i in 0..len {
                 let position = i as f64 * ratio;
-                let frame = ending.sample_f64(position).unwrap_or_default();
-                slice[i * 2] += frame.0 * volume_music;
-                slice[i * 2 + 1] += frame.1 * volume_music;
+                let frame = ending_music.sample_f64(position).unwrap_or_default();
+                slice[i * 2] += frame.0;
+                slice[i * 2 + 1] += frame.1;
             }
-            pos += ending.frame_count() as f64 / sample_rate_f64;
+            pos += ending_music.frame_count() as f64 / sample_rate_f64;
         }
-        info!("Render Music Time:{:.2?}", music_time.elapsed())
-    }
-
-    let threshold = 1.0;
-    let attack_time = 0.0;
-    let release_time = 0.0;
-    let attack_coeff = (1.0 - (-2.0 / (attack_time * sample_rate as f32)).exp()).min(1.0);
-    let release_coeff = (1.0 - (-2.0 / (release_time * sample_rate as f32)).exp()).min(1.0);
-    let mut gain_reduction = 1.0;
-
-    fn apply_compressor(
-        sample: f32,
-        threshold: f32,
-        ratio: f32,
-        attack_coeff: f32,
-        release_coeff: f32,
-        gain_reduction: &mut f32,
-    ) -> f32 {
-        let abs_sample = sample.abs();
-        let mut gain = 1.0;
-
-        if abs_sample > threshold {
-            let excess = abs_sample - threshold;
-            let compressed_excess = excess / ratio;
-            let compressed_sample = threshold + compressed_excess;
-            gain = compressed_sample / abs_sample;
-        }
-
-        if gain < *gain_reduction {
-            *gain_reduction += attack_coeff * (gain - *gain_reduction);
-        } else {
-            *gain_reduction += release_coeff * (gain - *gain_reduction);
-        }
-
-        sample * *gain_reduction
+        info!("Process Music Time:{:.2?}", music_time.elapsed())
     }
 
     type AudioMap = std::collections::HashMap<String, AudioClip>;
@@ -636,103 +583,77 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        if config.aggressive_audio {
-            for line in &chart.lines {
-                for note in &line.notes {
-                    if !note.fake {
-                        if let Some(sfx) = get_hitsound(note) {
-                            place_agg(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
+        for line in &chart.lines {
+            for note in &line.notes {
+                if !note.fake {
+                    if let Some(sfx) = get_hitsound(note) {
+                        if note.time as f64 > chart_length {
+                            continue;
                         }
-                    }
-                }
-            }
-        } else {
-            for line in &chart.lines {
-                for note in &line.notes {
-                    if !note.fake {
-                        if let Some(sfx) = get_hitsound(note) {
-                            if note.time as f64 > chart_length {
-                                continue;
-                            }
-                            place(before_time + note.time as f64 + judge_offset, sfx, volume_sfx);
-                        }
+                        place_fx(before_time + note.time as f64 + judge_offset, sfx);
                     }
                 }
             }
         }
-        info!("Render Hit Effects Time:{:.2?}", sfx_time.elapsed())
+        info!("Process Hit Effects Time:{:.2?}", sfx_time.elapsed())
     }
 
-    {
-        let mixing_time = Instant::now();
-        if config.force_limit {
-            if config.aggressive_audio {
-                for i in 0..output_hitfx_agg.len() {
-                    output_hitfx_agg[i] = output_hitfx_agg[i]
-                        .clamp(-config.limit_threshold, config.limit_threshold)
-                }
-            } else {
-                for i in 0..output_hitfx.len() {
-                    output_hitfx[i] = output_hitfx[i]
-                        .clamp(-config.limit_threshold, config.limit_threshold)
-                }
-            }
-        } else if config.compression_ratio > 1. {
-            for i in 0..output_hitfx.len() {
-                output_hitfx[i] = apply_compressor(
-                    output_hitfx[i],
-                    threshold,
-                    config.compression_ratio,
-                    attack_coeff,
-                    release_coeff,
-                    &mut gain_reduction,
-                );
-            }
-        }
-
-        if config.aggressive_audio {
-            for i in 0..output_hitfx_agg.len() {
-                output[i * 2] += output_hitfx_agg[i];
-                output[i * 2 + 1] += output_hitfx_agg[i];
-            }
-        } else {
-            for i in 0..output_hitfx.len() {
-                output[i] += output_hitfx[i];
-            }
-        }
-
-        if !config.hires {
-            for i in 0..output.len() {
-                output[i] = output[i].clamp(-config.limit_threshold, config.limit_threshold);
-            }
-        }
-        info!("Mixing Time:{:.2?}", mixing_time.elapsed());
-    }
+    let output_music_temp = NamedTempFile::new()?;
+    let output_fx_temp = NamedTempFile::new()?;
 
     {
+        
+
         let output_audio_time = Instant::now();
+
         let mut proc = cmd_hidden(&ffmpeg)
             .args(
                 format!(
-                    "-y -f f32le -ar {} -ac 2 -i - -c:a pcm_f32le -f wav",
+                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
                     sample_rate
                 )
                 .split_whitespace(),
             )
-            .arg(audio_output.path())
+            .arg(output_music_temp.path())
             .arg("-loglevel")
             .arg("warning")
             .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
             .spawn()
             .with_context(|| tl!("run-ffmpeg-failed"))?;
         let input = proc.stdin.as_mut().unwrap();
         let mut writer = BufWriter::new(input);
-        for sample in output.into_iter() {
+        for sample in output_music.into_iter() {
             writer.write_all(&sample.to_le_bytes())?;
         }
         drop(writer);
         proc.wait()?;
+
+        let mut proc = cmd_hidden(&ffmpeg)
+            .args(
+                format!(
+                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
+                    sample_rate
+                )
+                .split_whitespace(),
+            )
+            .arg(output_fx_temp.path())
+            .arg("-loglevel")
+            .arg("warning")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .with_context(|| tl!("run-ffmpeg-failed"))?;
+        let input = proc.stdin.as_mut().unwrap();
+        let mut writer = BufWriter::new(input);
+        for sample in output_fx.into_iter() {
+            writer.write_all(&sample.to_le_bytes())?;
+        }
+        drop(writer);
+        proc.wait()?;
+
         info!("Output Audio Time:{:.2?}", output_audio_time.elapsed());
     }
 
@@ -829,13 +750,27 @@ pub async fn main(cmd: bool) -> Result<()> {
     }
     write!(
         &mut args,
-        " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i - -i"
+        " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
     )?;
 
+    let mut ffmpeg_audio_effect = if config.force_limit {
+        format!("[1:a]volume={}[a1];[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];", config.volume_music, config.volume_sfx, config.limit_threshold)
+    } else if config.compression_ratio > 1. {
+        format!("[1:a]volume={}[a1];[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];", config.volume_music, config.volume_sfx, config.compression_ratio)
+    } else {
+        format!("[1:a]volume={}[a1];[2:a]volume={}[a2];", config.volume_music, config.volume_sfx)
+    };
+
+    if config.hires{
+        ffmpeg_audio_effect += "[a1][a2]amix=inputs=2:normalize=0[a]"
+    } else {
+        ffmpeg_audio_effect += "[a1][a2]amix=inputs=2:normalize=0[a3];[a3]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]";
+    }
+
     let args2 = format!(
-        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -map 0:v:0 -map 1:a:0 {} -vf vflip -f {}",
+        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] {} -vf vflip -f {}",
         if config.hires {
-            "copy"
+            "pcm_f32le"
         } else {
             "aac -b:a 320k"
         },
@@ -844,6 +779,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         config.bitrate,
         ffmpeg_preset,
         ffmpeg_preset_name,
+        ffmpeg_audio_effect,
         if config.disable_loading {
             format!("-ss {}", before_time)
         } else {
@@ -861,7 +797,10 @@ pub async fn main(cmd: bool) -> Result<()> {
     //info!("Command: {} {} {} {} {}", "ffmpeg", args,"-", args2, output_path.display());
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
-        .arg(audio_output.path())
+        .arg("-i")
+        .arg(output_music_temp.path())
+        .arg("-i")
+        .arg(output_fx_temp.path())
         .args(args2.split_whitespace())
         .arg(output_path)
         .arg("-loglevel")
