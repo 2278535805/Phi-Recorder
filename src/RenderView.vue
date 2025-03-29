@@ -335,7 +335,11 @@ async function previewTweakoffset() {
   try {
     let params = await buildParams();
     if (!params) return false;
-    await invoke('preview_tweakoffset', { params });
+    let offset = await invoke('preview_tweakoffset', { params });
+    if (offset) {
+      chartInfo.value!.offset = offset as number;
+      offset_text.value = String(Math.round(chartInfo.value!.offset * 1000));
+    }
     stepIndex.value--;
     return true;
   } catch (e) {
