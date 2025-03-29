@@ -315,6 +315,7 @@ async function getNewVersion() {
 const loadingNext = ref(false);
 const loadingPreview = ref(false);
 const loadingPlay = ref(false);
+const loadingTweakoffset = ref(false);
 
 async function previewChart() {
   loadingPreview.value = true;
@@ -332,6 +333,7 @@ async function previewChart() {
 }
 
 async function previewTweakoffset() {
+  loadingTweakoffset.value = true;
   try {
     let params = await buildParams();
     if (!params) return false;
@@ -345,6 +347,8 @@ async function previewTweakoffset() {
   } catch (e) {
     toastError(e);
     return false;
+  } finally {
+    loadingTweakoffset.value = false
   }
 }
 
@@ -425,7 +429,7 @@ function tryParseAspect(): number | undefined {
     <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))" class="elevated-stepper v-stepper">
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
-        <v-btn v-if="step === 'options'" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
+        <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
         <div class="flex-grow-1"></div>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
