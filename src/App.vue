@@ -78,7 +78,7 @@ window.goto = (name: string) => {
     <v-app-bar :elevation="0" class="app-bar-shadow blur-background">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text">
-        <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
+        <v-app-bar-title class="mx-5 text-glow">Re:Phirc Render!</v-app-bar-title>
       </div>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" expand-on-hover rail permanent class="nav-drawer-border blur-background list-item">
@@ -125,7 +125,7 @@ window.goto = (name: string) => {
 }
 
 .dark-theme {
-  background: linear-gradient(45deg, #292364, #302b63, #24243e);
+  background: linear-gradient(45deg, #5dca83, #2d8673, #2e9043);
 }
 
 .app-bar-shadow {
@@ -137,7 +137,7 @@ window.goto = (name: string) => {
 }
 
 .gradient-text {
-  background: linear-gradient(30deg, #04c9ff, #ff13d4);
+  background: linear-gradient(30deg, #04ff3a, #ff13d4);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -204,7 +204,7 @@ window.goto = (name: string) => {
 
 .blur-background {
   backdrop-filter: blur(40px) saturate(180%);
-  background: linear-gradient(45deg, rgba(168, 98, 153, 0.3), rgba(101, 66, 182, 0.4)) !important;
+  background: linear-gradient(45deg, rgba(168, 98, 153, 0.3), rgba(17, 220, 48, 0.4)) !important;
   transform: translateZ(0);
   position: relative;
   z-index: 1;

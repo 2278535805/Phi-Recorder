@@ -596,7 +596,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   hires: false,
   chartDebug: false,
   chartRatio: 1,
-  allGood: false,
+  allGood: true,
   allBad: false,
   fps: 60,
   hardwareAccel: true,
@@ -615,22 +615,22 @@ const DEFAULT_CONFIG: RenderConfig = {
   noteScale: 1,
   particle: true,
   playerAvatar: null,
-  playerName: '',
-  playerRks: 16.00,
+  playerName: 'GUEST',
+  playerRks: 11.45,
   sampleCount: 8,
   resPackPath: null,
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
-  compressionRatio: 30.0,
+  compressionRatio: 20.0,
   forceLimit: true,
   limitThreshold: 1.0,
   watermark: '',
   roman: false,
   chinese: false,
-  combo: 'AUTOPLAY',
+  combo: 'OTTOPLAY',
   difficulty: '',
-  judgeOffset: 0,
+  judgeOffset: 0.1,
   simpleFileName: false,
   renderLine: true,
   renderLineExtra: true,
@@ -996,7 +996,7 @@ async function replacePreset() {
 
 <style scoped>
 .gradient-primary {
-  background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
+  background: linear-gradient(45deg, #21f360, #21f360) !important;
   box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -1004,20 +1004,20 @@ async function replacePreset() {
 .elevated-stepper {
   border-radius: 16px !important;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
-  background: rgba(23, 9, 99, 0.8) !important;
+  background: rgba(0, 255, 102, 0.368) !important;
   backdrop-filter: blur(8px);
 }
 
 .sticky-label {
-  background: rgba(54, 50, 98, 0.9) !important;
+  background: rgba(0, 255, 102, 0.368) !important;
 }
 
 .navigation {
-  background: rgba(54, 50, 98, 1) !important;
+  background: rgba(0, 255, 102, 0.368) !important;
 }
 
 .v-btn {
-  background: rgba(54, 50, 98, 1) !important;
+  background: rgba(0, 255, 102, 0.368) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
