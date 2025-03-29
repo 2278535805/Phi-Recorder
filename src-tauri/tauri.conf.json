@@ -13,7 +13,7 @@
     "allowlist": {
       "http": {
         "all": true,
-        "scope": [ "https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest" ],
+        "scope": [ "https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest", "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest" ],
         "request": true
       },
       "dialog": {

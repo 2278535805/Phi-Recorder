@@ -42,17 +42,7 @@ const isWindows = String(platform) === 'Windows_NT';
 const isMacOS = String(platform) === 'Darwin';
 const isLinux = String(platform) === 'Linux';
 
-type Assets = {
-  browser_download_url: string,
-  name: string,
-}
-
-type Release = {
-  id: number,
-  assets: Assets[],
-  tag_name: string,
-};
-
+import type { Release, Assets } from './model';
 async function checkForUpdates() {
   checking.value = true;
   try {

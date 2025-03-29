@@ -116,3 +116,14 @@ export interface RPEChart {
   illustration: string;
   charter: string;
 }
+
+export type Assets = {
+  browser_download_url: string,
+  name: string,
+}
+
+export type Release = {
+  id: number,
+  assets: Assets[],
+  tag_name: string,
+};
