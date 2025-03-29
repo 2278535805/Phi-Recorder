@@ -4,11 +4,11 @@ use macroquad::prelude::*;
 use prpr::{
     config::{Config, Mods}, core::init_assets, fs, scene::{show_error, GameMode, LoadingScene, NextScene, Scene}, time::TimeManager, ui::{FontArc, TextPainter, Ui}, Main
 };
-use std::{io::BufRead, ops::DerefMut};
+use std::{cell::RefCell, io::BufRead, ops::DerefMut, rc::Rc};
 
-struct BaseScene(Option<NextScene>, bool);
+struct BaseScene(Option<NextScene>, bool, Rc<RefCell<f32>>);
 impl Scene for BaseScene {
-    fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
+    /*fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
         show_error(
             result
                 .downcast::<anyhow::Error>()
@@ -17,20 +17,20 @@ impl Scene for BaseScene {
         );
         self.1 = true;
         Ok(())
-    }
+    }*/
 
-    /*fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
+    fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
         let _res = match result.downcast::<Option<f32>>() {
             Ok(offset) => {
                 if let Some(offset) = *offset {
-                    //info.offset = offset;
+                    *self.2.borrow_mut() = offset;
                 }
                 return Ok(());
             }
             Err(result) => result,
         };
         Ok(())
-    }*/
+    }
 
     fn enter(&mut self, _tm: &mut TimeManager, _target: Option<RenderTarget>) -> Result<()> {
         if self.0.is_none() && !self.1 {
@@ -104,6 +104,7 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
 
     let tm = TimeManager::default();
     let ctm = TimeManager::from_config(&prpr_config); // strange variable name...
+    let offset = Rc::new(RefCell::new(0.));
     let mut main = Main::new(
         Box::new(BaseScene(
             Some(NextScene::Overlay(Box::new(
@@ -123,6 +124,7 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
                     .await?,
             ))),
             false,
+            Rc::clone(&offset)
         )),
         ctm,
         None,
@@ -148,5 +150,7 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
         next_frame().await;
     }
 
+    let result_offset = *offset.borrow();
+    println!("offset: {}", result_offset);
     Ok(())
 }
