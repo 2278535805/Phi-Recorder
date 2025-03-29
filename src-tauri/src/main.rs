@@ -470,22 +470,55 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-async fn preview_tweakoffset(params: RenderParams) -> Result<(), InvokeError> {
+async fn preview_tweakoffset(params: RenderParams) -> Result<f32, InvokeError> {
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("tweakoffset")
             .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
-            .stdout(Stdio::inherit())
+            .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
             .spawn()?;
 
         let mut stdin = child.stdin.take().unwrap();
         let info = format!("{}\n", serde_json::to_string(&params)?);
-        stdin
-            .write_all(info.as_bytes())
-            .await?;
-        Ok(())
+        stdin.write_all(info.as_bytes()).await?;
+
+        // Read and process stdout to get the offset value
+        let stdout = child.stdout.take().unwrap();
+        let mut reader = tokio::io::BufReader::new(stdout);
+        let mut line = String::new();
+        let mut offset = 0.0f32;
+
+        while let Ok(bytes) = tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await {
+            if bytes == 0 {
+                break;
+            }
+
+            if line.contains("{update offset:") {
+                // Extract the offset value using regex
+                if let Some(offset_str) = line
+                    .trim()
+                    .strip_prefix("{update offset:")
+                    .and_then(|s| s.strip_suffix("}"))
+                {
+                    if let Ok(new_offset) = offset_str.trim().parse::<f32>() {
+                        println!("update offset:{}", new_offset);
+                        offset = new_offset;
+                        break;
+                    }
+                }
+            }
+
+            line.clear();
+        }
+
+        let status = child.wait().await?;
+        if !status.success() {
+            println!("Child process exited with {}", status);
+        }
+
+        Ok(offset)
     })
     .await
 }

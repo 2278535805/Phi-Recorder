@@ -104,7 +104,7 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
 
     let tm = TimeManager::default();
     let ctm = TimeManager::from_config(&prpr_config); // strange variable name...
-    let offset = Rc::new(RefCell::new(0.));
+    let offset = Rc::new(RefCell::new(0.0f32));
     let mut main = Main::new(
         Box::new(BaseScene(
             Some(NextScene::Overlay(Box::new(
@@ -150,7 +150,10 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
         next_frame().await;
     }
 
-    let result_offset = *offset.borrow();
-    println!("offset: {}", result_offset);
+    if tweak_offset {
+        let result_offset = *offset.borrow();
+        println!("{{update offset:{}}}", result_offset);
+    }
+
     Ok(())
 }
