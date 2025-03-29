@@ -536,9 +536,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_music != 0.0 {
         let music_time = Instant::now();
         let pos = before_time - offset.min(0.) as f64;
-        let len = ((music_length + config.ending_length) * sample_rate_f64) as usize;
-        let start_index = (pos * sample_rate_f64).round() as usize * 2;
-        let ratio = 1.0 / sample_rate_f64;
+        let len = ((music_length + config.ending_length) * music_sample_rate as f64) as usize;
+        let start_index = (pos * music_sample_rate as f64).round() as usize * 2;
+        let ratio = 1.0 / music_sample_rate as f64;
         let slice = &mut output_music[start_index..];
         for i in 0..len.min(slice.len() / 2) {
             let position = i as f64 * ratio + offset.max(0.) as f64;
