@@ -169,7 +169,7 @@ impl RenderConfig {
             speed: 1.0,
             volume_music: 1.0,
             volume_sfx: 0.7,
-            compression_ratio: 100.,
+            compression_ratio: 20.,
             force_limit: false,
             limit_threshold: 1.0,
             chart_debug: false,

@@ -622,7 +622,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 1.0,
   volumeSfx: 0.7,
-  compressionRatio: 30.0,
+  compressionRatio: 20.0,
   forceLimit: true,
   limitThreshold: 1.0,
   watermark: '',
