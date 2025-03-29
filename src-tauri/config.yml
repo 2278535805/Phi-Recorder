@@ -10,7 +10,6 @@ customEncoder:
 bitrateControl: CRF
 bitrate: 26
 aggressive: false
-aggressiveAudio: false
 
 disableEffect: false
 doubleHint: true
@@ -30,7 +29,7 @@ speed: 1.0
 hires: true
 volumeMusic: 1.0
 volumeSfx: 0.7
-compressionRatio: 30.0
+compressionRatio: 20.0
 forceLimit: true
 limitThreshold: 1.0
 
