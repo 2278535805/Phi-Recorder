@@ -129,19 +129,19 @@ async function unbindRPE() {
   font-weight: 600;
   padding: 12px 24px;
   margin-bottom: 12px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0, 1, 1, 0);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .chart-card {
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0, 1, 1, 0);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin: 5px;
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
-  animation: fadeUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+  animation: fadeUp 0.5s cubic-bezier(0, 1, 1, 0) forwards;
   opacity: 0; /* 初始状态透明 */
 }
 

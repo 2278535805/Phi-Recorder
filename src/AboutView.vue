@@ -1,18 +1,20 @@
 <i18n>
 en:
-  app: Phi Recorder
+  app: Re:Phira Recorderrrr!!!!!
   check: Check Update
+  cool: So Cool!!!
   new-version: New version available!
-  non-version: It's the latest version
+  non-version: You are using the most advanced version of the universe!!!
   err-version: Check update failed
   download: Download
   close: Close
 
 zh-CN:
-  app: Phi Recorder
+  app: 屁屁拉录制器！
   check: 检查更新
+  cool: 好炫酷！！！
   new-version: 发现新版本!
-  non-version: 已是最新版本
+  non-version: 您使用的是宇宙最前沿版本！！！
   err-version: 检查更新失败
   download: 下载
   close: 关闭
@@ -29,7 +31,7 @@ import { open } from '@tauri-apps/api/shell';
 //import { random } from 'mathjs';
 //import { download as tauriDownload } from '@tauri-apps/plugin-upload';
 
-const appVersion = await getVersion();
+const appVersion = "2.0";
 
 import { fetch } from '@tauri-apps/api/http';
 import semver from 'semver';
@@ -54,37 +56,7 @@ type Release = {
 };
 
 async function checkForUpdates() {
-  checking.value = true;
-  try {
-    const response = await fetch('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Phi-Recorder',
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    });
-    const release = response.data as Release;
-    console.log(release);
-    
-    if (!release) {
-      throw new Error('No tags found');
-    }
-    const latestVersion = release.tag_name;
-    //const latestVersion = '0.3.0';
-    console.log(latestVersion);
-    updates.value = semver.gt(latestVersion, appVersion);
-    if (updates.value) {
-      dialog_update.value = true;
-    } else {
-      dialog_non.value = true;
-    }
-  } catch (error) {
-    console.error('Error fetching tags:', error);
-    updates.value = false;
-    dialog_error.value = true;
-  }
-  checking.value = false;
+  dialog_non.value = true;
 }
 
 const clamp = (num: number, lower: number, upper: number) => {
@@ -156,7 +128,7 @@ const dialog_download = ref(false);
     <div class="about-container">
       <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
-      <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
+      <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">Gitee</v-btn>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-update" :loading="checking" @click="checkForUpdates">{{ t('check') }}</v-btn>
       <p class="license-text license-text-gradient">Licensed by GPLv3</p>
     </div>
@@ -177,7 +149,7 @@ const dialog_download = ref(false);
 
   <v-dialog v-model="dialog_non" width="auto" min-width="400px" class="log-card-bg">
     <v-card class="log-card-only-window">
-      <v-card-title v-t="t('check')"> </v-card-title>
+      <v-card-title v-t="t('cool')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('non-version') }}</pre>
       </v-card-text>
@@ -263,7 +235,7 @@ const dialog_download = ref(false);
 }
 
 .github-btn {
-  background: rgba(147, 147, 147, 0.2);
+  background: rgba(0, 255, 102, 0.368);
   padding: 0px 24px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -271,7 +243,7 @@ const dialog_download = ref(false);
 }
 
 .gradient-text {
-  background: linear-gradient(45deg, #2196f3, #e91e63);
+  background: linear-gradient(45deg, #21f360, #1ee96f);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -283,7 +255,7 @@ const dialog_download = ref(false);
 }
 
 .license-text-gradient {
-  background: linear-gradient(45deg, #4caf50, #ffeb3b);
+  background: linear-gradient(45deg, #4caf50, #3a9762);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

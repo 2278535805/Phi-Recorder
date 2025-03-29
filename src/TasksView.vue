@@ -272,10 +272,10 @@ async function showFolder() {
   border-radius: 16px !important;
   background: rgba(255, 255, 255, 0.05);
   margin: 5px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0, 1, 1, 0);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
-  animation: fadeUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
+  animation: fadeUp 0.5s cubic-bezier(0, 1, 1, 0) forwards;
   opacity: 0; /* 初始状态透明 */
 }
 
@@ -311,7 +311,7 @@ pre {
 }
 
 .animated-form {
-  transition: opacity 0.1s ease, transform 0.1s ease;
+  transition: opacity 0.1s cubic-bezier(0, 1, 1, 0), transform 0.1s cubic-bezier(0, 1, 1, 0);
 }
 
 .v-slide-y-transition-enter-from {
@@ -324,7 +324,7 @@ pre {
   padding: 8px 14px;
   margin: 4px 8px;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0, 1, 1, 0);
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
