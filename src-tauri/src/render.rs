@@ -742,19 +742,33 @@ pub async fn main(cmd: bool) -> Result<()> {
     let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
-    let mut ffmpeg_audio_effect = if config.force_limit {
-        format!("[1:a]volume={}[a1];[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];[3:a]adelay={}[a3];", config.volume_music, config.volume_sfx, config.limit_threshold, delay_ending)
-    } else if config.compression_ratio > 1. {
-        format!("[1:a]volume={}[a1];[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];[3:a]adelay={}[a3];", config.volume_music, config.volume_sfx, config.compression_ratio, delay_ending)
-    } else {
-        format!("[1:a]volume={}[a1];[2:a]volume={}[a2];[3:a]adelay={}[a3];", config.volume_music, config.volume_sfx, delay_ending)
-    };
+    let ffmpeg_audio_filter_music = format!(
+        "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}[a1];",
+        config.volume_music
+    );
+    let ffmpeg_audio_filter_fx = if config.force_limit { format!(
+        "[2:a]alimiter=limit={}:level=false:attack=0.1:release=1,volume={}[a2];",
+        config.limit_threshold, config.volume_sfx
+    )} else if config.compression_ratio > 1. { format!(
+        "[2:a]acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01,volume={}[a2];",
+        config.compression_ratio, config.volume_sfx
+    )} else { format!(
+        "[2:a]volume={}[a2];",
+        config.volume_sfx
+    )};
+    let ffmpeg_audio_filter_ending = format!(
+        "[3:a]adelay={},volume={}[a3];",
+        delay_ending, config.volume_music
+    );
 
-    if config.hires{
-        ffmpeg_audio_effect += "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
-    } else {
-        ffmpeg_audio_effect += "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a4];[a4]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]";
-    }
+    let ffmpeg_audio_effect_mix = if config.hires{ format!(
+        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
+    )} else { format!(
+        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a4];[a4]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
+    )};
+
+    let ffmpeg_audio_filter = format!("{}{}{}{}", ffmpeg_audio_filter_music, ffmpeg_audio_filter_fx, ffmpeg_audio_filter_ending, ffmpeg_audio_effect_mix);
+
 
     let args2 = format!(
         "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] {} -vf vflip -f {}",
@@ -768,7 +782,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         config.bitrate,
         ffmpeg_preset,
         ffmpeg_preset_name,
-        ffmpeg_audio_effect,
+        ffmpeg_audio_filter,
         if config.disable_loading {
             format!("-ss {}", before_time)
         } else {
