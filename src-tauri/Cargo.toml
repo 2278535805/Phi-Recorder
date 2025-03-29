@@ -15,6 +15,7 @@ tauri-build = { version = "1.5.6", features = [] }
 [dependencies]
 # env_logger = "0.11.6"
 serde_json = "1.0.138"
+toml = "0.7.3"
 serde = { version = "1.0.217", features = ["derive"] }
 tauri = { version = "1.8.2", features = [ "os-all", "http-all", "dialog-message", "system-tray", "shell-open", "fs-read-file", "protocol-asset", "dialog-open"] }
 
@@ -24,7 +25,6 @@ prpr = { git = "https://github.com/2278535805/render-lib", package = "prpr", bra
 # prpr = { path = "../../phira/prpr" }
 
 sasa = { git = "https://github.com/2278535805/sasa" }
-serde_yaml = "0.9"
 tokio = { version = "1.43.0", features = ["process", "rt-multi-thread", "fs"] }
 tracing = "0.1.37"
 tempfile = "3.16.0"

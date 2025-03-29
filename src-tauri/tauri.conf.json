@@ -63,7 +63,7 @@
       "resources": [
         "assets",
         "WebView2Loader.dll",
-        "config.yml"
+        "config.toml"
       ],
       "shortDescription": "",
       "targets": "all",

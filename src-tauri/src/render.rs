@@ -293,17 +293,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 .unwrap();
         }
 
-        let config = match (|| -> Result<RenderConfig> {
-            Ok(serde_yaml::from_str(
-                &std::fs::read_to_string("config.yml").context("error reading config")?,
-            )?)
-        })() {
-            Err(err) => {
-                warn!("error loading config: {:?}", err);
-                RenderConfig::default()
-            }
-            Ok(config) => config,
-        };
+        let config: RenderConfig = toml::from_str(&std::fs::read_to_string("config.toml")?)?;
         let path = std::env::args().nth(2).unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;

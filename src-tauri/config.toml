@@ -1,0 +1,59 @@
+resolution = [1920, 1080]
+fps = 60
+ffmpegPreset = "medium p4 balanced"
+hardwareAccel = true
+sampleCount = 2
+hevc = false
+mpeg4 = false
+# customEncoder = ""
+bitrateControl = "CRF"
+bitrate = "26"
+
+# playerAvatar = ""
+playerName = "HLMC"
+playerRks = 16.0
+challengeColor = "rainbow"
+challengeRank = 45
+
+# res_pack_path = ""
+noteScale = 1.0
+chartRatio = 1.0
+
+disableLoading = true
+renderLine = true
+renderLineExtra = true
+renderNote = true
+renderUiPause = true
+renderUiScore = true
+renderUiCombo = true
+renderUiBar = true
+renderBg = true
+particle = true
+disableEffect = false
+doubleHint = true
+
+aggressive = false
+chartDebug = false
+roman = false
+chinese = false
+
+forceLimit = true
+hires = true
+volumeMusic = 1.0
+volumeSfx = 0.7
+compressionRatio = 20.0
+limitThreshold = 1.0
+
+endingLength = 0.0
+watermark = ""
+combo = "AUTOPLAY"
+difficulty = ""
+allGood = false
+allBad = false
+judgeOffset = 0.0
+maxParticles = 100000
+fade = 0.0
+
+simpleFileName = false
+fxaa = false
+speed = 1.0

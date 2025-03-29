@@ -3215,11 +3215,11 @@ dependencies = [
  "sasa",
  "serde",
  "serde_json",
- "serde_yaml",
  "tauri",
  "tauri-build",
  "tempfile",
  "tokio",
+ "toml 0.7.8",
  "tracing",
  "winapi",
 ]
@@ -3341,7 +3341,7 @@ dependencies = [
 [[package]]
 name = "prpr"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#98a2aee750efdabd98611f8e7afdfea86ae738d5"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#a9b55352366f180866fc36ef0613e41d0ae75792"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3409,7 +3409,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#98a2aee750efdabd98611f8e7afdfea86ae738d5"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#a9b55352366f180866fc36ef0613e41d0ae75792"
 dependencies = [
  "anyhow",
  "tracing",
