@@ -701,20 +701,24 @@ pub async fn main(cmd: bool) -> Result<()> {
 
 
     let ffmpeg_preset = "-preset";
-    let mut ffmpeg_preset_name_list = config.ffmpeg_preset.split_whitespace();
+    let ffmpeg_preset_name_list: Vec<String> = config.ffmpeg_preset.split_whitespace().map(|s| s.to_string()).collect();
+    let ffmpeg_preset_default_cpu: String = "medium".to_string();
+    let ffmpeg_preset_default_nvenc: String = "p4".to_string();
+    let ffmpeg_preset_default_qsv: String = "medium".to_string();
+    let ffmpeg_preset_default_amf: String = "balanced".to_string();
 
     let ffmpeg_preset_name = if ffmpeg_encoder == encoder_list[0] {
-        ffmpeg_preset_name_list.nth(1).unwrap_or(
-            ffmpeg_preset_name_list.nth(0).unwrap_or("p4")
+        ffmpeg_preset_name_list.get(1).unwrap_or(
+            ffmpeg_preset_name_list.get(0).unwrap_or(&ffmpeg_preset_default_nvenc)
         )
     } else if ffmpeg_encoder == encoder_list[1] {
-        ffmpeg_preset_name_list.nth(2).unwrap_or("medium")
+        ffmpeg_preset_name_list.get(2).unwrap_or(&ffmpeg_preset_default_qsv)
     } else if ffmpeg_encoder == encoder_list[2] {
-        ffmpeg_preset_name_list.nth(3).unwrap_or(
-            ffmpeg_preset_name_list.nth(0).unwrap_or("balanced")
+        ffmpeg_preset_name_list.get(3).unwrap_or(
+            ffmpeg_preset_name_list.get(0).unwrap_or(&ffmpeg_preset_default_amf)
         )
     } else {
-        ffmpeg_preset_name_list.nth(0).unwrap_or("medium")
+        ffmpeg_preset_name_list.get(0).unwrap_or(&ffmpeg_preset_default_cpu)
     };
 
     let bitrate_control = 
