@@ -259,7 +259,7 @@ html {
 
 .blur-background {
   backdrop-filter: blur(40px) saturate(180%);
-  background: linear-gradient(45deg, rgba(168, 98, 153, 0.3), rgba(101, 66, 182, 0.4)) !important;
+  background: linear-gradient(45deg, rgba(122, 98, 168, 0.4), rgba(107, 66, 182, 0.4)) !important;
   transform: translateZ(0);
   position: relative;
   z-index: 1;

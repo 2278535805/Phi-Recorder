@@ -936,7 +936,7 @@ async function replacePreset() {
           </v-select>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-n2">
+      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3" class="px-2">
           <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positive10000]"></v-text-field>
         </v-col>
