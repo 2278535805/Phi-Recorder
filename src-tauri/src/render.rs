@@ -308,7 +308,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 .unwrap();
         }
 
-        let config: RenderConfig = toml::from_str(&std::fs::read_to_string("config.toml")?)?;
+        let config: RenderConfig = toml::from_str(&std::fs::read_to_string(std::env::args().nth(4).unwrap_or("config.toml".to_string()))?)?;
         let path = std::env::args().nth(2).unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
