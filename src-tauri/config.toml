@@ -1,6 +1,6 @@
 resolution = [1920, 1080]
 fps = 60
-ffmpegPreset = "medium p4 balanced"
+ffmpegPreset = "medium p4 medium balanced"
 hardwareAccel = true
 sampleCount = 2
 hevc = false
