@@ -765,23 +765,17 @@ async function replacePreset() {
       </v-layout>
 
   <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 20px;">
-    <v-row v-if = "page === 0 || page === undefined" no-gutters class="mx-n2 align-center">
-      <v-col cols="8">
-        <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" class="mx-2" :label="t('presets')" :items="presets" item-title="name" v-model="preset"></v-combobox>
-      </v-col>
-      <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-refresh'" size="large" @click="updatePresets"></v-btn>
-      </v-col>
-      <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-create'" size="large" @click="createPreset"></v-btn>
-      </v-col>
-      <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'" @click="deletePreset"></v-btn>
-      </v-col>
-      <v-col cols="1" class="mt-n4">
-        <v-btn class="px-2" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'" @click="replacePreset"></v-btn>
-      </v-col>
-    </v-row>
+    <div v-if="page === 0 || page === undefined"
+      style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
+      <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"
+        item-title="name" v-model="preset" style="flex: 1;"></v-combobox>
+      <v-btn class="text-caption" v-t="'preset-refresh'" size="large" @click="updatePresets" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" v-t="'preset-create'" size="large" @click="createPreset" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'"
+        @click="deletePreset" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'"
+        @click="replacePreset" style="flex: .2;"></v-btn>
+    </div>
 
     <div v-if = "page === 0">
       <StickyLabel :title="t('title.common')"></StickyLabel>
@@ -808,7 +802,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('player-name')" v-model="playerName"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2">
+      <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3" class="px-2">
           <v-select v-model="render" :items="renderList" :label="t('render')" multiple>
             <template v-slot:selection="{ index }">
@@ -832,7 +826,7 @@ async function replacePreset() {
 
     <div v-if = "page === 1 || page === undefined">
       <StickyLabel :title="t('title.output')"></StickyLabel>
-      <v-row no-gutters class="mx-n2">
+      <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
@@ -846,7 +840,7 @@ async function replacePreset() {
           <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2">
+      <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
           <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
@@ -864,7 +858,7 @@ async function replacePreset() {
     </div>
     <div class="mt-2" v-if = "page === 2 || page === undefined">
       <StickyLabel :title="t('title.player')"></StickyLabel>
-      <v-row no-gutters class="mx-n2">
+      <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="4">
           <v-text-field
             readonly

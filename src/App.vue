@@ -113,6 +113,61 @@ window.goto = (name: string) => {
 </template>
 
 <style>
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(54, 50, 98, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(99, 102, 241, 0.5);
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(139, 92, 246, 0.7);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* make all text unselectable */
+* {
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE and Edge */
+  user-select: none;
+  /* Non-prefixed version, currently supported by Chrome, Opera, and Edge */
+}
+
+.v-input__details {
+  /* 不让details占据布局空间 */
+  display: none;
+}
+
+.v-form {
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: rgba(99, 102, 241, 0.5) rgba(54, 50, 98, 0.1);
+  /* Firefox */
+}
+
+.v-overlay-container {
+  z-index: 1000;
+  /* 设置遮罩层的背景颜色,使其与主题一致 */
+  background-color: rgba(56, 56, 146, 0.8);
+}
+
 .waitIn {
   visibility: hidden;
   animation: Up 0.5s 0.5s forwards;
