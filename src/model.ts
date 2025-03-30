@@ -100,10 +100,14 @@ export interface RenderConfig {
   renderLineExtra: boolean;
   renderNote: boolean;
   renderUiPause: boolean;
+  renderUiName: boolean;
+  renderUiLevel: boolean;
   renderUiScore: boolean;
   renderUiCombo: boolean;
   renderUiBar: boolean;
   renderBg: boolean;
+  renderBgDim: boolean;
+  bgBlurriness: number;
 
   maxParticles: number;
   fade: number;

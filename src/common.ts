@@ -21,6 +21,13 @@ export function isString(s: unknown): s is string {
 export const RULES = {
   non_empty: (value: string) => value.trim().length > 0 || i18n.global.t('rules.non-empty'),
   positive: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.positive'),
+  positive10000: (value: string) => {
+    if (isNumeric(value)) {
+      if (Number(value) < 0) return i18n.global.t('rules.positive');
+      if (Number(value) > 100000) return i18n.global.t('rules.big');
+    }
+    return true;
+  },
   positiveInt: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4 && Number(value) > 0) || i18n.global.t('rules.positive-int'),
   int: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4) || i18n.global.t('rules.int'),
   // greaterThanZero: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.greater-than-zero'),

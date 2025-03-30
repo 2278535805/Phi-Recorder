@@ -84,7 +84,7 @@ en:
   judgeOffset: Judge Offset
 
   render: Render
-  render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Score,Combo Number,Progress Bar,Background,Hit Particle,Shader,Double Hint
+  render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Name,Difficulty,Score,Combo Number,Progress Bar,Background,Background Dim,Hit Particle,Shader,Double Hint
   expand: Expand
   expand-list: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
@@ -98,6 +98,7 @@ en:
   max-particles-list: Low,Medium,High
 
   fade: Fade In/Out
+  bg-blurriness: Background Blurriness
 
   presets: Presets
   preset-refresh: Refresh
@@ -195,7 +196,7 @@ zh-CN:
   offset: 延时
   judgeOffset: 判定偏移
   render: 渲染内容
-  render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,打击粒子,着色器,双押提示
+  render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,曲目名称,谱面难度,分数,连击数,进度条,背景,背景压暗,打击粒子,着色器,双押提示
   expand: 拓展内容
   expand-list: 激进优化,谱面调试,罗马模式,中文模式
   audio-expand: 音频拓展内容
@@ -209,6 +210,7 @@ zh-CN:
   max-particles-list: 低,中,高
 
   fade: 上隐/下隐
+  bg-blurriness: 背景模糊
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -310,7 +312,7 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
 
 const renderList = ref(t('render-list').split(','));
 const render = ref<string[]>([]);
-render.value.push(...renderList.value.slice(1, 12));
+render.value.push(...renderList.value.slice(1, 15));
 
 const expandList = ref(t('expand-list').split(','));
 const expand = ref<string[]>([]);
@@ -366,6 +368,7 @@ const combo = ref('AUTOPLAY')
 const difficulty = ref('')
 const judgeOffset = ref('0')
 const simpleFileName = ref(false)
+const bgBlurriness = ref('80')
 
 const maxParticlesText = ref(t('max-particles-list').split(',')[1]);
 const maxParticles = ref(100000);
@@ -453,22 +456,24 @@ async function buildConfig(): Promise<RenderConfig | null> {
     difficulty: difficulty.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
     simpleFileName: simpleFileName.value,
+    bgBlurriness: parseFloat(bgBlurriness.value),
     
-    //加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
     disableLoading: !render.value.includes(renderList.value[0]),
     renderLine: render.value.includes(renderList.value[1]),
     renderLineExtra: render.value.includes(renderList.value[2]),
     renderNote: render.value.includes(renderList.value[3]),
     renderUiPause: render.value.includes(renderList.value[4]),
-    renderUiScore: render.value.includes(renderList.value[5]),
-    renderUiCombo: render.value.includes(renderList.value[6]),
-    renderUiBar: render.value.includes(renderList.value[7]),
-    renderBg: render.value.includes(renderList.value[8]),
-    particle: render.value.includes(renderList.value[9]),
-    disableEffect: !render.value.includes(renderList.value[10]),
-    doubleHint: render.value.includes(renderList.value[11]),
+    renderUiName: render.value.includes(renderList.value[5]),
+    renderUiLevel: render.value.includes(renderList.value[6]),
+    renderUiScore: render.value.includes(renderList.value[7]),
+    renderUiCombo: render.value.includes(renderList.value[8]),
+    renderUiBar: render.value.includes(renderList.value[9]),
+    renderBg: render.value.includes(renderList.value[10]),
+    renderBgDim: render.value.includes(renderList.value[11]),
+    particle: render.value.includes(renderList.value[12]),
+    disableEffect: !render.value.includes(renderList.value[13]),
+    doubleHint: render.value.includes(renderList.value[14]),
 
-    //激进优化,谱面调试,罗马模式,中文模式
     aggressive: expand.value.includes(expandList.value[0]),
     chartDebug: expand.value.includes(expandList.value[1]),
     roman: expand.value.includes(expandList.value[2]),
@@ -553,22 +558,24 @@ function applyConfig(config: RenderConfig) {
   else judgeMode.value = t('judge-modes').split(',')[0];
 
   render.value = [];
-  //加载画面,判定线,其他判定线,音符,暂停按钮,分数,连击数,进度条,背景,粒子,特效,双押提示
   if (!config.disableLoading) render.value.push(renderList.value[0]);
   if (config.renderLine) render.value.push(renderList.value[1]);
   if (config.renderLineExtra) render.value.push(renderList.value[2]);
   if (config.renderNote) render.value.push(renderList.value[3]);
   if (config.renderUiPause) render.value.push(renderList.value[4]);
-  if (config.renderUiScore) render.value.push(renderList.value[5]);
-  if (config.renderUiCombo) render.value.push(renderList.value[6]);
-  if (config.renderUiBar) render.value.push(renderList.value[7]);
-  if (config.renderBg) render.value.push(renderList.value[8]);
-  if (config.particle) render.value.push(renderList.value[9]);
-  if (!config.disableEffect) render.value.push(renderList.value[10]);
-  if (config.doubleHint) render.value.push(renderList.value[11]);
+  if (config.renderUiName) render.value.push(renderList.value[5]);
+  if (config.renderUiLevel) render.value.push(renderList.value[6]);
+  if (config.renderUiScore) render.value.push(renderList.value[7]);
+  if (config.renderUiCombo) render.value.push(renderList.value[8]);
+  if (config.renderUiBar) render.value.push(renderList.value[9]);
+  if (config.renderBg) render.value.push(renderList.value[10]);
+  if (config.renderBgDim) render.value.push(renderList.value[11]);
+  if (config.particle) render.value.push(renderList.value[12]);
+  if (!config.disableEffect) render.value.push(renderList.value[13]);
+  if (config.doubleHint) render.value.push(renderList.value[14]);
+  
 
   expand.value = [];
-  //激进优化,无损音频,谱面调试,强制限幅,罗马模式,中文模式
   if (config.aggressive) expand.value.push(expandList.value[0]);
   if (config.chartDebug) expand.value.push(expandList.value[1]);
   if (config.roman) expand.value.push(expandList.value[2]);
@@ -636,10 +643,14 @@ const DEFAULT_CONFIG: RenderConfig = {
   renderLineExtra: true,
   renderNote: true,
   renderUiPause: true,
+  renderUiName: true,
+  renderUiLevel: true,
   renderUiScore: true,
   renderUiCombo: true,
   renderUiBar: true,
   renderBg: true,
+  renderBgDim: false,
+  bgBlurriness: 80,
 
   maxParticles: 100000,
   fade: 0.0,
@@ -934,6 +945,11 @@ async function replacePreset() {
               </span>
             </template>
           </v-select>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-n2">
+        <v-col cols="3" class="px-2">
+          <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positive10000]"></v-text-field>
         </v-col>
       </v-row>
     </div>
