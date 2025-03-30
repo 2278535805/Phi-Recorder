@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'src-tauri/src/**'
+      - 'src-tauri/config.toml'
   workflow_dispatch:
 
 
