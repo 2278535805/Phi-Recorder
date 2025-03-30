@@ -899,11 +899,11 @@ async function replacePreset() {
         <v-col cols="8">
           <v-combobox class="mx-2" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
-        <v-col cols="2" class="mt-n5 d-flex justify-center">
-          <v-btn class="pa-1" size="large" @click="updateRespacks" v-t="'respack-refresh'"></v-btn>
+        <v-col cols="2" class="d-flex justify-center">
+          <v-btn class="pa-1 text-caption" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .2;"></v-btn>
         </v-col>
-        <v-col cols="2" class="mt-n5 d-flex justify-center">
-          <v-btn class="pa-1" size="large" @click="openRespackFolder" v-t="'respack-open'"></v-btn>
+        <v-col cols="2" class="d-flex justify-center">
+          <v-btn class="pa-1 text-caption" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .2;"></v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
@@ -914,7 +914,7 @@ async function replacePreset() {
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-2 px-2">
+      <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="6" class="px-2">
           <v-select v-model="render" :items="renderList" :label="t('render')" multiple>
             <template v-slot:selection="{ item, index }">
@@ -937,8 +937,17 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="3" class="px-2">
+        <v-col cols="3">
           <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positive10000]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.nonCOMBO]" v-model="combo"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
       </v-row>
     </div>
@@ -969,27 +978,18 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
-        </v-col>
-        <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.nonCOMBO]" v-model="combo"></v-text-field>
-        </v-col>
-        <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="3">
           <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
-        </v-col>
-        <v-col cols="3">
           <v-text-field class="mx-2" :label="t('fade')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="3">
+          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
