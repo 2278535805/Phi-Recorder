@@ -649,7 +649,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   renderUiCombo: true,
   renderUiBar: true,
   renderBg: true,
-  renderBgDim: false,
+  renderBgDim: true,
   bgBlurriness: 80,
 
   maxParticles: 100000,
