@@ -48,6 +48,7 @@ const i18n = createI18n({
         'non-spaces': 'Must not contain spaces',
         'combo': 'Must not be COMBO',
         'long': 'Input is too long',
+        'big': 'Input is too big',
       },
       'has-error': 'There are errors in the configuration',
       'any-filter': 'All files',
@@ -64,7 +65,8 @@ const i18n = createI18n({
         'bitrate': '必须是有效的码率',
         'non-spaces': '不能包含空格',
         'combo': '不能为 COMBO',
-        'long': '输入内容过长'
+        'long': '输入内容过长',
+        'big': '输入内容过大',
       },
       'has-error': '配置中有错误',
       'any-filter': '所有文件',

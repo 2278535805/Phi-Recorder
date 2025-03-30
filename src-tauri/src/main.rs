@@ -601,7 +601,15 @@ fn open_respack_folder() -> Result<(), InvokeError> {
     .map_err(InvokeError::from_anyhow)
 }
 
-fn get_presets_file() -> Result<PathBuf> {
+fn get_presets_toml_file() -> Result<PathBuf> {
+    let file = CONFIG_DIR.get().unwrap().join("presets.toml");
+    if file.exists() && !file.is_file() {
+        bail!("presets.toml is not a file");
+    }
+    Ok(file)
+}
+
+fn get_presets_json_file() -> Result<PathBuf> {
     let file = CONFIG_DIR.get().unwrap().join("presets.json");
     if file.exists() && !file.is_file() {
         bail!("presets.json is not a file");
@@ -612,18 +620,28 @@ fn get_presets_file() -> Result<PathBuf> {
 #[tauri::command]
 async fn get_presets() -> Result<HashMap<String, RenderConfig>, InvokeError> {
     (|| {
-        let file = get_presets_file()?;
-        Ok(if !file.exists() {
-            HashMap::new()
-        } else {
-            serde_json::from_reader(BufReader::new(File::open(file)?))?
-        })
+        let toml_file = get_presets_toml_file()?;
+        if toml_file.exists() {
+            let presets: HashMap<String, RenderConfig> = toml::from_str(&std::fs::read_to_string(toml_file)?)?;
+            return Ok(presets);
+        }
+
+        // Compatible with old versions
+        let json_file = get_presets_json_file()?;
+        if json_file.exists() {
+            let presets: HashMap<String, RenderConfig> = serde_json::from_reader(BufReader::new(File::open(json_file)?))?;
+            return Ok(presets);
+        }
+
+        Ok(HashMap::new())
     })()
     .map_err(InvokeError::from_anyhow)
 }
 
 async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()> {
-    serde_json::to_writer(BufWriter::new(File::create(get_presets_file()?)?), presets)?;
+    let file = get_presets_toml_file()?;
+    let toml_string = toml::to_string(presets)?;
+    std::fs::write(file, toml_string)?;
     Ok(())
 }
 

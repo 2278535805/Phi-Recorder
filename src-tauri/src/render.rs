@@ -30,7 +30,7 @@ use std::{
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
 
-#[derive(Deserialize, Serialize, Default, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
     resolution: (u32, u32),
@@ -82,10 +82,14 @@ pub struct RenderConfig {
     render_line_extra: bool,
     render_note: bool,
     render_ui_pause: bool,
+    render_ui_name: bool,
+    render_ui_level: bool,
     render_ui_score: bool,
     render_ui_combo: bool,
     render_ui_bar: bool,
     render_bg: bool,
+    render_bg_dim: bool,
+    bg_blurriness: f32,
 
     max_particles: usize,
 
@@ -129,19 +133,25 @@ impl RenderConfig {
             render_line_extra: self.render_line_extra,
             render_note: self.render_note,
             render_ui_pause: self.render_ui_pause,
+            render_ui_name: self.render_ui_name,
+            render_ui_level: self.render_ui_level,
             render_ui_score: self.render_ui_score,
             render_ui_combo: self.render_ui_combo,
             render_ui_bar: self.render_ui_bar,
             render_bg: self.render_bg,
+            render_bg_dim: self.render_bg_dim,
+            bg_blurriness: self.bg_blurriness,
 
             max_particles: self.max_particles,
             fade: self.fade,
             ..Default::default()
         }
     }
+}
 
-    pub fn default() -> RenderConfig {
-        RenderConfig {
+impl Default for RenderConfig {
+    fn default() -> Self {
+        Self {
             resolution: (1920, 1080),
             ffmpeg_preset: "medium".to_string(),
             ending_length: 5.0,
@@ -189,10 +199,15 @@ impl RenderConfig {
             render_line_extra: true,
             render_note: true,
             render_ui_pause: true,
+            render_ui_name: true,
+            render_ui_level: true,
             render_ui_score: true,
             render_ui_combo: true,
             render_ui_bar: true,
             render_bg: true,
+            render_bg_dim: true,
+            bg_blurriness: 80.,
+
 
             max_particles: 100000,
             fade: 0.0,
