@@ -8,28 +8,27 @@ use std::{cell::RefCell, io::BufRead, ops::DerefMut, rc::Rc};
 
 struct BaseScene(Option<NextScene>, bool, Rc<RefCell<f32>>);
 impl Scene for BaseScene {
-    /*fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
-        show_error(
-            result
-                .downcast::<anyhow::Error>()
-                .unwrap()
-                .context("加载谱面失败"),
-        );
-        self.1 = true;
-        Ok(())
-    }*/
-
     fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
-        let _res = match result.downcast::<Option<f32>>() {
-            Ok(offset) => {
-                if let Some(offset) = *offset {
+        match result.downcast::<Option<f32>>() {
+            Ok(result_offset) => {
+                if let Some(offset) = *result_offset {
                     *self.2.borrow_mut() = offset;
                 }
-                return Ok(());
+                Ok(())
+            },
+            Err(result_err) => {
+                match result_err.downcast::<anyhow::Error>() {
+                    Ok(error) => {
+                        show_error(error.context("加载谱面失败"));
+                        self.1 = true;
+                        Ok(())
+                    },
+                    Err(_) => {
+                        Ok(())
+                    }
+                }
             }
-            Err(result) => result,
-        };
-        Ok(())
+        }
     }
 
     fn enter(&mut self, _tm: &mut TimeManager, _target: Option<RenderTarget>) -> Result<()> {
