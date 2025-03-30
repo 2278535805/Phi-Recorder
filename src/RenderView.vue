@@ -454,7 +454,7 @@ function tryParseAspect(): number | undefined {
 
       <template v-slot:item.2>
         <v-form ref="form" v-if="chartInfo">
-          <v-row no-gutters class="mx-n2">
+          <v-row no-gutters class="mx-n2 my-2">
             <v-col cols="6">
               <v-text-field class="mx-2" :label="t('chart-name')" v-model="chartInfo.name"></v-text-field>
             </v-col>
@@ -466,7 +466,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1">
+          <v-row no-gutters class="mx-n2 mt-1 my-2">
             <v-col cols="12" sm="4">
               <v-text-field class="mx-2" :label="t('charter')" v-model="chartInfo.charter"></v-text-field>
             </v-col>
@@ -478,7 +478,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1 align-center">
+          <v-row no-gutters class="mx-n2 mt-1 my-2 align-center">
             <v-col cols="4">
               <div class="mx-2 d-flex flex-column">
                 <p class="text-caption" v-t="'aspect'"></p>
@@ -494,7 +494,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1">
+          <v-row no-gutters class="mx-n2 mt-1 my-2">
             <v-col cols="12">
               <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
             </v-col>
