@@ -30,7 +30,7 @@ use std::{
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
 
-#[derive(Deserialize, Serialize, Default, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
     resolution: (u32, u32),
@@ -147,9 +147,11 @@ impl RenderConfig {
             ..Default::default()
         }
     }
+}
 
-    pub fn default() -> RenderConfig {
-        RenderConfig {
+impl Default for RenderConfig {
+    fn default() -> Self {
+        Self {
             resolution: (1920, 1080),
             ffmpeg_preset: "medium".to_string(),
             ending_length: 5.0,
