@@ -484,7 +484,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
 
     maxParticles: maxParticles.value,
     fade: parseFloat(fade.value),
-};
+  };
 }
 
 function onEnter() {
@@ -736,44 +736,39 @@ async function replacePreset() {
 </script>
 
 <template>
-      <v-layout class="overflow-visible gradient-primary" style="height: 56px;">
-        <v-bottom-navigation 
-          class="navigation"
-          v-model="page"
-          color="primary"
-          horizontal
-        >
-          <v-btn>
-            <v-icon>mdi-star-box</v-icon>
-            {{ t('title.common') }}
-          </v-btn>
-
-          <v-btn>
-            <v-icon>mdi-video-box</v-icon>
-            {{ t('title.output') }}
-          </v-btn>
-
-          <v-btn>
-            <v-icon>mdi-account</v-icon>
-            {{ t('title.player') }}
-          </v-btn>
-
-          <v-btn>
-            <v-icon>mdi-image-area</v-icon>
-            {{ t('title.graphics') }}
-          </v-btn>
-
-          <v-btn>
-            <v-icon>mdi-music</v-icon>
-            {{ t('title.audio') }}
-          </v-btn>
-
-          <v-btn>
-            <v-icon>mdi-toolbox</v-icon>
-            {{ t('title.other') }}
-          </v-btn>
-        </v-bottom-navigation>
-      </v-layout>
+  <v-layout class="overflow-visible gradient-primary" style="height: 56px;">
+    <v-bottom-navigation 
+      class="navigation"
+      v-model="page"
+      color="primary"
+      horizontal
+    >
+      <v-btn>
+        <v-icon>mdi-star-box</v-icon>
+        {{ t('title.common') }}
+      </v-btn>
+      <v-btn>
+        <v-icon>mdi-video-box</v-icon>
+        {{ t('title.output') }}
+      </v-btn>
+      <v-btn>
+        <v-icon>mdi-account</v-icon>
+        {{ t('title.player') }}
+      </v-btn>
+      <v-btn>
+        <v-icon>mdi-image-area</v-icon>
+        {{ t('title.graphics') }}
+      </v-btn>
+      <v-btn>
+        <v-icon>mdi-music</v-icon>
+        {{ t('title.audio') }}
+      </v-btn>
+      <v-btn>
+        <v-icon>mdi-toolbox</v-icon>
+        {{ t('title.other') }}
+      </v-btn>
+    </v-bottom-navigation>
+  </v-layout>
 
   <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 20px;">
     <v-row v-if = "page === 0 || page === undefined" no-gutters class="mx-n2 align-center">
