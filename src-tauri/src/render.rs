@@ -163,7 +163,7 @@ impl Default for RenderConfig {
             mpeg4: false,
             custom_encoder: None,
             bitrate_control: "CRF".to_string(),
-            bitrate: "1000k".to_string(),
+            bitrate: "28".to_string(),
             aggressive: false,
             challenge_color: ChallengeModeColor::Rainbow,
             challenge_rank: 45,

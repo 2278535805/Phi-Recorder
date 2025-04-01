@@ -114,8 +114,8 @@ async fn main() -> Result<()> {
             "help" | "--help" | "-help" | "/help" | "-h" | "?" | "--?" | "-?" | "/?" => {
                 println!("Usage: phi-recorder --render <input file> [options]");
                 println!("Options:");
-                println!("  --output <file/path>   Output file");
-                println!("  --config <file/json>   Config");
+                println!("  --output <file/path>    Output file");
+                println!("  --config <file/json>    Config");
                 std::process::exit(0);
             }
             "render" => {
