@@ -110,23 +110,30 @@ async fn main() -> Result<()> {
     let _guard = rt.enter();
 
     if std::env::args().len() > 1 {
-        match std::env::args().nth(1).as_deref() {
-            Some("render") => {
+        match std::env::args().nth(1).as_deref().unwrap_or_default() {
+            "help" | "--help" | "-help" | "/help" | "-h" | "?" | "--?" | "-?" | "/?" => {
+                println!("Usage: phi-recorder --render <input file> [options]");
+                println!("Options:");
+                println!("  --output <file/path>   Output file");
+                println!("  --config <file/json>   Config");
+                std::process::exit(0);
+            }
+            "render" => {
                 run_wrapped(render::main(false)).await;
             }
-            Some("preview") | Some("play") => {
+            "preview" | "play" => {
                 run_wrapped(preview::main(false, false)).await;
             }
-            Some("tweakoffset") => {
+            "tweakoffset" => {
                 run_wrapped(preview::main(false, true)).await;
             }
-            Some("--render") => {
+            "--render" => {
                 run_wrapped(render::main(true)).await;
             }
-            Some("--preview") | Some("--play") => {
+            "--preview" | "--play" => {
                 run_wrapped(preview::main(true, false)).await;
             }
-            Some("--tweakoffset") => {
+            "--tweakoffset" => {
                 run_wrapped(preview::main(true, true)).await;
             }
             cmd => {

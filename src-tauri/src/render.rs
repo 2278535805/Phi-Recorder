@@ -308,8 +308,48 @@ pub async fn main(cmd: bool) -> Result<()> {
                 .unwrap();
         }
 
-        let config: RenderConfig = toml::from_str(&std::fs::read_to_string(std::env::args().nth(4).unwrap_or("config.toml".to_string()))?)?;
-        let path = std::env::args().nth(2).unwrap();
+        let args: Vec<String> = std::env::args().collect();
+        let mut args_input = None;
+        let mut args_output = None;
+        let mut args_config = None;
+
+        let mut args_now = 1;
+        while args_now < args.len() {
+            match args[args_now].as_str() {
+                "--output" => {
+                    args_output = args.get(args_now + 1).cloned();
+                    args_now += 2;
+                }
+                "--config" => {
+                    args_config = args.get(args_now + 1).cloned();
+                    args_now += 2;
+                }
+                arg => {
+                    if !arg.starts_with("--") && args_input.is_none() {
+                        args_input = Some(arg.to_string());
+                    }
+                    args_now += 1;
+                }
+            }
+        }
+
+        let config: RenderConfig = if let Some(config) = &args_config {
+            match serde_json::from_str(config) {
+                Ok(config_json) => {
+                    println!("Using config from json");
+                    config_json
+                },
+                Err(error) => {
+                    println!("Failed to parse json: {}", error);
+                    println!("Using config from toml file");
+                    toml::from_str(&std::fs::read_to_string(config)?)?
+                }
+            }
+        } else {
+            println!("Using config from config.toml");
+            toml::from_str(&std::fs::read_to_string("config.toml")?)?
+        };
+        let path = args_input.unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
         let info = fs::load_info(fs.deref_mut()).await?;
@@ -341,13 +381,19 @@ pub async fn main(cmd: bool) -> Result<()> {
                 Local::now().format("%Y-%m-%d %H-%M-%S")
             )
         };
-        let output_path = if std::env::args().len() > 3 {
-            let dir = std::env::args().nth(3).unwrap();
-            let output_dir = PathBuf::from(dir);
-            info!("output dir: {:?}", output_dir);
-            let_output_dir(output_dir)?.join(file_name)
+        let output_path = if args_output.is_some() {
+            let output_dir = PathBuf::from(args_output.unwrap());
+            let output_file = if output_dir.is_dir() {
+                let_output_dir(output_dir)?.join(file_name)
+            } else {
+                output_dir
+            };
+            info!("output file: {:?}", output_file);
+            output_file
         } else {
-            output_dir()?.join(file_name)
+            let output_file = output_dir()?.join(file_name);
+            info!("output file: {:?}", output_file);
+            output_file
         };
 
         (fs, output_path, config, info)
@@ -702,23 +748,37 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let ffmpeg_preset = "-preset";
     let ffmpeg_preset_name_list: Vec<String> = config.ffmpeg_preset.split_whitespace().map(|s| s.to_string()).collect();
-    let ffmpeg_preset_default_cpu: String = "medium".to_string();
-    let ffmpeg_preset_default_nvenc: String = "p4".to_string();
-    let ffmpeg_preset_default_qsv: String = "medium".to_string();
-    let ffmpeg_preset_default_amf: String = "balanced".to_string();
 
     let ffmpeg_preset_name = if ffmpeg_encoder == encoder_list[0] {
-        ffmpeg_preset_name_list.get(1).unwrap_or(
-            ffmpeg_preset_name_list.get(0).unwrap_or(&ffmpeg_preset_default_nvenc)
-        )
+        if let Some(i) = ffmpeg_preset_name_list.get(1) {
+            i.as_str()
+        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
+            i.as_str()
+        } else {
+            "p4"
+        }
     } else if ffmpeg_encoder == encoder_list[1] {
-        ffmpeg_preset_name_list.get(2).unwrap_or(&ffmpeg_preset_default_qsv)
+        if let Some(i) = ffmpeg_preset_name_list.get(2) {
+            i.as_str()
+        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
+            i.as_str()
+        } else {
+            "medium"
+        }
     } else if ffmpeg_encoder == encoder_list[2] {
-        ffmpeg_preset_name_list.get(3).unwrap_or(
-            ffmpeg_preset_name_list.get(0).unwrap_or(&ffmpeg_preset_default_amf)
-        )
+        if let Some(i) = ffmpeg_preset_name_list.get(3) {
+            i.as_str()
+        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
+            i.as_str()
+        } else {
+            "balanced"
+        }
     } else {
-        ffmpeg_preset_name_list.get(0).unwrap_or(&ffmpeg_preset_default_cpu)
+        if let Some(i) = ffmpeg_preset_name_list.get(0) {
+            i.as_str()
+        } else {
+            "medium"
+        }
     };
 
     let bitrate_control = 
