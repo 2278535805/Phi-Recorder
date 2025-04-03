@@ -6,13 +6,13 @@ use prpr::{
 };
 use std::{cell::RefCell, io::BufRead, ops::DerefMut, rc::Rc};
 
-struct BaseScene(Option<NextScene>, bool, Rc<RefCell<f32>>);
+struct BaseScene(Option<NextScene>, bool, Rc<RefCell<Option<f32>>>);
 impl Scene for BaseScene {
     fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
         match result.downcast::<Option<f32>>() {
             Ok(result_offset) => {
                 if let Some(offset) = *result_offset {
-                    *self.2.borrow_mut() = offset;
+                    *self.2.borrow_mut() = Some(offset);
                 }
                 Ok(())
             },
@@ -93,7 +93,7 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
 
     let tm = TimeManager::default();
     let ctm = TimeManager::from_config(&prpr_config); // strange variable name...
-    let offset = Rc::new(RefCell::new(0.0f32));
+    let offset = Rc::new(RefCell::new(None));
     let mut main = Main::new(
         Box::new(BaseScene(
             Some(NextScene::Overlay(Box::new(
@@ -140,8 +140,9 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
     }
 
     if tweak_offset {
-        let result_offset = *offset.borrow();
-        println!("{{update offset:{}}}", result_offset);
+        if let Some(result_offset) = *offset.borrow() {
+            println!("{{update offset:{}}}", result_offset);
+        }
     }
 
     Ok(())

@@ -338,7 +338,7 @@ async function previewTweakoffset() {
     let params = await buildParams();
     if (!params) return false;
     let offset = await invoke('preview_tweakoffset', { params });
-    if (offset) {
+    if (offset != null) {
       chartInfo.value!.offset = offset as number;
       offset_text.value = String(Math.round(chartInfo.value!.offset * 1000));
     }
