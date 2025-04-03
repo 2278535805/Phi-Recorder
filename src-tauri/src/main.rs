@@ -477,7 +477,7 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-async fn preview_tweakoffset(params: RenderParams) -> Result<f32, InvokeError> {
+async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, InvokeError> {
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("tweakoffset")
@@ -495,7 +495,7 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<f32, InvokeError> {
         let stdout = child.stdout.take().unwrap();
         let mut reader = tokio::io::BufReader::new(stdout);
         let mut line = String::new();
-        let mut offset = 0.0f32;
+        let mut offset = None;
 
         while let Ok(bytes) = tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await {
             if bytes == 0 {
@@ -511,7 +511,7 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<f32, InvokeError> {
                 {
                     if let Ok(new_offset) = offset_str.trim().parse::<f32>() {
                         println!("update offset:{}", new_offset);
-                        offset = new_offset;
+                        offset = Some(new_offset);
                         break;
                     }
                 }
