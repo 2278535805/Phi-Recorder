@@ -863,7 +863,7 @@ async function replacePreset() {
           <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('dynamic-bitrate-control')" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
+          <TipSwitch v-if="encoder !== encoderList[2]" :label="t('dynamic-bitrate-control')" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
         </v-col>
       </v-row>
     </div>
