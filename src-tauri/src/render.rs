@@ -47,7 +47,7 @@ pub struct RenderConfig {
     hevc: bool,
     mpeg4: bool,
     custom_encoder: Option<String>,
-    bitrate_control: String,
+    dynamic_bitrate_control: bool,
     bitrate: String,
 
     aggressive: bool,
@@ -162,7 +162,7 @@ impl Default for RenderConfig {
             hevc: false,
             mpeg4: false,
             custom_encoder: None,
-            bitrate_control: "CRF".to_string(),
+            dynamic_bitrate_control: true,
             bitrate: "28".to_string(),
             aggressive: false,
             challenge_color: ChallengeModeColor::Rainbow,
@@ -802,7 +802,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
 
     let bitrate_control = 
-    if config.bitrate_control.to_lowercase() == "crf" {
+    if config.dynamic_bitrate_control {
         if ffmpeg_encoder == encoder_list[0] && !config.mpeg4 {
             "-cq"
         } else if ffmpeg_encoder == encoder_list[1] || config.mpeg4 || ffmpeg_encoder == encoder_list[3] {

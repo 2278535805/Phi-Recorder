@@ -7,7 +7,7 @@ sampleCount = 8
 hevc = false
 mpeg4 = false
 # customEncoder = ""
-bitrateControl = "CRF"
+dynamicBitrateControl = true
 bitrate = "26"
 
 

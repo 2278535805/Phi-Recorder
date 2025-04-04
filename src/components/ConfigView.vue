@@ -92,7 +92,7 @@ en:
   others: More
   selects: Selected
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
-  bitrate-control-list: CRF,CBR
+  dynamic-bitrate-control: Dynamic Bitrate Control
 
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
@@ -204,7 +204,7 @@ zh-CN:
   others: 更多
   selects: 已选中
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
-  bitrate-control-list: 动态码率,固定码率
+  dynamic-bitrate-control: 动态码率
 
   max-particles: 粒子限制
   max-particles-list: 低,中,高
@@ -250,12 +250,9 @@ const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
   ffmpegPresetPresetList = ['veryfast p1 veryfast speed', 'faster p2 faster speed','fast p3 fast speed', 'medium p4 medium balanced', 'slow p5 slow quality', 'slower p6 slower quality', 'veryslow p7 veryslow quality'],
   ffmpegPresetText = ref(ffmpegPresetPresetTextList[3]),
   ffmpegPreset = ref(ffmpegPresetPresetList[3]);
-const bitrateControlTextList = t('bitrate-control-list').split(','),
-  bitrateControlList = ['crf','cbr'],
-  bitrateControlText = ref(bitrateControlTextList[0]),
-  bitrateControl = ref(bitrateControlList[0]),
+const dynamicBitrateControl = ref(true),
   bitrate = ref('28');
-const bitrateList = ['7M', '5M'];
+const bitrateList = ['5M', '7M', '2M'];
 const bitrateCrfList = ['28', '24', '40'];
 const fpsList = ['60', '120', '30'];
 
@@ -377,6 +374,14 @@ const maxParticlesList = [20000, 100000, 800000];
 
 const fade = ref('0.0');
 
+function updateBitrate() {
+  if (dynamicBitrateControl.value) {
+    bitrate.value = bitrateCrfList[0];
+  } else {
+    bitrate.value = bitrateList[0];
+  }
+}
+
 function updateMaxParticles() {
   const index = maxParticlesTextList.indexOf(maxParticlesText.value);
   const textNum = Number(maxParticlesText.value);
@@ -432,7 +437,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     hevc: encoder.value === encoderList.value[1],
     mpeg4: encoder.value === encoderList.value[2],
     customEncoder: encoderList.value.includes(encoder.value) ? null : encoder.value,
-    bitrateControl: encoder.value === encoderList.value[2] ? 'CRF' : bitrateControl.value,
+    dynamicBitrateControl: encoder.value === encoderList.value[2] || dynamicBitrateControl.value,
     bitrate: encoder.value === encoderList.value[2] ? '7' : bitrate.value,
 
     challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
@@ -530,7 +535,7 @@ function applyConfig(config: RenderConfig) {
   if (config.mpeg4) {
     encoder.value = encoderList.value[2];
   }
-  bitrateControl.value = config.bitrateControl;
+  dynamicBitrateControl.value = config.mpeg4 || config.dynamicBitrateControl;
   bitrate.value = config.bitrate;
 
   challengeColor.value = t('challenge-colors').split(',')[STD_CHALLENGE_COLORS.indexOf(config.challengeColor)];
@@ -610,7 +615,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   hevc: false,
   mpeg4: false,
   customEncoder: null,
-  bitrateControl: 'CRF',
+  dynamicBitrateControl: true,
   bitrate: '28',
 
   aggressive: false,
@@ -790,8 +795,8 @@ async function replacePreset() {
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="bitrateControlText === bitrateControlTextList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="bitrateControlText === bitrateControlTextList[1] && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-text-field
@@ -854,11 +859,11 @@ async function replacePreset() {
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="bitrateControlText === bitrateControlTextList[0] && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="bitrateControlText === bitrateControlTextList[1] && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-autocomplete v-if="encoder !== encoderList[2]" :label="t('bitrate-control')" :items="bitrateControlTextList" class="mx-2" :rules="[RULES.non_empty]" v-model="bitrateControlText"></v-autocomplete>
+          <TipSwitch :label="t('dynamic-bitrate-control')" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
         </v-col>
       </v-row>
     </div>
