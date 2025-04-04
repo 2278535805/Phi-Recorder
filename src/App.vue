@@ -67,6 +67,22 @@ const icons = {
   about: 'mdi-information-outline',
 };
 
+const rail = ref(true);
+// 监听菜单/右键
+document.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+  //console.log('Detected contextmenu', event);
+});
+
+// 监听中键
+document.addEventListener('mousedown', (event) => {
+  if (event.button === 1) {
+    event.preventDefault();
+    //console.log('Detected mousedown 1', event);
+    rail.value = !rail.value;
+  }
+});
+
 window.goto = (name: string) => {
   router.push({ name });
 };
@@ -81,7 +97,7 @@ window.goto = (name: string) => {
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
       </div>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" expand-on-hover rail permanent class="nav-drawer-border blur-background list-item">
+    <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item">
       <v-list density="compact" nav>
         <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'about']"
@@ -91,6 +107,18 @@ window.goto = (name: string) => {
           :title="t(key)"
           @click="router.push({ name: key })"
           class="list-item-hover"
+          v-if="rail"
+          ></v-list-item>
+
+          <v-list-item
+          v-for="key in ['render', 'rpe', 'tasks', 'about']"
+          :active="route.name === key"
+          :key="key"
+          :prepend-icon="icons[key as keyof typeof icons]"
+          :title="t(key)"
+          @click="router.push({ name: key })"
+          class="list-item-hover-rail"
+          v-if="!rail"
           ></v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -214,6 +242,12 @@ html {
   margin: 8px 4px;
   transform: translateX(4px);
   filter: drop-shadow(0 0 8px #ffffff8a);
+}
+
+.list-item-hover-rail {
+  transition: all 0.3s ease;
+  margin: 8px 0px;
+  border-radius: 12px;
 }
 
 .active-item {
