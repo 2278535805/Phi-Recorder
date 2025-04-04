@@ -475,6 +475,24 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
 
     fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoders: [&str; 4]) -> Option<String> {
+
+        let filter = String::from_utf8(Command::new(&ffmpeg)
+            .arg("-filters")
+            .arg("-loglevel")
+            .arg("error")
+            .arg("-hide_banner")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .output()
+            .with_context(|| tl!("run-ffmpeg-failed"))
+            .expect("failed test filter")
+            .stdout,
+        ).unwrap();
+
+        if !filter.contains("aresample") || !filter.contains("alimiter") || !filter.contains("acompressor") || !filter.contains("volume") {
+            panic!("FFmpeg not support filter, Place update FFmpeg to full version.");
+        }
+
         if let Some(custom_encoder) = &config.custom_encoder {
             return Some(custom_encoder.to_string());
         };
@@ -501,7 +519,8 @@ pub async fn main(cmd: bool) -> Result<()> {
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .output()
-                .expect("Failed to test encoder");
+                .with_context(|| tl!("run-ffmpeg-failed"))
+                .expect("failed test encoder");
         
             output.status.success()
         };
