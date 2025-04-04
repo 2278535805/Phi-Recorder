@@ -221,6 +221,9 @@ document.addEventListener('keydown', async (event) => {
   if (document.hasFocus() && event.key === 'Enter') {
     await moveNext();
   }
+  if (document.hasFocus() && event.key === 'Escape' && stepIndex) {
+    stepIndex.value--;
+  }
 });
 
 const form = ref<VForm>();
