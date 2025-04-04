@@ -38,6 +38,7 @@
 }
 
 .log-card-msg {
+  user-select: text;
   border-radius: 12px !important;
   background: rgba(0, 0, 0, 0.40) !important;
   transition: all 0.3s ease;
