@@ -484,7 +484,12 @@ pub async fn main(cmd: bool) -> Result<()> {
             .stdout,
         ).unwrap();
 
-        let filter_required = ["libsoxr", "aresample", "alimiter", "acompressor", "volume"];
+        if !filter.contains("--enable-libsoxr") {
+            error!("Missing lib: libsoxr, Place update FFmpeg to full version");
+            std::process::exit(1);
+        }
+
+        let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
         for i in filter_required {
             if !filter.contains(i) {
                 error!("Missing lib: {}, Place update FFmpeg to full version", i);
