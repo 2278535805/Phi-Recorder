@@ -476,19 +476,19 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoders: [&str; 4]) -> Option<String> {
 
-        let filter = String::from_utf8(Command::new(&ffmpeg)
+        let output = Command::new(&ffmpeg)
             .arg("-filters")
             .output()
             .with_context(|| tl!("run-ffmpeg-failed"))
-            .expect("failed test filter")
-            .stdout,
-        ).unwrap();
-
-        if !filter.contains("--enable-libsoxr") {
+            .expect("failed test filter");
+        
+        let banner = String::from_utf8(output.stderr).unwrap_or_default();
+        if !banner.contains("--enable-libsoxr") {
             error!("Missing lib: libsoxr, Place update FFmpeg to full version");
             std::process::exit(1);
         }
 
+        let filter = String::from_utf8(output.stdout).unwrap_or_default();
         let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
         for i in filter_required {
             if !filter.contains(i) {
