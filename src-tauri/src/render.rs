@@ -481,16 +481,17 @@ pub async fn main(cmd: bool) -> Result<()> {
             .arg("-loglevel")
             .arg("error")
             .arg("-hide_banner")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
             .output()
             .with_context(|| tl!("run-ffmpeg-failed"))
             .expect("failed test filter")
             .stdout,
         ).unwrap();
 
-        if !filter.contains("aresample") || !filter.contains("alimiter") || !filter.contains("acompressor") || !filter.contains("volume") {
-            panic!("FFmpeg not support filter, Place update FFmpeg to full version.");
+        let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
+        for i in filter_required {
+            if !filter.contains(i) {
+                panic!("Missing filter: {i}, Place update FFmpeg to full version");
+            }
         }
 
         if let Some(custom_encoder) = &config.custom_encoder {
@@ -528,6 +529,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         for encoder in encoders {
             if test_encoder(encoder) {
                 return Some(encoder.to_string());
+            } else {
+                warn!("Encoder {} not supported", encoder);
             }
         }
 
