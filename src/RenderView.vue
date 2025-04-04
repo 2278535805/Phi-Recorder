@@ -274,9 +274,10 @@ const platform = await os.type();
 const isWindows = String(platform) === 'Windows_NT';
 const isLinux = String(platform) === 'Linux';
 import { open } from '@tauri-apps/api/shell';
+const getNewVersionLoding = ref(false);
 async function getNewVersion() {
   //dialog_download.value = true;
-  
+  getNewVersionLoding.value = true;
   try {
     const response = await fetch('https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest', {
       method: 'GET',
@@ -312,6 +313,8 @@ async function getNewVersion() {
   } catch (error) {
     console.error('Error fetching tags:', error);
     await open("https://github.com/BtbN/FFmpeg-Builds/releases");
+  } finally {
+    getNewVersionLoding.value = false;
   }
 }
 
@@ -531,7 +534,7 @@ function tryParseAspect(): number | undefined {
           <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="getNewVersion" v-t="t('try-download')"></v-btn>
+          <v-btn variant="text" @click="getNewVersion" :loading="getNewVersionLoding" v-t="t('try-download')"></v-btn>
           <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
           <v-btn variant="text" @click="openAppFolder" v-t="t('open-app-folder')"></v-btn>
           <v-btn color="primary" class="hover-scale" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
