@@ -478,19 +478,17 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         let filter = String::from_utf8(Command::new(&ffmpeg)
             .arg("-filters")
-            .arg("-loglevel")
-            .arg("error")
-            .arg("-hide_banner")
             .output()
             .with_context(|| tl!("run-ffmpeg-failed"))
             .expect("failed test filter")
             .stdout,
         ).unwrap();
 
-        let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
+        let filter_required = ["libsoxr", "aresample", "alimiter", "acompressor", "volume"];
         for i in filter_required {
             if !filter.contains(i) {
-                panic!("Missing filter: {i}, Place update FFmpeg to full version");
+                error!("Missing lib: {}, Place update FFmpeg to full version", i);
+                std::process::exit(1);
             }
         }
 
