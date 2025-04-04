@@ -65,7 +65,7 @@ export interface RenderConfig {
   hevc: boolean;
   mpeg4: boolean;
   customEncoder: string | null;
-  bitrateControl: string;
+  dynamicBitrateControl: boolean;
   bitrate: string;
 
   aggressive: boolean;
