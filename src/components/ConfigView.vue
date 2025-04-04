@@ -23,7 +23,7 @@ en:
   hevc-tips: Use HEVC encoding, which has higher compression rate and slower speed
 
   encoder: Encoder
-  encoder-list: Default(AVC),High Quality(HEVC),Fast(MPEG4)
+  encoder-list: Default(AVC),High Efficiency(HEVC),Fast(MPEG4)
 
   sample-count: Sample Count
   sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA
@@ -136,7 +136,7 @@ zh-CN:
   hevc-tips: 使用 HEVC 编码，压缩率更高，渲染速度更慢
 
   encoder: 编码器
-  encoder-list: 默认(AVC),高质量(HEVC),快速(MPEG4)
+  encoder-list: 默认(AVC),高效率(HEVC),快速(MPEG4)
 
   sample-count: 采样数
   sample-count-tips: 大于 1 的采样数(必须为 2 的幂)会启用 MSAA
