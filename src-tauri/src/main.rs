@@ -170,7 +170,8 @@ async fn main() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             is_the_only_instance,
             exit_program,
-            show_folder,
+            show_output_folder,
+            open_in_folder,
             show_in_folder,
             open_file,
             preview_chart,
@@ -337,10 +338,20 @@ fn exit_program() {
 }
 
 #[tauri::command]
-fn show_folder() -> Result<(), InvokeError> {
+fn show_output_folder() -> Result<(), InvokeError> {
     (|| {
         let path = output_dir().unwrap();
         println!("Opening output folder: {}", path.display());
+        open::that_detached(path)?;
+        Ok(())
+    })()
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+fn open_in_folder(path: &Path) -> Result<(), InvokeError> {
+    (move || {
+        println!("Open in folder: {}", path.display());
         open::that_detached(path)?;
         Ok(())
     })()

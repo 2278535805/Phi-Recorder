@@ -6,6 +6,7 @@ en:
   unbind: Unbind RPE
   unbinded: Unbinded successfully
   rpe-folder: Please select RPE's folder
+  show-folder: Open Folder
 
   render: Render
 
@@ -16,6 +17,7 @@ zh-CN:
   unbind: 解绑 RPE
   unbinded: 解绑成功
   rpe-folder: 请选择 RPE 所在文件夹
+  show-folder: 打开文件夹
 
   render: 渲染
 
@@ -60,6 +62,14 @@ async function unbindRPE() {
     toastError(e);
   }
 }
+
+async function openInFolder(path: string) {
+  try {
+    await invoke('open_in_folder', { path });
+  } catch (e) {
+    toastError(e);
+  }
+}
 </script>
 
 <template>
@@ -96,7 +106,8 @@ async function unbindRPE() {
             <v-card-subtitle class="chart-id">{{ chart.charter }}</v-card-subtitle>
             <div class="w-100 mt-2">
               <div class="pt-4 d-flex justify-end">
-                <v-btn class="render-btn" color="primary" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
+                <v-btn class="open-btn mx-4" @click="openInFolder(chart.path)" v-t="'show-folder'"></v-btn>
+                <v-btn class="render-btn" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
               </div>
             </div>
           </div>
@@ -173,6 +184,20 @@ async function unbindRPE() {
   padding: 8px 16px;
   transform: translateY(-1px);
   box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.3);
+}
+
+.open-btn {
+  font-weight: 600;
+  padding: 8px 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.open-btn:hover {
+  font-weight: 700;
+  padding: 8px 16px;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -2px rgba(0, 0, 0, 0.2);
 }
 
 .text-gradient {
