@@ -150,9 +150,9 @@ async function openFile(path: string) {
   }
 }
 
-async function showFolder() {
+async function showOutputFolder() {
   try {
-    await invoke('show_folder');
+    await invoke('show_output_folder');
   } catch (e) {
     toastError(e);
   }
@@ -164,7 +164,7 @@ async function showFolder() {
     <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
       <v-row>
         <v-col cols="12" style="margin: -20px 0px;">
-          <v-btn size="large" class="hover-scale margin-btn" @click="showFolder()" v-t="'show-folder'"></v-btn>
+          <v-btn size="large" class="hover-scale margin-btn" @click="showOutputFolder()" v-t="'show-folder'"></v-btn>
         </v-col>
       </v-row>
     </v-form>
