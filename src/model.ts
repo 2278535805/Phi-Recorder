@@ -56,7 +56,7 @@ export interface RenderConfig {
   endingLength: number;
   disableLoading: boolean;
   hires: boolean;
-  chartDebug: boolean;
+  chartDebug: number;
   chartRatio: number;
   allGood: boolean;
   allBad: boolean;

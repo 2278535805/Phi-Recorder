@@ -16,7 +16,8 @@ use prpr::{
     Main,
 };
 use sasa::AudioClip;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
+use toml::Value;
 use std::{
     cell::RefCell,
     io::{BufRead, BufWriter, Write},
@@ -30,6 +31,19 @@ use std::{
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
 
+fn deserialize_f32_or_default<'de, D>(deserializer: D) -> Result<f32, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Value::deserialize(deserializer)?;
+    match value {
+        Value::Float(f) => Ok(f as f32),
+        Value::Integer(i) => Ok(i as f32),
+        Value::Boolean(b) => Ok(if b { 0.2 } else { 0.0 }),
+        _ => Ok(0.0),
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
@@ -38,7 +52,8 @@ pub struct RenderConfig {
     ending_length: f64,
     disable_loading: bool,
     hires: bool,
-    chart_debug: bool,
+    #[serde(deserialize_with = "deserialize_f32_or_default")] // Compatible with old version
+    chart_debug: f32,
     chart_ratio: f32,
     all_good: bool,
     all_bad: bool,
@@ -182,7 +197,7 @@ impl Default for RenderConfig {
             compression_ratio: 20.,
             force_limit: false,
             limit_threshold: 1.0,
-            chart_debug: false,
+            chart_debug: 0.0,
             chart_ratio: 1.0,
             all_good: false,
             all_bad: false,

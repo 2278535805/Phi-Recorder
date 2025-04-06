@@ -67,7 +67,7 @@ en:
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
   hires: Lossless Audio
-  chart_debug: Debug Mode
+  chart_debug: Chart Debug
   chart_ratio: Chart Zoom
 
   judge-mode: Judge Mode
@@ -86,7 +86,7 @@ en:
   render: Render
   render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Name,Difficulty,Score,Combo Number,Progress Bar,Background,Background Dim,Hit Particle,Shader,Double Hint
   expand: Expand
-  expand-list: Aggressive Optimization,Debug Mode,Roman Mode,Chinese Mode
+  expand-list: Aggressive Optimization,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
   audio-list: Force Limit,Lossless Audio
   others: More
@@ -180,7 +180,7 @@ zh-CN:
   ending-length: 结算画面时长
   disable-loading: 禁用加载
   hires: 无损音频
-  chart_debug: 调试模式
+  chart_debug: 谱面调试
   chart_ratio: 谱面缩放
 
   judge-mode: 判定模式
@@ -198,7 +198,7 @@ zh-CN:
   render: 渲染内容
   render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,曲目名称,谱面难度,分数,连击数,进度条,背景,背景压暗,打击粒子,着色器,双押提示
   expand: 拓展内容
-  expand-list: 激进优化,谱面调试,罗马模式,中文模式
+  expand-list: 激进优化,罗马模式,中文模式
   audio-expand: 音频拓展内容
   audio-list: 强制限幅,无损音频
   others: 更多
@@ -353,7 +353,7 @@ const volumeMusic = ref(1.0),
 const endingLength = ref('0.0');
 
 
-const chartDebug = ref(false)
+const chartDebug = ref(0.0)
 const chartRatio = ref(1.0)
 
 const judgeMode = ref(t('judge-modes').split(',')[0])
@@ -431,6 +431,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
+    chartDebug: chartDebug.value,
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
@@ -480,9 +481,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     doubleHint: render.value.includes(renderList.value[14]),
 
     aggressive: expand.value.includes(expandList.value[0]),
-    chartDebug: expand.value.includes(expandList.value[1]),
-    roman: expand.value.includes(expandList.value[2]),
-    chinese: expand.value.includes(expandList.value[3]),
+    roman: expand.value.includes(expandList.value[1]),
+    chinese: expand.value.includes(expandList.value[2]),
 
     forceLimit: audio.value.includes(audioList.value[0]),
     hires: audio.value.includes(audioList.value[1]),
@@ -582,9 +582,8 @@ function applyConfig(config: RenderConfig) {
 
   expand.value = [];
   if (config.aggressive) expand.value.push(expandList.value[0]);
-  if (config.chartDebug) expand.value.push(expandList.value[1]);
-  if (config.roman) expand.value.push(expandList.value[2]);
-  if (config.chinese) expand.value.push(expandList.value[3]);
+  if (config.roman) expand.value.push(expandList.value[1]);
+  if (config.chinese) expand.value.push(expandList.value[2]);
 
   audio.value = [];
   if (config.forceLimit) audio.value.push(audioList.value[0]);
@@ -606,7 +605,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   endingLength: 0.0,
   disableLoading: true,
   hires: false,
-  chartDebug: false,
+  chartDebug: 0.,
   chartRatio: 1,
   allGood: false,
   allBad: false,
@@ -912,10 +911,13 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
-        <v-col cols="6" class="px-6">
+        <v-col cols="4" class="px-6">
           <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.05" v-model="noteScale"> </v-slider>
         </v-col>
-        <v-col cols="6" class="px-6">
+        <v-col cols="4" class="px-6">
+          <v-slider :label="t('chart_debug')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="chartDebug"> </v-slider>
+        </v-col>
+        <v-col cols="4" class="px-6">
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
