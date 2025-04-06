@@ -912,13 +912,13 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
         <v-col cols="4" class="px-6">
-          <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.05" v-model="noteScale"> </v-slider>
+          <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
         </v-col>
         <v-col cols="4" class="px-6">
-          <v-slider :label="t('chart_debug')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="chartDebug"> </v-slider>
+          <v-slider :label="t('chart_debug')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebug"> </v-slider>
         </v-col>
         <v-col cols="4" class="px-6">
-          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.05" v-model="chartRatio"> </v-slider>
+          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
