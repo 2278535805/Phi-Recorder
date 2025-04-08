@@ -441,6 +441,8 @@ pub async fn main(cmd: bool) -> Result<()> {
     let ipc = if cmd { false } else { true };
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);
+    let volume_music = std::mem::take(&mut config.volume_music);
+    let volume_sfx = std::mem::take(&mut config.volume_sfx);
     let mut prpr_config = config.to_config();
     prpr_config.mods = Mods::AUTOPLAY;
     prpr_config.disable_audio = true;
@@ -468,9 +470,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let sfx_flick = ld!("flick.ogg");
 
     let mut gl = unsafe { get_internal_gl() };
-
-    let volume_music = std::mem::take(&mut config.volume_music);
-    let volume_sfx = std::mem::take(&mut config.volume_sfx);
 
     let before_time: f64 = if config.disable_loading {
         GameScene::BEFORE_DURATION as f64
