@@ -305,7 +305,7 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
-    let (mut fs, output_path, config, info) = 
+    let (mut fs, output_path, mut config, info) = 
     if cmd {
         init_assets();
 
@@ -469,8 +469,8 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut gl = unsafe { get_internal_gl() };
 
-    let volume_music = config.volume_music;
-    let volume_sfx = config.volume_sfx;
+    let volume_music = std::mem::take(&mut config.volume_music);
+    let volume_sfx = std::mem::take(&mut config.volume_sfx);
 
     let before_time: f64 = if config.disable_loading {
         GameScene::BEFORE_DURATION as f64
@@ -853,21 +853,21 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let ffmpeg_audio_filter_music = format!(
         "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}[a1];",
-        config.volume_music
+        volume_music
     );
     let ffmpeg_audio_filter_fx = if config.force_limit { format!(
         "[2:a]alimiter=limit={}:level=false:attack=0.1:release=1,volume={}[a2];",
-        config.limit_threshold, config.volume_sfx
+        config.limit_threshold, volume_sfx
     )} else if config.compression_ratio > 1. { format!(
         "[2:a]acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01,volume={}[a2];",
-        config.compression_ratio, config.volume_sfx
+        config.compression_ratio, volume_sfx
     )} else { format!(
         "[2:a]volume={}[a2];",
-        config.volume_sfx
+        volume_sfx
     )};
     let ffmpeg_audio_filter_ending = format!(
         "[3:a]adelay={},volume={}[a3];",
-        delay_ending, config.volume_music
+        delay_ending, volume_music
     );
 
     let ffmpeg_audio_effect_mix = if config.hires{ format!(
