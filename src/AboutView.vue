@@ -33,7 +33,7 @@ const appVersion = await getVersion();
 
 import { fetch } from '@tauri-apps/api/http';
 import semver from 'semver';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { os } from '@tauri-apps/api';
 
@@ -43,7 +43,7 @@ const isMacOS = String(platform) === 'Darwin';
 const isLinux = String(platform) === 'Linux';
 
 import type { Release, Assets } from './model';
-async function checkForUpdates() {
+async function checkForUpdates(dialog = true) {
   checking.value = true;
   try {
     const response = await fetch('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
@@ -66,7 +66,7 @@ async function checkForUpdates() {
     updates.value = semver.gt(latestVersion, appVersion);
     if (updates.value) {
       dialog_update.value = true;
-    } else {
+    } else if (dialog) {
       dialog_non.value = true;
     }
   } catch (error) {
@@ -139,6 +139,12 @@ const dialog_update = ref(false);
 const dialog_non = ref(false);
 const dialog_error = ref(false);
 const dialog_download = ref(false);
+
+onMounted(() => {
+  //setTimeout(() => {
+  checkForUpdates(false);
+  //}, 100);
+});
 </script>
 
 <template>
