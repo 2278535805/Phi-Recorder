@@ -8,6 +8,8 @@ en:
   ffmpeg-check: FFmpeg Check
   ffmpeg-check-detail: FFmpeg is incomplete, please install the full version of FFmpeg
 
+  update-available: Update available!
+
   open-app-folder: Open app folder
   open-download: Open FFmpeg Download Page
   try-download: Try to download FFmpeg
@@ -28,6 +30,8 @@ zh-CN:
 
   ffmpeg-check: FFmpeg 检查
   ffmpeg-check-detail: FFmpeg 不完整, 请安装 full 版本的 FFmpeg
+
+  update-available: 有新版本可用!
 
   open-app-folder: 打开程序文件夹
   open-download: 打开 FFmpeg 下载页
@@ -50,6 +54,8 @@ import { useI18n } from 'vue-i18n';
 
 import { VSonner } from 'vuetify-sonner';
 import { invoke, os, shell } from '@tauri-apps/api';
+import semver from 'semver';
+import { getVersion } from '@tauri-apps/api/app';
 
 const onLoaded = ref<() => void>();
 const component = ref();
@@ -93,12 +99,12 @@ const { t } = useI18n();
 const route = useRoute(),
   router = useRouter();
 
-const icons = {
+const icons = ref({
   render: 'mdi-auto-fix',
   rpe: 'mdi-bookshelf',
   tasks: 'mdi-server',
   about: 'mdi-information-outline',
-};
+});
 
 const rail = ref(true);
 // 监听菜单/右键
@@ -121,7 +127,7 @@ window.goto = (name: string) => {
 };
 
 
-
+// FFmpeg
 const platform = os.type();
 const isWindows = String(platform) === 'Windows_NT';
 const isLinux = String(platform) === 'Linux';
@@ -191,9 +197,45 @@ async function testFFmpegFilter() {
     }
 }
 
+// Update
+const update = ref(false);
+async function checkForUpdates(dialog = true): Promise<boolean> {
+  try {
+    const response = await fetch('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'Phi-Recorder',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    });
+    const release = response.data as Release;
+    console.log(release);
+    
+    if (!release) {
+      throw new Error('No tags found');
+    }
+    const latestVersion = release.tag_name;
+    //const latestVersion = '0.4.0';
+    console.log(latestVersion);
+    const updates = semver.gt(latestVersion, await getVersion());
+    if (updates) {
+      return true;
+    }
+  } catch (error) {
+    console.error('Error fetching tags:', error);  }
+    return false;
+}
+
+
 onMounted(async () => {
   //setTimeout(() => {
   testFFmpegFilter();
+
+  if (await checkForUpdates()) {
+    icons.value.about = 'mdi-cloud-download';
+    update.value = true;
+  }
   //}, 100);
 });
 </script>
@@ -205,6 +247,9 @@ onMounted(async () => {
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
+      </div>
+      <div v-if="update">
+        <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
       </div>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item">
