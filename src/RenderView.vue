@@ -182,8 +182,8 @@ async function loadChart(file: string) {
   }
 }
 
-const aspectWidth = ref('0'),
-  aspectHeight = ref('0');
+const aspectWidth = ref('16'),
+  aspectHeight = ref('9');
 
 const offset_text = ref('0')
 
@@ -267,7 +267,9 @@ async function previewTweakoffset() {
       chartInfo.value!.offset = offset as number;
       offset_text.value = String(Math.round(chartInfo.value!.offset * 1000));
     }
-    stepIndex.value--;
+    if (stepIndex.value === 3) {
+      stepIndex.value--;
+    }
     return true;
   } catch (e) {
     toastError(e);
