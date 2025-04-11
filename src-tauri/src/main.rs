@@ -189,8 +189,9 @@ async fn main() -> Result<()> {
             set_rpe_dir,
             unset_rpe_dir,
             get_rpe_charts,
-            test_ffmpeg,
             open_app_folder,
+            test_ffmpeg,
+            test_ffmpeg_filter,
         ])
         .on_system_tray_event(|app, event| match event {
             SystemTrayEvent::MenuItemClick { id, .. } => {
@@ -870,11 +871,6 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
 }
 
 #[tauri::command]
-fn test_ffmpeg() -> Result<bool, InvokeError> {
-    (|| Ok(find_ffmpeg()?.is_some()))().map_err(InvokeError::from_anyhow)
-}
-
-#[tauri::command]
 fn open_app_folder() -> Result<(), InvokeError> {
     (|| {
         let exe_path = std::env::current_exe()?;
@@ -884,4 +880,39 @@ fn open_app_folder() -> Result<(), InvokeError> {
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+fn test_ffmpeg() -> Result<bool, InvokeError> {
+    (|| Ok(find_ffmpeg()?.is_some()))().map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+async fn test_ffmpeg_filter() -> bool {
+    let Ok(Some(ffmpeg)) = find_ffmpeg() else {
+        return false;
+    };
+    eprintln!("ffmpeg: {}", &ffmpeg);
+
+    let output = Command::new(&ffmpeg)
+        .arg("-filters")
+        .output()
+        .await
+        .expect("failed test filter");
+    
+    let banner = String::from_utf8(output.stderr).unwrap_or_default();
+    if !banner.contains("--enable-libsoxr") {
+        eprintln!("Missing lib: libsoxr, Place update FFmpeg to full version");
+        return false;
+    }
+
+    let filter = String::from_utf8(output.stdout).unwrap_or_default();
+    let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
+    for i in filter_required {
+        if !filter.contains(i) {
+            eprintln!("Missing lib: {}, Place update FFmpeg to full version", i);
+            return false;
+        }
+    }
+    return true;
 }

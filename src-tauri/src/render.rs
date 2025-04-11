@@ -287,7 +287,6 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
     if test("ffmpeg") {
         return Ok(Some("ffmpeg".to_owned()));
     }
-    eprintln!("Failed to find global ffmpeg. Using bundled ffmpeg");
     let exe_dir = std::env::current_exe()?.parent().unwrap().to_owned();
     let ffmpeg = if cfg!(target_os = "windows") {
         "ffmpeg.exe"
@@ -449,7 +448,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let Some(ffmpeg) = find_ffmpeg()? else {
         bail!("FFmpeg not found")
     };
-    info!("ffmpeg: {}", &ffmpeg);
 
     let (mut chart, ..) = GameScene::load_chart(fs.deref_mut(), &info)
         .await
