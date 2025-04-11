@@ -46,14 +46,6 @@ en:
 
   render-started: Rendering has started!
   see-tasks: See tasks
-
-  open-app-folder: Open app folder
-  open-download: Open FFmpeg Download Page
-  try-download: Try to download FFmpeg
-  ffmpeg-not-found: FFmpeg not found!
-  ffmpeg-not-found-detail: |
-    Please download ffmpeg, Windows users usually only need to download "ffmpeg-master-latest-win64-gpl.zip"
-    Place all files in the bin folder in the program folder or configure the ffmpeg environment variables
   
   confirm: Confirm
 
@@ -98,14 +90,6 @@ zh-CN:
 
   render-started: 视频已开始渲染!
   see-tasks: 查看任务列表
-
-  open-app-folder: 打开程序文件夹
-  open-download: 打开 FFmpeg 下载页
-  try-download: 尝试下载 FFmpeg
-  ffmpeg-not-found: 未找到 FFmpeg!
-  ffmpeg-not-found-detail: |
-    请下载 ffmpeg, Windows 用户一般只需下载 "ffmpeg-master-latest-win64-gpl.zip"
-    将 bin 文件夹内的所有文件放置在程序文件夹内或配置 ffmpeg 环境变量
 
   confirm: 确定
 
@@ -241,14 +225,8 @@ async function buildParams() {
   };
 }
 
-const ffmpegDialog = ref(false);
 async function postRender() {
   try {
-    if (!(await invoke('test_ffmpeg'))) {
-      ffmpegDialog.value = true;
-      //await dialog.message(t('ffmpeg-not-found'));
-      return false;
-    }
     let params = await buildParams();
     if (!params) return false;
     await invoke('post_render', { params });
@@ -256,65 +234,6 @@ async function postRender() {
   } catch (e) {
     toastError(e);
     return false;
-  }
-}
-
-async function openAppFolder() {
-  await invoke('open_app_folder');
-}
-
-async function openDownload() {
-  await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
-}
-
-import { fetch } from '@tauri-apps/api/http';
-import type { Release, Assets } from './model';
-import { os } from '@tauri-apps/api';
-const platform = await os.type();
-const isWindows = String(platform) === 'Windows_NT';
-const isLinux = String(platform) === 'Linux';
-import { open } from '@tauri-apps/api/shell';
-const getNewVersionLoding = ref(false);
-async function getNewVersion() {
-  //dialog_download.value = true;
-  getNewVersionLoding.value = true;
-  try {
-    const response = await fetch('https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Phi-Recorder',
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    });
-    const release = response.data as Release;
-    if (!release) {
-      throw new Error('No tags found');
-    }
-
-    const assets = release.assets as Assets[];
-    if (assets.length === 0) {
-      throw new Error('No assets found');
-    }
-    const asset = assets.find((asset) => {
-      if (isWindows) {
-        return asset.name.includes('ffmpeg-master-latest-win64-gpl.zip');
-      } else if (isLinux) {
-        return asset.name.includes('ffmpeg-master-latest-linux64-gpl.tar.xz');
-      }
-      return false;
-    })
-    //const subName = isWindows ? '.exe' : (isMacOS ? '.dmg' : '.AppImage');
-
-    const link = (asset as Assets).browser_download_url;
-    console.log(link);
-    await open(link);
-    
-  } catch (error) {
-    console.error('Error fetching tags:', error);
-    await open("https://github.com/BtbN/FFmpeg-Builds/releases");
-  } finally {
-    getNewVersionLoding.value = false;
   }
 }
 
@@ -526,21 +445,6 @@ function tryParseAspect(): number | undefined {
       </div>
     </v-overlay>
   </div>
-
-  <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px" class="log-card-bg">
-      <v-card class="log-card-window">
-        <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
-        <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="getNewVersion" :loading="getNewVersionLoding" v-t="t('try-download')"></v-btn>
-          <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
-          <v-btn variant="text" @click="openAppFolder" v-t="t('open-app-folder')"></v-btn>
-          <v-btn color="primary" class="hover-scale" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 </template>
 
 <style scoped>
