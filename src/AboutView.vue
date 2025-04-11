@@ -61,7 +61,7 @@ async function checkForUpdates(dialog = true) {
       throw new Error('No tags found');
     }
     const latestVersion = release.tag_name;
-    //const latestVersion = '0.3.0';
+    //const latestVersion = '0.4.0';
     console.log(latestVersion);
     updates.value = semver.gt(latestVersion, appVersion);
     if (updates.value) {
