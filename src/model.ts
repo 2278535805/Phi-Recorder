@@ -62,6 +62,7 @@ export interface RenderConfig {
   allBad: boolean;
   fps: number;
   hardwareAccel: boolean;
+  onDeviceEncode: boolean;
   hevc: boolean;
   mpeg4: boolean;
   customEncoder: string | null;

@@ -2,6 +2,7 @@
 prpr::tl_file!("render");
 
 use crate::common::{ensure_dir, let_output_dir, output_dir, DATA_DIR};
+use libloading::{Library, Symbol};
 use chrono::Local;
 use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::GLuint, prelude::*};
@@ -21,7 +22,7 @@ use std::{
     cell::RefCell,
     io::{BufRead, BufWriter, Write},
     ops::DerefMut,
-    path::PathBuf,
+    path::{PathBuf, Path},
     process::{Command, Stdio},
     rc::Rc,
     sync::atomic::{AtomicBool, Ordering},
@@ -29,6 +30,100 @@ use std::{
 };
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
+
+#[repr(C)]
+struct EncoderState {
+    // These fields should match the C++ structure
+    cu_context: u64,    // Opaque pointer to CUcontext
+    cuda_resource: u64, // Opaque pointer to cudaGraphicsResource_t
+    encoder: u64,       // Opaque pointer to NvEncoderCuda
+    output_file: u64,   // Opaque pointer to std::ofstream
+    width: i32,
+    height: i32,
+    initialized: bool,
+    _padding: [u8; 7], // Ensure proper alignment
+}
+
+#[allow(dead_code)]
+struct GlCudaNvEncoder {
+    lib: Library,
+    create_encoder: unsafe extern "C" fn(width: i32, height: i32, output_path: *const i8, gpu_id: i32) -> *mut EncoderState,
+    register_texture: unsafe extern "C" fn(state: *mut EncoderState, texture_id: u32) -> i32,
+    encode_frame: unsafe extern "C" fn(state: *mut EncoderState) -> i32,
+    destroy_encoder: unsafe extern "C" fn(state: *mut EncoderState) -> i32,
+}
+
+impl GlCudaNvEncoder {
+    fn new() -> Result<Self> {
+        // Try to find the DLL
+        let lib_path = Path::new("GlCudaNvEncoder.dll");
+        let lib_path = if lib_path.exists() {
+            lib_path.display().to_string()
+        } else {
+            println!("Cannot find NVENC encoder library, using default path");
+            "GlCudaNvEncoder.dll".to_owned()
+        };
+        println!("Loading NVENC encoder from: {}", lib_path);
+
+        // Load the library
+        let lib = unsafe { Library::new(&lib_path) }.with_context(|| format!("无法加载NVENC编码库: {}", lib_path))?;
+
+        println!("Loaded NVENC encoder from: {}", lib_path);
+
+        // Load all functions
+        let create_encoder: Symbol<unsafe extern "C" fn(i32, i32, *const i8, i32) -> *mut EncoderState> = unsafe { lib.get(b"gcne_create_encoder")? };
+        let register_texture: Symbol<unsafe extern "C" fn(*mut EncoderState, u32) -> i32> = unsafe { lib.get(b"gcne_register_texture")? };
+        let encode_frame: Symbol<unsafe extern "C" fn(*mut EncoderState) -> i32> = unsafe { lib.get(b"gcne_encode_frame")? };
+        let destroy_encoder: Symbol<unsafe extern "C" fn(*mut EncoderState) -> i32> = unsafe { lib.get(b"gcne_destroy_encoder")? };
+
+        // Clone the symbols to avoid borrowing issues
+        let create_encoder_fn = *create_encoder;
+        let register_texture_fn = *register_texture;
+        let encode_frame_fn = *encode_frame;
+        let destroy_encoder_fn = *destroy_encoder;
+
+        Ok(Self {
+            lib,
+            create_encoder: create_encoder_fn,
+            register_texture: register_texture_fn,
+            encode_frame: encode_frame_fn,
+            destroy_encoder: destroy_encoder_fn,
+        })
+    }
+
+    fn create_encoder(&self, width: i32, height: i32, output_path: &str, gpu_id: i32) -> Result<*mut EncoderState> {
+        let c_output_path = std::ffi::CString::new(output_path)?;
+        let encoder = unsafe { (self.create_encoder)(width, height, c_output_path.as_ptr(), gpu_id) };
+        if encoder.is_null() {
+            bail!("Failed to create NVENC encoder");
+        }
+        Ok(encoder)
+    }
+
+    fn register_texture(&self, state: *mut EncoderState, texture_id: u32) -> Result<()> {
+        let result = unsafe { (self.register_texture)(state, texture_id) };
+        if result != 0 {
+            bail!("Failed to register OpenGL texture for NVENC encoding");
+        }
+        Ok(())
+    }
+
+    fn encode_frame(&self, state: *mut EncoderState) -> Result<()> {
+        let result = unsafe { (self.encode_frame)(state) };
+        if result != 0 {
+            bail!("Failed to encode frame with NVENC");
+        }
+        Ok(())
+    }
+
+    fn destroy_encoder(&self, state: *mut EncoderState) -> Result<()> {
+        let result = unsafe { (self.destroy_encoder)(state) };
+        if result != 0 {
+            bail!("Failed to clean up NVENC encoder");
+        }
+        Ok(())
+    }
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase", default)]
@@ -44,6 +139,7 @@ pub struct RenderConfig {
     all_bad: bool,
     fps: u32,
     hardware_accel: bool,
+    on_device_encode: bool,
     hevc: bool,
     mpeg4: bool,
     custom_encoder: Option<String>,
@@ -159,6 +255,7 @@ impl Default for RenderConfig {
             hires: false,
             fps: 60,
             hardware_accel: true,
+            on_device_encode: false,
             hevc: false,
             mpeg4: false,
             custom_encoder: None,
@@ -423,6 +520,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
 
     use crate::ipc::client::*;
+    let temp_dir: PathBuf = std::env::temp_dir();
     let ipc = if cmd { false } else { true };
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);
@@ -875,7 +973,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         .arg(output_fx_temp.path())
         .args("-i ./assets/ending.ogg".split_whitespace())
         .args(args2.split_whitespace())
-        .arg(output_path)
+        .arg(temp_dir.join("t_audio").to_str().unwrap())
         .arg("-loglevel")
         .arg("warning")
         .stdin(Stdio::piped())
@@ -888,60 +986,73 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     const N: usize = 60;
     let mut pbos: [GLuint; N] = [0; N];
-    unsafe {
-        use miniquad::gl::*;
-        glGenBuffers(N as _, pbos.as_mut_ptr());
-        for pbo in pbos {
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-            glBufferData(
-                GL_PIXEL_PACK_BUFFER,
-                (vw as u64 * vh as u64 * 4) as _,
-                std::ptr::null(),
-                GL_STREAM_READ,
-            );
+    if !config.on_device_encode {
+        unsafe {
+            use miniquad::gl::*;
+            glGenBuffers(N as _, pbos.as_mut_ptr());
+            for pbo in pbos {
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+                glBufferData(
+                    GL_PIXEL_PACK_BUFFER,
+                    (vw as u64 * vh as u64 * 4) as _,
+                    std::ptr::null(),
+                    GL_STREAM_READ,
+                );
+            }
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         }
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     }
-
     if ipc {
         send(IPCEvent::StartRender(frames));
     }
     let render_time = Instant::now();
 
     let fps = fps as f64;
-    for frame in 0..N {
-        *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
-        gl.quad_gl.render_pass(Some(mst.output().render_pass));
-        main.update()?;
-        main.render(&mut painter)?;
-        if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && !config.disable_loading {
-            draw_rectangle(0., 0., 0., 0., Color::default());
-        }
-        gl.flush();
+    let mut nvenc_encoder: Option<GlCudaNvEncoder> = None;
+    let mut state: Option<*mut EncoderState> = None;
+    if config.on_device_encode {
+        // create and initalize the encoder
+        nvenc_encoder = Some(GlCudaNvEncoder::new().context("无法加载 NVENC 编码库")?);
+        let encoder = nvenc_encoder.as_ref().unwrap();
+        state = Some(encoder.create_encoder(vw as i32, vh as i32, temp_dir.join("t_video.h264").to_str().unwrap(), 0)?);
+        encoder.register_texture(state.unwrap(), mst.output().texture.raw_miniquad_texture_handle().gl_internal_id())?;
+        info!("'on device encode' enabled, skipping Pre-Render");
+    } else {
+        // pre render start (fill all the pbos?)
+        for frame in 0..N {
+            *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
+            gl.quad_gl.render_pass(Some(mst.output().render_pass));
+            main.update()?;
+            main.render(&mut painter)?;
+            if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && !config.disable_loading {
+                draw_rectangle(0., 0., 0., 0., Color::default());
+            }
+            gl.flush();
 
-        if MSAA.load(Ordering::SeqCst) {
-            mst.blit();
+            if MSAA.load(Ordering::SeqCst) {
+                mst.blit();
+            }
+            unsafe {
+                use miniquad::gl::*;
+                //let tex = mst.output().texture.raw_miniquad_texture_handle();
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame]);
+                glReadPixels(
+                    0,
+                    0,
+                    vw as _,
+                    vh as _,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE,
+                    std::ptr::null_mut(),
+                );
+            }
+            if ipc {
+                send(IPCEvent::Frame);
+            }
         }
-        unsafe {
-            use miniquad::gl::*;
-            //let tex = mst.output().texture.raw_miniquad_texture_handle();
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame]);
-            glReadPixels(
-                0,
-                0,
-                vw as _,
-                vh as _,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                std::ptr::null_mut(),
-            );
-        }
-        if ipc {
-            send(IPCEvent::Frame);
-        }
+        info!("Pre-Render Time:{:.2?}", pre_render_time.elapsed());
     }
-    info!("Pre-Render Time:{:.2?}", pre_render_time.elapsed());
 
     let frames10 = frames / 10;
     let mut step_time = Instant::now();
@@ -971,32 +1082,39 @@ pub async fn main(cmd: bool) -> Result<()> {
         if MSAA.load(Ordering::SeqCst) {
             mst.blit();
         }
-        unsafe {
-            use miniquad::gl::*;
-            //let tex = mst.output().texture.raw_miniquad_texture_handle();
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
+        if config.on_device_encode && nvenc_encoder.is_some() {
+            nvenc_encoder.as_ref().unwrap().encode_frame(state.unwrap())?;
+        } else {
+            unsafe {
+                use miniquad::gl::*;
+                //let tex = mst.output().texture.raw_miniquad_texture_handle();
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
 
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
-            glReadPixels(
-                0,
-                0,
-                vw as _,
-                vh as _,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                std::ptr::null_mut(),
-            );
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
+                glReadPixels(
+                    0,
+                    0,
+                    vw as _,
+                    vh as _,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE,
+                    std::ptr::null_mut(),
+                );
 
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1) as usize % N]);
-            let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8);
-            if !src.is_null() {
-                input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
-                glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1) as usize % N]);
+                let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8);
+                if !src.is_null() {
+                    input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
+                    glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+                }
             }
         }
         if ipc {
             send(IPCEvent::Frame);
         }
+    }
+    if config.on_device_encode && nvenc_encoder.is_some() && state.is_some() {
+        nvenc_encoder.as_ref().unwrap().destroy_encoder(state.unwrap())?;
     }
     drop(input);
     info!("Render Time: {:.2?}", render_time.elapsed());
