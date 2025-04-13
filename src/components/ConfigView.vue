@@ -16,6 +16,9 @@ en:
   hw-accel: Hardware Acceleration
   hw-accel-tips: Improve rendering speed, slightly reduce quality
 
+  on-device-encode: (Experimental) On-device Encoding
+  on-device-encode-tips: Directly use GPU data for encoding, which will speed up high-resolution rendering, but has poor compatibility
+
   fxaa: FXAA
   fxaa-tips: FXAA, as a low-cost anti-aliasing method, will cause the picture to be blurred, and it is not recommended to turn it on
 
@@ -128,6 +131,9 @@ zh-CN:
 
   hw-accel: 硬件加速
   hw-accel-tips: 提升渲染速度，略微降低质量
+
+  on-device-encode: (实验性) 设备编码
+  on-device-encode-tips: 直接使用gpu数据编码，将加速高分辨率时的速度，兼容性较差
 
   fxaa: FXAA
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
@@ -279,7 +285,8 @@ const page = ref(0);
 
 const resolution = ref('1920x1080'),
   fps = ref('60'),
-  hwAccel = ref(true);
+  hwAccel = ref(true),
+  onDeviceEncode = ref(false);
 const encoderList = ref(t('encoder-list').split(','));
 const encoder = ref(t('encoder-list').split(',')[0]);
 
@@ -429,6 +436,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
+    onDeviceEncode: onDeviceEncode.value,
     hevc: encoder.value === encoderList.value[1],
     mpeg4: encoder.value === encoderList.value[2],
     customEncoder: encoderList.value.includes(encoder.value) ? null : encoder.value,
@@ -607,6 +615,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   allBad: false,
   fps: 60,
   hardwareAccel: true,
+  onDeviceEncode: false,
   hevc: false,
   mpeg4: false,
   customEncoder: null,
@@ -844,6 +853,7 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
           <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
+          <TipSwitch v-if="hwAccel" :label="t('on-device-encode')" v-model="onDeviceEncode"></TipSwitch> <!-- :tooltip="t('on-device-encode-tips')" -->
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">

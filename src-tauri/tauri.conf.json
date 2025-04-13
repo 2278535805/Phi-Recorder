@@ -63,6 +63,7 @@
       "resources": [
         "assets",
         "WebView2Loader.dll",
+        "GlCudaNvEncoder.dll",
         "config.toml"
       ],
       "shortDescription": "",

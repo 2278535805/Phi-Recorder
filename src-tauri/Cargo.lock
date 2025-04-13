@@ -3209,6 +3209,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "fs4",
+ "libloading 0.8.6",
  "macroquad",
  "open 5.3.2",
  "prpr",
