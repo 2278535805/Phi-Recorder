@@ -22,7 +22,7 @@ tauri = { version = "1.8.2", features = [ "os-all", "http-all", "dialog-message"
 anyhow = { version = "1.0.95", features = ["backtrace"] }
 macroquad = { git = "https://github.com/2278535805/prpr-macroquad", default-features = false }
 prpr = { git = "https://github.com/2278535805/render-lib", package = "prpr", branch = "render-lib" }
-# prpr = { path = "../../phira/prpr" }
+# prpr = { path = "../../render-lib/prpr" }
 
 sasa = { git = "https://github.com/2278535805/sasa" }
 tokio = { version = "1.43.0", features = ["process", "rt-multi-thread", "fs"] }
