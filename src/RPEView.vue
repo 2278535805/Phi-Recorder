@@ -98,7 +98,15 @@ async function openInFolder(path: string) {
             <div
               class="cover-image"
               style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-              :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }"></div>
+              :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }">
+              <div 
+              class="overlay"
+              @click="router.push({ name: 'render', query: { chart: chart.path } })"
+              >
+              <i class="mdi mdi-play icon">
+              </i>
+            </div>
+            </div>
           </div>
           <div class="d-flex flex-column w-100 chart-content">
             <v-card-title class="chart-name">{{ chart.name }}</v-card-title>
