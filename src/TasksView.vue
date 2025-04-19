@@ -338,25 +338,6 @@ pre {
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.overlay {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.25);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  cursor: pointer;
-}
-
-.overlay:hover {
-  opacity: 1;
-}
-
 .icon {
   font-size: 250%;
 }
