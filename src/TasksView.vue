@@ -72,6 +72,8 @@ import { convertFileSrc } from '@tauri-apps/api/tauri';
 import moment from 'moment';
 import { toastError } from './common';
 
+import router from './router';
+
 const tasks = ref<Task[]>();
 
 async function updateList() {
@@ -175,7 +177,15 @@ async function showOutputFolder() {
           <div
             style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
             :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"
-            ></div>
+            >
+            <div 
+              class="overlay"
+              @click="router.push({ name: 'render', query: { chart: task.path } })"
+              >
+              <i class="mdi mdi-reload icon">
+              </i>
+            </div>
+          </div>
         </div>
         <div class="d-flex flex-column w-100 name-cover">
           <v-card-title>{{ task.name }}</v-card-title>
@@ -326,6 +336,29 @@ pre {
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.overlay {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.overlay:hover {
+  opacity: 1;
+}
+
+.icon {
+  font-size: 250%;
 }
 
 @media (max-width: 600px) {
