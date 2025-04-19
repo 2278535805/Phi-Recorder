@@ -223,7 +223,7 @@ async function showOutputFolder() {
                 class="hover-scale"></v-btn>
             </div>
             <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
-              <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'"></v-btn>
+              <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale"></v-btn>
               <v-btn
                 variant="flat"
                 prepend-icon="mdi-text-box-outline"
