@@ -40,6 +40,12 @@
     "shell:default",
     "http:default",
     "fs:default",
+    "os:default",
+    "dialog:default",
+    "dialog:default",
+    "http:default",
+    "shell:default",
+    "fs:default",
     "os:default"
   ]
 }
