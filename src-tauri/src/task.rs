@@ -68,13 +68,18 @@ impl Task {
         let mut cover = NamedTempFile::new()?;
         cover.write_all(&fs.load_file(&info.illustration).await?)?;
 
-        let level: String = info.level.split_whitespace().next().unwrap_or("UK").to_string();
+        let level: String = info
+            .level
+            .split_whitespace()
+            .next()
+            .unwrap_or("UK")
+            .to_string();
         let safe_name: String = info
             .name
             .chars()
             .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
             .collect();
-        let format = if config.hires {"mov"} else {"mp4"};
+        let format = if config.hires { "mov" } else { "mp4" };
         let output = output_dir()?.join(format!(
             "{} {safe_name}_{level}.{format}",
             Local::now().format("%Y-%m-%d %H-%M-%S")
@@ -125,7 +130,9 @@ impl Task {
         loop {
             let line = lines.next_line().await?;
             let Some(line) = line else { break };
-            let Ok(event): Result<IPCEvent, _> = serde_json::from_str(line.trim()) else { continue };
+            let Ok(event): Result<IPCEvent, _> = serde_json::from_str(line.trim()) else {
+                continue;
+            };
             match event {
                 IPCEvent::Loading => {
                     *self.status.lock().await = TaskStatus::Loading;
@@ -237,7 +244,7 @@ impl TaskQueue {
             loop {
                 let Ok(task) = receiver.try_recv() else {
                     std::thread::sleep(std::time::Duration::from_millis(500));
-                    continue
+                    continue;
                 };
                 if let Err(err) = task.run().await {
                     error!("Failed to render: {err:?}");

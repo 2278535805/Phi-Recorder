@@ -25,17 +25,17 @@ useI18n();
 const { t } = useI18n();
 
 import { getVersion } from '@tauri-apps/api/app';
-import { open } from '@tauri-apps/api/shell';
+import { open } from '@tauri-apps/plugin-shell';
 //import { random } from 'mathjs';
 //import { download as tauriDownload } from '@tauri-apps/plugin-upload';
 
 const appVersion = await getVersion();
 
-import { fetch } from '@tauri-apps/api/http';
+import { fetch } from '@tauri-apps/plugin-http';
 import semver from 'semver';
 import { onMounted, ref } from 'vue';
 
-import { os } from '@tauri-apps/api';
+import {  } from '@tauri-apps/api';
 
 const platform = await os.type();
 const isWindows = String(platform) === 'Windows_NT';
@@ -43,6 +43,7 @@ const isMacOS = String(platform) === 'Darwin';
 const isLinux = String(platform) === 'Linux';
 
 import type { Release, Assets } from './model';
+import * as os from "@tauri-apps/plugin-os"
 async function checkForUpdates(dialog = true) {
   checking.value = true;
   try {
@@ -54,7 +55,7 @@ async function checkForUpdates(dialog = true) {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = response.data as Release;
+    const release = await response.json() as Release;
     console.log(release);
     
     if (!release) {
@@ -99,7 +100,7 @@ async function getNewVersion() {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = response.data as Release;
+    const release = await response.json() as Release;
     if (!release) {
       throw new Error('No tags found');
     }

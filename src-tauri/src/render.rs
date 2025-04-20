@@ -2,22 +2,21 @@
 prpr::tl_file!("render");
 
 use crate::common::{ensure_dir, let_output_dir, output_dir, DATA_DIR};
-use chrono::Local;
 use anyhow::{bail, Context, Result};
+use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use prpr::{
     config::{ChallengeModeColor, Config, Mods},
-    core::{init_assets, internal_id, MSRenderTarget, HitSound, Note},
+    core::{init_assets, internal_id, HitSound, MSRenderTarget, Note},
     fs,
     info::ChartInfo,
-    scene::{BasicPlayer, GameMode, GameScene, LoadingScene, EndingScene},
+    scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
     time::TimeManager,
     ui::{FontArc, TextPainter},
     Main,
 };
 use sasa::AudioClip;
 use serde::{Deserialize, Deserializer, Serialize};
-use toml::Value;
 use std::{
     cell::RefCell,
     io::{BufRead, BufWriter, Write},
@@ -30,6 +29,7 @@ use std::{
 };
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
+use toml::Value;
 
 fn deserialize_f32_or_default<'de, D>(deserializer: D) -> Result<f32, D::Error>
 where
@@ -223,7 +223,6 @@ impl Default for RenderConfig {
             render_bg_dim: true,
             bg_blurriness: 80.,
 
-
             max_particles: 100000,
             fade: 0.0,
         }
@@ -304,23 +303,8 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
-    let (mut fs, output_path, mut config, info) = 
-    if cmd {
+    let (mut fs, output_path, mut config, info) = if cmd {
         init_assets();
-
-        #[cfg(target_os = "windows")]
-        {
-            let app_data_dir = std::env::var("APPDATA").unwrap();
-            let data_dir = PathBuf::from(app_data_dir).join("com.hlmc.phi.recorder");
-            DATA_DIR.set(ensure_dir(data_dir.clone())).unwrap();
-        }
-
-        #[cfg(not(target_os = "windows"))]
-        {
-            DATA_DIR
-                .set(ensure_dir(std::env::current_dir().unwrap().to_owned()))
-                .unwrap();
-        }
 
         let args: Vec<String> = std::env::args().collect();
         let mut args_input = None;
@@ -352,7 +336,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 Ok(config_json) => {
                     println!("Using config from json");
                     config_json
-                },
+                }
                 Err(error) => {
                     println!("Failed to parse json: {}", error);
                     println!("Using config from toml file");
@@ -386,9 +370,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let format = if config.hires { "mov" } else { "mp4" };
 
         let file_name = if config.simple_file_name {
-            format!(
-                "{safe_name}.{safe_name2}_{level}.{format}",
-            )
+            format!("{safe_name}.{safe_name2}_{level}.{format}",)
         } else {
             format!(
                 "{} {safe_name}_{level}.{format}",
@@ -411,30 +393,28 @@ pub async fn main(cmd: bool) -> Result<()> {
         };
 
         (fs, output_path, config, info)
-    }
-    else {
+    } else {
         set_pc_assets_folder(&std::env::args().nth(2).unwrap());
-    
+
         let mut stdin = std::io::stdin().lock();
         let stdin = &mut stdin;
-    
+
         let mut line = String::new();
         stdin.read_line(&mut line)?;
         let params: RenderParams = serde_json::from_str(line.trim())?;
         let path = params.path;
-    
+
         line.clear();
         stdin.read_line(&mut line)?;
         let output_path: PathBuf = serde_json::from_str(line.trim())?;
-    
+
         let fs = fs::fs_from_file(&path)?;
-    
+
         let config = params.config;
         let info = params.info;
 
         (fs, output_path, config, info)
     };
-
 
     use crate::ipc::client::*;
     let ipc = if cmd { false } else { true };
@@ -480,14 +460,13 @@ pub async fn main(cmd: bool) -> Result<()> {
     let chart_length = before_time + music_length - offset as f64 + 1.;
     let video_length = chart_length + fade_out_time + config.ending_length;
 
-    let encoder_list =  if config.hevc {
+    let encoder_list = if config.hevc {
         ["hevc_nvenc", "hevc_qsv", "hevc_amf", "hevc_vaapi"]
     } else {
         ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"]
     };
 
     fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoders: [&str; 4]) -> Option<String> {
-
         if let Some(custom_encoder) = &config.custom_encoder {
             return Some(custom_encoder.to_string());
         };
@@ -507,7 +486,19 @@ pub async fn main(cmd: bool) -> Result<()> {
         let test_encoder = |encoder: &str| -> bool {
             info!("Testing encoder: {}", encoder);
             let output = Command::new(&ffmpeg)
-                .args(&["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
+                .args(&[
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    "testsrc=size=1920x1080:rate=5:duration=1",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-c:v",
+                    encoder,
+                    "-f",
+                    "null",
+                    "-",
+                ])
                 .arg("-loglevel")
                 .arg("error")
                 .arg("-hide_banner")
@@ -516,7 +507,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 .output()
                 .with_context(|| tl!("run-ffmpeg-failed"))
                 .expect("failed test encoder");
-        
+
             output.status.success()
         };
 
@@ -578,7 +569,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         sfx_flick.sample_rate()
     );
 
-    let mut output_music = vec![0.0_f32; (video_length * music_sample_rate as f64).ceil() as usize * 2];
+    let mut output_music =
+        vec![0.0_f32; (video_length * music_sample_rate as f64).ceil() as usize * 2];
     let mut output_fx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
 
     // let stereo_sfx = false; // TODO stereo sound effects
@@ -598,7 +590,6 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         return len;
     };
-
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
@@ -623,14 +614,12 @@ pub async fn main(cmd: bool) -> Result<()> {
         extra_sfxs.insert(name, clip);
     });
 
-    let get_hitsound = |note: &Note| {
-        match &note.hitsound {
-            HitSound::None => None,
-            HitSound::Click => Some(&sfx_click),
-            HitSound::Flick => Some(&sfx_flick),
-            HitSound::Drag => Some(&sfx_drag),
-            HitSound::Custom(s) => extra_sfxs.get(s)
-        }
+    let get_hitsound = |note: &Note| match &note.hitsound {
+        HitSound::None => None,
+        HitSound::Click => Some(&sfx_click),
+        HitSound::Flick => Some(&sfx_flick),
+        HitSound::Drag => Some(&sfx_drag),
+        HitSound::Custom(s) => extra_sfxs.get(s),
     };
 
     if volume_sfx != 0.0 {
@@ -655,8 +644,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let output_fx_temp = NamedTempFile::new()?;
 
     {
-        
-
         let output_audio_time = Instant::now();
 
         let mut proc = cmd_hidden(&ffmpeg)
@@ -760,10 +747,12 @@ pub async fn main(cmd: bool) -> Result<()> {
     let fps = config.fps;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
-
-
     let ffmpeg_preset = "-preset";
-    let ffmpeg_preset_name_list: Vec<String> = config.ffmpeg_preset.split_whitespace().map(|s| s.to_string()).collect();
+    let ffmpeg_preset_name_list: Vec<String> = config
+        .ffmpeg_preset
+        .split_whitespace()
+        .map(|s| s.to_string())
+        .collect();
 
     let ffmpeg_preset_name = if ffmpeg_encoder == encoder_list[0] {
         if let Some(i) = ffmpeg_preset_name_list.get(1) {
@@ -797,11 +786,13 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     };
 
-    let bitrate_control = 
-    if config.dynamic_bitrate_control {
+    let bitrate_control = if config.dynamic_bitrate_control {
         if ffmpeg_encoder == encoder_list[0] && !config.mpeg4 {
             "-cq"
-        } else if ffmpeg_encoder == encoder_list[1] || config.mpeg4 || ffmpeg_encoder == encoder_list[3] {
+        } else if ffmpeg_encoder == encoder_list[1]
+            || config.mpeg4
+            || ffmpeg_encoder == encoder_list[3]
+        {
             "-q"
         } else if ffmpeg_encoder == encoder_list[2] {
             "-qp_p"
@@ -814,7 +805,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         "-b:v"
     };
 
-
     let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo".to_owned();
     if ffmpeg_encoder == encoder_list[0] {
         args += " -hwaccel_output_format cuda";
@@ -824,36 +814,45 @@ pub async fn main(cmd: bool) -> Result<()> {
         " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
     )?;
 
-    let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
+    let delay_ending =
+        (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let ffmpeg_audio_filter_music = format!(
         "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}[a1];",
         volume_music
     );
-    let ffmpeg_audio_filter_fx = if config.force_limit { format!(
-        "[2:a]alimiter=limit={}:level=false:attack=0.1:release=1,volume={}[a2];",
-        config.limit_threshold, volume_sfx
-    )} else if config.compression_ratio > 1. { format!(
-        "[2:a]acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01,volume={}[a2];",
-        config.compression_ratio, volume_sfx
-    )} else { format!(
-        "[2:a]volume={}[a2];",
-        volume_sfx
-    )};
-    let ffmpeg_audio_filter_ending = format!(
-        "[3:a]adelay={},volume={}[a3];",
-        delay_ending, volume_music
-    );
+    let ffmpeg_audio_filter_fx = if config.force_limit {
+        format!(
+            "[2:a]alimiter=limit={}:level=false:attack=0.1:release=1,volume={}[a2];",
+            config.limit_threshold, volume_sfx
+        )
+    } else if config.compression_ratio > 1. {
+        format!(
+            "[2:a]acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01,volume={}[a2];",
+            config.compression_ratio, volume_sfx
+        )
+    } else {
+        format!("[2:a]volume={}[a2];", volume_sfx)
+    };
+    let ffmpeg_audio_filter_ending =
+        format!("[3:a]adelay={},volume={}[a3];", delay_ending, volume_music);
 
-    let ffmpeg_audio_effect_mix = if config.hires{ format!(
-        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
-    )} else { format!(
+    let ffmpeg_audio_effect_mix = if config.hires {
+        format!("[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]")
+    } else {
+        format!(
         "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a4];[a4]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
-    )};
+    )
+    };
 
-    let ffmpeg_audio_filter = format!("{}{}{}{}", ffmpeg_audio_filter_music, ffmpeg_audio_filter_fx, ffmpeg_audio_filter_ending, ffmpeg_audio_effect_mix);
-
+    let ffmpeg_audio_filter = format!(
+        "{}{}{}{}",
+        ffmpeg_audio_filter_music,
+        ffmpeg_audio_filter_fx,
+        ffmpeg_audio_filter_ending,
+        ffmpeg_audio_effect_mix
+    );
 
     let args2 = format!(
         "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] {} -vf vflip -f {}",
