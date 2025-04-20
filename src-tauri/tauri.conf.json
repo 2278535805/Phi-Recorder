@@ -1,84 +1,65 @@
 {
+  "productName": "phi-recorder",
+  "mainBinaryName": "phi-recorder",
+  "version": "0.3.3",
+  "identifier": "com.hlmc.phi.recorder",
   "build": {
-    "beforeBuildCommand": "pnpm run build",
+    "beforeBuildCommand": "pnpm build",
     "beforeDevCommand": "pnpm dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173"
   },
-  "package": {
-    "productName": "phi-recorder",
-    "version": "0.3.3"
-  },
-  "tauri": {
-    "allowlist": {
-      "http": {
-        "all": true,
-        "scope": [ "https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest", "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest" ],
-        "request": true
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": "all",
+    "externalBin": [],
+    "fileAssociations": [
+      {
+        "ext": ["pez"],
+        "name": "RPE Chart Bundle",
+        "description": "RPE Chart Bundle",
+        "role": "Viewer"
       },
-      "dialog": {
-        "message": true,
-        "open": true
-      },
-      "fs": {
-        "readFile": true,
-        "scope": ["$RESOURCE/*"]
-      },
-      "protocol": {
-        "asset": true,
-        "assetScope": {
-          "allow": ["**"],
-          "requireLiteralLeadingDot": false
-        }
-      },
-      "os": {
-        "all": true
-      },
-      "shell": {
-        "open": true
+      {
+        "ext": ["zip"],
+        "name": "ZIP Bundle",
+        "description": "ZIP Bundle",
+        "role": "Viewer"
       }
+    ],
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
     },
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "resources": [
+      "assets",
+      "WebView2Loader.dll",
+      "config.toml"
+    ],
+    "shortDescription": "",
+    "linux": {
       "deb": {
         "depends": []
-      },
-      "externalBin": [
-      ],
-      "icon": [
-        "icons/icon.png",
-        "icons/icon.ico"
-      ],
-      "identifier": "com.hlmc.phi.recorder",
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [
-        "assets",
-        "WebView2Loader.dll",
-        "config.toml"
-      ],
-      "shortDescription": "",
-      "targets": "all",
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
       }
-    },
-    "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost https://api.github.com; style-src 'self' 'unsafe-inline'"
-    },
-    "updater": {
-      "active": false
-    },
+    }
+  },
+  "plugins": {},
+  "app": {
     "windows": [
       {
         "fullscreen": false,
@@ -86,12 +67,26 @@
         "resizable": true,
         "title": "Phi Recorder",
         "width": 900,
-        "fileDropEnabled": true
+        "dragDropEnabled": true,
+        "useHttpsScheme": true
       }
     ],
-    "systemTray": {
+    "trayIcon": {
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true
+    },
+    "security": {
+      "assetProtocol": {
+        "scope": {
+          "allow": [
+            "**"
+          ],
+          "deny": [],
+          "requireLiteralLeadingDot": false
+        },
+        "enable": true
+      },
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost https://api.github.com; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost"
     }
   }
 }

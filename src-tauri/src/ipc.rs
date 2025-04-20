@@ -1,4 +1,3 @@
-
 pub mod client {
     use serde::Serialize;
 

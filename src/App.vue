@@ -53,9 +53,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import { VSonner } from 'vuetify-sonner';
-import { invoke, os, shell } from '@tauri-apps/api';
+import { invoke,   } from '@tauri-apps/api/core';
 import semver from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
+import * as os from "@tauri-apps/plugin-os"
+import * as shell from "@tauri-apps/plugin-shell"
 
 const onLoaded = ref<() => void>();
 const component = ref();
@@ -90,9 +92,9 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { fetch } from '@tauri-apps/api/http';
+import { fetch } from '@tauri-apps/plugin-http';
 import type { Release, Assets } from './model';
-import { open } from '@tauri-apps/api/shell';
+import { open } from '@tauri-apps/plugin-shell';
 
 const { t } = useI18n();
 
@@ -147,7 +149,7 @@ async function getNewVersion() {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = response.data as Release;
+    const release = await response.json() as Release;
     if (!release) {
       throw new Error('No tags found');
     }
@@ -209,7 +211,7 @@ async function checkForUpdates(dialog = true): Promise<boolean> {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = response.data as Release;
+    const release = await response.json() as Release;
     console.log(release);
     
     if (!release) {
