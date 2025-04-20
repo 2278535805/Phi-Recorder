@@ -24,10 +24,10 @@ importers:
         specifier: ~2.2.1
         version: 2.2.1
       '@tauri-apps/plugin-fs':
-        specifier: ~2
+        specifier: ~2.2.1
         version: 2.2.1
       '@tauri-apps/plugin-http':
-        specifier: ~2
+        specifier: ~2.4.3
         version: 2.4.3
       '@tauri-apps/plugin-os':
         specifier: ~2.2.1
