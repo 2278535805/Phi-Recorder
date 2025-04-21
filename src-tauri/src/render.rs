@@ -109,6 +109,7 @@ pub struct RenderConfig {
     max_particles: usize,
 
     fade: f32,
+    alpha_tint: bool,
 }
 
 impl RenderConfig {
@@ -159,6 +160,7 @@ impl RenderConfig {
 
             max_particles: self.max_particles,
             fade: self.fade,
+            alpha_tint: self.alpha_tint,
             ..Default::default()
         }
     }
@@ -225,6 +227,7 @@ impl Default for RenderConfig {
 
             max_particles: 100000,
             fade: 0.0,
+            alpha_tint: false,
         }
     }
 }

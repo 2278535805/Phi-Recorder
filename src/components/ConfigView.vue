@@ -99,6 +99,11 @@ en:
 
   fade: Fade In/Out
   bg-blurriness: Background Blurriness
+  alpha-tint: Alpha Tint
+  alpha-tint-tip: |
+    Tint Note based on different alpha:
+    (0.0, 0.5] Blue,
+    (0.5, 1.0) Red
 
   presets: Presets
   preset-refresh: Refresh
@@ -211,6 +216,11 @@ zh-CN:
 
   fade: 上隐/下隐
   bg-blurriness: 背景模糊
+  alpha-tint: 透明度染色
+  alpha-tint-tip: |
+    根据不同的透明度对 Note 染色:
+    (0.0, 0.5] 蓝色,
+    (0.5, 1.0) 红色
 
   presets: 预设配置
   preset-refresh: 刷新
@@ -373,6 +383,7 @@ const maxParticlesTextList = t('max-particles-list').split(',');
 const maxParticlesList = [20000, 100000, 800000];
 
 const fade = ref('0.0');
+const alphaTint = ref(false);
 
 function updateBitrate() {
   if (dynamicBitrateControl.value) {
@@ -489,6 +500,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
 
     maxParticles: maxParticles.value,
     fade: parseFloat(fade.value),
+    alphaTint: alphaTint.value,
   };
 }
 
@@ -597,6 +609,7 @@ function applyConfig(config: RenderConfig) {
     maxParticlesText.value = String(maxParticles.value);
   }
   fade.value = String(config.fade);
+  alphaTint.value = config.alphaTint;
 }
 
 const DEFAULT_CONFIG: RenderConfig = {
@@ -658,6 +671,7 @@ const DEFAULT_CONFIG: RenderConfig = {
 
   maxParticles: 100000,
   fade: 0.0,
+  alphaTint: false,
 };
 interface Preset {
   name: string;
@@ -997,6 +1011,9 @@ async function replacePreset() {
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
           <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch :label="t('alpha-tint')" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
