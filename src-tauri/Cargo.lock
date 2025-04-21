@@ -3832,7 +3832,7 @@ dependencies = [
 [[package]]
 name = "prpr"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#4fbcb7bb7f3a5766b1aa48cf5095b75457eea866"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#86321e4a77a364110b5a4e7e6d902f9e3c781334"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3857,6 +3857,7 @@ dependencies = [
  "image",
  "intl-memoizer",
  "js-sys",
+ "lazy_static",
  "libc",
  "lru",
  "lyon",
@@ -3900,7 +3901,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/render-lib?branch=render-lib#4fbcb7bb7f3a5766b1aa48cf5095b75457eea866"
+source = "git+https://github.com/2278535805/render-lib?branch=render-lib#86321e4a77a364110b5a4e7e6d902f9e3c781334"
 dependencies = [
  "anyhow",
  "tracing",
