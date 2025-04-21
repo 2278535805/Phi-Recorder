@@ -116,6 +116,8 @@ import moment from 'moment';
 import * as dialog from "@tauri-apps/plugin-dialog"
 import * as shell from "@tauri-apps/plugin-shell"
 
+import { listen } from "@tauri-apps/api/event";
+
 if (!(await invoke('is_the_only_instance'))) {
   await dialog.message(t('already-running'));
   await invoke('exit_program');
@@ -191,16 +193,24 @@ const aspectWidth = ref('16'),
 const offset_text = ref('0')
 
 const fileHovering = ref(false);
-event.listen('tauri://file-drop-hover', (_event) => (fileHovering.value = step.value === 'choose'));
-event.listen('tauri://file-drop-cancelled', (_event) => (fileHovering.value = false));
-event.listen('tauri://file-drop', async (event) => {
+
+interface FileDropEvent {
+  paths: string[];
+  position: { x: number; y: number };
+}
+
+listen('tauri://drag-over', (_event) => (fileHovering.value = step.value === 'choose'));
+listen('tauri://drag-leave', (_event) => (fileHovering.value = false));
+listen('tauri://drag-drop', async (event) => {
+  const files = (event.payload as FileDropEvent).paths;
+  
   if (step.value === 'choose') {
     fileHovering.value = false;
-    await loadChart((event.payload as string[])[0]);
+    await loadChart(files[0]);
   } else if (step.value === 'config' || step.value === 'options' || step.value === 'render') {
     fileHovering.value = false;
     stepIndex.value = 1;
-    await loadChart((event.payload as string[])[0]);
+    await loadChart(files[0]);
   }
 });
 
