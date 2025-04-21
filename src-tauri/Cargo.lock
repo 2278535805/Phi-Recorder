@@ -3670,7 +3670,7 @@ dependencies = [
 
 [[package]]
 name = "phi-recorder"
-version = "0.3.3"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "chrono",
