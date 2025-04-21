@@ -50,25 +50,6 @@ jobs:
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
         run: pnpm install # Change this to npm, yarn or pnpm.
 
-      - name: Download static-lib
-        uses: suisei-cn/actions-download-file@v1.3.0
-        id: downlod-static-lib
-        with:
-          # url: "https://files-cf.phira.cn/prpr-avc-static-lib.tar.gz"
-          url: "https://raw.githubusercontent.com/2278535805/Phi-Recorder/main/prpr-avc-static-lib.tar.gz"
-          target: ./
-
-      - name: Mkdir static-lib
-        run: mkdir static-lib
-
-      - name: Extract static-lib
-        uses: a7ul/tar-action@v1.2.0
-        id: extract-static-lib
-        with:
-          command: x
-          cwd: ./static-lib
-          files: prpr-avc-static-lib.tar.gz
-
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
 
