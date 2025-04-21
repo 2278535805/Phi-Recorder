@@ -7,7 +7,7 @@ use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use prpr::{
     config::{ChallengeModeColor, Config, Mods},
-    core::{init_assets, internal_id, HitSound, MSRenderTarget, Note},
+    core::{init_assets, internal_id, ResourcePack, HitSound, MSRenderTarget, Note},
     fs,
     info::ChartInfo,
     scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
@@ -432,20 +432,17 @@ pub async fn main(cmd: bool) -> Result<()> {
     let (mut chart, ..) = GameScene::load_chart(fs.deref_mut(), &info)
         .await
         .with_context(|| tl!("load-chart-failed"))?;
-    macro_rules! ld {
-            ($path:literal) => {
-                AudioClip::new(load_file($path).await?)
-                    .with_context(|| tl!("load-sfx-failed", "name" => $path))?
-            };
-        }
+    let res_pack = ResourcePack::from_path(config.res_pack_path.as_ref())
+        .await
+        .context("Failed to load resource pack")?;
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
     let music_length = music.length() as f64;
     let music_sample_rate = music.sample_rate();
-    let ending_music = ld!("ending.ogg");
-    let sfx_click = ld!("click.ogg");
-    let sfx_drag = ld!("drag.ogg");
-    let sfx_flick = ld!("flick.ogg");
+    let ending_music = res_pack.ending;
+    let sfx_click = res_pack.sfx_click;
+    let sfx_drag = res_pack.sfx_drag;
+    let sfx_flick = res_pack.sfx_flick;
 
     let mut gl = unsafe { get_internal_gl() };
 
