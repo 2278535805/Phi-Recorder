@@ -1,6 +1,8 @@
 
 # Phigros Recorder 介绍
 
+![Phi Recorder Banner](arts/banner.png)
+
 快 简 轻 便  
 Fast Simple Lightweight Convenient
 
