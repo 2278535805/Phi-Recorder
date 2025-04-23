@@ -617,8 +617,13 @@ async fn remove_preset(name: String) -> Result<(), InvokeError> {
     .await
 }
 
-fn rpe_dir() -> Result<Option<PathBuf>> {
+fn get_rpe_dir() -> Result<PathBuf> {
     let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+    Ok(file)
+}
+
+fn rpe_dir() -> Result<Option<PathBuf>> {
+    let file = get_rpe_dir()?;
     if file.exists() {
         if !file.is_file() {
             bail!("rpe_path.txt is not a file");
@@ -626,7 +631,7 @@ fn rpe_dir() -> Result<Option<PathBuf>> {
     } else {
         return Ok(None);
     }
-    let dir: PathBuf = std::fs::read_to_string(file)?.into();
+    let dir = PathBuf::from(std::fs::read_to_string(file)?);
     Ok(if dir.exists() { Some(dir) } else { None })
 }
 
@@ -660,7 +665,7 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
         {
             bail!(mtl!("not-valid-rpe"));
         }
-        let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+        let file = get_rpe_dir()?;
         println!("Create {}", file.display());
         std::fs::write(
             file,
@@ -677,7 +682,7 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
 #[tauri::command]
 fn unset_rpe_dir() -> Result<(), InvokeError> {
     (|| {
-        let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+        let file = get_rpe_dir()?;
         println!("Delete {}", file.display());
         std::fs::remove_file(file)?;
         Ok(())
