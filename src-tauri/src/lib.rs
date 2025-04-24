@@ -77,14 +77,6 @@ fn hide_cmd() {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // async to block
-    let rt = tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(4)
-        .enable_all()
-        .build()
-        .unwrap();
-    let _guard = rt.enter();
-
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
@@ -155,6 +147,17 @@ pub fn run() {
     let asset_dir = exe_dir.join("assets");
     ASSET_PATH.set(asset_dir.clone()).unwrap();
     set_pc_assets_folder(&asset_dir.display().to_string());
+
+    app.run(|_, _| {});
+
+    // async to block
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(4)
+        .enable_all()
+        .build()
+        .unwrap();
+    let _guard = rt.enter();
+
 
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref().unwrap_or_default() {
@@ -238,7 +241,6 @@ pub fn run() {
         eprintln!("Lock failed");
     }
 
-    app.run(|_, _| {});
 }
 
 #[tauri::command]
