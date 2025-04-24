@@ -1,7 +1,6 @@
 {
   "productName": "phi-recorder",
   "mainBinaryName": "phi-recorder",
-  "version": "1.0.0",
   "identifier": "com.hlmc.phi.recorder",
   "build": {
     "beforeBuildCommand": "pnpm build",
