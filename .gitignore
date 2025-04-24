@@ -33,3 +33,4 @@ coverage
 /.cargo
 
 target/
+src-tauri/gen/android/keystore.properties

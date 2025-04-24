@@ -76,14 +76,8 @@ fn hide_cmd() {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub async fn run() -> Result<()> {
-    /*use chrono::prelude::*;
-    let now = Utc::now();
-    let target_date = Utc.with_ymd_and_hms(2025, 2, 5, 0, 0, 0).unwrap();
-    if now >= target_date {
-        panic!("Outdated version!");
-    }*/
-
+pub fn run() {
+    // async to block
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
@@ -92,59 +86,49 @@ pub async fn run() -> Result<()> {
     let _guard = rt.enter();
 
     let app = tauri::Builder::default()
-    .plugin(tauri_plugin_os::init())
-    .plugin(tauri_plugin_fs::init())
-    .plugin(tauri_plugin_http::init())
-    .plugin(tauri_plugin_shell::init())
-    .plugin(tauri_plugin_dialog::init())
-    .manage(TaskQueue::new())
-    .invoke_handler(tauri::generate_handler![
-        is_the_only_instance,
-        exit_program,
-        show_output_folder,
-        open_in_folder,
-        show_in_folder,
-        open_file,
-        preview_chart,
-        preview_tweakoffset,
-        preview_play,
-        parse_chart,
-        post_render,
-        get_tasks,
-        cancel_task,
-        get_respacks,
-        open_respack_folder,
-        get_presets,
-        add_preset,
-        remove_preset,
-        set_rpe_dir,
-        unset_rpe_dir,
-        get_rpe_charts,
-        open_app_folder,
-        test_ffmpeg,
-        test_ffmpeg_filter,
-    ])
-    .on_window_event(|_, event| match event {
-        //WindowEvent::CloseRequested { api, .. } => {
-        WindowEvent::CloseRequested { .. } => {
-            /*event
-            .window()
-            .app_handle()
-            .tray_handle()
-            .get_item("toggle")
-            .set_title(mtl!("tray-show"))
-            .unwrap();*/
-            exit_program();
-            //event.window().hide().unwrap();
-            //api.prevent_close();
-        }
-        _ => {}
-    })
-    .build(tauri::generate_context!())
-    .expect("error while running tauri application");
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
+        .manage(TaskQueue::new())
+        .invoke_handler(tauri::generate_handler![
+            is_the_only_instance,
+            exit_program,
+            show_output_folder,
+            open_in_folder,
+            show_in_folder,
+            open_file,
+            preview_chart,
+            preview_tweakoffset,
+            preview_play,
+            parse_chart,
+            post_render,
+            get_tasks,
+            cancel_task,
+            get_respacks,
+            open_respack_folder,
+            get_presets,
+            add_preset,
+            remove_preset,
+            set_rpe_dir,
+            unset_rpe_dir,
+            get_rpe_charts,
+            open_app_folder,
+            test_ffmpeg,
+            test_ffmpeg_filter,
+        ])
+        .on_window_event(|_, event| match event {
+            tauri::WindowEvent::CloseRequested { .. } => {
+                exit_program();
+            }
+            _ => {}
+        })
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application");
 
     let resolver = app.path();
-    let exe = std::env::current_exe()?;
+    let exe = std::env::current_exe().unwrap();
     let exe_dir = exe.parent().unwrap();
 
     let cache_dir = ensure_dir(
@@ -168,11 +152,9 @@ pub async fn run() -> Result<()> {
         ))
         .unwrap();
 
-    // let asset_dir = resolver.resolve("assets", BaseDirectory::Config).unwrap();
     let asset_dir = exe_dir.join("assets");
     ASSET_PATH.set(asset_dir.clone()).unwrap();
     set_pc_assets_folder(&asset_dir.display().to_string());
-
 
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref().unwrap_or_default() {
@@ -184,38 +166,53 @@ pub async fn run() -> Result<()> {
                 std::process::exit(0);
             }
             "render" => {
-                run_wrapped(render::main(false)).await;
+                rt.block_on(async {
+                    run_wrapped(render::main(false)).await;
+                });
             }
             "preview" | "play" => {
-                run_wrapped(preview::main(false, false)).await;
+                rt.block_on(async {
+                    run_wrapped(preview::main(false, false)).await;
+                });
             }
             "tweakoffset" => {
-                run_wrapped(preview::main(false, true)).await;
+                rt.block_on(async {
+                    run_wrapped(preview::main(false, true)).await;
+                });
             }
             "--render" => {
-                run_wrapped(render::main(true)).await;
+                rt.block_on(async {
+                    run_wrapped(render::main(true)).await;
+                });
             }
             "--preview" | "--play" => {
-                run_wrapped(preview::main(true, false)).await;
+                rt.block_on(async {
+                    run_wrapped(preview::main(true, false)).await;
+                });
             }
             "--tweakoffset" => {
-                run_wrapped(preview::main(true, true)).await;
+                rt.block_on(async {
+                    run_wrapped(preview::main(true, true)).await;
+                });
             }
             cmd => {
                 eprintln!("Command: {cmd:?}");
                 let args = std::env::args().nth(1).unwrap_or_default();
                 let path = Path::new(&args);
-                if path.is_file() && (args.contains(".pez") || args.contains(".zip"))
+                if (path.is_file() && (args.contains(".pez") || args.contains(".zip")))
                     || path.is_dir()
                 {
                     println!("Find a valid path, start preview");
-                    let mut child = Command::new(std::env::current_exe()?)
+                    let mut child = Command::new(std::env::current_exe().unwrap())
                         .arg("--preview")
                         .arg(args)
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())
-                        .spawn()?;
-                    let status = child.wait().await?;
+                        .spawn()
+                        .unwrap();
+                    let status = rt.block_on(async {
+                        child.wait().await.unwrap()
+                    });
                     std::process::exit(status.code().unwrap_or_default());
                 } else {
                     std::process::exit(1);
@@ -226,12 +223,15 @@ pub async fn run() -> Result<()> {
         hide_cmd();
     }
 
-    let lock_file = tokio::fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(cache_dir.join("app.lock"))
-        .await?;
+    let lock_file = rt.block_on(async {
+        tokio::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .open(cache_dir.join("app.lock"))
+            .await
+            .unwrap()
+    });
     if lock_file.try_lock_exclusive().is_ok() {
         LOCK_FILE.set(lock_file).unwrap();
     } else {
@@ -239,8 +239,6 @@ pub async fn run() -> Result<()> {
     }
 
     app.run(|_, _| {});
-
-    Ok(())
 }
 
 #[tauri::command]
