@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, path::PathBuf, sync::OnceLock};
 
 use crate::render::RenderConfig;
@@ -76,20 +77,60 @@ pub async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()>
     Ok(())
 }
 
-pub fn get_rpe_dir() -> Result<PathBuf> {
-    let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase", default)]
+pub struct Config {
+    pub rpe_dir: Option<PathBuf>,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            rpe_dir: None,
+        }
+    }
+}
+
+pub fn get_config_file() -> Result<PathBuf> {
+    let file = CONFIG_DIR.get().unwrap().join("config.toml");
+    if file.exists() && !file.is_file() {
+        bail!("presets.toml is not a file");
+    }
     Ok(file)
 }
 
-pub fn rpe_dir() -> Result<Option<PathBuf>> {
-    let file = get_rpe_dir()?;
+pub fn read_config() -> Result<Config> {
+    let file = get_config_file()?;
     if file.exists() {
-        if !file.is_file() {
-            bail!("rpe_path.txt is not a file");
+        let config: Config = toml::from_str(&std::fs::read_to_string(file)?)?;
+        Ok(config)
+    } else {
+        Ok(Config::default())
+    }
+}
+
+pub fn save_config(config: Config) -> Result<()> {
+    let file = get_config_file()?;
+    let string = toml::to_string(&config)?;
+    std::fs::write(file, string)?;
+    Ok(())
+}
+
+pub fn get_rpe_dir() -> Result<PathBuf> {
+    if let Some(dir) = read_config()?.rpe_dir {
+        if dir.exists() {
+            Ok(dir)
+        } else {
+            bail!("rpe_dir does not exist");
         }
     } else {
-        return Ok(None);
+        bail!("rpe_dir is not set");
     }
-    let dir = PathBuf::from(std::fs::read_to_string(file)?);
-    Ok(if dir.exists() { Some(dir) } else { None })
+}
+
+pub fn set_rpe_dir(set_dir: Option<PathBuf>) -> Result<()> {
+    let mut config = read_config()?;
+    config.rpe_dir = set_dir;
+    save_config(config)?;
+    Ok(())
 }
