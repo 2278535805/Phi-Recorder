@@ -1,5 +1,7 @@
 use anyhow::{bail, Result};
-use std::{path::PathBuf, sync::OnceLock};
+use std::{collections::HashMap, path::PathBuf, sync::OnceLock};
+
+use crate::render::RenderConfig;
 
 pub static CONFIG_DIR: OnceLock<PathBuf> = OnceLock::new();
 pub static DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
@@ -49,4 +51,45 @@ pub fn respack_dir() -> Result<PathBuf> {
         std::fs::create_dir(&dir)?;
     }
     Ok(dir)
+}
+
+pub fn get_presets_toml_file() -> Result<PathBuf> {
+    let file = CONFIG_DIR.get().unwrap().join("presets.toml");
+    if file.exists() && !file.is_file() {
+        bail!("presets.toml is not a file");
+    }
+    Ok(file)
+}
+
+pub fn get_presets_json_file() -> Result<PathBuf> {
+    let file = CONFIG_DIR.get().unwrap().join("presets.json");
+    if file.exists() && !file.is_file() {
+        bail!("presets.json is not a file");
+    }
+    Ok(file)
+}
+
+pub async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()> {
+    let file = get_presets_toml_file()?;
+    let toml_string = toml::to_string(presets)?;
+    std::fs::write(file, toml_string)?;
+    Ok(())
+}
+
+pub fn get_rpe_dir() -> Result<PathBuf> {
+    let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
+    Ok(file)
+}
+
+pub fn rpe_dir() -> Result<Option<PathBuf>> {
+    let file = get_rpe_dir()?;
+    if file.exists() {
+        if !file.is_file() {
+            bail!("rpe_path.txt is not a file");
+        }
+    } else {
+        return Ok(None);
+    }
+    let dir = PathBuf::from(std::fs::read_to_string(file)?);
+    Ok(if dir.exists() { Some(dir) } else { None })
 }

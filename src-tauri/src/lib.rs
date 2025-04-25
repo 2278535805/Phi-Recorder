@@ -10,7 +10,7 @@ mod render;
 mod task;
 
 use anyhow::{bail, Context, Result};
-use common::{ensure_dir, output_dir, respack_dir, CONFIG_DIR, DATA_DIR};
+use common::{ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, rpe_dir, save_presets, CONFIG_DIR, DATA_DIR};
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
 use prpr::{
@@ -23,7 +23,7 @@ use std::{
     collections::HashMap,
     fs::File,
     future::Future,
-    io::{BufRead, BufReader, BufWriter},
+    io::{BufRead, BufReader},
     ops::DerefMut,
     path::{Path, PathBuf},
     process::Stdio,
@@ -32,7 +32,6 @@ use std::{
 };
 use task::{TaskQueue, TaskView};
 use tauri::{
-    path::BaseDirectory,
     Manager,
     State,
     WindowEvent,
@@ -545,22 +544,6 @@ fn open_respack_folder() -> Result<(), InvokeError> {
     .map_err(InvokeError::from_anyhow)
 }
 
-fn get_presets_toml_file() -> Result<PathBuf> {
-    let file = CONFIG_DIR.get().unwrap().join("presets.toml");
-    if file.exists() && !file.is_file() {
-        bail!("presets.toml is not a file");
-    }
-    Ok(file)
-}
-
-fn get_presets_json_file() -> Result<PathBuf> {
-    let file = CONFIG_DIR.get().unwrap().join("presets.json");
-    if file.exists() && !file.is_file() {
-        bail!("presets.json is not a file");
-    }
-    Ok(file)
-}
-
 #[tauri::command]
 async fn get_presets() -> Result<HashMap<String, RenderConfig>, InvokeError> {
     (|| {
@@ -582,13 +565,6 @@ async fn get_presets() -> Result<HashMap<String, RenderConfig>, InvokeError> {
         Ok(HashMap::new())
     })()
     .map_err(InvokeError::from_anyhow)
-}
-
-async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()> {
-    let file = get_presets_toml_file()?;
-    let toml_string = toml::to_string(presets)?;
-    std::fs::write(file, toml_string)?;
-    Ok(())
 }
 
 #[tauri::command]
@@ -615,24 +591,6 @@ async fn remove_preset(name: String) -> Result<(), InvokeError> {
         Ok(())
     })
     .await
-}
-
-fn get_rpe_dir() -> Result<PathBuf> {
-    let file = CONFIG_DIR.get().unwrap().join("rpe_path.txt");
-    Ok(file)
-}
-
-fn rpe_dir() -> Result<Option<PathBuf>> {
-    let file = get_rpe_dir()?;
-    if file.exists() {
-        if !file.is_file() {
-            bail!("rpe_path.txt is not a file");
-        }
-    } else {
-        return Ok(None);
-    }
-    let dir = PathBuf::from(std::fs::read_to_string(file)?);
-    Ok(if dir.exists() { Some(dir) } else { None })
 }
 
 #[derive(Serialize)]
