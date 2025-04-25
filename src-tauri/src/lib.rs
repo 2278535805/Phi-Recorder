@@ -10,7 +10,7 @@ mod render;
 mod task;
 
 use anyhow::{bail, Context, Result};
-use common::{ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, rpe_dir, save_presets, CONFIG_DIR, DATA_DIR};
+use common::{ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, save_presets, Config, CONFIG_DIR, DATA_DIR};
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
 use prpr::{
@@ -116,6 +116,8 @@ pub async fn run() -> Result<()> {
         get_presets,
         add_preset,
         remove_preset,
+        read_config,
+        save_config,
         set_rpe_dir,
         unset_rpe_dir,
         get_rpe_charts,
@@ -593,6 +595,18 @@ async fn remove_preset(name: String) -> Result<(), InvokeError> {
     .await
 }
 
+#[tauri::command]
+async fn read_config() -> Result<Config, InvokeError> {
+    common::read_config()
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+async fn save_config(config: Config) -> Result<(), InvokeError> {
+    common::save_config(config)
+    .map_err(InvokeError::from_anyhow)
+}
+
 #[derive(Serialize)]
 pub struct RPEChartInfo {
     name: String,
@@ -602,15 +616,6 @@ pub struct RPEChartInfo {
     charter: String,
     #[serde(skip)]
     modified: SystemTime,
-}
-
-fn remove_verbatim_prefix(path: &PathBuf) -> PathBuf {
-    let path_str = path.to_str().unwrap_or("");
-    if path_str.starts_with(r"\\?\") && path_str.len() < 260 {
-        PathBuf::from(&path_str[4..])
-    } else {
-        path.to_path_buf()
-    }
 }
 
 #[tauri::command]
@@ -623,15 +628,7 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
         {
             bail!(mtl!("not-valid-rpe"));
         }
-        let file = get_rpe_dir()?;
-        println!("Create {}", file.display());
-        std::fs::write(
-            file,
-            remove_verbatim_prefix(&path.canonicalize()?)
-                .display()
-                .to_string()
-                .as_bytes(),
-        )?;
+        common::set_rpe_dir(Some(path))?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
@@ -640,9 +637,7 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
 #[tauri::command]
 fn unset_rpe_dir() -> Result<(), InvokeError> {
     (|| {
-        let file = get_rpe_dir()?;
-        println!("Delete {}", file.display());
-        std::fs::remove_file(file)?;
+        common::set_rpe_dir(None)?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
@@ -651,7 +646,7 @@ fn unset_rpe_dir() -> Result<(), InvokeError> {
 #[tauri::command]
 fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
     (|| {
-        let Some(dir) = rpe_dir()? else {
+        let Ok(dir) = get_rpe_dir() else {
             return Ok(None);
         };
         let mut results = Vec::new();
