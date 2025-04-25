@@ -51,12 +51,12 @@ async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeEr
     })
 }
 
-async fn run_wrapped(f: impl Future<Output = Result<()>>) -> ! {
+async fn run_wrapped(f: impl Future<Output = Result<()>>) {
     if let Err(err) = f.await {
         eprintln!("{err:?}");
-        std::process::exit(1);
+        exit_program(1);
     }
-    std::process::exit(0);
+    exit_program(0);
 }
 
 fn hide_cmd() {
@@ -134,7 +134,7 @@ pub async fn run() -> Result<()> {
             .get_item("toggle")
             .set_title(mtl!("tray-show"))
             .unwrap();*/
-            exit_program();
+            exit_program(0);
             //event.window().hide().unwrap();
             //api.prevent_close();
         }
@@ -181,7 +181,7 @@ pub async fn run() -> Result<()> {
                 println!("Options:");
                 println!("  --output <file/path>    Output file");
                 println!("  --config <file/json>    Config");
-                std::process::exit(0);
+                exit_program(0);
             }
             "render" => {
                 run_wrapped(render::main(false)).await;
@@ -216,9 +216,9 @@ pub async fn run() -> Result<()> {
                         .stderr(Stdio::inherit())
                         .spawn()?;
                     let status = child.wait().await?;
-                    std::process::exit(status.code().unwrap_or_default());
+                    exit_program(status.code().unwrap_or_default());
                 } else {
-                    std::process::exit(1);
+                    exit_program(1);
                 }
             }
         }
@@ -245,11 +245,11 @@ pub async fn run() -> Result<()> {
 
 #[tauri::command]
 fn is_the_only_instance() -> bool {
-    LOCK_FILE.get().is_some()
+    true// LOCK_FILE.get().is_some()
 }
 
 #[tauri::command]
-fn exit_program() {
+fn exit_program(code: i32) {
     /*#[cfg(target_os = "windows")]
     {
         use sysinfo::{ProcessExt, System, SystemExt, PidExt};
@@ -266,7 +266,7 @@ fn exit_program() {
             }
         }
     }*/
-    std::process::exit(0);
+    std::process::exit(code);
 }
 
 #[tauri::command]
