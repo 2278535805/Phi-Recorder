@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 prpr::tl_file!("render");
 
-use crate::common::{ensure_dir, let_output_dir, output_dir, DATA_DIR};
+use crate::common::{let_output_dir, output_dir};
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
