@@ -1,7 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 prpr::tl_file!("render");
 
-use crate::common::{let_output_dir, output_dir};
+use crate::{
+    common::{let_output_dir, output_dir},
+    ASSET_PATH
+};
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
@@ -888,7 +891,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         .arg(output_music_temp.path())
         .arg("-i")
         .arg(output_fx_temp.path())
-        .args("-i ./assets/ending.ogg".split_whitespace())
+        .arg("-i")
+        .arg(ASSET_PATH.get().unwrap().join("ending.ogg"))
         .args(args2.split_whitespace())
         .arg(output_path)
         .arg("-loglevel")
