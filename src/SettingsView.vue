@@ -42,7 +42,7 @@ updateConfig();
 
 async function saveConfig() {
   for (const key in config.value) {
-    if (config.value[key as keyof Config] === "") {
+    if (config.value[key as keyof Config]?.trim() === "") {
       config.value[key as keyof Config] = null;
     }
   }
