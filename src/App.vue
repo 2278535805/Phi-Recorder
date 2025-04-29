@@ -437,6 +437,12 @@ html {
   border-radius: 12px;
 }
 
+.list-item-hover-rail:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 8px #ffffff8a);
+}
+
 .active-item {
   background: linear-gradient(45deg, rgba(33, 150, 243, 0.2), transparent) !important;
 }
