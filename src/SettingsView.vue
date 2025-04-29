@@ -41,6 +41,12 @@ async function updateConfig() {
 updateConfig();
 
 async function saveConfig() {
+  for (const key in config.value) {
+    if (config.value[key as keyof Config] === "") {
+      config.value[key as keyof Config] = null;
+    }
+  }
+
   await invoke('save_config', { config: config.value });
   updateConfig();
 }
