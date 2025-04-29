@@ -1,6 +1,7 @@
 <i18n>
 en:
   save: Save
+  save-success: Save successfully
   reset: Reset
   select: Selected
   no-select: No selection
@@ -9,6 +10,7 @@ en:
 
 zh-CN:
   save: 保存
+  save-success: 保存成功
   reset: 重置
   select: 已选择
   no-select: 没有选择
@@ -26,7 +28,11 @@ import { onMounted, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
-import { toast, toastError } from './common';
+import { toast, toastError, RULES } from './common';
+import type { VForm } from 'vuetify/components';
+
+const form = ref<VForm>();
+const loadingSave = ref(false);
 
 const DEFAULT_CONFIG: Config = {
   rpeDir: null,
@@ -41,14 +47,35 @@ async function updateConfig() {
 updateConfig();
 
 async function saveConfig() {
+  loadingSave.value = true;
+  if (!(await form.value!.validate()).valid) {
+    toast(t('has-error'), 'error');
+    loadingSave.value = false;
+    return null;
+  }
+  if (config.value.outputDir) {
+    try {
+      await invoke('let_output_dir', { dir: config.value.outputDir });
+    } catch (e) {
+      toastError(e);
+      loadingSave.value = false;
+      return null;
+    }
+  }
   for (const key in config.value) {
     if (config.value[key as keyof Config]?.trim() === "") {
       config.value[key as keyof Config] = null;
     }
   }
 
-  await invoke('save_config', { config: config.value });
+  try {
+    await invoke('save_config', { config: config.value });
+  } catch (e) {
+    toastError(e);
+  }
   updateConfig();
+  loadingSave.value = false;
+  toast(t('save-success'), 'success');
 }
 
 async function resetConfig() {
@@ -90,19 +117,19 @@ async function selectOutputDir() {
       <div no-gutters class="mt-0 d-flex flex-row pt-0">
         <v-btn @click="resetConfig" v-t="'reset'" size="large"></v-btn>
         <div class="flex-grow-1"></div>
-        <v-btn @click="saveConfig" v-t="'save'" size="large"></v-btn>
+        <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" size="large"></v-btn>
 
       </div>
 
       <v-row no-gutters class="mt-3 mx-n2">
         <v-col cols="6">
           <div>
-            <v-text-field clearable class="mx-2" :label="t('rpe-dir')" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir"></v-text-field>
+            <v-text-field clearable class="mx-2" :label="t('rpe-dir')" :rules="[RULES.isPath]" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir"></v-text-field>
           </div>
         </v-col>
         <v-col cols="6">
           <div>
-            <v-text-field clearable class="mx-2" :label="t('output-dir')" v-model="config.outputDir" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir"></v-text-field>
+            <v-text-field clearable class="mx-2" :label="t('output-dir')" :rules="[RULES.isPath]" v-model="config.outputDir" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir"></v-text-field>
           </div>
         </v-col>
       </v-row>

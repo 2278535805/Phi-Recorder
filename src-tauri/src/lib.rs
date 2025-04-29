@@ -118,6 +118,7 @@ pub async fn run() -> Result<()> {
         remove_preset,
         read_config,
         save_config,
+        let_output_dir,
         set_rpe_dir,
         unset_rpe_dir,
         get_rpe_charts,
@@ -604,6 +605,12 @@ async fn read_config() -> Result<Config, InvokeError> {
 #[tauri::command]
 async fn save_config(config: Config) -> Result<(), InvokeError> {
     common::save_config(config)
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+async fn let_output_dir(dir: PathBuf) -> Result<PathBuf, InvokeError> {
+    common::let_output_dir(dir)
     .map_err(InvokeError::from_anyhow)
 }
 
