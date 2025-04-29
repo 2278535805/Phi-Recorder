@@ -81,12 +81,14 @@ pub async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()>
 #[serde(rename_all = "camelCase", default)]
 pub struct Config {
     pub rpe_dir: Option<PathBuf>,
+    pub output_dir: Option<PathBuf>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
             rpe_dir: None,
+            output_dir: None,
         }
     }
 }

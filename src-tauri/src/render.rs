@@ -2,7 +2,7 @@
 prpr::tl_file!("render");
 
 use crate::{
-    common::{let_output_dir, output_dir},
+    common::{let_output_dir, output_dir, read_config},
     ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
@@ -393,7 +393,11 @@ pub async fn main(cmd: bool) -> Result<()> {
             info!("output file: {:?}", output_file);
             output_file
         } else {
-            let output_file = output_dir()?.join(file_name);
+            let output_file = if let Some(set_output_dir) = read_config()?.output_dir {
+                set_output_dir.join(file_name)
+            } else {
+                output_dir()?.join(file_name)
+            };
             info!("output file: {:?}", output_file);
             output_file
         };
@@ -412,7 +416,12 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         line.clear();
         stdin.read_line(&mut line)?;
-        let output_path: PathBuf = serde_json::from_str(line.trim())?;
+        let mut output_path: PathBuf = serde_json::from_str(line.trim())?;
+        if let Some(set_output_dir) = read_config()?.output_dir {
+            if let Some(file_name) = output_path.file_name() {
+                output_path = set_output_dir.join(file_name);
+            }
+        }
 
         let fs = fs::fs_from_file(&path)?;
 

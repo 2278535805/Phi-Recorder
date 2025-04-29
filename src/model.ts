@@ -115,7 +115,8 @@ export interface RenderConfig {
 }
 
 export interface Config {
-  rpeDir: string | null
+  rpeDir: string | null;
+  outputDir: string | null;
 }
 
 export interface RPEChart {
