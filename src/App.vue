@@ -123,7 +123,7 @@ document.addEventListener('mousedown', (event) => {
   if (event.button === 1) {
     event.preventDefault();
     //console.log('Detected mousedown 1', event);
-    rail.value = !rail.value;
+    //rail.value = !rail.value;
   }
 });
 
@@ -266,20 +266,22 @@ onMounted(async () => {
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
           @click="router.push({ name: key })"
+          @contextmenu="rail = !rail"
           class="list-item-hover"
           v-if="rail"
-          ></v-list-item>
+        ></v-list-item>
 
-          <v-list-item
+        <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
           @click="router.push({ name: key })"
+          @contextmenu="rail = !rail"
           class="list-item-hover-rail"
           v-if="!rail"
-          ></v-list-item>
+        ></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
