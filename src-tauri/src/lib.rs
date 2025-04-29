@@ -619,7 +619,7 @@ pub struct RPEChartInfo {
 }
 
 #[tauri::command]
-fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
+fn set_rpe_dir(path: PathBuf, save: bool) -> Result<(), InvokeError> {
     (|| {
         if !path.is_dir()
             || ["PhiEdit.exe", "Resources"]
@@ -628,7 +628,9 @@ fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
         {
             bail!(mtl!("not-valid-rpe"));
         }
-        common::set_rpe_dir(Some(path))?;
+        if save {
+            common::set_rpe_dir(Some(path))?;
+        }
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)

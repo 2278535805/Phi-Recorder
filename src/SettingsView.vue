@@ -2,12 +2,18 @@
 en:
   save: Save
   reset: Reset
+  select: Selected
+  no-select: No selection
   rpe-dir: RPE Directory
+  output-dir: Output Directory
 
 zh-CN:
   save: 保存
   reset: 重置
+  select: 已选择
+  no-select: 没有选择
   rpe-dir: RPE 目录
+  output-dir: 输出目录
 
 </i18n>
 
@@ -19,9 +25,12 @@ const { t } = useI18n();
 import { onMounted, ref } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { Config } from './model';
+import { open } from '@tauri-apps/plugin-dialog';
+import { toast, toastError } from './common';
 
 const DEFAULT_CONFIG: Config = {
   rpeDir: null,
+  outputDir: null,
 }
 
 const config = ref(DEFAULT_CONFIG);
@@ -40,6 +49,33 @@ async function resetConfig() {
   config.value = DEFAULT_CONFIG;
 }
 
+async function selectDir() {
+  let file = await open({ directory: true, title: t('output-dir') });
+  if (!file) {
+    toast(t('no-select'), 'error');
+    return null;
+  } else {
+    //toast(t('select'), 'success');
+    return file;
+  }
+}
+
+async function selectRpeDir() {
+  let file = await selectDir();
+  if (file) {
+    try {
+      await invoke('set_rpe_dir', { path: file, save: false });
+      config.value.rpeDir = file;
+    } catch (e) {
+      toastError(e);
+    }
+  }
+}
+
+async function selectOutputDir() {
+  config.value.outputDir = await selectDir()
+}
+
 </script>
 
 <template>
@@ -52,10 +88,15 @@ async function resetConfig() {
 
       </div>
 
-      <v-row no-gutters class="mt-2">
-        <v-col cols="3">
+      <v-row no-gutters class="mt-3 mx-n2">
+        <v-col cols="6">
           <div>
-            <v-text-field :label="t('rpe-dir')" v-model="config.rpeDir"></v-text-field>
+            <v-text-field clearable class="mx-2" :label="t('rpe-dir')" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir"></v-text-field>
+          </div>
+        </v-col>
+        <v-col cols="6">
+          <div>
+            <v-text-field clearable class="mx-2" :label="t('output-dir')" v-model="config.outputDir" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir"></v-text-field>
           </div>
         </v-col>
       </v-row>
