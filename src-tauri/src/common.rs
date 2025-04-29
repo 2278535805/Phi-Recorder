@@ -19,7 +19,11 @@ pub fn ensure_dir(path: PathBuf) -> PathBuf {
 }
 
 pub fn output_dir() -> Result<PathBuf> {
-    let dir = DATA_DIR.get().unwrap().join("output");
+    let dir = if let Some(set_output_dir) = read_config()?.output_dir {
+        set_output_dir
+    } else {
+        DATA_DIR.get().unwrap().join("output")
+    };
     if dir.exists() {
         if !dir.is_dir() {
             bail!("output directory is not a directory");
