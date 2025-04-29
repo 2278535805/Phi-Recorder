@@ -246,7 +246,7 @@ pub async fn run() -> Result<()> {
 
 #[tauri::command]
 fn is_the_only_instance() -> bool {
-    true// LOCK_FILE.get().is_some()
+    LOCK_FILE.get().is_some()
 }
 
 #[tauri::command]
