@@ -5,6 +5,7 @@ import AboutView from '../AboutView.vue';
 import RenderView from '../RenderView.vue';
 import RPEView from '../RPEView.vue';
 import TasksView from '../TasksView.vue';
+import SettingsView from '../SettingsView.vue';
 
 import { useOnLoaded } from '../App.vue';
 
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: '/', name: 'render', component: RenderView },
     { path: '/rpe', name: 'rpe', component: RPEView },
     { path: '/tasks', name: 'tasks', component: TasksView },
+    { path: '/settings', name: 'settings', component: SettingsView },
     { path: '/about', name: 'about', component: AboutView },
   ],
   scrollBehavior(_to, from, savedPosition) {
