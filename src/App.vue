@@ -3,6 +3,7 @@ en:
   render: Render
   rpe: RPE
   tasks: Tasks
+  settings: Settings
   about: About
 
   ffmpeg-check: FFmpeg Check
@@ -26,6 +27,7 @@ zh-CN:
   render: 渲染
   rpe: RPE
   tasks: 任务列表
+  settings: 设置
   about: 关于
 
   ffmpeg-check: FFmpeg 检查
@@ -105,6 +107,7 @@ const icons = ref({
   render: 'mdi-auto-fix',
   rpe: 'mdi-bookshelf',
   tasks: 'mdi-server',
+  settings: 'mdi-cog',
   about: 'mdi-information-outline',
 });
 
@@ -257,7 +260,7 @@ onMounted(async () => {
     <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item">
       <v-list density="compact" nav>
         <v-list-item
-          v-for="key in ['render', 'rpe', 'tasks', 'about']"
+          v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
@@ -268,7 +271,7 @@ onMounted(async () => {
           ></v-list-item>
 
           <v-list-item
-          v-for="key in ['render', 'rpe', 'tasks', 'about']"
+          v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"

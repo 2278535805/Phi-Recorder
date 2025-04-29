@@ -114,6 +114,10 @@ export interface RenderConfig {
   alphaTint: boolean;
 }
 
+export interface Config {
+  rpeDir: string | null
+}
+
 export interface RPEChart {
   name: string;
   id: string;
