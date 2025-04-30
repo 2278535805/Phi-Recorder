@@ -154,7 +154,7 @@ async function openFile(path: string) {
 
 async function showOutputFolder() {
   try {
-    await invoke('show_output_folder');
+    await invoke('open_output_folder');
   } catch (e) {
     toastError(e);
   }

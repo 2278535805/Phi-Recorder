@@ -55,7 +55,7 @@ async function saveConfig() {
   }
   if (config.value.outputDir) {
     try {
-      await invoke('let_output_dir', { dir: config.value.outputDir });
+      await invoke('test_output_dir', { dir: config.value.outputDir });
     } catch (e) {
       toastError(e);
       loadingSave.value = false;
@@ -109,27 +109,43 @@ async function selectOutputDir() {
   config.value.outputDir = await selectDir()
 }
 
+async function openInFolder(path: string | null, isOutput: boolean = false) {
+  if (!path && !isOutput) {
+    toast(t('no-select'), 'error');
+    return null;
+  } else if (!path && isOutput) {
+    await invoke('open_output_folder', { path });
+    return;
+  }
+  try {
+    await invoke('test_output_dir', { dir: path });
+    await invoke('open_in_folder', { path });
+  } catch (e) {
+    toastError(e);
+  }
+}
+
 </script>
 
 <template>
   <div class="pa-8 w-100 h-90 d-flex flex-column align-center about-container" style="max-width: 1280px; gap: 1rem">
     <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
-      <div no-gutters class="mt-0 d-flex flex-row pt-0">
+      <div no-gutters class="mt-2 mx-2 d-flex flex-row">
         <v-btn @click="resetConfig" v-t="'reset'" size="large"></v-btn>
         <div class="flex-grow-1"></div>
         <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" size="large"></v-btn>
 
       </div>
 
-      <v-row no-gutters class="mt-3 mx-n2">
+      <v-row no-gutters class="mt-3 mx-0">
         <v-col cols="6">
           <div>
-            <v-text-field clearable class="mx-2" :label="t('rpe-dir')" :rules="[RULES.isPath]" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir"></v-text-field>
+            <v-text-field clearable class="mx-2" :label="t('rpe-dir')" :rules="[RULES.isPath]" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir" @contextmenu="openInFolder(config.rpeDir)"></v-text-field>
           </div>
         </v-col>
         <v-col cols="6">
           <div>
-            <v-text-field clearable class="mx-2" :label="t('output-dir')" :rules="[RULES.isPath]" v-model="config.outputDir" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir"></v-text-field>
+            <v-text-field clearable class="mx-2" :label="t('output-dir')" :rules="[RULES.isPath]" v-model="config.outputDir" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir" @contextmenu="openInFolder(config.outputDir, true)"></v-text-field>
           </div>
         </v-col>
       </v-row>

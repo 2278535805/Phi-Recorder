@@ -36,6 +36,7 @@ import semver from 'semver';
 import { onMounted, ref } from 'vue';
 
 import {  } from '@tauri-apps/api';
+import * as os from "@tauri-apps/plugin-os";
 
 const platform = await os.type();
 const isWindows = String(platform) === 'Windows_NT';
@@ -43,7 +44,6 @@ const isMacOS = String(platform) === 'Darwin';
 const isLinux = String(platform) === 'Linux';
 
 import type { Release, Assets } from './model';
-import * as os from "@tauri-apps/plugin-os"
 async function checkForUpdates(dialog = true) {
   checking.value = true;
   try {

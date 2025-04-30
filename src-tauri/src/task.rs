@@ -1,6 +1,6 @@
 use crate::{
     cmd_hidden,
-    common::output_dir,
+    common::{output_dir, read_config},
     render::{IPCEvent, RenderParams},
     ASSET_PATH,
 };
@@ -80,10 +80,26 @@ impl Task {
             .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
             .collect();
         let format = if config.hires { "mov" } else { "mp4" };
-        let output = output_dir()?.join(format!(
-            "{} {safe_name}_{level}.{format}",
-            Local::now().format("%Y-%m-%d %H-%M-%S")
-        ));
+        let file_name = if params.config.simple_file_name {
+            let safe_name2: String = info
+                .composer
+                .chars()
+                .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
+                .collect();
+            format!("{safe_name}.{safe_name2}_{level}.{format}",)
+        } else {
+            format!(
+                "{} {safe_name}_{level}.{format}",
+                Local::now().format("%Y-%m-%d %H-%M-%S")
+            )
+        };
+
+        let output = if let Some(set_output_dir) = read_config()?.output_dir {
+            set_output_dir.join(file_name)
+        } else {
+            output_dir()?.join(file_name)
+        };
+
 
         Ok(Self {
             id,
