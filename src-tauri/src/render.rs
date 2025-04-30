@@ -2,7 +2,7 @@
 prpr::tl_file!("render");
 
 use crate::{
-    common::{let_output_dir, output_dir, read_config},
+    common::{test_output_dir, output_dir, read_config},
     ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
@@ -94,7 +94,7 @@ pub struct RenderConfig {
     combo: String,
     difficulty: String,
     judge_offset: f32,
-    simple_file_name: bool,
+    pub simple_file_name: bool,
 
     render_line: bool,
     render_line_extra: bool,
@@ -368,14 +368,13 @@ pub async fn main(cmd: bool) -> Result<()> {
             .chars()
             .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
             .collect();
-        let safe_name2: String = info
-            .composer
-            .chars()
-            .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
-            .collect();
         let format = if config.hires { "mov" } else { "mp4" };
-
         let file_name = if config.simple_file_name {
+            let safe_name2: String = info
+                .composer
+                .chars()
+                .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
+                .collect();
             format!("{safe_name}.{safe_name2}_{level}.{format}",)
         } else {
             format!(
@@ -383,24 +382,19 @@ pub async fn main(cmd: bool) -> Result<()> {
                 Local::now().format("%Y-%m-%d %H-%M-%S")
             )
         };
-        let output_path = if args_output.is_some() {
-            let output_dir = PathBuf::from(args_output.unwrap());
-            let output_file = if output_dir.is_dir() {
-                let_output_dir(output_dir)?.join(file_name)
-            } else {
-                output_dir
-            };
-            info!("output file: {:?}", output_file);
-            output_file
+
+        let output_path = if let Some(output_string) = args_output {
+            let output_dir = PathBuf::from(output_string);
+            test_output_dir(output_dir.clone())?;
+            output_dir.join(file_name)
         } else {
-            let output_file = if let Some(set_output_dir) = read_config()?.output_dir {
+            if let Some(set_output_dir) = read_config()?.output_dir {
                 set_output_dir.join(file_name)
             } else {
                 output_dir()?.join(file_name)
-            };
-            info!("output file: {:?}", output_file);
-            output_file
+            }
         };
+        info!("output file: {:?}", output_path);
 
         (fs, output_path, config, info)
     } else {
@@ -416,12 +410,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         line.clear();
         stdin.read_line(&mut line)?;
-        let mut output_path: PathBuf = serde_json::from_str(line.trim())?;
-        if let Some(set_output_dir) = read_config()?.output_dir {
-            if let Some(file_name) = output_path.file_name() {
-                output_path = set_output_dir.join(file_name);
-            }
-        }
+        let output_path: PathBuf = serde_json::from_str(line.trim())?;
 
         let fs = fs::fs_from_file(&path)?;
 

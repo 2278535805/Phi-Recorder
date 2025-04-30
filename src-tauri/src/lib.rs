@@ -100,7 +100,7 @@ pub async fn run() -> Result<()> {
     .invoke_handler(tauri::generate_handler![
         is_the_only_instance,
         exit_program,
-        show_output_folder,
+        open_output_folder,
         open_in_folder,
         show_in_folder,
         open_file,
@@ -118,7 +118,7 @@ pub async fn run() -> Result<()> {
         remove_preset,
         read_config,
         save_config,
-        let_output_dir,
+        test_output_dir,
         set_rpe_dir,
         unset_rpe_dir,
         get_rpe_charts,
@@ -272,7 +272,7 @@ fn exit_program(code: i32) {
 }
 
 #[tauri::command]
-fn show_output_folder() -> Result<(), InvokeError> {
+fn open_output_folder() -> Result<(), InvokeError> {
     (|| {
         let path = output_dir().unwrap();
         println!("Opening output folder: {}", path.display());
@@ -609,8 +609,8 @@ async fn save_config(config: Config) -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-async fn let_output_dir(dir: PathBuf) -> Result<PathBuf, InvokeError> {
-    common::let_output_dir(dir)
+async fn test_output_dir(dir: PathBuf) -> Result<(), InvokeError> {
+    common::test_output_dir(dir)
     .map_err(InvokeError::from_anyhow)
 }
 

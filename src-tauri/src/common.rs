@@ -34,7 +34,7 @@ pub fn output_dir() -> Result<PathBuf> {
     Ok(dir)
 }
 
-pub fn let_output_dir(dir: PathBuf) -> Result<PathBuf> {
+pub fn test_output_dir(dir: PathBuf) -> Result<()> {
     //let dir = DATA_DIR.get().unwrap().clone();
     if dir.exists() {
         if !dir.is_dir() {
@@ -43,7 +43,7 @@ pub fn let_output_dir(dir: PathBuf) -> Result<PathBuf> {
     } else {
         std::fs::create_dir(&dir)?;
     }
-    Ok(dir)
+    Ok(())
 }
 
 pub fn respack_dir() -> Result<PathBuf> {
