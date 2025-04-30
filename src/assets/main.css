@@ -1,13 +1,13 @@
 
 @font-face {
-  font-family: 'Ubuntu';
+  font-family: 'custom-font';
   font-display: swap;
   src: url('./HarmonyOS_Sans_SC_Regular.ttf');
 }
 
 @layer base {
   html {
-    font-family: ubuntu, sans-serif, system-ui !important;
+    font-family: custom-font, system-ui !important;
     transition: background-color 0.5s;
   }
 }
