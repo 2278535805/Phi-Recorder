@@ -366,7 +366,7 @@ function tryParseAspect(): number | undefined {
 
 <template>
   <div class="pa-8 w-100 h-100" style="max-width: 1280px">
-    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))" class="elevated-stepper v-stepper">
+    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))" class="elevated-stepper fade-in">
       <div v-if="step === 'config' || step === 'options'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
@@ -489,12 +489,6 @@ function tryParseAspect(): number | undefined {
 .v-text-field :deep(.v-field--focused) {
   border-color: #6366f1 !important;
   box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2);
-}
-
-.v-stepper {
-  font-family: 'Inter var', system-ui, sans-serif;
-  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
-  opacity: 0; /* 初始状态透明 */
 }
 
 h2 {

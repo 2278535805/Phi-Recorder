@@ -150,7 +150,7 @@ onMounted(() => {
 
 <template>
   <div class="pa-8 w-100 h-100 d-flex flex-column align-center" style="max-width: 1280px; gap: 1rem">
-    <div class="about-container">
+    <div class="about-container container fade-in">
       <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
@@ -213,21 +213,17 @@ onMounted(() => {
 </template>
 
 <style scoped>
-  .about-container {
-    padding: 2rem;
-    min-width: none;
-    min-height: 300px;
-    max-width: 1280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
-    opacity: 0; /* 初始状态透明 */
-  }
+.about-container {
+  margin: 0px;
+  padding: 2rem;
+  min-width: none;
+  min-height: 300px;
+  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
 
 @media (max-width: 720px) {
   .about-container {

@@ -128,7 +128,7 @@ async function openInFolder(path: string | null, isOutput: boolean = false) {
 </script>
 
 <template>
-  <div class="pa-8 w-100 h-90 d-flex flex-column align-center about-container" style="max-width: 1280px; gap: 1rem">
+  <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem">
     <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
       <div no-gutters class="mt-2 mx-2 d-flex flex-row">
         <v-btn @click="resetConfig" v-t="'reset'" size="large"></v-btn>
@@ -155,10 +155,4 @@ async function openInFolder(path: string | null, isOutput: boolean = false) {
 </template>
 
 <style scoped>
-.about-container {
-  margin: 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 </style>

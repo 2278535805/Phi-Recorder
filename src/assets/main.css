@@ -12,6 +12,13 @@
   }
 }
 
+.container {
+  margin: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .text-glow {
   text-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
 }
@@ -84,7 +91,7 @@
   transform: translateX(-20px);
 }
 
-  .v-stepper__content-enter-from {
+.v-stepper__content-enter-from {
   opacity: 0;
   transform: translateX(20px);
 }
@@ -102,7 +109,7 @@
 }
 
 .fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 0.75) forwards;
+  animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   opacity: 0; /* 初始状态透明 */
 }
 
