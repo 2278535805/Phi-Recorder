@@ -5,8 +5,9 @@ en:
   reset: Reset
   select: Selected
   no-select: No selection
+
   rpe-dir: RPE Directory
-  output-dir: Output Directory
+  output-dir: Custom Output Directory
 
 zh-CN:
   save: 保存
@@ -14,8 +15,9 @@ zh-CN:
   reset: 重置
   select: 已选择
   no-select: 没有选择
+
   rpe-dir: RPE 目录
-  output-dir: 输出目录
+  output-dir: 自定义输出目录
 
 </i18n>
 
