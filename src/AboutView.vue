@@ -38,10 +38,10 @@ import { onMounted, ref } from 'vue';
 import {  } from '@tauri-apps/api';
 import * as os from "@tauri-apps/plugin-os";
 
-const platform = await os.type();
-const isWindows = String(platform) === 'Windows_NT';
-const isMacOS = String(platform) === 'Darwin';
-const isLinux = String(platform) === 'Linux';
+const platform = os.family();
+const isWindows = String(platform) === 'windows';
+const isMacOS = String(platform) === 'macos';
+const isLinux = String(platform) === 'linux';
 
 import type { Release, Assets } from './model';
 async function checkForUpdates(dialog = true) {
