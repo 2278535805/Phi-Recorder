@@ -37,13 +37,23 @@ import { onMounted, ref } from 'vue';
 
 import {  } from '@tauri-apps/api';
 import * as os from "@tauri-apps/plugin-os";
+import { download } from '@tauri-apps/plugin-upload';
+import { tempDir } from '@tauri-apps/api/path';
 
-const platform = await os.type();
-const isWindows = String(platform) === 'Windows_NT';
-const isMacOS = String(platform) === 'Darwin';
-const isLinux = String(platform) === 'Linux';
+const platform = os.family();
+const isWindows = String(platform) === 'windows';
+const isMacOS = String(platform) === 'macos';
+const isLinux = String(platform) === 'linux';
 
 import type { Release, Assets } from './model';
+import { toastError } from './common';
+
+const release = ref<Release>({
+  id: 0,
+  assets: [],
+  tag_name: '',
+});
+
 async function checkForUpdates(dialog = true) {
   checking.value = true;
   try {
@@ -55,17 +65,19 @@ async function checkForUpdates(dialog = true) {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = await response.json() as Release;
-    console.log(release);
+    const getRelease = await response.json() as Release;
+    console.log(getRelease);
     
-    if (!release) {
+    if (!getRelease) {
       throw new Error('No tags found');
     }
-    const latestVersion = release.tag_name;
-    //const latestVersion = '0.4.0';
+    const latestVersion = getRelease.tag_name;
+    // const latestVersion = '0.4.0';
     console.log(latestVersion);
     updates.value = semver.gt(latestVersion, appVersion);
+    updates.value = true; // ---------------------------------- Test
     if (updates.value) {
+      release.value = getRelease;
       dialog_update.value = true;
     } else if (dialog) {
       dialog_non.value = true;
@@ -82,52 +94,46 @@ const clamp = (num: number, lower: number, upper: number) => {
   return Math.min(Math.max(num, lower), upper);
 };
 
-async function download(url: string) {
-  await open(url);
-  //dialog_download.value = false;
-  return;
-}
-
 async function getNewVersion() {
   //dialog_download.value = true;
   
   try {
-    const response = await fetch('https://api.github.com/repos/2278535805/Phi-Recorder/releases/latest', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'Phi-Recorder',
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    });
-    const release = await response.json() as Release;
-    if (!release) {
+    const getRelease = release.value as Release;
+    if (!getRelease) {
       throw new Error('No tags found');
     }
 
-    const assets = release.assets as Assets[];
+    const assets = getRelease.assets as Assets[];
+    
     if (assets.length === 0) {
       throw new Error('No assets found');
     }
+
     const asset = assets.find((asset) => {
       if (isWindows) {
-        return asset.name.endsWith('.msi');
+        return asset.name.endsWith('msi');
       } else if (isMacOS) {
-        return asset.name.endsWith('.dmg');
+        return asset.name.endsWith('dmg');
       } else if (isLinux) {
-        return asset.name.endsWith('.AppImage');
+        return asset.name.endsWith('AppImage');
       }
-      return false;
+      return null;
     })
     //const subName = isWindows ? '.exe' : (isMacOS ? '.dmg' : '.AppImage');
 
     const link = (asset as Assets).browser_download_url;
     console.log(link);
-    await download(link);
-    
+    const filePath = `${await tempDir()}phi-recorder_${getRelease.tag_name}.exe`;
+    console.log(filePath);
+
+    checking.value = true;
+    await download(link, filePath);
+    await open(filePath);    
   } catch (error) {
-    console.error('Error fetching tags:', error);
+    toastError(`Error: ${error}`);
     await open("https://github.com/2278535805/Phi-Recorder/releases/latest");
+  } finally {
+    checking.value = false;
   }
 }
 

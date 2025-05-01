@@ -91,6 +91,7 @@ pub async fn run() -> Result<()> {
     let _guard = rt.enter();
 
     let app = tauri::Builder::default()
+    .plugin(tauri_plugin_upload::init())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_http::init())

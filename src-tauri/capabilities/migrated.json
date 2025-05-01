@@ -46,6 +46,9 @@
     "http:default",
     "shell:default",
     "fs:default",
-    "os:default"
+    "os:default",
+    "upload:default",
+    "upload:default",
+    "upload:default"
   ]
 }

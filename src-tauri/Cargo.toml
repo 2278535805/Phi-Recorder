@@ -1,6 +1,6 @@
 [package]
 name = "phi-recorder"
-version = "1.0.0"
+version = "0.2.0"
 description = "Phi Recorder"
 authors = ["HLMC", "Mivik"]
 license = ""
@@ -43,6 +43,7 @@ tauri-plugin-os = "2"
 regex = "1.9.6"
 tauri-plugin-cli = "2.0.0-alpha.2"
 tauri-plugin-dialog = "2"
+tauri-plugin-upload = "2"
 # sysinfo = "0.29.0"
 
 [features]
