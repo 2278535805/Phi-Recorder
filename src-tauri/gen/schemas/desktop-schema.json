@@ -6241,6 +6241,36 @@
           "type": "string",
           "const": "shell:deny-stdin-write",
           "markdownDescription": "Denies the stdin_write command without any pre-configured scope."
+        },
+        {
+          "description": "This permission set configures what kind of\noperations are available from the upload plugin.\n\n#### Granted Permissions\n\nAll operations are enabled by default.\n\n\n#### This default permission set includes:\n\n- `allow-upload`\n- `allow-download`",
+          "type": "string",
+          "const": "upload:default",
+          "markdownDescription": "This permission set configures what kind of\noperations are available from the upload plugin.\n\n#### Granted Permissions\n\nAll operations are enabled by default.\n\n\n#### This default permission set includes:\n\n- `allow-upload`\n- `allow-download`"
+        },
+        {
+          "description": "Enables the download command without any pre-configured scope.",
+          "type": "string",
+          "const": "upload:allow-download",
+          "markdownDescription": "Enables the download command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the upload command without any pre-configured scope.",
+          "type": "string",
+          "const": "upload:allow-upload",
+          "markdownDescription": "Enables the upload command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the download command without any pre-configured scope.",
+          "type": "string",
+          "const": "upload:deny-download",
+          "markdownDescription": "Denies the download command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the upload command without any pre-configured scope.",
+          "type": "string",
+          "const": "upload:deny-upload",
+          "markdownDescription": "Denies the upload command without any pre-configured scope."
         }
       ]
     },
