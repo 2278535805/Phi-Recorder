@@ -86,6 +86,8 @@ pub async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()>
 pub struct Config {
     pub rpe_dir: Option<PathBuf>,
     pub output_dir: Option<PathBuf>,
+    pub encoder_avc: Option<String>,
+    pub encoder_hevc: Option<String>,
 }
 
 impl Default for Config {
@@ -93,6 +95,8 @@ impl Default for Config {
         Self {
             rpe_dir: None,
             output_dir: None,
+            encoder_avc: None,
+            encoder_hevc: None,
         }
     }
 }

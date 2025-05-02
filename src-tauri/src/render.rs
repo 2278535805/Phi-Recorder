@@ -2,7 +2,7 @@
 prpr::tl_file!("render");
 
 use crate::{
-    common::{test_output_dir, output_dir, read_config},
+    common::{output_dir, read_config, test_output_dir},
     ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
@@ -50,69 +50,69 @@ where
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
-    resolution: (u32, u32),
-    ffmpeg_preset: String,
-    ending_length: f64,
-    disable_loading: bool,
-    hires: bool,
+    pub resolution: (u32, u32),
+    pub ffmpeg_preset: String,
+    pub ending_length: f64,
+    pub disable_loading: bool,
+    pub hires: bool,
     #[serde(deserialize_with = "deserialize_f32_or_default")] // Compatible with old version
-    chart_debug: f32,
-    chart_ratio: f32,
-    all_good: bool,
-    all_bad: bool,
-    fps: u32,
-    hardware_accel: bool,
-    hevc: bool,
-    mpeg4: bool,
-    custom_encoder: Option<String>,
-    dynamic_bitrate_control: bool,
-    bitrate: String,
+    pub chart_debug: f32,
+    pub chart_ratio: f32,
+    pub all_good: bool,
+    pub all_bad: bool,
+    pub fps: u32,
+    pub hardware_accel: bool,
+    pub hevc: bool,
+    pub mpeg4: bool,
+    pub custom_encoder: Option<String>,
+    pub dynamic_bitrate_control: bool,
+    pub bitrate: String,
 
-    aggressive: bool,
-    challenge_color: ChallengeModeColor,
-    challenge_rank: u32,
-    disable_effect: bool,
-    double_hint: bool,
-    fxaa: bool,
-    note_scale: f32,
-    //offset: f32,
-    particle: bool,
-    player_avatar: Option<String>,
-    player_name: String,
-    player_rks: f32,
-    sample_count: u32,
-    res_pack_path: Option<String>,
-    speed: f32,
-    volume_music: f32,
-    volume_sfx: f32,
-    compression_ratio: f32,
-    force_limit: bool,
-    limit_threshold: f32,
-    watermark: String,
-    roman: bool,
-    chinese: bool,
-    combo: String,
-    difficulty: String,
-    judge_offset: f32,
+    pub aggressive: bool,
+    pub challenge_color: ChallengeModeColor,
+    pub challenge_rank: u32,
+    pub disable_effect: bool,
+    pub double_hint: bool,
+    pub fxaa: bool,
+    pub note_scale: f32,
+    //pub offset: f32,
+    pub particle: bool,
+    pub player_avatar: Option<String>,
+    pub player_name: String,
+    pub player_rks: f32,
+    pub sample_count: u32,
+    pub res_pack_path: Option<String>,
+    pub speed: f32,
+    pub volume_music: f32,
+    pub volume_sfx: f32,
+    pub compression_ratio: f32,
+    pub force_limit: bool,
+    pub limit_threshold: f32,
+    pub watermark: String,
+    pub roman: bool,
+    pub chinese: bool,
+    pub combo: String,
+    pub difficulty: String,
+    pub judge_offset: f32,
     pub simple_file_name: bool,
 
-    render_line: bool,
-    render_line_extra: bool,
-    render_note: bool,
-    render_ui_pause: bool,
-    render_ui_name: bool,
-    render_ui_level: bool,
-    render_ui_score: bool,
-    render_ui_combo: bool,
-    render_ui_bar: bool,
-    render_bg: bool,
-    render_bg_dim: bool,
-    bg_blurriness: f32,
+    pub render_line: bool,
+    pub render_line_extra: bool,
+    pub render_note: bool,
+    pub render_ui_pause: bool,
+    pub render_ui_name: bool,
+    pub render_ui_level: bool,
+    pub render_ui_score: bool,
+    pub render_ui_combo: bool,
+    pub render_ui_bar: bool,
+    pub render_bg: bool,
+    pub render_bg_dim: bool,
+    pub bg_blurriness: f32,
 
-    max_particles: usize,
+    pub max_particles: usize,
 
-    fade: f32,
-    alpha_tint: bool,
+    pub fade: f32,
+    pub alpha_tint: bool,
 }
 
 impl RenderConfig {
@@ -306,6 +306,107 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
     })
 }
 
+pub const ENCODER_LIST_HEVC: [&str; 4] = ["hevc_nvenc", "hevc_qsv", "hevc_amf", "hevc_vaapi"];
+pub const ENCODER_LIST_AVC: [&str; 4] = ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"];
+
+pub fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoder_list: [&str; 4], use_global_config: bool) -> Option<String> {
+    if let Some(custom_encoder) = &config.custom_encoder {
+        return Some(custom_encoder.to_string());
+    };
+
+    if config.mpeg4 {
+        return Some("mpeg4".to_string());
+    };
+
+    if !config.hardware_accel {
+        if config.hevc {
+            return Some("libx265".to_string());
+        } else {
+            return Some("libx264".to_string());
+        }
+    }
+
+    if use_global_config {
+        let global_config = read_config().unwrap_or_default();
+        if let Some(encoder_avc) = global_config.encoder_avc {
+            if !config.hevc && !config.mpeg4 {
+                return Some(encoder_avc);
+            }
+        }
+        if let Some(encoder_hevc) = global_config.encoder_hevc {
+            if config.hevc && !config.mpeg4 {
+                return Some(encoder_hevc);
+            }
+        }
+    }
+
+    let test_encoder = |encoder: &str| -> bool {
+        info!("Testing encoder: {}", encoder);
+        let output = Command::new(&ffmpeg)
+            .args([
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=1920x1080:rate=5:duration=1",
+                "-pix_fmt",
+                "yuv420p",
+                "-c:v",
+                encoder,
+                "-f",
+                "null",
+                "-",
+            ])
+            .arg("-loglevel")
+            .arg("error")
+            .arg("-hide_banner")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .output()
+            .with_context(|| tl!("run-ffmpeg-failed"))
+            .expect("failed test encoder");
+
+        output.status.success()
+    };
+
+    for encoder in encoder_list {
+        if test_encoder(encoder) {
+            return Some(encoder.to_string());
+        } else {
+            warn!("Encoder {} not supported", encoder);
+        }
+    }
+
+    None
+}
+
+pub fn test_encoder(ffmpeg: String, encoder: String) -> bool {
+    info!("Testing encoder: {}", encoder);
+    let output = Command::new(&ffmpeg)
+        .args([
+            "-f",
+            "lavfi",
+            "-i",
+            "testsrc=size=1920x1080:rate=5:duration=1",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:v",
+            encoder.as_str(),
+            "-f",
+            "null",
+            "-",
+        ])
+        .arg("-loglevel")
+        .arg("info")
+        // .arg("-hide_banner")
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .output()
+        .with_context(|| tl!("run-ffmpeg-failed"))
+        .expect("failed test encoder");
+    output.status.success()
+}
+
+
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
@@ -462,68 +563,12 @@ pub async fn main(cmd: bool) -> Result<()> {
     let video_length = chart_length + fade_out_time + config.ending_length;
 
     let encoder_list = if config.hevc {
-        ["hevc_nvenc", "hevc_qsv", "hevc_amf", "hevc_vaapi"]
+        ENCODER_LIST_HEVC
     } else {
-        ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"]
+        ENCODER_LIST_AVC
     };
 
-    fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoders: [&str; 4]) -> Option<String> {
-        if let Some(custom_encoder) = &config.custom_encoder {
-            return Some(custom_encoder.to_string());
-        };
-
-        if config.mpeg4 {
-            return Some("mpeg4".to_string());
-        };
-
-        if !config.hardware_accel {
-            if config.hevc {
-                return Some("libx265".to_string());
-            } else {
-                return Some("libx264".to_string());
-            }
-        }
-
-        let test_encoder = |encoder: &str| -> bool {
-            info!("Testing encoder: {}", encoder);
-            let output = Command::new(&ffmpeg)
-                .args(&[
-                    "-f",
-                    "lavfi",
-                    "-i",
-                    "testsrc=size=1920x1080:rate=5:duration=1",
-                    "-pix_fmt",
-                    "yuv420p",
-                    "-c:v",
-                    encoder,
-                    "-f",
-                    "null",
-                    "-",
-                ])
-                .arg("-loglevel")
-                .arg("error")
-                .arg("-hide_banner")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .output()
-                .with_context(|| tl!("run-ffmpeg-failed"))
-                .expect("failed test encoder");
-
-            output.status.success()
-        };
-
-        for encoder in encoders {
-            if test_encoder(encoder) {
-                return Some(encoder.to_string());
-            } else {
-                warn!("Encoder {} not supported", encoder);
-            }
-        }
-
-        None
-    }
-
-    let ffmpeg_encoder = if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoder_list) {
+    let ffmpeg_encoder = if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoder_list, true) {
         ffmpeg_encoder
     } else {
         bail!(tl!("no-hwacc"))

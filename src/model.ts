@@ -117,6 +117,8 @@ export interface RenderConfig {
 export interface Config {
   rpeDir: string | null;
   outputDir: string | null;
+  encoderAvc: string | null;
+  encoderHevc: string | null;
 }
 
 export interface RPEChart {

@@ -17,7 +17,7 @@ use prpr::{
     fs::{self, FileSystem},
     info::ChartInfo,
 };
-use render::{find_ffmpeg, RenderConfig, RenderParams};
+use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
 use serde::Serialize;
 use std::{
     collections::HashMap,
@@ -125,6 +125,8 @@ pub async fn run() -> Result<()> {
         open_app_folder,
         test_ffmpeg,
         test_ffmpeg_filter,
+        get_encoder,
+        test_encoder,
     ])
     .on_window_event(|_, event| match event {
         //WindowEvent::CloseRequested { api, .. } => {
@@ -818,4 +820,35 @@ async fn test_ffmpeg_filter() -> bool {
         }
     }
     return true;
+}
+
+#[tauri::command]
+async fn get_encoder(hevc: bool) -> Result<Option<String>, InvokeError> {
+    (|| {
+        let Some(ffmpeg) = find_ffmpeg()? else {
+            bail!("FFmpeg not found")
+        };
+        let config = RenderConfig {
+            hevc,
+            ..RenderConfig::default()
+        };
+        let encoder_list = if config.hevc {
+            ENCODER_LIST_HEVC
+        } else {
+            ENCODER_LIST_AVC
+        };
+        Ok(render::get_encoder(&ffmpeg, &config, encoder_list, false))
+    })()
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+async fn test_encoder(encoder: String) -> Result<bool, InvokeError> {
+    (|| {
+        let Some(ffmpeg) = find_ffmpeg()? else {
+            bail!("FFmpeg not found")
+        };
+        Ok(render::test_encoder(ffmpeg, encoder))
+    })()
+    .map_err(InvokeError::from_anyhow)
 }
