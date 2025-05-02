@@ -254,17 +254,136 @@ import TipSwitch from './TipSwitch.vue';
 import TipTextField from './TipTextField.vue';
 
 const props = defineProps<{ initAspectRatio?: number }>();
+const form = ref<VForm>();
+const page = ref(0);
 
-const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080'];
+const DEFAULT_CONFIG: RenderConfig = {
+  resolution: [1920, 1080],
+  ffmpegPreset: 'medium p4 balanced',
+  endingLength: 0.0,
+  disableLoading: true,
+  hires: false,
+  chartDebug: 0.,
+  chartRatio: 1,
+  allGood: false,
+  allBad: false,
+  fps: 60,
+  hardwareAccel: true,
+  hevc: false,
+  mpeg4: false,
+  customEncoder: null,
+  dynamicBitrateControl: true,
+  bitrate: '28',
+
+  aggressive: false,
+  challengeColor: 'rainbow',
+  challengeRank: 3,
+  disableEffect: false,
+  doubleHint: true,
+  fxaa: false,
+  noteScale: 1,
+  particle: true,
+  playerAvatar: null,
+  playerName: '',
+  playerRks: 16.00,
+  sampleCount: 8,
+  resPackPath: null,
+  speed: 1,
+  volumeMusic: 1.0,
+  volumeSfx: 0.7,
+  compressionRatio: 20.0,
+  forceLimit: true,
+  limitThreshold: 1.0,
+  watermark: '',
+  roman: false,
+  chinese: false,
+  combo: 'AUTOPLAY',
+  difficulty: '',
+  judgeOffset: 0,
+  simpleFileName: false,
+  renderLine: true,
+  renderLineExtra: true,
+  renderNote: true,
+  renderUiPause: true,
+  renderUiName: true,
+  renderUiLevel: true,
+  renderUiScore: true,
+  renderUiCombo: true,
+  renderUiBar: true,
+  renderBg: true,
+  renderBgDim: true,
+  bgBlurriness: 80,
+
+  maxParticles: 100000,
+  fade: 0.0,
+  alphaTint: false,
+};
+
+const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080']
 const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
   ffmpegPresetPresetList = ['veryfast p1 veryfast speed', 'faster p2 faster speed','fast p3 fast speed', 'medium p4 medium balanced', 'slow p5 slow quality', 'slower p6 slower quality', 'veryslow p7 veryslow quality'],
   ffmpegPresetText = ref(ffmpegPresetPresetTextList[3]),
-  ffmpegPreset = ref(ffmpegPresetPresetList[3]);
-const dynamicBitrateControl = ref(true),
-  bitrate = ref('28');
-const bitrateList = ['5M', '7M', '2M'];
-const bitrateCrfList = ['28', '24', '40'];
-const fpsList = ['60', '120', '30'];
+  ffmpegPreset = ref(ffmpegPresetPresetList[3])
+
+const
+  endingLength = ref(String(DEFAULT_CONFIG.endingLength)),
+  chartDebug = ref(DEFAULT_CONFIG.chartDebug),
+  chartRatio = ref(DEFAULT_CONFIG.chartRatio),
+  allGood = ref(DEFAULT_CONFIG.allGood),
+  allBad = ref(DEFAULT_CONFIG.allBad),
+  fpsList = ['60', '120', '30'],
+  fps = ref(String(DEFAULT_CONFIG.fps)),
+  hwAccel = ref(DEFAULT_CONFIG.hardwareAccel),
+  dynamicBitrateControl = ref(true),
+  bitrate = ref('28'),
+  bitrateList = ['5M', '7M', '2M'],
+  bitrateCrfList = ['28', '24', '40'],
+  resolution = ref(String(DEFAULT_CONFIG.resolution))
+const encoderList = ref(t('encoder-list').split(','))
+const encoder = ref(t('encoder-list').split(',')[0])
+
+const challengeColor = ref(t('challenge-colors').split(',')[5]),
+  challengeRank = ref(String(DEFAULT_CONFIG.challengeRank)),
+  fxaa = ref(DEFAULT_CONFIG.fxaa),
+  noteScale = ref(DEFAULT_CONFIG.noteScale),
+  playerAvatar = ref<string>(),
+  playerName = ref(DEFAULT_CONFIG.playerName),
+  playerRks = ref(String(DEFAULT_CONFIG.playerRks)),
+  sampleCount = ref(String(DEFAULT_CONFIG.sampleCount))
+
+const volumeMusic = ref(DEFAULT_CONFIG.volumeMusic),
+  volumeSfx = ref(DEFAULT_CONFIG.volumeSfx),
+  compressionRatio = ref(DEFAULT_CONFIG.compressionRatio),
+  limitThreshold = ref(DEFAULT_CONFIG.limitThreshold)
+
+
+const renderList = ref(t('render-list').split(','))
+const render = ref<string[]>([])
+render.value.push(...renderList.value.slice(1, 15))
+
+const expandList = ref(t('expand-list').split(','))
+const expand = ref<string[]>([])
+
+const audioList = ref(t('audio-list').split(','))
+const audio = ref([audioList.value[0]])
+
+const
+  combo = ref(DEFAULT_CONFIG.combo),
+  difficulty = ref(DEFAULT_CONFIG.difficulty),
+  judgeOffset = ref(String(DEFAULT_CONFIG.judgeOffset)),
+  simpleFileName = ref(DEFAULT_CONFIG.simpleFileName),
+  bgBlurriness = ref(String(DEFAULT_CONFIG.bgBlurriness)),
+  watermark = ref(DEFAULT_CONFIG.watermark)
+
+const maxParticlesText = ref(t('max-particles-list').split(',')[1])
+const maxParticles = ref(DEFAULT_CONFIG.maxParticles)
+const maxParticlesTextList = t('max-particles-list').split(',')
+const maxParticlesList = [20000, 100000, 800000];
+
+const judgeMode = ref(t('judge-modes').split(',')[0])
+const fade = ref(String(DEFAULT_CONFIG.fade))
+const alphaTint = ref(DEFAULT_CONFIG.alphaTint)
+
 
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);
@@ -280,25 +399,6 @@ function parseResolution(resolution: string): [number, number] | null {
 const resolutionRule = (value: string) => parseResolution(value) !== null || t('rules.resolution');
 const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number(value)) % 1 === 0) || t('rules.sample-count');
 
-const form = ref<VForm>();
-
-const page = ref(0);
-
-const resolution = ref('1920x1080'),
-  fps = ref('60'),
-  hwAccel = ref(true);
-const encoderList = ref(t('encoder-list').split(','));
-const encoder = ref(t('encoder-list').split(',')[0]);
-
-const fxaa = ref(false),
-  sampleCount = ref('8');
-
-const playerAvatar = ref<string>(),
-  playerName = ref(''),
-  playerRks = ref('16.0');
-
-const watermark = ref('');
-
 async function chooseAvatar() {
   let file = await open({
     filters: [
@@ -313,19 +413,6 @@ async function chooseAvatar() {
     playerAvatar.value = file as string;
   }
 }
-
-const challengeColor = ref(t('challenge-colors').split(',')[5]),
-  challengeRank = ref('3');
-
-const renderList = ref(t('render-list').split(','));
-const render = ref<string[]>([]);
-render.value.push(...renderList.value.slice(1, 15));
-
-const expandList = ref(t('expand-list').split(','));
-const expand = ref<string[]>([]);
-
-const audioList = ref(t('audio-list').split(','));
-const audio = ref([audioList.value[0]]);
 
 interface Respack {
   name: string;
@@ -351,39 +438,6 @@ async function updateRespacks() {
   respack.value = respacks.value.find((x) => x.name === respack.value.name) || respacks.value[0];
 }
 updateRespacks();
-
-const noteScale = ref(1);
-
-
-const volumeMusic = ref(1.0),
-  volumeSfx = ref(0.7),
-  compressionRatio = ref(20.0),
-  limitThreshold = ref(1.0);
-
-const endingLength = ref('0.0');
-
-
-const chartDebug = ref(0.0)
-const chartRatio = ref(1.0)
-
-const judgeMode = ref(t('judge-modes').split(',')[0])
-const allGood = ref(false)
-const allBad = ref(false)
-
-
-const combo = ref('AUTOPLAY')
-const difficulty = ref('')
-const judgeOffset = ref('0')
-const simpleFileName = ref(false)
-const bgBlurriness = ref('80')
-
-const maxParticlesText = ref(t('max-particles-list').split(',')[1]);
-const maxParticles = ref(100000);
-const maxParticlesTextList = t('max-particles-list').split(',');
-const maxParticlesList = [20000, 100000, 800000];
-
-const fade = ref('0.0');
-const alphaTint = ref(false);
 
 function updateBitrate() {
   if (dynamicBitrateControl.value) {
@@ -612,67 +666,6 @@ function applyConfig(config: RenderConfig) {
   alphaTint.value = config.alphaTint;
 }
 
-const DEFAULT_CONFIG: RenderConfig = {
-  resolution: [1920, 1080],
-  ffmpegPreset: 'medium p4 balanced',
-  endingLength: 0.0,
-  disableLoading: true,
-  hires: false,
-  chartDebug: 0.,
-  chartRatio: 1,
-  allGood: false,
-  allBad: false,
-  fps: 60,
-  hardwareAccel: true,
-  hevc: false,
-  mpeg4: false,
-  customEncoder: null,
-  dynamicBitrateControl: true,
-  bitrate: '28',
-
-  aggressive: false,
-  challengeColor: 'rainbow',
-  challengeRank: 3,
-  disableEffect: false,
-  doubleHint: true,
-  fxaa: false,
-  noteScale: 1,
-  particle: true,
-  playerAvatar: null,
-  playerName: '',
-  playerRks: 16.00,
-  sampleCount: 8,
-  resPackPath: null,
-  speed: 1,
-  volumeMusic: 1.0,
-  volumeSfx: 0.7,
-  compressionRatio: 20.0,
-  forceLimit: true,
-  limitThreshold: 1.0,
-  watermark: '',
-  roman: false,
-  chinese: false,
-  combo: 'AUTOPLAY',
-  difficulty: '',
-  judgeOffset: 0,
-  simpleFileName: false,
-  renderLine: true,
-  renderLineExtra: true,
-  renderNote: true,
-  renderUiPause: true,
-  renderUiName: true,
-  renderUiLevel: true,
-  renderUiScore: true,
-  renderUiCombo: true,
-  renderUiBar: true,
-  renderBg: true,
-  renderBgDim: true,
-  bgBlurriness: 80,
-
-  maxParticles: 100000,
-  fade: 0.0,
-  alphaTint: false,
-};
 interface Preset {
   name: string;
   key: string;
