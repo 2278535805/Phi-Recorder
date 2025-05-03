@@ -6,6 +6,8 @@ en:
   unbind: Unbind RPE
   unbinded: Unbinded successfully
   rpe-folder: Please select RPE's folder
+  export: Export
+  output-folder: Please select output folder
   show-folder: Open Folder
 
   render: Render
@@ -17,6 +19,8 @@ zh-CN:
   unbind: 解绑 RPE
   unbinded: 解绑成功
   rpe-folder: 请选择 RPE 所在文件夹
+  export: 导出
+  output-folder: 请选择输出文件夹
   show-folder: 打开文件夹
 
   render: 渲染
@@ -31,7 +35,7 @@ const { t } = useI18n();
 
 import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { open } from '@tauri-apps/plugin-dialog';
+import { open, save } from '@tauri-apps/plugin-dialog';
 
 import { toast, toastError } from './common';
 import type { RPEChart } from './model';
@@ -66,6 +70,15 @@ async function unbindRPE() {
 async function openInFolder(path: string) {
   try {
     await invoke('open_in_folder', { path });
+  } catch (e) {
+    toastError(e);
+  }
+}
+
+async function exportPez(chartPath: string){
+  try {
+    const outputPath = await save({ title: t('output-folder'), filters: [{ name: 'RPE Chart File', extensions: ['pez', 'zip'] }] });
+    await invoke('export_pez', { chartPath, outputPath });
   } catch (e) {
     toastError(e);
   }
@@ -114,8 +127,9 @@ async function openInFolder(path: string) {
             <v-card-subtitle class="chart-id">{{ chart.charter }}</v-card-subtitle>
             <div class="w-100 mt-2">
               <div class="pt-4 d-flex justify-end">
-                <v-btn class="open-btn mx-4" @click="openInFolder(chart.path)" v-t="'show-folder'"></v-btn>
-                <v-btn class="render-btn" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
+                <v-btn class="open-btn mx-2" @click="exportPez(chart.path)" v-t="'export'"></v-btn>
+                <v-btn class="open-btn mx-2" @click="openInFolder(chart.path)" v-t="'show-folder'"></v-btn>
+                <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
               </div>
             </div>
           </div>

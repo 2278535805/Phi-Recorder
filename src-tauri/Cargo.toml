@@ -43,6 +43,7 @@ tauri-plugin-os = "2"
 regex = "1.9.6"
 tauri-plugin-cli = "2.0.0-alpha.2"
 tauri-plugin-dialog = "2"
+zip = "0.6.6"
 # sysinfo = "0.29.0"
 
 [features]

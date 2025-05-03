@@ -1,6 +1,13 @@
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf, sync::OnceLock};
+use std::{
+    collections::HashMap,
+    fs::File,
+    io::{BufWriter, Read, Write},
+    path::PathBuf,
+    sync::OnceLock,
+};
+use zip::{write::FileOptions, ZipWriter};
 
 use crate::render::RenderConfig;
 
@@ -142,5 +149,61 @@ pub fn set_rpe_dir(set_dir: Option<PathBuf>) -> Result<()> {
     let mut config = read_config()?;
     config.rpe_dir = set_dir;
     save_config(config)?;
+    Ok(())
+}
+
+pub fn collect_chart_files(
+    directory: PathBuf,
+    parent: PathBuf,
+) -> Result<HashMap<String, PathBuf>> {
+    let mut file_list: HashMap<String, PathBuf> = HashMap::new();
+
+    if directory.is_dir() {
+        for entry in std::fs::read_dir(directory)? {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+
+                if path.is_file() {
+                    let filename = path.file_name().unwrap().to_string_lossy();
+                    let file_path = path
+                        .strip_prefix(&parent)?
+                        .display()
+                        .to_string()
+                        .replace('\\', "/");
+                    if filename.starts_with("AutoSave_")
+                        || filename.starts_with("blur_")
+                        || filename.starts_with("blur1_")
+                        || filename == "createTime.txt"
+                    {
+                        continue;
+                    }
+                    file_list.insert(file_path, path);
+                } else if path.is_dir() {
+                    file_list.extend(collect_chart_files(path, parent.clone())?);
+                }
+            }
+        }
+    }
+
+    Ok(file_list)
+}
+
+pub fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -> Result<()> {
+    let file = File::create(&output_path)?;
+    let mut zip = ZipWriter::new(BufWriter::new(file));
+
+    let options = FileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated)
+        .unix_permissions(0o755);
+
+    for (file_name, file_path) in files {
+        zip.start_file(file_name, options)?;
+        let mut buffer = Vec::new();
+        File::open(&file_path)?.read_to_end(&mut buffer)?;
+        zip.write_all(&buffer)?;
+    }
+
+    zip.finish()?;
+    println!("Create ZIP: {:?}", output_path);
     Ok(())
 }
