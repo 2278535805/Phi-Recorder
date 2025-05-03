@@ -188,7 +188,7 @@ pub fn collect_chart_files(
     Ok(file_list)
 }
 
-pub fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -> Result<()> {
+pub async fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -> Result<()> {
     let file = File::create(&output_path)?;
     let mut zip = ZipWriter::new(BufWriter::new(file));
 
