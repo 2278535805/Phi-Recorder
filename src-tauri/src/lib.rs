@@ -861,8 +861,8 @@ struct Extra {
 }
 
 #[tauri::command]
-fn export_pez(chart_path: String, output_path: String) -> Result<(), InvokeError> {
-    (|| {
+async fn export_pez(chart_path: String, output_path: String) -> Result<(), InvokeError> {
+    wrap_async(async move {
         println!("Exporting PEZ: {} -> {}", chart_path, output_path);
         let chart_path = PathBuf::from(chart_path);
         let output_path = PathBuf::from(output_path);
@@ -892,8 +892,7 @@ fn export_pez(chart_path: String, output_path: String) -> Result<(), InvokeError
         }
         println!("files: {:?}", files);
 
-        create_zip(output_path, files)?;
+        create_zip(output_path, files).await?;
         Ok(())
-    })()
-    .map_err(InvokeError::from_anyhow)
+    }).await
 }

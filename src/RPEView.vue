@@ -75,12 +75,18 @@ async function openInFolder(path: string) {
   }
 }
 
-async function exportPez(chartPath: string){
+const exportPezLoading = ref(false);
+async function exportPez(chartPath: string, chartName: string) {
+  exportPezLoading.value = true;
   try {
-    const outputPath = await save({ title: t('output-folder'), filters: [{ name: 'RPE Chart File', extensions: ['pez', 'zip'] }] });
+    const outputName = chartName.replace(/[\\/:*?"<>|]/g, "_") + '.pez';
+    const outputPath = await save({ title: t('output-folder'), filters: [{ name: 'RPE Chart File', extensions: ['pez', 'zip'] }], defaultPath: outputName });
+    if (!outputPath) return;
     await invoke('export_pez', { chartPath, outputPath });
   } catch (e) {
     toastError(e);
+  } finally {
+    exportPezLoading.value = false;
   }
 }
 </script>
@@ -127,7 +133,7 @@ async function exportPez(chartPath: string){
             <v-card-subtitle class="chart-id">{{ chart.charter }}</v-card-subtitle>
             <div class="w-100 mt-2">
               <div class="pt-4 d-flex justify-end">
-                <v-btn class="open-btn mx-2" @click="exportPez(chart.path)" v-t="'export'"></v-btn>
+                <v-btn class="open-btn mx-2" :loading="exportPezLoading" @click="exportPez(chart.path, chart.name)">{{ t('export') }}</v-btn>
                 <v-btn class="open-btn mx-2" @click="openInFolder(chart.path)" v-t="'show-folder'"></v-btn>
                 <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
               </div>
