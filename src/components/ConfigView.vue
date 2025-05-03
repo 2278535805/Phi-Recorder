@@ -338,7 +338,7 @@ const
   bitrate = ref('28'),
   bitrateList = ['5M', '7M', '2M'],
   bitrateCrfList = ['28', '24', '40'],
-  resolution = ref(String(DEFAULT_CONFIG.resolution))
+  resolution = ref('1920x1080')
 const encoderList = ref(t('encoder-list').split(','))
 const encoder = ref(t('encoder-list').split(',')[0])
 
