@@ -10,7 +10,10 @@ mod render;
 mod task;
 
 use anyhow::{bail, Context, Result};
-use common::{ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, save_presets, Config, CONFIG_DIR, DATA_DIR};
+use common::{
+    ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir,
+    save_presets, Config, CONFIG_DIR, DATA_DIR,
+};
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
 use prpr::{
@@ -31,12 +34,7 @@ use std::{
     time::SystemTime,
 };
 use task::{TaskQueue, TaskView};
-use tauri::{
-    Manager,
-    State,
-    WindowEvent,
-    ipc::InvokeError,
-};
+use tauri::{ipc::InvokeError, Manager, State, WindowEvent};
 use tokio::{io::AsyncWriteExt, process::Command};
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
@@ -91,61 +89,61 @@ pub async fn run() -> Result<()> {
     let _guard = rt.enter();
 
     let app = tauri::Builder::default()
-    .plugin(tauri_plugin_os::init())
-    .plugin(tauri_plugin_fs::init())
-    .plugin(tauri_plugin_http::init())
-    .plugin(tauri_plugin_shell::init())
-    .plugin(tauri_plugin_dialog::init())
-    .manage(TaskQueue::new())
-    .invoke_handler(tauri::generate_handler![
-        is_the_only_instance,
-        exit_program,
-        open_output_folder,
-        open_in_folder,
-        show_in_folder,
-        open_file,
-        preview_chart,
-        preview_tweakoffset,
-        preview_play,
-        parse_chart,
-        post_render,
-        get_tasks,
-        cancel_task,
-        get_respacks,
-        open_respack_folder,
-        get_presets,
-        add_preset,
-        remove_preset,
-        read_config,
-        save_config,
-        test_output_dir,
-        set_rpe_dir,
-        unset_rpe_dir,
-        get_rpe_charts,
-        open_app_folder,
-        test_ffmpeg,
-        test_ffmpeg_filter,
-        get_encoder,
-        test_encoder,
-    ])
-    .on_window_event(|_, event| match event {
-        //WindowEvent::CloseRequested { api, .. } => {
-        WindowEvent::CloseRequested { .. } => {
-            /*event
-            .window()
-            .app_handle()
-            .tray_handle()
-            .get_item("toggle")
-            .set_title(mtl!("tray-show"))
-            .unwrap();*/
-            exit_program(0);
-            //event.window().hide().unwrap();
-            //api.prevent_close();
-        }
-        _ => {}
-    })
-    .build(tauri::generate_context!())
-    .expect("error while running tauri application");
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
+        .manage(TaskQueue::new())
+        .invoke_handler(tauri::generate_handler![
+            is_the_only_instance,
+            exit_program,
+            open_output_folder,
+            open_in_folder,
+            show_in_folder,
+            open_file,
+            preview_chart,
+            preview_tweakoffset,
+            preview_play,
+            parse_chart,
+            post_render,
+            get_tasks,
+            cancel_task,
+            get_respacks,
+            open_respack_folder,
+            get_presets,
+            add_preset,
+            remove_preset,
+            read_config,
+            save_config,
+            test_output_dir,
+            set_rpe_dir,
+            unset_rpe_dir,
+            get_rpe_charts,
+            open_app_folder,
+            test_ffmpeg,
+            test_ffmpeg_filter,
+            get_encoder,
+            test_encoder,
+        ])
+        .on_window_event(|_, event| match event {
+            //WindowEvent::CloseRequested { api, .. } => {
+            WindowEvent::CloseRequested { .. } => {
+                /*event
+                .window()
+                .app_handle()
+                .tray_handle()
+                .get_item("toggle")
+                .set_title(mtl!("tray-show"))
+                .unwrap();*/
+                exit_program(0);
+                //event.window().hide().unwrap();
+                //api.prevent_close();
+            }
+            _ => {}
+        })
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application");
 
     let resolver = app.path();
     let exe = std::env::current_exe()?;
@@ -176,7 +174,6 @@ pub async fn run() -> Result<()> {
     let asset_dir = exe_dir.join("assets");
     ASSET_PATH.set(asset_dir.clone()).unwrap();
     set_pc_assets_folder(&asset_dir.display().to_string());
-
 
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref().unwrap_or_default() {
@@ -600,20 +597,17 @@ async fn remove_preset(name: String) -> Result<(), InvokeError> {
 
 #[tauri::command]
 async fn read_config() -> Result<Config, InvokeError> {
-    common::read_config()
-    .map_err(InvokeError::from_anyhow)
+    common::read_config().map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]
 async fn save_config(config: Config) -> Result<(), InvokeError> {
-    common::save_config(config)
-    .map_err(InvokeError::from_anyhow)
+    common::save_config(config).map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]
 async fn test_output_dir(dir: PathBuf) -> Result<(), InvokeError> {
-    common::test_output_dir(dir)
-    .map_err(InvokeError::from_anyhow)
+    common::test_output_dir(dir).map_err(InvokeError::from_anyhow)
 }
 
 #[derive(Serialize)]

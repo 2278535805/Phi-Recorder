@@ -100,7 +100,6 @@ impl Task {
             output_dir()?.join(file_name)
         };
 
-
         Ok(Self {
             id,
             name: info.name,

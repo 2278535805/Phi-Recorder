@@ -80,7 +80,6 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
         (fs, config, info)
     };
 
-
     let mut prpr_config: Config = config.to_config();
     if matches!(
         std::env::args().nth(1).as_deref(),
