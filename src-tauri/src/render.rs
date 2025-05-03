@@ -3,14 +3,14 @@ prpr::tl_file!("render");
 
 use crate::{
     common::{output_dir, read_config, test_output_dir},
-    ASSET_PATH
+    ASSET_PATH,
 };
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use prpr::{
     config::{ChallengeModeColor, Config, Mods},
-    core::{init_assets, internal_id, ResourcePack, HitSound, MSRenderTarget, Note},
+    core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
     fs,
     info::ChartInfo,
     scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
@@ -309,7 +309,12 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
 pub const ENCODER_LIST_HEVC: [&str; 4] = ["hevc_nvenc", "hevc_qsv", "hevc_amf", "hevc_vaapi"];
 pub const ENCODER_LIST_AVC: [&str; 4] = ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"];
 
-pub fn get_encoder(ffmpeg: &String, config: &RenderConfig, encoder_list: [&str; 4], use_global_config: bool) -> Option<String> {
+pub fn get_encoder(
+    ffmpeg: &String,
+    config: &RenderConfig,
+    encoder_list: [&str; 4],
+    use_global_config: bool,
+) -> Option<String> {
     if let Some(custom_encoder) = &config.custom_encoder {
         return Some(custom_encoder.to_string());
     };
@@ -405,7 +410,6 @@ pub fn test_encoder(ffmpeg: String, encoder: String) -> bool {
         .expect("failed test encoder");
     output.status.success()
 }
-
 
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
@@ -568,11 +572,12 @@ pub async fn main(cmd: bool) -> Result<()> {
         ENCODER_LIST_AVC
     };
 
-    let ffmpeg_encoder = if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoder_list, true) {
-        ffmpeg_encoder
-    } else {
-        bail!(tl!("no-hwacc"))
-    };
+    let ffmpeg_encoder =
+        if let Some(ffmpeg_encoder) = get_encoder(&ffmpeg, &config, encoder_list, true) {
+            ffmpeg_encoder
+        } else {
+            bail!(tl!("no-hwacc"))
+        };
 
     info!("Encoder: {}", ffmpeg_encoder);
 
