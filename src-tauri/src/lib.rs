@@ -11,8 +11,8 @@ mod task;
 
 use anyhow::{bail, Context, Result};
 use common::{
-    ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir,
-    save_presets, Config, CONFIG_DIR, DATA_DIR,
+    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file,
+    get_rpe_dir, output_dir, respack_dir, save_presets, Config, CONFIG_DIR, DATA_DIR,
 };
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
@@ -21,12 +21,12 @@ use prpr::{
     info::ChartInfo,
 };
 use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs::File,
     future::Future,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, BufWriter, Read, Write},
     ops::DerefMut,
     path::{Path, PathBuf},
     process::Stdio,
@@ -36,6 +36,8 @@ use std::{
 use task::{TaskQueue, TaskView};
 use tauri::{ipc::InvokeError, Manager, State, WindowEvent};
 use tokio::{io::AsyncWriteExt, process::Command};
+use zip::write::FileOptions;
+use zip::ZipWriter;
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
 static LOCK_FILE: OnceLock<tokio::fs::File> = OnceLock::new();
@@ -125,6 +127,7 @@ pub async fn run() -> Result<()> {
             test_ffmpeg_filter,
             get_encoder,
             test_encoder,
+            export_pez,
         ])
         .on_window_event(|_, event| match event {
             //WindowEvent::CloseRequested { api, .. } => {
@@ -843,6 +846,54 @@ async fn test_encoder(encoder: String) -> Result<bool, InvokeError> {
             bail!("FFmpeg not found")
         };
         Ok(render::test_encoder(ffmpeg, encoder))
+    })()
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct Effect {
+    shader: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+struct Extra {
+    effects: Vec<Effect>,
+}
+
+#[tauri::command]
+fn export_pez(chart_path: String, output_path: String) -> Result<(), InvokeError> {
+    (|| {
+        println!("Exporting PEZ: {} -> {}", chart_path, output_path);
+        let chart_path = PathBuf::from(chart_path);
+        let output_path = PathBuf::from(output_path);
+
+        let mut files = collect_chart_files(chart_path.clone(), chart_path.clone())?;
+        let res_path = chart_path.parent().unwrap().join("shaders").join("pr");
+
+        let extra_file = chart_path.join("extra.json");
+        if extra_file.exists() {
+            let mut shaders = Vec::new();
+            let extra: Extra = serde_json::from_str(&std::fs::read_to_string(extra_file)?)?;
+            for effect in extra.effects {
+                if let Some(shader) = effect.shader.strip_prefix("/") {
+                    let shader = shader.to_string();
+                    if shader.ends_with("_pr.glsl") && !shaders.contains(&shader) {
+                        shaders.push(shader);
+                    }
+                }
+            }
+            for shader in shaders {
+                let shader_path = chart_path.join(&shader);
+                let rpe_shader_path = res_path.join(&shader);
+                if !shader_path.exists() && rpe_shader_path.exists() {
+                    files.insert(shader, rpe_shader_path);
+                }
+            }
+        }
+        println!("files: {:?}", files);
+
+        create_zip(output_path, files)?;
+        Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
 }
