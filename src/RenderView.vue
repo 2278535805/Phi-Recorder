@@ -439,10 +439,10 @@ function tryParseAspect(): number | undefined {
               </div>
             </v-col>
             <v-col cols="4">
-              <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
+              <v-text-field type="number" class="mx-2" :rules="[RULES.positive10000]" :label="t('line-length')" v-model="lineLength"></v-text-field>
             </v-col>
             <v-col cols="4">
-              <v-text-field type="number" class="mx-2" :rules="[RULES.positive]" :label="t('line-length')" v-model="lineLength"></v-text-field>
+              <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
             </v-col>
           </v-row>
 
