@@ -27,6 +27,8 @@ en:
   level: Level
   aspect: Aspect ratio
   dim: Background dim
+  hold-partial-cover: Hold Partial Cover
+  line-length: Line Length
 
   tip: Tip
   tip-placeholder: Leave empty to choose randomly
@@ -78,6 +80,8 @@ zh-CN:
   level: 难度
   aspect: 宽高比
   dim: 背景亮度
+  hold-partial-cover: Hold 遮罩位置
+  line-length: 判定线长度
 
   tip: Tip
   tip-placeholder: 留空则随机选择
@@ -168,6 +172,7 @@ async function loadChart(file: string) {
     chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
     stepIndex.value++;
     offset_text.value = String(Math.floor(chartInfo.value.offset * 1000));
+    lineLength.value = String(chartInfo.value.lineLength);
     aspectWidth.value = String(chartInfo.value.aspectRatio);
     aspectHeight.value = '1.0';
     for (let asp of [
@@ -192,7 +197,8 @@ async function loadChart(file: string) {
 const aspectWidth = ref('16'),
   aspectHeight = ref('9');
 
-const offset_text = ref('0')
+const offset_text = ref('0'),
+  lineLength = ref('6.0');
 
 const fileHovering = ref(false);
 
@@ -231,6 +237,7 @@ const configView = ref<typeof ConfigView>();
 async function buildParams() {
   let config = await configView.value!.buildConfig();
   chartInfo.value!.offset = parseFloat(offset_text.value) / 1000;
+  chartInfo.value!.lineLength = parseFloat(lineLength.value);
   if (!config) return null;
   if (!chartInfo.value!.tip?.trim().length) chartInfo.value!.tip = null;
   return {
@@ -396,7 +403,7 @@ function tryParseAspect(): number | undefined {
 
       <template v-slot:item.2>
         <v-form ref="form" v-if="chartInfo">
-          <v-row no-gutters class="mx-n2 my-2">
+          <v-row no-gutters class="my-2">
             <v-col cols="6">
               <v-text-field class="mx-2" :label="t('chart-name')" v-model="chartInfo.name"></v-text-field>
             </v-col>
@@ -408,7 +415,7 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1 my-2">
+          <v-row no-gutters class="mt-1 my-2 pt-2">
             <v-col cols="12" sm="4">
               <v-text-field class="mx-2" :label="t('charter')" v-model="chartInfo.charter"></v-text-field>
             </v-col>
@@ -420,10 +427,10 @@ function tryParseAspect(): number | undefined {
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1 my-2 align-center">
+          <p class="text-caption mx-3" v-t="'aspect'"></p>
+          <v-row no-gutters class="mt-1 my-2 align-center">
             <v-col cols="4">
               <div class="mx-2 d-flex flex-column">
-                <p class="text-caption" v-t="'aspect'"></p>
                 <div class="d-flex flex-row align-center justify-center">
                   <v-text-field type="number" class="mr-2" :rules="[RULES.positive]" :label="t('width')" v-model="aspectWidth"></v-text-field>
                   <p>:</p>
@@ -431,15 +438,24 @@ function tryParseAspect(): number | undefined {
                 </div>
               </div>
             </v-col>
-            <v-col cols="8" class="px-6">
-              <v-slider :label="t('dim')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
+            <v-col cols="4">
+              <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
+            </v-col>
+            <v-col cols="4">
+              <v-text-field type="number" class="mx-2" :rules="[RULES.positive]" :label="t('width')" v-model="lineLength"></v-text-field>
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="mx-n2 mt-1 my-2">
-            <v-col cols="12">
-              <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
+          <v-row no-gutters class="mt-1 my-2 align-center">
+            <v-col cols="8" class="px-6 py-6">
+              <v-slider :label="t('dim')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
+            <v-col cols="4">
+              <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('hold-partial-cover')"></v-switch>
+            </v-col>
+          </v-row>
+
+          <v-row no-gutters class="mt-1 my-2">
           </v-row>
         </v-form>
       </template>
