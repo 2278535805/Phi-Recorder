@@ -133,9 +133,9 @@ window.goto = (name: string) => {
 
 
 // FFmpeg
-const platform = os.type();
-const isWindows = String(platform) === 'Windows_NT';
-const isLinux = String(platform) === 'Linux';
+const platform = os.family();
+const isWindows = String(platform) === 'windows';
+const isLinux = String(platform) === 'linux';
 const ffmpegGetNewVersionLoding = ref(false);
 const ffmpegDialog = ref(false);
 const ffmpegDialogFilter = ref(false);
