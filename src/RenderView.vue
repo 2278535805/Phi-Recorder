@@ -15,6 +15,7 @@ en:
     folder: Folder
     can-also-drop: You can also drag & drop the file to here
     drop: DROP CHART HERE
+    filter-name: Chart file
 
   chart-file: Chart file
 
@@ -65,6 +66,7 @@ zh-CN:
     folder: 文件夹
     can-also-drop: 可直接拖放谱面至此处
     drop: 拖放谱面至此处
+    filter-name: 谱面文件
 
   chart-file: 谱面文件
 
