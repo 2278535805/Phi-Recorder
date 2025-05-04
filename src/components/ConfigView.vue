@@ -747,34 +747,33 @@ async function replacePreset() {
 </script>
 
 <template>
-  <v-layout class="overflow-visible gradient-primary" style="height: 56px;">
+  <v-layout style="height: 56px;">
     <v-bottom-navigation 
       class="navigation"
       v-model="page"
-      color="primary"
       horizontal
     >
-      <v-btn>
+      <v-btn class="navigation">
         <v-icon>mdi-star-box</v-icon>
         {{ t('title.common') }}
       </v-btn>
-      <v-btn>
+      <v-btn class="navigation">
         <v-icon>mdi-video-box</v-icon>
         {{ t('title.output') }}
       </v-btn>
-      <v-btn>
+      <v-btn class="navigation">
         <v-icon>mdi-account</v-icon>
         {{ t('title.player') }}
       </v-btn>
-      <v-btn>
+      <v-btn class="navigation">
         <v-icon>mdi-image-area</v-icon>
         {{ t('title.graphics') }}
       </v-btn>
-      <v-btn>
+      <v-btn class="navigation">
         <v-icon>mdi-music</v-icon>
         {{ t('title.audio') }}
       </v-btn>
-      <v-btn>
+      <v-btn class="navigation">
         <v-icon>mdi-toolbox</v-icon>
         {{ t('title.other') }}
       </v-btn>
@@ -1035,14 +1034,13 @@ async function replacePreset() {
 }
 
 .navigation {
-  background: rgba(54, 50, 98, 1) !important;
+  background: rgba(54, 50, 98, 0) !important;
+  /* box-shadow: 0 !important; */
 }
 
 .v-btn {
-  background: rgba(54, 50, 98, 1) !important;
+  background: rgba(54, 50, 98, 1);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-
 
 </style>
