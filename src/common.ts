@@ -101,7 +101,7 @@ export function toast(message: string, kind?: 'success' | 'info' | 'warning' | '
     cardProps: {
       color: kind,
       // @ts-ignore
-      style: 'width: var(--width)',
+      style: 'width: var(--width); user-select: text;',
     },
   });
 }

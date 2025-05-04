@@ -12,6 +12,10 @@
   }
 }
 
+.select {
+  user-select: text;
+}
+
 .container {
   margin: 2rem;
   background: rgba(255, 255, 255, 0.05);

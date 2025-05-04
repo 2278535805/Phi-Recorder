@@ -73,6 +73,7 @@ import moment from 'moment';
 import { toastError } from './common';
 
 import router from './router';
+import { open } from '@tauri-apps/plugin-shell';
 
 const tasks = ref<Task[]>();
 
@@ -188,8 +189,8 @@ async function showOutputFolder() {
           </div>
         </div>
         <div class="d-flex flex-column w-100 name-cover">
-          <v-card-title>{{ task.name }}</v-card-title>
-          <v-card-subtitle class="mt-n2">{{ task.path }}</v-card-subtitle>
+          <v-card-title class="select">{{ task.name }}</v-card-title>
+          <v-card-subtitle class="mt-n2 select">{{ task.path }}</v-card-subtitle>
           <div class="w-100 pa-4 pb-2 pr-2 mt-2">
             <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
             <template v-if="['loading', 'mixing', 'rendering'].includes(task.status.type)">

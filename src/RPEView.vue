@@ -128,9 +128,9 @@ async function exportPez(chartPath: string, chartName: string) {
             </div>
           </div>
           <div class="d-flex flex-column w-100 chart-content">
-            <v-card-title class="chart-name">{{ chart.name }}</v-card-title>
-            <v-card-subtitle class="mt-n2 chart-id">{{ chart.id }}</v-card-subtitle>
-            <v-card-subtitle class="chart-id">{{ chart.charter }}</v-card-subtitle>
+            <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
+            <v-card-subtitle class="mt-n2 chart-id select">{{ chart.id }}</v-card-subtitle>
+            <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
             <div class="w-100 mt-2">
               <div class="pt-4 d-flex justify-end">
                 <v-btn class="open-btn mx-2" :loading="exportPezLoading" @click="exportPez(chart.path, chart.name)">{{ t('export') }}</v-btn>
