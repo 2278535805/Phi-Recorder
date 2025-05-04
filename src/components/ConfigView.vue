@@ -906,15 +906,15 @@ async function replacePreset() {
 
     <div class="mt-2" v-if = "page === 3 || page === undefined">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
-      <v-row no-gutters class="mx-n2 mt-4 align-center">
+      <v-row no-gutters class="mr-1 mt-4 align-center">
         <v-col cols="8">
-          <v-combobox class="mx-2" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
+          <v-combobox class="mr-1" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .2;"></v-btn>
+          <v-btn class="pa-1 text-caption" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .2;"></v-btn>
+          <v-btn class="pa-1 text-caption" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
