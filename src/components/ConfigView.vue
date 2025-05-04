@@ -575,7 +575,7 @@ function onEnter() {
 defineExpose({ buildConfig, onEnter });
 
 function StickyLabel(props: { title: string }) {
-  return h('div', { class: 'mb-4 bg-surface sticky-label', style: 'position: sticky; top: 0; z-index: 2' }, [h('h3', { class: 'pa-1' }, props.title), h(VDivider)]);
+  return h('div', { class: 'mb-4 bg-surface sticky-label', style: 'z-index: 2' }, [h('h3', { class: 'pa-1' }, props.title), h(VDivider)]);
 }
 
 /*function applyCrf() { // not working in combo box
@@ -780,7 +780,8 @@ async function replacePreset() {
     </v-bottom-navigation>
   </v-layout>
 
-  <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 20px;">
+  <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 0px;">
+    <VDivider style="position: sticky; top: 0;"/>
     <div v-if="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
       <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"
@@ -1030,7 +1031,7 @@ async function replacePreset() {
 }
 
 .sticky-label {
-  background: rgba(54, 50, 98, 0.9) !important;
+  background: rgba(54, 50, 98, 0) !important;
 }
 
 .navigation {
