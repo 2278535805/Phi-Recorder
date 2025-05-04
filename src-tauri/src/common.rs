@@ -152,6 +152,16 @@ pub fn set_rpe_dir(set_dir: Option<PathBuf>) -> Result<()> {
     Ok(())
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Effect {
+    pub shader: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Extra {
+    pub effects: Vec<Effect>,
+}
+
 pub fn collect_chart_files(
     directory: PathBuf,
     parent: PathBuf,
@@ -204,6 +214,6 @@ pub async fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -
     }
 
     zip.finish()?;
-    println!("Create ZIP: {:?}", output_path);
+    println!("Create ZIP: {}", output_path.display());
     Ok(())
 }

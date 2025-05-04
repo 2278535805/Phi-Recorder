@@ -11,8 +11,7 @@ mod task;
 
 use anyhow::{bail, Context, Result};
 use common::{
-    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file,
-    get_rpe_dir, output_dir, respack_dir, save_presets, Config, CONFIG_DIR, DATA_DIR,
+    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, save_presets, Config, Extra, CONFIG_DIR, DATA_DIR
 };
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
@@ -21,12 +20,12 @@ use prpr::{
     info::ChartInfo,
 };
 use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::{
     collections::HashMap,
     fs::File,
     future::Future,
-    io::{BufRead, BufReader, BufWriter, Read, Write},
+    io::{BufRead, BufReader},
     ops::DerefMut,
     path::{Path, PathBuf},
     process::Stdio,
@@ -36,8 +35,6 @@ use std::{
 use task::{TaskQueue, TaskView};
 use tauri::{ipc::InvokeError, Manager, State, WindowEvent};
 use tokio::{io::AsyncWriteExt, process::Command};
-use zip::write::FileOptions;
-use zip::ZipWriter;
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
 static LOCK_FILE: OnceLock<tokio::fs::File> = OnceLock::new();
@@ -848,16 +845,6 @@ async fn test_encoder(encoder: String) -> Result<bool, InvokeError> {
         Ok(render::test_encoder(ffmpeg, encoder))
     })()
     .map_err(InvokeError::from_anyhow)
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-struct Effect {
-    shader: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-struct Extra {
-    effects: Vec<Effect>,
 }
 
 #[tauri::command]
