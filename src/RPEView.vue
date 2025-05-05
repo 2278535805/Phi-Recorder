@@ -111,10 +111,12 @@ async function deleteChart(chartName: string, chartPath: string) {
     .then(async (result) => {
       if (!result) return;
       try {
+        moreLoading.value = true;
         await invoke('delete_path', { path: chartPath });
       } catch (e) {
         toastError(e);
       } finally {
+        moreLoading.value = false;
         message(t('delete-success'), { title: t('delete-chart') })
         charts.value = await getRPECharts();
       }
@@ -129,10 +131,12 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
     .then(async (result) => {
       if (!result) return;
       try {
+        moreLoading.value = true;
         await invoke('delete_autosave', { path: chartPath });
       } catch (e) {
         toastError(e);
       } finally {
+        moreLoading.value = false;
         message(t('delete-success'), { title: t('delete-chart') })
       }
     })
