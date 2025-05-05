@@ -731,7 +731,16 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
             for folder in folders {
                 println!("Found chart folder: {}", folder.display());
                 if !folder.join("info.txt").exists() {
-                    println!("Not found info.txt, skip");
+                    println!("Not found info.txt");
+                    let folder_name = folder.file_name().unwrap_or_default().to_string_lossy().to_string();
+                    results.push(RPEChartInfo {
+                        name: folder_name,
+                        id: "Empty folder".to_string(),
+                        path: folder.display().to_string(),
+                        illustration: "".to_string(),
+                        charter: "".to_string(),
+                        modified: SystemTime::UNIX_EPOCH,
+                    });
                     continue;
                 }
                 for line in BufReader::new(File::open(folder.join("info.txt"))?).lines() {
