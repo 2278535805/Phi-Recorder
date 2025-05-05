@@ -7,6 +7,14 @@ en:
   unbinded: Unbinded successfully
   rpe-folder: Please select RPE's folder
   export: Export
+  delete: Delete
+  delete-chart: Delete Chart
+  cancel: Cancel
+  delete-confirm: Are you sure you want to delete this chart?
+  delete-confirm-info: will be lost forever! (A long time!)
+  delete-autosave: Delete Autosave
+  delete-autosave-confirm: Are you sure you want to delete this chart's autosave file?
+  delete-success: Deleted successfully
   output-folder: Please select output folder
   show-folder: Open Folder
 
@@ -20,6 +28,14 @@ zh-CN:
   unbinded: 解绑成功
   rpe-folder: 请选择 RPE 所在文件夹
   export: 导出
+  delete: 删除
+  delete-chart: 删除谱面
+  cancel: 取消
+  delete-confirm: 你确定要刪除这个谱面吗？
+  delete-confirm-info: 将会永久消失！（真的很久！）
+  delete-autosave: 删除自动保存
+  delete-autosave-confirm: 确定要刪除这个谱面的自动保存文件吗？
+  delete-success: 删除成功
   output-folder: 请选择输出文件夹
   show-folder: 打开文件夹
 
@@ -35,7 +51,7 @@ const { t } = useI18n();
 
 import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { open, save } from '@tauri-apps/plugin-dialog';
+import { open, save, confirm, message } from '@tauri-apps/plugin-dialog';
 
 import { toast, toastError } from './common';
 import type { RPEChart } from './model';
@@ -75,9 +91,9 @@ async function openInFolder(path: string) {
   }
 }
 
-const exportPezLoading = ref(false);
+const moreLoading = ref(false);
 async function exportPez(chartPath: string, chartName: string) {
-  exportPezLoading.value = true;
+  moreLoading.value = true;
   try {
     const outputName = chartName.replace(/[\\/:*?"<>|]/g, "_") + '.pez';
     const outputPath = await save({ title: t('output-folder'), filters: [{ name: 'RPE Chart File', extensions: ['pez', 'zip'] }], defaultPath: outputName });
@@ -86,8 +102,43 @@ async function exportPez(chartPath: string, chartName: string) {
   } catch (e) {
     toastError(e);
   } finally {
-    exportPezLoading.value = false;
+    moreLoading.value = false;
   }
+}
+
+async function deleteChart(chartName: string, chartPath: string) {
+  confirm(`"${chartName}" ${t('delete-confirm-info')}`, { title: t('delete-confirm'), kind: 'warning' })
+    .then(async (result) => {
+      if (!result) return;
+      try {
+        await invoke('delete_path', { path: chartPath });
+      } catch (e) {
+        toastError(e);
+      } finally {
+        message(t('delete-success'), { title: t('delete-chart') })
+        charts.value = await getRPECharts();
+      }
+    })
+    .catch((e) => {
+      toast(t('delete-cancel') + ":" + e, 'info');
+    })
+}
+
+async function deleteAutoSave(chartName: string, chartPath: string) {
+  confirm(`"${chartName}" ${t('delete-autosave-confirm')}`, { title: t('delete-autosave'), kind: 'warning' })
+    .then(async (result) => {
+      if (!result) return;
+      try {
+        await invoke('delete_autosave', { path: chartPath });
+      } catch (e) {
+        toastError(e);
+      } finally {
+        message(t('delete-success'), { title: t('delete-chart') })
+      }
+    })
+    .catch((e) => {
+      toast(t('delete-cancel') + ":" + e, 'info');
+    })
 }
 </script>
 
@@ -133,9 +184,20 @@ async function exportPez(chartPath: string, chartName: string) {
             <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
             <div class="w-100 mt-2">
               <div class="pt-4 d-flex justify-end">
-                <v-btn class="open-btn mx-2" :loading="exportPezLoading" @click="exportPez(chart.path, chart.name)">{{ t('export') }}</v-btn>
-                <v-btn class="open-btn mx-2" @click="openInFolder(chart.path)" v-t="'show-folder'"></v-btn>
-                <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'"></v-btn>
+                <v-menu>
+                  <template v-slot:activator="{ props }">
+                    <v-btn class="open-btn mx-2" v-bind="props" :loading="moreLoading">
+                      <i class="mdi mdi-cog" />
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item @click="exportPez(chart.path, chart.name)" v-t="'export'" />
+                    <v-list-item @click="openInFolder(chart.path)" v-t="'show-folder'" />
+                    <v-list-item @click="deleteChart(chart.name, chart.path)" v-t="'delete-chart'" />
+                    <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
+                  </v-list>
+                </v-menu>
+                <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'" />
               </div>
             </div>
           </div>
