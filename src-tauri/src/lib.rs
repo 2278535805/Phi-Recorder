@@ -125,6 +125,8 @@ pub async fn run() -> Result<()> {
             get_encoder,
             test_encoder,
             export_pez,
+            delete_path,
+            delete_autosave,
         ])
         .on_window_event(|_, event| match event {
             //WindowEvent::CloseRequested { api, .. } => {
@@ -880,6 +882,41 @@ async fn export_pez(chart_path: String, output_path: String) -> Result<(), Invok
         println!("files: {:?}", files);
 
         create_zip(output_path, files).await?;
+        Ok(())
+    }).await
+}
+
+#[tauri::command]
+async fn delete_path(path: String) -> Result<(), InvokeError> {
+    wrap_async(async move {
+        let path = PathBuf::from(path);
+        if path.exists() && path.is_dir() {
+            tokio::fs::remove_dir_all(path).await?;
+        } else {
+            bail!("Not a directory");
+        }
+        Ok(())
+    }).await
+}
+
+#[tauri::command]
+async fn delete_autosave(path: String) -> Result<(), InvokeError> {
+    wrap_async(async move {
+        let path = PathBuf::from(path);
+        if path.exists() && path.is_dir() {
+            let mut entries = tokio::fs::read_dir(&path).await?;
+
+            while let Some(entry) = entries.next_entry().await? {
+                let file_path = entry.path();
+                if let Some(file_name) = file_path.file_name().and_then(|s| s.to_str()) {
+                    if file_name.starts_with("AutoSave_") {
+                        tokio::fs::remove_file(file_path).await?;
+                    }
+                }
+            }
+        } else {
+            bail!("Not a directory");
+        }
         Ok(())
     }).await
 }
