@@ -7,6 +7,7 @@ en:
   unbinded: Unbinded successfully
   rpe-folder: Please select RPE's folder
   export: Export
+  export-success: Exported successfully
   delete: Delete
   delete-chart: Delete Chart
   cancel: Cancel
@@ -28,6 +29,7 @@ zh-CN:
   unbinded: 解绑成功
   rpe-folder: 请选择 RPE 所在文件夹
   export: 导出
+  export-success: 导出成功
   delete: 删除
   delete-chart: 删除谱面
   cancel: 取消
@@ -99,6 +101,7 @@ async function exportPez(chartPath: string, chartName: string) {
     const outputPath = await save({ title: t('output-folder'), filters: [{ name: 'RPE Chart File', extensions: ['pez', 'zip'] }], defaultPath: outputName });
     if (!outputPath) return;
     await invoke('export_pez', { chartPath, outputPath });
+    message(t('export-success'), { title: t('export') })
   } catch (e) {
     toastError(e);
   } finally {
@@ -113,11 +116,11 @@ async function deleteChart(chartName: string, chartPath: string) {
       try {
         moreLoading.value = true;
         await invoke('delete_path', { path: chartPath });
+        message(t('delete-success'), { title: t('delete-chart') })
       } catch (e) {
         toastError(e);
       } finally {
         moreLoading.value = false;
-        message(t('delete-success'), { title: t('delete-chart') })
         charts.value = await getRPECharts();
       }
     })
@@ -133,11 +136,11 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       try {
         moreLoading.value = true;
         await invoke('delete_autosave', { path: chartPath });
+        message(t('delete-success'), { title: t('delete-chart') })
       } catch (e) {
         toastError(e);
       } finally {
         moreLoading.value = false;
-        message(t('delete-success'), { title: t('delete-chart') })
       }
     })
     .catch((e) => {
