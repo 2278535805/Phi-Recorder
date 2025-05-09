@@ -67,7 +67,8 @@ en:
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
   hires: Lossless Audio
-  chart_debug: Chart Debug
+  chart_debug_line: Chart Debug - Line
+  chart_debug_note: Chart Debug - Note
   chart_ratio: Chart Zoom
 
   judge-mode: Judge Mode
@@ -185,7 +186,8 @@ zh-CN:
   ending-length: 结算画面时长
   disable-loading: 禁用加载
   hires: 无损音频
-  chart_debug: 谱面调试
+  chart_debug_line: 谱面调试 - 判定线
+  chart_debug_note: 谱面调试 - 音符
   chart_ratio: 谱面缩放
 
   judge-mode: 判定模式
@@ -263,7 +265,8 @@ const DEFAULT_CONFIG: RenderConfig = {
   endingLength: 0.0,
   disableLoading: true,
   hires: false,
-  chartDebug: 0.,
+  chartDebugLine: 0.,
+  chartDebugNote: 0.,
   chartRatio: 1,
   allGood: false,
   allBad: false,
@@ -327,7 +330,8 @@ const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
 
 const
   endingLength = ref(String(DEFAULT_CONFIG.endingLength)),
-  chartDebug = ref(DEFAULT_CONFIG.chartDebug),
+  chartDebugLine = ref(DEFAULT_CONFIG.chartDebugLine),
+  chartDebugNote = ref(DEFAULT_CONFIG.chartDebugNote),
   chartRatio = ref(DEFAULT_CONFIG.chartRatio),
   allGood = ref(DEFAULT_CONFIG.allGood),
   allBad = ref(DEFAULT_CONFIG.allBad),
@@ -496,7 +500,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     })(),
     ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
-    chartDebug: chartDebug.value,
+    chartDebugLine: chartDebugLine.value,
+    chartDebugNote: chartDebugNote.value,
     chartRatio: chartRatio.value,
     fps: parseInt(fps.value),
     hardwareAccel: hwAccel.value,
@@ -591,7 +596,8 @@ function applyConfig(config: RenderConfig) {
   setList(config.ffmpegPreset, ffmpegPresetText, ffmpegPresetPresetTextList);
   //ffmpegPresetText.value = ffmpegPresetPresetTextList[ffmpegPresetPresetList.indexOf(config.ffmpegPreset)];
   endingLength.value = String(config.endingLength);
-  chartDebug.value = config.chartDebug;
+  chartDebugLine.value = config.chartDebugLine;
+  chartDebugNote.value = config.chartDebugNote;
   chartRatio.value = config.chartRatio;
   fps.value = String(config.fps);
   hwAccel.value = config.hardwareAccel;
@@ -918,14 +924,19 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-4 align-center">
-        <v-col cols="4" class="px-6">
-          <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
+        <v-col cols="6" class="px-6">
+          <v-slider :label="t('chart_debug_line')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"> </v-slider>
         </v-col>
-        <v-col cols="4" class="px-6">
-          <v-slider :label="t('chart_debug')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebug"> </v-slider>
-        </v-col>
-        <v-col cols="4" class="px-6">
+        <v-col cols="6" class="px-6">
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </v-slider>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-4 align-center">
+        <v-col cols="6" class="px-6">
+          <v-slider :label="t('chart_debug_note')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </v-slider>
+        </v-col>
+        <v-col cols="6" class="px-6">
+          <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
