@@ -122,7 +122,7 @@ async function deleteChart(chartName: string, chartPath: string) {
       }
     })
     .catch((e) => {
-      toast(t('delete-cancel') + ":" + e, 'info');
+      toast(`${t('delete-cancel')}: ${e}`, 'info');
     })
 }
 
@@ -141,7 +141,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       }
     })
     .catch((e) => {
-      toast(t('delete-cancel') + ":" + e, 'info');
+      toast(`${t('delete-cancel')}: ${e}`, 'info');
     })
 }
 </script>

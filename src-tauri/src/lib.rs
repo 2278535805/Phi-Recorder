@@ -865,6 +865,10 @@ async fn export_pez(chart_path: String, output_path: String) -> Result<(), Invok
         let chart_path = PathBuf::from(chart_path);
         let output_path = PathBuf::from(output_path);
 
+        if !chart_path.exists() || !chart_path.is_dir() {
+            bail!("Not a directory");
+        }
+
         let mut files = collect_chart_files(chart_path.clone(), chart_path.clone())?;
         let res_path = chart_path.parent().unwrap().join("shaders").join("pr");
 
