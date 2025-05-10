@@ -169,47 +169,50 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
           </v-col>
         </v-row>
       </v-form>
-      <v-card v-for="(chart, index) in charts" :key="chart.id" class="chart-card" :style="{ animationDelay: index * 0.1 + 's' }">
-        <div class="d-flex flex-row align-stretch">
-          <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
-            <div
-              class="cover-image"
-              style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-              :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }">
-              <div 
-              class="overlay"
-              @click="router.push({ name: 'render', query: { chart: chart.path } })"
+
+      <v-lazy v-for="(chart, index) in charts" :key="chart.id" :min-height="150"> <!--transition="fade-transition"-->
+        <v-card class="chart-card">
+          <div class="d-flex flex-row align-stretch">
+            <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
+              <div
+                class="cover-image"
+                style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
+                :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }"
               >
-              <i class="mdi mdi-play icon">
-              </i>
+                <div 
+                  class="overlay"
+                  @click="router.push({ name: 'render', query: { chart: chart.path } })"
+                >
+                  <i class="mdi mdi-play icon"></i>
+                </div>
+              </div>
             </div>
-            </div>
-          </div>
-          <div class="d-flex flex-column w-100 chart-content">
-            <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
-            <v-card-subtitle class="mt-n2 chart-id select">{{ chart.id }}</v-card-subtitle>
-            <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
-            <div class="w-100 mt-2">
-              <div class="pt-4 d-flex justify-end">
-                <v-menu>
-                  <template v-slot:activator="{ props }">
-                    <v-btn class="open-btn mx-2" v-bind="props" :loading="moreLoading">
-                      <i class="mdi mdi-cog" />
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item @click="exportPez(chart.path, chart.name)" v-t="'export'" />
-                    <v-list-item @click="openInFolder(chart.path)" v-t="'show-folder'" />
-                    <v-list-item @click="deleteChart(chart.name, chart.path)" v-t="'delete-chart'" />
-                    <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
-                  </v-list>
-                </v-menu>
-                <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'" />
+            <div class="d-flex flex-column w-100 chart-content">
+              <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
+              <v-card-subtitle class="mt-n2 chart-id select">{{ chart.id }}</v-card-subtitle>
+              <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
+              <div class="w-100 mt-2">
+                <div class="pt-4 d-flex justify-end">
+                  <v-menu>
+                    <template v-slot:activator="{ props }">
+                      <v-btn class="open-btn mx-2" v-bind="props" :loading="moreLoading">
+                        <i class="mdi mdi-cog" />
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item @click="exportPez(chart.path, chart.name)" v-t="'export'" />
+                      <v-list-item @click="openInFolder(chart.path)" v-t="'show-folder'" />
+                      <v-list-item @click="deleteChart(chart.name, chart.path)" v-t="'delete-chart'" />
+                      <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
+                    </v-list>
+                  </v-menu>
+                  <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </v-card>
+        </v-card>
+      </v-lazy>
     </template>
   </div>
 </template>
