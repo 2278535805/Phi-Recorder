@@ -255,7 +255,6 @@ import type { RenderConfig } from '../model';
 import TipSwitch from './TipSwitch.vue';
 import TipTextField from './TipTextField.vue';
 
-const props = defineProps<{ initAspectRatio?: number }>();
 const form = ref<VForm>();
 const page = ref(0);
 
@@ -323,7 +322,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   alphaTint: false,
 };
 
-const RESOLUTIONS = [ '1920x1080', '1280x720', '2560x1440', '3840x2160', '2844x1600', '2388x1668', '1600x1080']
+const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160']
 const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
   ffmpegPresetPresetList = ['veryfast p1 veryfast speed', 'faster p2 faster speed','fast p3 fast speed', 'medium p4 medium balanced', 'slow p5 slow quality', 'slower p6 slower quality', 'veryslow p7 veryslow quality'],
   ffmpegPresetText = ref(ffmpegPresetPresetTextList[3]),
@@ -565,21 +564,20 @@ async function buildConfig(): Promise<RenderConfig | null> {
   };
 }
 
-function onEnter() {
+function applyAspectRatio(aspectRatio: number) {
   if (preset.value.key !== 'default') return;
-  resolution.value = RESOLUTIONS[1];
-  if (props.initAspectRatio) {
-    for (let res of RESOLUTIONS) {
-      let [w, h] = parseResolution(res)!;
-      if (Math.abs(w / h - props.initAspectRatio) < 0.01) {
-        resolution.value = res;
-        break;
-      }
-    }
+
+  if (aspectRatio > 1.78) {
+    resolution.value = `1920x1080`
+  } else if (aspectRatio < 1.33) {
+    resolution.value = `1440x1080`
+  } else {
+    let w = Math.floor(aspectRatio * 1080);
+    resolution.value = `${w}x1080`
   }
 }
 
-defineExpose({ buildConfig, onEnter });
+defineExpose({ buildConfig, applyAspectRatio });
 
 function StickyLabel(props: { title: string }) {
   return h('div', { class: 'mb-4 bg-surface sticky-label', style: 'z-index: 2' }, [h('h3', { class: 'pa-1' }, props.title), h(VDivider)]);

@@ -146,7 +146,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -384,7 +384,9 @@ async function moveNext() {
   if (step.value === 'config') {
     if ((await form.value!.validate()).valid) {
       stepIndex.value++;
-      configView.value!.onEnter();
+      tryParseAspect();
+      await nextTick();
+      configView.value!.applyAspectRatio(chartInfo.value!.aspectRatio);
     } else {
       toast(t('has-error'), 'error');
     }
@@ -491,7 +493,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
         <div class="flex-grow-1"></div>
-        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true" class="mr-2">{{ t('more') }}</v-btn>
+        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true; tryParseAspect();" class="mr-2">{{ t('more') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
         <v-btn v-if="step !== 'render'" :loading="loadingNext" variant="tonal" @click="moveNext" class="gradient-primary">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
@@ -685,7 +687,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
       </v-dialog>
 
       <template v-slot:item.3>
-        <ConfigView ref="configView" :init-aspect-ratio="tryParseAspect()"></ConfigView>
+        <ConfigView ref="configView"></ConfigView>
       </template>
 
       <template v-slot:item.4>
