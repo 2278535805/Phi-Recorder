@@ -6,6 +6,7 @@ en:
   unbind: Unbind RPE
   unbinded: Unbinded successfully
   rpe-folder: Please select RPE's folder
+  search: Search
   export: Export
   export-success: Exported successfully
   delete: Delete
@@ -28,6 +29,7 @@ zh-CN:
   unbind: 解绑 RPE
   unbinded: 解绑成功
   rpe-folder: 请选择 RPE 所在文件夹
+  search: 搜索
   export: 导出
   export-success: 导出成功
   delete: 删除
@@ -46,7 +48,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -63,6 +65,18 @@ async function getRPECharts() {
   return (await invoke('get_rpe_charts')) as RPEChart[] | null;
 }
 const charts = ref(await getRPECharts());
+const searchQuery = ref('');
+const filteredCharts = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return charts.value;
+
+  return charts.value!.filter(chart =>
+    chart.name.toLowerCase().includes(query) ||
+    chart.charter.toLowerCase().includes(query) ||
+    chart.id.toString().includes(query)
+  );
+});
+
 
 async function bindRPE() {
   let file = await open({ directory: true, title: t('rpe-folder') });
@@ -164,13 +178,14 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
     <template v-if="charts">
       <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
         <v-row>
-          <v-col cols="12" style="margin: -20px 0px;">
-            <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn>
+          <v-col cols="12" style="margin: -10px 0px 5px 0px;">
+            <v-text-field clearable class="mx-2 justify-center hover-scale-text" prepend-inner-icon="mdi-magnify" :label="t('search')" v-model="searchQuery"></v-text-field>
+            <!-- <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn> -->
           </v-col>
         </v-row>
       </v-form>
 
-      <v-lazy v-for="(chart, index) in charts" :key="chart.id" :min-height="150"> <!--transition="fade-transition"-->
+      <v-lazy v-for="(chart, index) in filteredCharts" :key="chart.id" :min-height="150"> <!--transition="fade-transition"-->
         <v-card class="chart-card">
           <div class="d-flex flex-row align-stretch">
             <div class="d-flex flex-row align-center chart-cover" style="width: 35%">

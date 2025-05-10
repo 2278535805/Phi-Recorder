@@ -65,6 +65,15 @@
   filter: drop-shadow(0 0 8px #ffffff50);
 }
 
+.hover-scale-text {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale-text:hover {
+  transform: scale(1.01);
+  filter: drop-shadow(0 0 4px #ffffff50);
+}
+
 .v-text-field.type-number {
   --v-field-padding-start: 1rem;
   --v-field-border-radius: 8px;
