@@ -667,16 +667,19 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                 (|| {
                     let id = id.take()?;
                     let path = dir.join("Resources").join(&id);
-                    let metadata = path.join(chart.take()?).metadata();
+                    let metadata = path.join(chart.take()?).metadata().ok();
+
+                    let modified = metadata
+                        .and_then(|m| m.modified().ok())
+                        .unwrap_or(SystemTime::UNIX_EPOCH);
+
                     results.push(RPEChartInfo {
                         name: name.take()?,
                         id,
                         path: path.display().to_string(),
                         illustration: path.join(illustration.take()?).display().to_string(),
                         charter: charter.take()?,
-                        modified: metadata
-                            .and_then(|it| it.modified())
-                            .unwrap_or(SystemTime::UNIX_EPOCH),
+                        modified,
                     });
                     Some(())
                 })()
@@ -729,7 +732,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                 }
             }
             for folder in folders {
-                println!("Found chart folder: {}", folder.display());
+                println!("Found chart folder: {}", folder.file_name().unwrap_or_default().to_string_lossy());
                 if !folder.join("info.txt").exists() {
                     println!("Not found info.txt");
                     let folder_name = folder.file_name().unwrap_or_default().to_string_lossy().to_string();
@@ -764,10 +767,9 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                         "Charter" => &mut charter,
                         _ => continue,
                     }) = Some(value.trim().to_owned());
-                    if key == "Name" {
-                        println!("Found {}", value);
-                    }
+                    print!("{}, ", value.trim());
                 }
+                println!();
                 commit!();
             }
         }
