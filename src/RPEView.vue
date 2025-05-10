@@ -19,6 +19,8 @@ en:
   delete-success: Deleted successfully
   output-folder: Please select output folder
   show-folder: Open Folder
+  sort: Sort
+  sort-option-list: Modified Time,Name,Charter,ID
 
   render: Render
 
@@ -42,6 +44,8 @@ zh-CN:
   delete-success: 删除成功
   output-folder: 请选择输出文件夹
   show-folder: 打开文件夹
+  sort: 排序
+  sort-option-list: 修改时间,名称,谱师,ID
 
   render: 渲染
 
@@ -66,16 +70,29 @@ async function getRPECharts() {
 }
 const charts = ref(await getRPECharts());
 const searchQuery = ref('');
+const sortOptionList = t('sort-option-list').split(',');
+const sortOption = ref(sortOptionList[0]);
 const filteredCharts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
   if (!query) return charts.value;
 
-  return charts.value!.filter(chart =>
+  return charts.value?.filter(chart =>
     chart.name.toLowerCase().includes(query) ||
     chart.charter.toLowerCase().includes(query) ||
     chart.id.toString().includes(query)
   );
 });
+
+async function sortCharts() {
+  charts.value = await getRPECharts();
+  if (sortOption.value === sortOptionList[1]) {
+    charts.value?.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortOption.value === sortOptionList[2]) {
+    charts.value?.sort((a, b) => a.charter.localeCompare(b.charter));
+  } else if (sortOption.value === sortOptionList[3]) {
+    charts.value?.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+  }
+}
 
 
 async function bindRPE() {
@@ -178,9 +195,12 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
     <template v-if="charts">
       <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
         <v-row>
-          <v-col cols="12" style="margin: -10px 0px 5px 0px;">
-            <v-text-field clearable class="mx-2 justify-center hover-scale-text" prepend-inner-icon="mdi-magnify" :label="t('search')" v-model="searchQuery"></v-text-field>
+          <v-col cols="8" style="margin: -10px 0px 5px 0px;">
+            <v-text-field clearable class="ml-2 justify-center hover-scale-text" prepend-inner-icon="mdi-magnify" :label="t('search')" v-model="searchQuery"></v-text-field>
             <!-- <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn> -->
+          </v-col>
+          <v-col cols="4" style="margin: -10px 0px 5px 0px;">
+            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" append-icon="mdi-sort" @click:append="sortCharts"></v-select>
           </v-col>
         </v-row>
       </v-form>
