@@ -59,6 +59,7 @@ en:
 
   tweakoffset: Tweak Offset
   more: More
+  phira-info: Phira Chart Info
   preview: Preview
   render: Render
   play: Play
@@ -71,8 +72,8 @@ en:
   save: Save
   save-success: Saved successfully
   read-success: Read successfully
-  save-info: Save information
-  read-info: Read information
+  save-info: Save Info
+  read-info: Read Info
 
 zh-CN:
   already-running: Phi Recorder 已经在运行
@@ -128,6 +129,7 @@ zh-CN:
 
   tweakoffset: 调整延时
   more: 更多
+  phira-info: Phira 谱面信息
   preview: 预览
   render: 渲染
   play: 游玩
@@ -576,7 +578,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
       <v-dialog v-model="moreInfo" width="auto" min-width="90%" class="log-card-bg">
         <v-card class="log-card-only-window">
-          <v-card-title v-t="'more'"> </v-card-title>
+          <v-card-title v-t="'phira-info'"> </v-card-title>
           <v-card-text>
 
             <v-form v-if="chartInfo">
@@ -632,8 +634,8 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.illustration')" v-model="chartInfo.illustration"></v-text-field>
                 </v-col>
-                <v-col cols="3">
-                  <v-btn class="hover-scale" variant="text" @click="tagEditor = true" v-t="'tag'"></v-btn>
+                <v-col cols="3" class="text-center">
+                  <v-btn class="" color="#414047" size="large" @click="tagEditor = true">{{ t('info.tags') }}</v-btn>
                 </v-col>
               </v-row>
 
