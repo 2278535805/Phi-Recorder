@@ -421,7 +421,10 @@ function tryParseAspect(): number | undefined {
 
 const moreInfo = ref(false);
 const tagEditor = ref(false);
-function checkInfo() {
+async function checkInfo() {
+  if (!(await form.value!.validate()).valid) {
+    return false;
+  }
   if (chartInfo.value?.previewEnd && chartInfo.value?.previewEnd - chartInfo.value?.previewStart > 15) {
     toast(t('error.preview-start-end-15s'), 'error');
     return false;
