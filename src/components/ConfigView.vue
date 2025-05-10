@@ -61,7 +61,7 @@ en:
   volume-music: Music Volume
   volume-sfx: SFX Volume
   compression-ratio: SFX Comp Ratio
-  force-limit: Force Limit
+  force-limit: SFX Force Limit
   limit-threshold: Max SFX Volume
 
   ending-length: Result Screen Duration
@@ -89,7 +89,7 @@ en:
   expand: Expand
   expand-list: Aggressive Optimization,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
-  audio-list: Force Limit,Lossless Audio
+  audio-list: SFX Force Limit,Lossless Audio,Music Loudness Equalization
   others: More
   selects: Selected
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
@@ -207,7 +207,7 @@ zh-CN:
   expand: 拓展内容
   expand-list: 激进优化,罗马模式,中文模式
   audio-expand: 音频拓展内容
-  audio-list: 强制限幅,无损音频
+  audio-list: 音效强制限幅,无损音频,音乐响度均衡
   others: 更多
   selects: 已选中
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
@@ -297,6 +297,7 @@ const DEFAULT_CONFIG: RenderConfig = {
   compressionRatio: 20.0,
   forceLimit: true,
   limitThreshold: 1.0,
+  loudnessEqualization: false,
   watermark: '',
   roman: false,
   chinese: false,
@@ -556,6 +557,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
 
     forceLimit: audio.value.includes(audioList.value[0]),
     hires: audio.value.includes(audioList.value[1]),
+    loudnessEqualization: audio.value.includes(audioList.value[2]),
 
     maxParticles: maxParticles.value,
     fade: parseFloat(fade.value),
@@ -660,6 +662,7 @@ function applyConfig(config: RenderConfig) {
   audio.value = [];
   if (config.forceLimit) audio.value.push(audioList.value[0]);
   if (config.hires) audio.value.push(audioList.value[1]);
+  if (config.loudnessEqualization) audio.value.push(audioList.value[2]);
 
   maxParticles.value = config.maxParticles;
   const index = maxParticlesList.indexOf(maxParticles.value);

@@ -88,6 +88,7 @@ pub struct RenderConfig {
     pub compression_ratio: f32,
     pub force_limit: bool,
     pub limit_threshold: f32,
+    pub loudness_equalization: bool,
     pub watermark: String,
     pub roman: bool,
     pub chinese: bool,
@@ -203,6 +204,7 @@ impl Default for RenderConfig {
             compression_ratio: 20.,
             force_limit: false,
             limit_threshold: 1.0,
+            loudness_equalization: false,
             chart_debug_line: 0.0,
             chart_debug_note: 0.0,
             chart_ratio: 1.0,
@@ -871,10 +873,15 @@ pub async fn main(cmd: bool) -> Result<()> {
         (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
-    let ffmpeg_audio_filter_music = format!(
-        "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}[a1];",
+    let mut ffmpeg_audio_filter_music = format!(
+        "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}",
         volume_music
     );
+    if config.loudness_equalization {
+        ffmpeg_audio_filter_music += ",loudnorm=I=-14:LRA=12:TP=-1"
+    }
+    ffmpeg_audio_filter_music += "[a1];";
+
     let ffmpeg_audio_filter_fx = if config.force_limit {
         format!(
             "[2:a]alimiter=limit={}:level=false:attack=0.1:release=1,volume={}[a2];",
@@ -886,13 +893,16 @@ pub async fn main(cmd: bool) -> Result<()> {
             config.compression_ratio, volume_sfx
         )
     } else {
-        format!("[2:a]volume={}[a2];", volume_sfx)
+        format!("[2:a]volume={}", volume_sfx)
     };
+
     let ffmpeg_audio_filter_ending =
         format!("[3:a]adelay={},volume={}[a3];", delay_ending, volume_music);
 
     let ffmpeg_audio_effect_mix = if config.hires {
-        format!("[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]")
+        format!(
+            "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
+        )
     } else {
         format!(
         "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a4];[a4]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
