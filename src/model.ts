@@ -1,17 +1,26 @@
 export interface ChartInfo {
   name: string;
+  difficulty: number;
   level: string;
   charter: string;
   composer: string;
   illustrator: string;
 
-  tip: string | null;
-  offset: number;
+  chart: string;
+  music: string;
+  illustration: string;
 
+  previewStart: number;
+  previewEnd: number | null;
   aspectRatio: number;
   backgroundDim: number;
-
   lineLength: number;
+  offset: number;
+  tip: string | null;
+  tags: string[];
+
+  intro: string,
+
   holdPartialCover: boolean;
 }
 

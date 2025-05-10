@@ -44,6 +44,7 @@ regex = "1.9.6"
 tauri-plugin-cli = "2.0.0-alpha.2"
 tauri-plugin-dialog = "2"
 zip = "0.6.6"
+serde_yaml = "0.9.21"
 # sysinfo = "0.29.0"
 
 [features]

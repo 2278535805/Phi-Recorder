@@ -127,6 +127,8 @@ pub async fn run() -> Result<()> {
             export_pez,
             delete_path,
             delete_autosave,
+            save_info,
+            read_info,
         ])
         .on_window_event(|_, event| match event {
             //WindowEvent::CloseRequested { api, .. } => {
@@ -933,5 +935,24 @@ async fn delete_autosave(path: String) -> Result<(), InvokeError> {
             bail!("Not a directory");
         }
         Ok(())
+    }).await
+}
+
+#[tauri::command]
+async fn save_info(path: String, info: ChartInfo) -> Result<(), InvokeError> {
+    wrap_async(async move {
+        let file = PathBuf::from(path);
+        let string = serde_yaml::to_string(&info)?;
+        std::fs::write(file, string)?;
+        Ok(())
+    }).await
+}
+
+#[tauri::command]
+async fn read_info(path: String) -> Result<ChartInfo, InvokeError> {
+    wrap_async(async move {
+        let file = PathBuf::from(path);
+        let info = serde_yaml::from_reader(BufReader::new(std::fs::File::open(file)?))?;
+        Ok(info)
     }).await
 }
