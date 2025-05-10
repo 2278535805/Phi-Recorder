@@ -172,83 +172,84 @@ async function showOutputFolder() {
       </v-row>
     </v-form>
     <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in" v-t="'empty'"></h1>
-    <v-card v-for="(task, index) in tasks" :key="task.id" class="task-card" :style="{ animationDelay: index * 0.1 + 's' }">
-      <div class="d-flex flex-row align-stretch">
-        <div class="d-flex flex-row align-center img-cover" style="width: 30%">
-          <div
-            style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-            :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"
+    <v-lazy v-for="(task, index) in tasks" :key="task.id" :min-height="150" transition="fade-transition">
+      <v-card class="task-card">
+        <div class="d-flex flex-row align-stretch">
+          <div class="d-flex flex-row align-center img-cover" style="width: 30%">
+            <div
+              style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
+              :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"
             >
-            <div 
-              class="overlay"
-              @click="router.push({ name: 'render', query: { chart: task.path } })"
+              <div 
+                class="overlay"
+                @click="router.push({ name: 'render', query: { chart: task.path } })"
               >
-              <i class="mdi mdi-reload icon">
-              </i>
-            </div>
-          </div>
-        </div>
-        <div class="d-flex flex-column w-100 name-cover">
-          <v-card-title class="select">{{ task.name }}</v-card-title>
-          <v-card-subtitle class="mt-n2 select">{{ task.path }}</v-card-subtitle>
-          <div class="w-100 pa-4 pb-2 pr-2 mt-2">
-            <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
-            <template v-if="['loading', 'mixing', 'rendering'].includes(task.status.type)">
-              <v-progress-linear
-                v-if="task.status.type !== 'rendering'"
-                :indeterminate="true"
-                class="glow-spinner"
-              ></v-progress-linear>
-              <v-progress-linear
-                v-else
-                :model-value="task.status.progress * 100"
-                rounded
-              ></v-progress-linear>
-              <div class="pt-4 d-flex justify-end">
-                <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"></v-btn>
+                <i class="mdi mdi-reload icon"></i>
               </div>
-            </template>
-            <div v-if="task.status.type === 'failed'" class="pt-4 d-flex justify-end">
-              <v-btn
-                variant="flat"
-                prepend-icon="mdi-alert-circle-outline"
-                @click="
-                  () => {
-                    if (task.status.type === 'failed') {
-                      errorDialogMessage = task.status.error;
-                      errorDialog = true;
-                    }
-                  }
-                "
-                v-t="'details'"
-                class="hover-scale"></v-btn>
             </div>
-            <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
-              <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale"></v-btn>
-              <v-btn
-                variant="flat"
-                prepend-icon="mdi-text-box-outline"
-                @click="
-                  () => {
-                    if (task.status.type === 'done') {
-                      outputDialogMessage = task.status.output;
-                      outputDialog = true;
+          </div>
+          <div class="d-flex flex-column w-100 name-cover">
+            <v-card-title class="select">{{ task.name }}</v-card-title>
+            <v-card-subtitle class="mt-n2 select">{{ task.path }}</v-card-subtitle>
+            <div class="w-100 pa-4 pb-2 pr-2 mt-2">
+              <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
+              <template v-if="['loading', 'mixing', 'rendering'].includes(task.status.type)">
+                <v-progress-linear
+                  v-if="task.status.type !== 'rendering'"
+                  :indeterminate="true"
+                  class="glow-spinner"
+                ></v-progress-linear>
+                <v-progress-linear
+                  v-else
+                  :model-value="task.status.progress * 100"
+                  rounded
+                ></v-progress-linear>
+                <div class="pt-4 d-flex justify-end">
+                  <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"></v-btn>
+                </div>
+              </template>
+              <div v-if="task.status.type === 'failed'" class="pt-4 d-flex justify-end">
+                <v-btn
+                  variant="flat"
+                  prepend-icon="mdi-alert-circle-outline"
+                  @click="
+                    () => {
+                      if (task.status.type === 'failed') {
+                        errorDialogMessage = task.status.error;
+                        errorDialog = true;
+                      }
                     }
-                  }
-                "
-                v-t="'show-output'"
-                class="hover-scale"></v-btn>
-              <v-btn 
-              variant="flat"
-              prepend-icon="mdi-folder-open-outline" 
-              @click="showInFolder(task.output)" 
-              v-t="'show-in-folder'"
-              class="hover-scale"></v-btn>
+                  "
+                  v-t="'details'"
+                  class="hover-scale"></v-btn>
+              </div>
+              <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
+                <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale"></v-btn>
+                <v-btn
+                  variant="flat"
+                  prepend-icon="mdi-text-box-outline"
+                  @click="
+                    () => {
+                      if (task.status.type === 'done') {
+                        outputDialogMessage = task.status.output;
+                        outputDialog = true;
+                      }
+                    }
+                  "
+                  v-t="'show-output'"
+                  class="hover-scale"></v-btn>
+                <v-btn 
+                  variant="flat"
+                  prepend-icon="mdi-folder-open-outline" 
+                  @click="showInFolder(task.output)" 
+                  v-t="'show-in-folder'"
+                  class="hover-scale"></v-btn>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </v-card>
+      </v-card>
+    </v-lazy>
 
     <v-dialog v-model="errorDialog" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
