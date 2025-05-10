@@ -17,21 +17,36 @@ en:
     drop: DROP CHART HERE
     filter-name: Chart file
 
-  chart-file: Chart file
+  info:
+    name: Chart name
+    difficulty: Difficulty
+    level: Display Difficulty
+    charter: Charter
+    composer: Composer
+    illustrator: Illustrator
 
-  chart-name: Chart name
-  chart-offset: Offset
-  charter: Charter
-  composer: Composer
-  illustrator: Illustrator
-  level: Level
-  aspect: Aspect ratio
-  dim: Background dim
-  hold-partial-cover: Hold Partial Cover
-  line-length: Line Length
+    chart: Chart file
+    music: Music file
+    illustration: illustration File
 
-  tip: Tip
-  tip-placeholder: Leave empty to choose randomly
+    previewStart: Preview Start Time
+    previewEnd: Preview End Time
+
+    aspectRatio: Aspect Ratio
+    backgroundDim: Background Dim
+    lineLength: Line Length
+    offset: Offset
+    tip: Tip
+    tip-placeholder: Leave empty to choose randomly
+    tags: Tags
+    tag-list: Regular, Troll, Plain, Visual
+
+    intro: Introduction
+
+    holdPartialCover: Hold Partial Cover
+
+  error:
+    preview-start-end-15s: Preview time cannot be greater than 15 seconds
 
   width: Width
   height: Height
@@ -43,6 +58,7 @@ en:
     illustration: Illustration (empty for default)
 
   tweakoffset: Tweak Offset
+  more: More
   preview: Preview
   render: Render
   play: Play
@@ -51,6 +67,12 @@ en:
   see-tasks: See tasks
   
   confirm: Confirm
+  close: Close
+  save: Save
+  save-success: Saved successfully
+  read-success: Read successfully
+  save-info: Save information
+  read-info: Read information
 
 zh-CN:
   already-running: Phi Recorder 已经在运行
@@ -70,26 +92,42 @@ zh-CN:
     drop: 拖放谱面至此处
     filter-name: 谱面文件
 
-  chart-file: 谱面文件
+  info:
+    name: 谱面名
+    difficulty: 难度
+    level: 显示难度
+    charter: 谱师
+    composer: 曲师
+    illustrator: 画师
 
-  chart-name: 谱面名
-  chart-offset: 偏移
-  charter: 谱师
-  composer: 曲师
-  illustrator: 画师
-  level: 难度
-  aspect: 宽高比
-  dim: 背景亮度
-  hold-partial-cover: Hold 遮罩位置
-  line-length: 判定线长度
+    chart: 谱面文件
+    music: 音乐文件
+    illustration: 曲绘文件
 
-  tip: Tip
-  tip-placeholder: 留空则随机选择
+    previewStart: 预览开始时间
+    previewEnd: 预览结束时间
+
+    aspectRatio: 宽高比
+    backgroundDim: 背景亮度
+    lineLength: 判定线长度
+    offset: 偏移
+    tip: 提示
+    tip-placeholder: 留空则随机选择
+    tags: 标签
+    tag-list: 常规,整活,纯配置,观赏
+
+    intro: 简介
+
+    holdPartialCover: Hold 遮罩位置
+
+  error:
+    preview-start-end-15s: 预览时间不能大于15秒
 
   width: 宽
   height: 高
 
   tweakoffset: 调整延时
+  more: 更多
   preview: 预览
   render: 渲染
   play: 游玩
@@ -98,11 +136,17 @@ zh-CN:
   see-tasks: 查看任务列表
 
   confirm: 确定
+  close: 关闭
+  save: 保存
+  save-success: 保存成功
+  read-success: 读取成功
+  save-info: 保存信息
+  read-info: 读取信息
 
 </i18n>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -123,6 +167,7 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import * as shell from "@tauri-apps/plugin-shell"
 
 import { listen } from "@tauri-apps/api/event";
+import { message, save, open } from '@tauri-apps/plugin-dialog';
 
 if (!(await invoke('is_the_only_instance'))) {
   await dialog.message(t('already-running'));
@@ -223,10 +268,10 @@ listen('tauri://drag-drop', async (event) => {
 });
 
 document.addEventListener('keydown', async (event) => {
-  if (document.hasFocus() && event.key === 'Enter') {
+  if (document.hasFocus() && event.key === 'Enter' && !moreInfo.value) {
     await moveNext();
   }
-  if (document.hasFocus() && event.key === 'Escape' && stepIndex) {
+  if (document.hasFocus() && event.key === 'Escape' && stepIndex && !moreInfo.value) {
     stepIndex.value--;
   }
 });
@@ -371,6 +416,72 @@ function tryParseAspect(): number | undefined {
     return undefined;
   }
 }
+
+const moreInfo = ref(false);
+const tagEditor = ref(false);
+function checkInfo() {
+  if (chartInfo.value?.previewEnd && chartInfo.value?.previewEnd - chartInfo.value?.previewStart > 15) {
+    toast(t('error.preview-start-end-15s'), 'error');
+    return false;
+  }
+  if (chartInfo.value!.previewEnd as string | null === '') {
+    chartInfo.value!.previewEnd = null;
+  }
+  if (chartInfo.value!.tip as string | null === '') {
+    chartInfo.value!.tip = null;
+  }
+
+  return true;
+}
+
+async function saveInfo() {
+  let check = checkInfo();
+  if (!check) return;
+  let outputPath = await save({ title: t('output-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }], defaultPath: 'info.yml' });
+  if (!outputPath) return;
+  try {
+    await invoke('save_info', { path: outputPath, info: chartInfo.value });
+    message(t('save-success'), { title: t('save-info') })
+} catch (e) {
+    toastError(e);
+  }
+}
+
+async function readInfo() {
+  let inputPath = await open({ title: t('rpe-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }] });
+  if (!inputPath) return;
+  try {
+    let info = await invoke('read_info', { path: inputPath }) as ChartInfo;
+    chartInfo.value = info;
+    message(t('read-success'), { title: t('read-info') })
+} catch (e) {
+    toastError(e);
+  }
+}
+
+const tagListText = t('info.tag-list').split(','); // wtf bro
+const tagList = ['Regular', 'Troll', 'Plain', 'Visual']
+const tagitems = [
+    tagList[0],
+    tagList[1],
+    tagList[2],
+    tagList[3],
+]
+
+watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
+  const currentPresets = newVal.filter(item => tagList.includes(item));
+
+  if (currentPresets.length > 1) {
+    const addedPreset = newVal.find(item => tagList.includes(item) && !oldVal.includes(item));
+
+    if (addedPreset) {
+      const customItems = newVal.filter(item => !tagList.includes(item));
+
+      chartInfo.value!.tags = [...customItems, addedPreset];
+    }
+  }
+});
+
 </script>
 
 <template>
@@ -380,6 +491,7 @@ function tryParseAspect(): number | undefined {
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
         <div class="flex-grow-1"></div>
+        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true" class="mr-2">{{ t('more') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
         <v-btn v-if="step !== 'render'" :loading="loadingNext" variant="tonal" @click="moveNext" class="gradient-primary">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
@@ -405,29 +517,29 @@ function tryParseAspect(): number | undefined {
         <v-form ref="form" v-if="chartInfo">
           <v-row no-gutters class="my-2">
             <v-col cols="6">
-              <v-text-field class="mx-2" :label="t('chart-name')" v-model="chartInfo.name"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
             </v-col>
             <v-col cols="2">
-              <v-text-field class="mx-2" :label="t('chart-offset')" type="number" :rules="[RULES.int]" v-model="offset_text"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.offset')" type="number" :rules="[RULES.int]" v-model="offset_text"></v-text-field>
             </v-col>
             <v-col cols="4">
-              <v-text-field class="mx-2" :label="t('level')" v-model="chartInfo.level"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
             </v-col>
           </v-row>
 
           <v-row no-gutters class="mt-1 my-2 pt-2">
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('charter')" v-model="chartInfo.charter"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.charter')" v-model="chartInfo.charter"></v-text-field>
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('composer')" v-model="chartInfo.composer"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.composer')" v-model="chartInfo.composer"></v-text-field>
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('illustrator')" v-model="chartInfo.illustrator"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.illustrator')" v-model="chartInfo.illustrator"></v-text-field>
             </v-col>
           </v-row>
 
-          <p class="text-caption mx-3" v-t="'aspect'"></p>
+          <p class="text-caption mx-3" v-t="'info.aspectRatio'"></p>
           <v-row no-gutters class="mt-1 my-2 align-center">
             <v-col cols="4">
               <div class="mx-2 d-flex flex-column">
@@ -438,20 +550,17 @@ function tryParseAspect(): number | undefined {
                 </div>
               </div>
             </v-col>
-            <v-col cols="4">
-              <v-text-field type="number" class="mx-2" :rules="[RULES.positive10000]" :label="t('line-length')" v-model="lineLength"></v-text-field>
-            </v-col>
-            <v-col cols="4">
-              <v-text-field class="mx-2" :label="t('tip')" :placeholder="t('tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
+            <v-col cols="8">
+              <v-text-field class="mx-2" :label="t('info.tip')" :placeholder="t('info.tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
             </v-col>
           </v-row>
 
           <v-row no-gutters class="mt-1 my-2 align-center">
             <v-col cols="8" class="px-6 py-6">
-              <v-slider :label="t('dim')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
+              <v-slider :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
             <v-col cols="4">
-              <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('hold-partial-cover')"></v-switch>
+              <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('info.holdPartialCover')"></v-switch>
             </v-col>
           </v-row>
 
@@ -459,6 +568,121 @@ function tryParseAspect(): number | undefined {
           </v-row>
         </v-form>
       </template>
+
+      <v-dialog v-model="moreInfo" width="auto" min-width="90%" class="log-card-bg">
+        <v-card class="log-card-only-window">
+          <v-card-title v-t="'more'"> </v-card-title>
+          <v-card-text>
+
+            <v-form v-if="chartInfo">
+              <v-row>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.charter')" v-model="chartInfo.charter"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.composer')" v-model="chartInfo.composer"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.illustrator')" v-model="chartInfo.illustrator"></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :label="t('info.aspectRatio')" v-model="chartInfo.aspectRatio"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
+                </v-col>
+                <v-col cols="6">
+                  <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"> </v-slider>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.previewStart')" v-model="chartInfo.previewStart"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :rules="[RULES.positiveNull]" :label="t('info.previewEnd')" v-model="chartInfo.previewEnd"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :label="t('info.offset')" v-model="offset_text"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :rules="[RULES.positive10000]" :label="t('info.lineLength')" v-model="lineLength"></v-text-field>
+                </v-col>
+              </v-row>
+              
+              <v-row>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.chart')" v-model="chartInfo.chart"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.music')" v-model="chartInfo.music"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.illustration')" v-model="chartInfo.illustration"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-btn class="hover-scale" variant="text" @click="tagEditor = true" v-t="'tag'"></v-btn>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.tip')" v-model="chartInfo.tip"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="text" class="" :label="t('info.intro')" v-model="chartInfo.intro"></v-text-field>
+                </v-col>
+                <v-col cols="6">
+                  <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="chartInfo.backgroundDim"> </v-slider>
+                </v-col>
+              </v-row>
+
+            </v-form>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn class="hover-scale" variant="text" @click="readInfo" v-t="'read-info'"></v-btn>
+            <v-btn class="hover-scale" variant="text" @click="saveInfo" v-t="'save-info'"></v-btn>
+            <v-btn class="hover-scale" variant="text" @click="moreInfo = false" v-t="'close'"></v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="tagEditor" width="auto" min-width="90%" class="log-card-bg">
+        <v-card class="log-card-only-window">
+          <v-card-title v-t="'info.tags'"> </v-card-title>
+          <v-card-text>
+
+            <v-form v-if="chartInfo">
+              <v-row>
+                <v-col cols="12">
+                  <v-combobox
+                    v-model="chartInfo.tags"
+                    :items="tagitems"
+                    multiple
+                    chips
+                    :clearable="true"
+                    :label="t('info.tags')"
+                    :item-props="true"
+                    allow-custom
+                  ></v-combobox>
+                </v-col>
+                
+              </v-row>
+
+            </v-form>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn class="hover-scale" variant="text" @click="tagEditor = false" v-t="'close'"></v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
       <template v-slot:item.3>
         <ConfigView ref="configView" :init-aspect-ratio="tryParseAspect()"></ConfigView>

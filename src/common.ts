@@ -21,6 +21,7 @@ export function isString(s: unknown): s is string {
 export const RULES = {
   non_empty: (value: string) => value.trim().length > 0 || i18n.global.t('rules.non-empty'),
   positive: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.positive'),
+  positiveNull: (value: string) => (isNumeric(value) && Number(value) >= 0 || value === null || value === '') || i18n.global.t('rules.positive'),
   positive10000: (value: string) => {
     if (isNumeric(value)) {
       if (Number(value) < 0) return i18n.global.t('rules.positive');
