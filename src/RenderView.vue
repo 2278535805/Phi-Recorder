@@ -39,6 +39,7 @@ en:
     tip: Tip
     tip-placeholder: Leave empty to choose randomly
     tags: Tags
+    tag-editor: Tag Editor
     tag-list: Regular, Troll, Plain, Visual
 
     intro: Introduction
@@ -115,6 +116,7 @@ zh-CN:
     tip: 提示
     tip-placeholder: 留空则随机选择
     tags: 标签
+    tag-editor: 标签编辑器
     tag-list: 常规,整活,纯配置,观赏
 
     intro: 简介
@@ -476,16 +478,22 @@ const tagitems = [
 ]
 
 watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
-  const currentPresets = newVal.filter(item => tagList.includes(item));
+  let addedPreset = newVal.find(item =>
+    tagList.some(tag => tag.toLowerCase() === item.toLowerCase()) &&
+    !oldVal.some(tag => tag === item) // 比较旧值
+  );
 
-  if (currentPresets.length > 1) {
-    const addedPreset = newVal.find(item => tagList.includes(item) && !oldVal.includes(item));
-
-    if (addedPreset) {
-      const customItems = newVal.filter(item => !tagList.includes(item));
-
-      chartInfo.value!.tags = [...customItems, addedPreset];
+  if (addedPreset) {
+    const matchedTag = tagList.find(tag => tag.toLowerCase() === addedPreset?.toLowerCase());
+    if (matchedTag) {
+      addedPreset = matchedTag;
     }
+
+    const customItems = newVal.filter(item =>
+      !tagList.some(tag => tag.toLowerCase() === item.toLowerCase())
+    );
+    
+    chartInfo.value!.tags = [...customItems, addedPreset];
   }
 });
 
@@ -634,8 +642,8 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.illustration')" v-model="chartInfo.illustration"></v-text-field>
                 </v-col>
-                <v-col cols="3" class="text-center">
-                  <v-btn class="" color="#414047" size="large" @click="tagEditor = true">{{ t('info.tags') }}</v-btn>
+                <v-col cols="3" class="d-flex align-center justify-center">
+                  <v-btn class="" color="#414047" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
                 </v-col>
               </v-row>
 
@@ -663,7 +671,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
       <v-dialog v-model="tagEditor" width="auto" min-width="90%" class="log-card-bg">
         <v-card class="log-card-only-window">
-          <v-card-title v-t="'info.tags'"> </v-card-title>
+          <v-card-title v-t="'info.tag-editor'"> </v-card-title>
           <v-card-text>
 
             <v-form v-if="chartInfo">
