@@ -98,7 +98,7 @@ export interface RenderConfig {
   judgeOffset: number;
   forceLimit: boolean;
   limitThreshold: number;
-  LoudnessEqualization: boolean;
+  loudnessEqualization: boolean;
   simpleFileName: boolean;
 
   renderLine: boolean;
