@@ -73,20 +73,6 @@ fn hide_cmd() {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() -> Result<()> {
-    /*use chrono::prelude::*;
-    let now = Utc::now();
-    let target_date = Utc.with_ymd_and_hms(2025, 2, 5, 0, 0, 0).unwrap();
-    if now >= target_date {
-        panic!("Outdated version!");
-    }*/
-
-    let rt = tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(4)
-        .enable_all()
-        .build()
-        .unwrap();
-    let _guard = rt.enter();
-
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
