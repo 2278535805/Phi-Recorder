@@ -124,6 +124,9 @@ export interface RenderConfig {
   bgBlurriness: number;
 
   maxParticles: number;
+  renderStartTime: number;
+  renderEndTime: number | null;
+
   fade: number;
   alphaTint: boolean;
 }
