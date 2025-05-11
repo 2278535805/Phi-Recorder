@@ -175,7 +175,7 @@ import { message, save, open } from '@tauri-apps/plugin-dialog';
 
 if (!(await invoke('is_the_only_instance'))) {
   await dialog.message(t('already-running'));
-  await invoke('exit_program');
+  await invoke('exit_program', { code: 0 });
 }
 
 const router = useRouter();
