@@ -187,14 +187,15 @@ impl Task {
                 }
                 IPCEvent::Done(duration) => {
                     let output = child.wait_with_output().await?;
-                    let stdout = String::from_utf8(output.stdout)
-                        .unwrap_or_else(|_| "Invalid output".to_owned());
-                    let stderr = String::from_utf8(output.stderr)
-                        .unwrap_or_else(|_| "Invalid output".to_owned());
                     *self.status.lock().await = TaskStatus::Done {
                         duration,
-                        //output: format!("[STDOUT]\n{stdout}\n\n[STDERR]\n{stderr}"),
-                        output: format!("{stdout}\n{stderr}"),
+                        output: format!(
+                        "{}\n{}",
+                        String::from_utf8(output.stdout)
+                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
+                        String::from_utf8(output.stderr)
+                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
+                    ),
                     };
                     return Ok(());
                 }
@@ -205,8 +206,10 @@ impl Task {
                 *self.status.lock().await = TaskStatus::Canceled {
                     output: format!(
                         "{}\n{}",
-                        String::from_utf8(output.stdout)?,
-                        String::from_utf8(output.stderr)?
+                        String::from_utf8(output.stdout)
+                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
+                        String::from_utf8(output.stderr)
+                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
                     ),
                 };
 
@@ -220,8 +223,10 @@ impl Task {
                 output: format!(
                     "Child process exited abnormally ({:?})\n{}\n{}",
                     output.status.code().unwrap_or_default(),
-                    String::from_utf8(output.stdout)?,
-                    String::from_utf8(output.stderr)?
+                    String::from_utf8(output.stdout)
+                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
+                    String::from_utf8(output.stderr)
+                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
                 ),
             };
             return Ok(());
