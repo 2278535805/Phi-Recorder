@@ -51,6 +51,8 @@ serde_yaml = "0.9.21"
 custom-protocol = ["tauri/custom-protocol"]
 
 [profile.release]
+lto = "thin"
+strip = true
 opt-level = 3
 # debug = 1
 
