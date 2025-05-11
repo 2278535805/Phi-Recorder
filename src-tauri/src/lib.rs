@@ -165,18 +165,18 @@ pub async fn run() -> Result<()> {
                 .app_config_dir()
                 .unwrap_or_else(|_| exe_dir.to_owned()),
         ))
-        .unwrap();
+        .ok();
     DATA_DIR
         .set(ensure_dir(
             resolver
                 .app_data_dir()
                 .unwrap_or_else(|_| exe_dir.to_owned()),
         ))
-        .unwrap();
+        .ok();
 
     // let asset_dir = resolver.resolve("assets", BaseDirectory::Config).unwrap();
     let asset_dir = exe_dir.join("assets");
-    ASSET_PATH.set(asset_dir.clone()).unwrap();
+    ASSET_PATH.set(asset_dir.clone()).ok();
     set_pc_assets_folder(&asset_dir.display().to_string());
 
     if std::env::args().len() > 1 {
