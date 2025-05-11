@@ -111,6 +111,8 @@ pub struct RenderConfig {
     pub bg_blurriness: f32,
 
     pub max_particles: usize,
+    pub render_start_time: f64,
+    pub render_end_time: Option<f64>,
 
     pub fade: f32,
     pub alpha_tint: bool,
@@ -233,6 +235,9 @@ impl Default for RenderConfig {
             bg_blurriness: 80.,
 
             max_particles: 100000,
+            render_start_time: 0.0,
+            render_end_time: None,
+
             fade: 0.0,
             alpha_tint: false,
         }
@@ -564,11 +569,18 @@ pub async fn main(cmd: bool) -> Result<()> {
     } else {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
     };
+    let cut_time: f64 = if config.disable_loading {
+        GameScene::BEFORE_DURATION as f64 + config.render_start_time
+    } else {
+        0.0
+    };
     let fade_out_time: f64 = -0.5;
 
+    let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = before_time + music_length - offset as f64 + 1.;
+    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
     let video_length = chart_length + fade_out_time + config.ending_length;
+    let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
         ENCODER_LIST_HEVC
@@ -799,9 +811,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     main.top_level = false;
     main.viewport = Some((0, 0, vw as _, vh as _));
 
-    let fps = config.fps;
-    let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
-
     let ffmpeg_preset = "-preset";
     let ffmpeg_preset_name_list: Vec<String> = config
         .ffmpeg_preset
@@ -930,11 +939,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         ffmpeg_preset,
         ffmpeg_preset_name,
         ffmpeg_audio_filter,
-        if config.disable_loading {
-            format!("-ss {}", before_time)
-        } else {
-            "".to_string()
-        },
+        format!("-ss {}", cut_time),
         if config.hires { "mov" } else { "mp4" }
     );
 
@@ -990,7 +995,8 @@ pub async fn main(cmd: bool) -> Result<()> {
     let frames10 = frames / 10;
     let mut step_time = Instant::now();
     for frame in 0..frames {
-        *my_time.borrow_mut() = (frame as f64 / fps).max(0.);
+        let now = (frame as f64) / fps;
+        *my_time.borrow_mut() = now.max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
         main.render(&mut painter)?;

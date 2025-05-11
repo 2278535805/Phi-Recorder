@@ -98,6 +98,9 @@ en:
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
 
+  render-start-time: Render Start Time
+  render-end-time: Render End Time
+
   fade: Fade In/Out
   bg-blurriness: Background Blurriness
   alpha-tint: Alpha Tint
@@ -216,6 +219,9 @@ zh-CN:
   max-particles: 粒子限制
   max-particles-list: 低,中,高
 
+  render-start-time: 渲染开始时间
+  render-end-time: 渲染结束时间
+
   fade: 上隐/下隐
   bg-blurriness: 背景模糊
   alpha-tint: 透明度染色
@@ -318,6 +324,9 @@ const DEFAULT_CONFIG: RenderConfig = {
   bgBlurriness: 80,
 
   maxParticles: 100000,
+  renderStartTime: 0.0,
+  renderEndTime: null,
+
   fade: 0.0,
   alphaTint: false,
 };
@@ -383,6 +392,10 @@ const maxParticlesText = ref(t('max-particles-list').split(',')[1])
 const maxParticles = ref(DEFAULT_CONFIG.maxParticles)
 const maxParticlesTextList = t('max-particles-list').split(',')
 const maxParticlesList = [20000, 100000, 800000];
+
+const
+  renderStartTime = ref(String(DEFAULT_CONFIG.renderStartTime)),
+  renderEndTime = ref('');
 
 const judgeMode = ref(t('judge-modes').split(',')[0])
 const fade = ref(String(DEFAULT_CONFIG.fade))
@@ -559,6 +572,9 @@ async function buildConfig(): Promise<RenderConfig | null> {
     loudnessEqualization: audio.value.includes(audioList.value[2]),
 
     maxParticles: maxParticles.value,
+    renderStartTime: parseFloat(renderStartTime.value),
+    renderEndTime: parseFloat(renderEndTime.value),
+
     fade: parseFloat(fade.value),
     alphaTint: alphaTint.value,
   };
@@ -1001,19 +1017,25 @@ async function replacePreset() {
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]" v-if="renderEndTime === null || renderEndTime === ''"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positive]" v-if="!render.includes(renderList[0])"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-if="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('fade')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="3">
+          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
+        </v-col>
         <v-col cols="3">
           <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
