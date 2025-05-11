@@ -47,10 +47,11 @@ export type TaskStatus =
     }
   | {
       type: 'canceled';
+      output: string;
     }
   | {
       type: 'failed';
-      error: string;
+      output: string;
     };
 
 export interface Task {

@@ -15,7 +15,6 @@ en:
   confirm: Confirm
 
   details: Details
-  error: Error
   output: Output
 
   show-output: Show Output
@@ -43,7 +42,6 @@ zh-CN:
   confirm: 确定
 
   details: 详情
-  error: 错误
   output: 输出
 
   show-output: 查看输出
@@ -131,9 +129,6 @@ function describeStatus(status: TaskStatus): string {
   }
 }
 
-const errorDialog = ref(false),
-  errorDialogMessage = ref('');
-
 const outputDialog = ref(false),
   outputDialogMessage = ref('');
 
@@ -208,15 +203,15 @@ async function showOutputFolder() {
                   <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"></v-btn>
                 </div>
               </template>
-              <div v-if="task.status.type === 'failed'" class="pt-4 d-flex justify-end">
+              <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
                 <v-btn
                   variant="flat"
                   prepend-icon="mdi-alert-circle-outline"
                   @click="
                     () => {
-                      if (task.status.type === 'failed') {
-                        errorDialogMessage = task.status.error;
-                        errorDialog = true;
+                      if (task.status.type === 'failed' || task.status.type === 'canceled') {
+                        outputDialogMessage = task.status.output;
+                        outputDialog = true;
                       }
                     }
                   "
@@ -250,18 +245,6 @@ async function showOutputFolder() {
         </div>
       </v-card>
     </v-lazy>
-
-    <v-dialog v-model="errorDialog" width="auto" min-width="400px" class="log-card-bg">
-      <v-card class="log-card-window">
-        <v-card-title v-t="'error'"> </v-card-title>
-        <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ errorDialogMessage }}</pre>
-        </v-card-text>
-        <v-card-actions class="justify-end">
-          <v-btn class="hover-scale" variant="text" @click="errorDialog = false" v-t="'confirm'"></v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
     <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
