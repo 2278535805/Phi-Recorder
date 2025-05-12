@@ -98,8 +98,8 @@ async function resetConfig() {
   config.value = DEFAULT_CONFIG;
 }
 
-async function selectDir() {
-  let file = await open({ directory: true, title: t('output-dir') });
+async function selectDir(title: string) {
+  let file = await open({ directory: true, title });
   if (!file) {
     toast(t('no-select'), 'error');
     return null;
@@ -110,7 +110,7 @@ async function selectDir() {
 }
 
 async function selectRpeDir() {
-  let file = await selectDir();
+  let file = await selectDir(t('rpe-dir'));
   if (file) {
     try {
       await invoke('set_rpe_dir', { path: file, save: false });
@@ -122,7 +122,7 @@ async function selectRpeDir() {
 }
 
 async function selectOutputDir() {
-  config.value.outputDir = await selectDir()
+  config.value.outputDir = await selectDir(t('output-dir'))
 }
 
 async function openInFolder(path: string | null, isOutput: boolean = false) {
