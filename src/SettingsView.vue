@@ -204,7 +204,7 @@ async function testEncoderAvc() {
   <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem">
     <v-form ref="form" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
       <v-row>
-        <h1 class="mt-3 mx-5">{{ t('setting') }}</h1>
+        <h2 class="mt-1 mx-5">{{ t('setting') }}</h2>
       </v-row>
       <v-row no-gutters class="mt-5 mx-0">
         <v-col cols="6">
