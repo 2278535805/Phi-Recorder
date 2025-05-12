@@ -564,13 +564,13 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut gl = unsafe { get_internal_gl() };
 
-    let before_time: f64 = if config.disable_loading {
-        GameScene::BEFORE_DURATION as f64
+    let audio_delay_time: f64 = if config.disable_loading {
+        0.0
     } else {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
     };
-    let cut_time: f64 = if config.disable_loading {
-        GameScene::BEFORE_DURATION as f64 + config.render_start_time
+    let video_cut_time: f64 = if config.disable_loading {
+        config.render_start_time
     } else {
         0.0
     };
@@ -578,9 +578,9 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
-    let video_length = chart_length + fade_out_time + config.ending_length;
-    let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
+    let chart_length = audio_delay_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
+    let video_length = chart_length + fade_out_time + config.ending_length - video_cut_time;
+    let frames = ((video_length + video_cut_time + GameScene::BEFORE_DURATION as f64) * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
         ENCODER_LIST_HEVC
@@ -637,8 +637,8 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let mut output_music =
-        vec![0.0_f32; (video_length * music_sample_rate as f64).ceil() as usize * 2];
-    let mut output_fx = vec![0.0_f32; (video_length * sample_rate_f64).ceil() as usize * 2];
+        vec![0.0_f32; ((video_length + video_cut_time) * sample_rate_f64).ceil() as usize * 2];
+    let mut output_fx = vec![0.0_f32; ((video_length + video_cut_time) * sample_rate_f64).ceil() as usize * 2];
 
     // let stereo_sfx = false; // TODO stereo sound effects
     let mut place_fx = |pos: f64, clip: &AudioClip| {
@@ -660,7 +660,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = before_time - offset.min(0.) as f64;
+        let pos = audio_delay_time - offset.min(0.) as f64;
         let len = ((music_length + config.ending_length) * music_sample_rate as f64) as usize;
         let start_index = (pos * music_sample_rate as f64).round() as usize * 2;
         let ratio = 1.0 / music_sample_rate as f64;
@@ -699,7 +699,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                         if note.time as f64 > chart_length {
                             continue;
                         }
-                        place_fx(before_time + note.time as f64 + judge_offset, sfx);
+                        place_fx(audio_delay_time + note.time as f64 + judge_offset, sfx);
                     }
                 }
             }
@@ -716,8 +716,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         let mut proc = cmd_hidden(&ffmpeg)
             .args(
                 format!(
-                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
-                    music_sample_rate
+                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -ss {} -c:a pcm_f32le -f wav",
+                    music_sample_rate, video_cut_time
                 )
                 .split_whitespace(),
             )
@@ -740,8 +740,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         let mut proc = cmd_hidden(&ffmpeg)
             .args(
                 format!(
-                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
-                    sample_rate
+                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -ss {} -c:a pcm_f32le -f wav",
+                    sample_rate, video_cut_time
                 )
                 .split_whitespace(),
             )
@@ -924,7 +924,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let args2 = format!(
-        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] {} -vf vflip -f {}",
+        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] -vf vflip -f {}",
         if config.hires {
             "pcm_f32le"
         } else {
@@ -936,7 +936,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         ffmpeg_preset,
         ffmpeg_preset_name,
         ffmpeg_audio_filter,
-        format!("-ss {}", cut_time),
         if config.hires { "mov" } else { "mp4" }
     );
 
@@ -996,6 +995,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         *my_time.borrow_mut() = now.max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
+        if config.disable_loading && now < video_cut_time + GameScene::BEFORE_DURATION as f64 {
+            continue;
+        }
         main.render(&mut painter)?;
         if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && !config.disable_loading {
             draw_rectangle(0., 0., 0., 0., Color::default());
