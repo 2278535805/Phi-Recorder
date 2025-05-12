@@ -1,5 +1,6 @@
 <i18n>
 en:
+  setting: Setting
   save: Save
   save-success: Save successfully
   reset: Reset
@@ -15,6 +16,7 @@ en:
   encoder-hevc: Specify HEVC Encoder
 
 zh-CN:
+  setting: 设置
   save: 保存
   save-success: 保存成功
   reset: 重置
@@ -200,15 +202,11 @@ async function testEncoderAvc() {
 
 <template>
   <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem">
-    <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
-      <div no-gutters class="mt-2 mx-2 d-flex flex-row">
-        <v-btn @click="resetConfig" v-t="'reset'" size="large"></v-btn>
-        <div class="flex-grow-1"></div>
-        <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" size="large"></v-btn>
-
-      </div>
-
-      <v-row no-gutters class="mt-3 mx-0">
+    <v-form ref="form" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
+      <v-row>
+        <h1 class="mt-3 mx-5">{{ t('setting') }}</h1>
+      </v-row>
+      <v-row no-gutters class="mt-5 mx-0">
         <v-col cols="6">
           <v-text-field clearable class="mx-2" :label="t('rpe-dir')" :rules="[RULES.isPath]" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir" @contextmenu="openInFolder(config.rpeDir)"></v-text-field>
         </v-col>
@@ -225,6 +223,11 @@ async function testEncoderAvc() {
         </v-col>
       </v-row>
     </v-form>
+    <div no-gutters class="mt-auto mx-2 d-flex flex-row" style="width: 100%">
+      <v-btn @click="resetConfig" v-t="'reset'" size="large"></v-btn>
+      <div class="flex-grow-1"></div>
+      <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" size="large"></v-btn>
+    </div>
   </div>
 
 </template>
