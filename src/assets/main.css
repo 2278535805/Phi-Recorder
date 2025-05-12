@@ -51,7 +51,7 @@
 .log-card-msg {
   user-select: text;
   border-radius: 12px !important;
-  background: rgba(0, 0, 0, 0.40) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
