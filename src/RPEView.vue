@@ -96,6 +96,10 @@ async function sortCharts() {
   }
 }
 
+async function reverseCharts() {
+  charts.value?.reverse();
+}
+
 watch(sortOption, () => {
   sortCharts();
 })
@@ -206,7 +210,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
             <!-- <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn> -->
           </v-col>
           <v-col cols="4" style="margin: -10px 0px 5px 0px;">
-            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" append-icon="mdi-sort" @click:append="sortCharts"></v-select>
+            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" append-icon="mdi-sort" @click:append="reverseCharts"></v-select>
           </v-col>
         </v-row>
       </v-form>
