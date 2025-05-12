@@ -893,12 +893,12 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let ffmpeg_audio_filter_fx = if config.force_limit {
         format!(
-            "[2:a]alimiter=limit={}:level=false:attack=0.1:release=1,volume={}[a2];",
+            "[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];",
             config.limit_threshold, volume_sfx
         )
     } else if config.compression_ratio > 1. {
         format!(
-            "[2:a]acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01,volume={}[a2];",
+            "[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];",
             config.compression_ratio, volume_sfx
         )
     } else {
@@ -906,7 +906,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
 
     let ffmpeg_audio_filter_ending =
-        format!("[3:a]adelay={},volume={}[a3];", delay_ending, volume_music);
+        format!("[3:a]volume={},adelay={}[a3];", delay_ending, volume_music);
 
     let ffmpeg_audio_effect_mix = if config.hires {
         format!(
@@ -914,7 +914,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         )
     } else {
         format!(
-        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a4];[a4]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
+        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[aa];[aa]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
     )
     };
 
@@ -969,7 +969,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let byte_size = vw as usize * vh as usize * 4;
 
-    const N: usize = 60;
+    const N: usize = 6;
     let mut pbos: [GLuint; N] = [0; N];
     unsafe {
         use miniquad::gl::*;
