@@ -96,7 +96,6 @@ async function sortCharts() {
 
 async function reverseCharts() {
   charts.value?.reverse();
-  console.log(charts.value);
 }
 
 async function bindRPE() {
