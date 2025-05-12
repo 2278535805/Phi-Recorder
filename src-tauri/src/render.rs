@@ -882,31 +882,28 @@ pub async fn main(cmd: bool) -> Result<()> {
         (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
-    let mut ffmpeg_audio_filter_music = format!(
-        "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}",
-        volume_music
-    );
-    if config.loudness_equalization {
-        ffmpeg_audio_filter_music += ",loudnorm=I=-14:LRA=12:TP=-1"
-    }
-    ffmpeg_audio_filter_music += "[a1];";
+    let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
+        "[1:a]aresample=48000:resampler=soxr:precision=28,loudnorm=I=-14:LRA=12:TP=-1,aresample=48000:resampler=soxr:precision=28,volume={}[a1];", volume_music,
+    )} else { format!(
+        "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}[a1];", volume_music,
+    )};
 
     let ffmpeg_audio_filter_fx = if config.force_limit {
         format!(
             "[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];",
-            config.limit_threshold, volume_sfx
+            volume_sfx, config.limit_threshold
         )
     } else if config.compression_ratio > 1. {
         format!(
             "[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];",
-            config.compression_ratio, volume_sfx
+            volume_sfx, config.compression_ratio
         )
     } else {
         format!("[2:a]volume={}", volume_sfx)
     };
 
     let ffmpeg_audio_filter_ending =
-        format!("[3:a]volume={},adelay={}[a3];", delay_ending, volume_music);
+        format!("[3:a]volume={},adelay={}[a3];", volume_music, delay_ending);
 
     let ffmpeg_audio_effect_mix = if config.hires {
         format!(
