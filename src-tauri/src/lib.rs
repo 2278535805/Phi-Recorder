@@ -681,35 +681,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
             };
         }
 
-        if dir.join("Chartlist.txt").exists() {
-            println!("Reading Chartlist.txt");
-            for line in BufReader::new(File::open(dir.join("Chartlist.txt"))?).lines() {
-                let line = line?;
-                let line = line.trim();
-                if line.is_empty() {
-                    continue;
-                }
-                if line == "#" {
-                    commit!();
-                    continue;
-                }
-                let Some((key, value)) = line.split_once(':') else {
-                    continue;
-                };
-                *(match key {
-                    "Name" => &mut name,
-                    "Path" => &mut id,
-                    "Chart" => &mut chart,
-                    "Picture" => &mut illustration,
-                    "Charter" => &mut charter,
-                    _ => continue,
-                }) = Some(value.trim().to_owned());
-                if key == "Name" {
-                    println!("Found {}", value);
-                }
-            }
-            commit!();
-        } else {
+        {
             println!("Not found Chartlist.txt, start reading folder");
             use regex::Regex;
             let onely_num = Regex::new(r"^\d+$").unwrap();
