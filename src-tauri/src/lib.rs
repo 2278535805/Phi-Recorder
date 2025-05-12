@@ -71,22 +71,9 @@ fn hide_cmd() {
     }
 }
 
+#[tokio::main]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() -> Result<()> {
-    /*use chrono::prelude::*;
-    let now = Utc::now();
-    let target_date = Utc.with_ymd_and_hms(2025, 2, 5, 0, 0, 0).unwrap();
-    if now >= target_date {
-        panic!("Outdated version!");
-    }*/
-
-    let rt = tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(4)
-        .enable_all()
-        .build()
-        .unwrap();
-    let _guard = rt.enter();
-
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_fs::init())
@@ -165,18 +152,18 @@ pub async fn run() -> Result<()> {
                 .app_config_dir()
                 .unwrap_or_else(|_| exe_dir.to_owned()),
         ))
-        .unwrap();
+        .ok();
     DATA_DIR
         .set(ensure_dir(
             resolver
                 .app_data_dir()
                 .unwrap_or_else(|_| exe_dir.to_owned()),
         ))
-        .unwrap();
+        .ok();
 
     // let asset_dir = resolver.resolve("assets", BaseDirectory::Config).unwrap();
     let asset_dir = exe_dir.join("assets");
-    ASSET_PATH.set(asset_dir.clone()).unwrap();
+    ASSET_PATH.set(asset_dir.clone()).ok();
     set_pc_assets_folder(&asset_dir.display().to_string());
 
     if std::env::args().len() > 1 {
