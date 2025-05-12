@@ -52,7 +52,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -178,6 +178,10 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       toast(`${t('delete-cancel')}: ${e}`, 'info');
     })
 }
+
+watch(sortOption, () => {
+  sortCharts();
+})
 </script>
 
 <template>
@@ -200,7 +204,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
             <!-- <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn> -->
           </v-col>
           <v-col cols="4" style="margin: -10px 0px 5px 0px;">
-            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" append-icon="mdi-sort" @click:append="sortCharts"></v-select>
+            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" @click:append="sortCharts"></v-select>
           </v-col>
         </v-row>
       </v-form>
