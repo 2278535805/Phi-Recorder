@@ -72,7 +72,6 @@ const charts = ref(await getRPECharts());
 const searchQuery = ref('');
 const sortOptionList = t('sort-option-list').split(',');
 const sortOption = ref(sortOptionList[0]);
-const reverse = ref(false);
 const filteredCharts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
   if (!query) return charts.value;
@@ -93,14 +92,11 @@ async function sortCharts() {
   } else if (sortOption.value === sortOptionList[3]) {
     charts.value?.sort((a, b) => parseInt(a.id) - parseInt(b.id));
   }
-  if (reverse.value) {
-    charts.value?.reverse();
-  }
 }
 
 async function reverseCharts() {
-  reverse.value = reverse.value === false;
-  await sortCharts()
+  charts.value?.reverse();
+  console.log(charts.value);
 }
 
 async function bindRPE() {
