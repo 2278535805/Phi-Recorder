@@ -17,6 +17,7 @@ en:
   delete-autosave: Delete Autosave
   delete-autosave-confirm: Are you sure you want to delete this chart's autosave file?
   delete-success: Deleted successfully
+  delete-cancel: Delete Cancel
   output-folder: Please select output folder
   show-folder: Open Folder
   sort: Sort
@@ -42,6 +43,7 @@ zh-CN:
   delete-autosave: 删除自动保存
   delete-autosave-confirm: 确定要刪除这个谱面的自动保存文件吗？
   delete-success: 删除成功
+  delete-cancel: 删除取消
   output-folder: 请选择输出文件夹
   show-folder: 打开文件夹
   sort: 排序
