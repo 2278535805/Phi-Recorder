@@ -52,7 +52,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -93,6 +93,10 @@ async function sortCharts() {
     charts.value?.sort((a, b) => parseInt(a.id) - parseInt(b.id));
   }
 }
+
+watch(sortOption, () => {
+  sortCharts();
+})
 
 
 async function bindRPE() {
