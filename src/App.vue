@@ -89,7 +89,6 @@ export default {
       this.drawer = !this.drawer;
     },
   },
-
 };
 </script>
 

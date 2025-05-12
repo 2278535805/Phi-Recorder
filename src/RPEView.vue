@@ -72,6 +72,7 @@ const charts = ref(await getRPECharts());
 const searchQuery = ref('');
 const sortOptionList = t('sort-option-list').split(',');
 const sortOption = ref(sortOptionList[0]);
+const reverse = ref(false);
 const filteredCharts = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
   if (!query) return charts.value;
@@ -92,8 +93,15 @@ async function sortCharts() {
   } else if (sortOption.value === sortOptionList[3]) {
     charts.value?.sort((a, b) => parseInt(a.id) - parseInt(b.id));
   }
+  if (reverse.value) {
+    charts.value?.reverse();
+  }
 }
 
+async function reverseCharts() {
+  console.log(reverse.value = reverse.value === false);
+  await sortCharts()
+}
 
 async function bindRPE() {
   let file = await open({ directory: true, title: t('rpe-folder') });
@@ -204,7 +212,7 @@ watch(sortOption, () => {
             <!-- <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn> -->
           </v-col>
           <v-col cols="4" style="margin: -10px 0px 5px 0px;">
-            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" @click:append="sortCharts"></v-select>
+            <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" append-icon="mdi-sort" :label="t('sort')" @click:append="reverseCharts"></v-select>
           </v-col>
         </v-row>
       </v-form>
