@@ -564,7 +564,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut gl = unsafe { get_internal_gl() };
 
-    let audio_delay_time: f64 = if config.disable_loading {
+    let before_time: f64 = if config.disable_loading {
         0.0
     } else {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
@@ -578,7 +578,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = audio_delay_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
+    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
     let video_length = chart_length + fade_out_time + config.ending_length - video_cut_time;
     let frames = ((video_length + video_cut_time + GameScene::BEFORE_DURATION as f64) * fps as f64 + N as f64 - 1.).ceil() as u64;
 
@@ -660,7 +660,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = audio_delay_time - offset.min(0.) as f64;
+        let pos = before_time - offset.min(0.) as f64;
         let len = ((music_length + config.ending_length) * music_sample_rate as f64) as usize;
         let start_index = (pos * music_sample_rate as f64).round() as usize * 2;
         let ratio = 1.0 / music_sample_rate as f64;
@@ -699,7 +699,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                         if note.time as f64 > chart_length {
                             continue;
                         }
-                        place_fx(audio_delay_time + note.time as f64 + judge_offset, sfx);
+                        place_fx(before_time + note.time as f64 + judge_offset, sfx);
                     }
                 }
             }
