@@ -580,7 +580,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let offset = chart.offset + info.offset;
     let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
     let video_length = chart_length + fade_out_time + config.ending_length - video_cut_time;
-    let frames = ((video_length + video_cut_time + GameScene::BEFORE_DURATION as f64) * fps as f64 + N as f64 - 1.).ceil() as u64;
+    let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
         ENCODER_LIST_HEVC
@@ -989,6 +989,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let fps = fps as f64;
     let frames10 = frames / 10;
+    let frames = frames + ((video_cut_time + GameScene::BEFORE_DURATION as f64) * fps) as u64;
     let mut step_time = Instant::now();
     for frame in 0..frames {
         let now = (frame as f64) / fps;
