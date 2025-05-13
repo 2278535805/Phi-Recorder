@@ -21,7 +21,7 @@ tauri-build = { version = "2", features = [] }
 serde_json = "1.0.138"
 toml = "0.7.3"
 serde = { version = "1.0.217", features = ["derive"] }
-tauri = { version = "2", features = [ "protocol-asset", "tray-icon"] }
+tauri = { version = "2.5.1", features = [ "protocol-asset", "tray-icon"] }
 
 anyhow = { version = "1.0.95", features = ["backtrace"] }
 macroquad = { git = "https://github.com/2278535805/prpr-macroquad", default-features = false }
@@ -35,14 +35,14 @@ tempfile = "3.16.0"
 chrono = "0.4.28"
 open = "5.3.2"
 fs4 = { version = "0.6.6", features = ["tokio-async"] }
-winapi = {version = "0.3", features = ["wincon", "winuser"] }
-tauri-plugin-shell = "2"
-tauri-plugin-http = "2"
-tauri-plugin-fs = "2"
-tauri-plugin-os = "2"
+winapi = { version = "0.3", features = ["wincon", "winuser"] }
+tauri-plugin-shell = "2.2.1"
+tauri-plugin-http = "2.4.3"
+tauri-plugin-fs = "2.2.1"
+tauri-plugin-os = "2.2.1"
 regex = "1.9.6"
-tauri-plugin-cli = "2.0.0-alpha.2"
-tauri-plugin-dialog = "2"
+tauri-plugin-cli = "2.2.0"
+tauri-plugin-dialog = "2.2.1"
 zip = "0.6.6"
 serde_yaml = "0.9.21"
 # sysinfo = "0.29.0"

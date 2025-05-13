@@ -47,7 +47,6 @@
     },
     "resources": [
       "assets",
-      "WebView2Loader.dll",
       "config.toml"
     ],
     "shortDescription": "",
