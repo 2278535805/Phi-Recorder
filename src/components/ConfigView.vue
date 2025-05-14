@@ -805,7 +805,7 @@ async function replacePreset() {
 
   <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 0px;">
     <VDivider style="position: sticky; top: 0;"/>
-    <div v-if="page === 0 || page === undefined"
+    <div v-show="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
       <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"
         item-title="name" v-model="preset" style="flex: 1;"></v-combobox>
@@ -817,7 +817,7 @@ async function replacePreset() {
         @click="replacePreset" style="flex: .2;"></v-btn>
     </div>
 
-    <div v-if = "page === 0">
+    <div v-show="page === 0">
       <StickyLabel :title="t('title.common')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
@@ -864,7 +864,7 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div v-if = "page === 1 || page === undefined">
+    <div v-show="page === 1 || page === undefined">
       <StickyLabel :title="t('title.output')"></StickyLabel>
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
@@ -873,7 +873,7 @@ async function replacePreset() {
         <v-col cols="3">
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
         </v-col>
-        <v-col cols="3" v-if="encoder !== encoderList[2]">
+        <v-col cols="3" v-show="encoder !== encoderList[2]">
           <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" class="mx-2" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
@@ -888,15 +888,15 @@ async function replacePreset() {
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <v-combobox v-show="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-show="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch v-if="encoder !== encoderList[2]" :label="t('dynamic-bitrate-control')" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
         </v-col>
       </v-row>
     </div>
-    <div class="mt-2" v-if = "page === 2 || page === undefined">
+    <div class="mt-2" v-show="page === 2 || page === undefined">
       <StickyLabel :title="t('title.player')"></StickyLabel>
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="4">
@@ -927,7 +927,7 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2" v-if = "page === 3 || page === undefined">
+    <div class="mt-2" v-show="page === 3 || page === undefined">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
       <v-row no-gutters class="mr-1 mt-4 align-center">
         <v-col cols="8">
@@ -994,7 +994,7 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2" v-if = "page === 4 || page === undefined">
+    <div class="mt-2" v-show="page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-col cols="12" class="px-2">
         <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
@@ -1013,17 +1013,17 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2" v-if = "page === 5 || page === undefined">
+    <div class="mt-2" v-show="page === 5 || page === undefined">
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]" v-if="renderEndTime === null || renderEndTime === ''"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positive]" v-if="!render.includes(renderList[0])"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positive]" v-show="!render.includes(renderList[0])"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-if="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('fade')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
