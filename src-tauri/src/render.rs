@@ -989,7 +989,11 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let fps = fps as f64;
     let frames10 = frames / 10;
-    let frames = frames + ((video_cut_time + GameScene::BEFORE_DURATION as f64) * fps) as u64;
+    let frames =  if config.disable_loading {
+        frames + ((video_cut_time + GameScene::BEFORE_DURATION as f64) * fps) as u64
+    } else {
+        frames
+    };
     let mut step_time = Instant::now();
     for frame in 0..frames {
         let now = (frame as f64) / fps;
