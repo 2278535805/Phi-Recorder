@@ -637,7 +637,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let mut output_music =
-        vec![0.0_f32; ((video_length + video_cut_time) * sample_rate_f64).ceil() as usize * 2];
+        vec![0.0_f32; ((video_length + video_cut_time) * music_sample_rate as f64).ceil() as usize * 2];
     let mut output_fx = vec![0.0_f32; ((video_length + video_cut_time) * sample_rate_f64).ceil() as usize * 2];
 
     // let stereo_sfx = false; // TODO stereo sound effects
@@ -879,7 +879,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     )?;
 
     let delay_ending =
-        (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
+        (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME - video_cut_time) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
