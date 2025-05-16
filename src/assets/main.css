@@ -16,6 +16,12 @@
   user-select: text;
 }
 
+.wrap {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
 .container {
   margin: 2rem;
   background: rgba(255, 255, 255, 0.05);

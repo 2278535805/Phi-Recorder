@@ -34,8 +34,9 @@ const appVersion = await getVersion();
 import { fetch } from '@tauri-apps/plugin-http';
 import semver from 'semver';
 import { onMounted, ref } from 'vue';
+import MarkdownIt from 'markdown-it';
+const md = new MarkdownIt();
 
-import {  } from '@tauri-apps/api';
 import * as os from "@tauri-apps/plugin-os";
 
 const platform = os.family();
@@ -55,7 +56,7 @@ async function checkForUpdates(dialog = true) {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    const release = await response.json() as Release;
+    const release: Release = await response.json();
     console.log(release);
     
     if (!release) {
@@ -64,14 +65,22 @@ async function checkForUpdates(dialog = true) {
     const latestVersion = release.tag_name;
     //const latestVersion = '0.4.0';
     console.log(latestVersion);
-    updates.value = semver.gt(latestVersion, appVersion);
-    if (updates.value) {
-      dialog_update.value = true;
-    } else if (dialog) {
-      dialog_non.value = true;
+    if (latestVersion) {
+      updates.value = semver.gt(latestVersion, appVersion);
+      updateBody.value = `${latestVersion}\n${release.body}`;
+      if (updates.value) {
+        dialog_update.value = true;
+      } else if (dialog) {
+        dialog_non.value = true;
+      }
+    } else {
+      updateBody.value = `${release.message}`;
+      updates.value = false;
+      dialog_error.value = true;
     }
   } catch (error) {
     console.error('Error fetching tags:', error);
+    updateBody.value = `${error}`;
     updates.value = false;
     dialog_error.value = true;
   }
@@ -140,6 +149,7 @@ const dialog_update = ref(false);
 const dialog_non = ref(false);
 const dialog_error = ref(false);
 const dialog_download = ref(false);
+const updateBody = ref('');
 
 onMounted(() => {
   //setTimeout(() => {
@@ -164,6 +174,7 @@ onMounted(() => {
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('new-version') }}</pre>
+        <div class="block overflow-auto" style="max-height: 60vh" v-html="md.render(updateBody)"></div>
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn color="primary" variant="text" @click="dialog_update = false, getNewVersion()" v-t="t('download')"></v-btn>
@@ -177,6 +188,7 @@ onMounted(() => {
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('non-version') }}</pre>
+        <div class="block overflow-auto" style="max-height: 60vh" v-html="md.render(updateBody)"></div>
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn color="primary" variant="text" @click="dialog_non = false" v-t="t('close')"></v-btn>
@@ -189,6 +201,7 @@ onMounted(() => {
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
         <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('err-version') }}</pre>
+        <pre class="block whitespace-pre overflow-auto select wrap" style="max-height: 60vh">{{ updateBody }}</pre>
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn color="primary" variant="text" @click="dialog_error = false" v-t="t('close')"></v-btn>
