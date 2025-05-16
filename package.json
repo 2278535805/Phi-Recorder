@@ -23,6 +23,7 @@
     "@tauri-apps/plugin-shell": "~2.2.1",
     "@types/semver": "^7.5.8",
     "axios": "^1.7.0",
+    "markdown-it": "^14.1.0",
     "moment": "^2.29.4",
     "phi-recorder": "file:",
     "semver": "^7.7.0",

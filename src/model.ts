@@ -156,4 +156,6 @@ export type Release = {
   id: number,
   assets: Assets[],
   tag_name: string,
+  body: string,
+  message: string, // error message
 };
