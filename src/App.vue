@@ -303,7 +303,7 @@ onMounted(async () => {
       <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
+          <pre class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="getNewVersion" :loading="ffmpegGetNewVersionLoding" v-t="t('try-download')"></v-btn>
@@ -317,7 +317,7 @@ onMounted(async () => {
       <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-check')"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</pre>
+          <pre class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="primary" class="hover-scale" variant="text" @click="ffmpegDialogFilter = false" v-t="t('confirm')"></v-btn>
