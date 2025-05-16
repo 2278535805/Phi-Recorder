@@ -3161,6 +3161,7 @@ snapshots:
       '@tauri-apps/plugin-shell': 2.2.1
       '@types/semver': 7.5.8
       axios: 1.7.9
+      markdown-it: 14.1.0
       moment: 2.29.4
       semver: 7.7.1
       vue: 3.5.13(typescript@5.1.6)
