@@ -229,6 +229,9 @@ async function loadChart(file: string) {
       [4, 3],
       [8, 5],
       [3, 2],
+      [16, 10],
+      [5, 4],
+      [7, 5],
     ]) {
       if (Math.abs(asp[0] / asp[1] - chartInfo.value.aspectRatio) < 1e-4) {
         aspectWidth.value = String(asp[0]);

@@ -583,13 +583,13 @@ async function buildConfig(): Promise<RenderConfig | null> {
 function applyAspectRatio(aspectRatio: number) {
   if (preset.value.key !== 'default') return;
 
-  if (aspectRatio > 1.78) {
-    resolution.value = `1920x1080`
-  } else if (aspectRatio < 1.33) {
-    resolution.value = `1440x1080`
+  let h = parseInt(resolution.value.split('x')[1]);
+
+  if (aspectRatio < 1.0) {
+    resolution.value = `${ h }x${ h }`
   } else {
-    let w = Math.floor(aspectRatio * 1080);
-    resolution.value = `${w}x1080`
+    let w = Math.floor(h * aspectRatio);
+    resolution.value = `${ w }x${ h }`
   }
 }
 
