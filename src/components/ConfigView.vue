@@ -896,7 +896,7 @@ async function replacePreset() {
         </v-col>
       </v-row>
     </div>
-    <div class="mt-2" v-show="page === 2 || page === undefined">
+    <div v-show="page === 2 || page === undefined">
       <StickyLabel :title="t('title.player')"></StickyLabel>
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="4">
@@ -927,7 +927,7 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2" v-show="page === 3 || page === undefined">
+    <div v-show="page === 3 || page === undefined">
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
       <v-row no-gutters class="mr-1 mt-4 align-center">
         <v-col cols="8">
@@ -940,7 +940,7 @@ async function replacePreset() {
           <v-btn class="pa-1 text-caption" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-4 align-center">
+      <v-row no-gutters class="mx-n2 mt-6 align-center">
         <v-col cols="6" class="px-6">
           <v-slider :label="t('chart_debug_line')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"> </v-slider>
         </v-col>
@@ -948,7 +948,7 @@ async function replacePreset() {
           <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-4 align-center">
+      <v-row no-gutters class="mx-n2 mt-6 align-center">
         <v-col cols="6" class="px-6">
           <v-slider :label="t('chart_debug_note')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </v-slider>
         </v-col>
@@ -956,7 +956,7 @@ async function replacePreset() {
           <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-2">
+      <v-row no-gutters class="mx-n2 mt-6">
         <v-col cols="6" class="px-2">
           <v-select v-model="render" :items="renderList" :label="t('render')" multiple>
             <template v-slot:selection="{ item, index }">
@@ -994,17 +994,19 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2" v-show="page === 4 || page === undefined">
+    <div v-show="page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
-      <v-col cols="12" class="px-2">
-        <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
-      </v-col>
-      <v-row no-gutters class="mx-n2 mt-8 align-center px-6">
+      <v-row no-gutters class="mt-2 align-center">
+        <v-col cols="12" class="">
+          <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 mt-6 align-center px-6">
         <v-col cols="4">
-          <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeMusic"> </v-slider>
+          <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeMusic"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.05" v-model="volumeSfx"> </v-slider>
+          <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="4">
           <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
@@ -1013,7 +1015,7 @@ async function replacePreset() {
       </v-row>
     </div>
 
-    <div class="mt-2" v-show="page === 5 || page === undefined">
+    <div v-show="page === 5 || page === undefined">
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">

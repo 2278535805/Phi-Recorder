@@ -6,6 +6,6 @@ export default {
     primary: '#ff6f9f',
     secondary: '#f44336',
     accent: '#e91e63',
-    surface: '#353068',
+    surface: '#312c66',
   },
 };
