@@ -20,6 +20,11 @@ import 'vuetify/styles';
 import { darkTheme, lightTheme } from './theme';
 
 export const SUPPORTED_LOCALES = ['en', 'zh-CN', 'zh-TW'];
+export const SUPPORTED_LOCALES_NAME = [
+  { code: "en", name: "English" },
+  { code: "zh-CN", name: "简体中文" },
+  // { code: "zh-TW", name: "繁體中文" }, // TODO
+];
 
 let locale = localStorage.getItem('locale');
 if (!locale) {

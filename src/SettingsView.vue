@@ -57,7 +57,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { toast, toastError, RULES, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
-import { SUPPORTED_LOCALES } from './main';
+import { SUPPORTED_LOCALES, SUPPORTED_LOCALES_NAME } from './main';
 const theme = useTheme();
 
 const form = ref<VForm>();
@@ -277,7 +277,7 @@ watch(listExpand, (val) => {
           <v-switch class="mx-4" :label="t('list-expand')" v-model="listExpand"></v-switch>
         </v-col>
         <v-col cols="6">
-          <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES" v-model="locale"></v-autocomplete>
+          <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES_NAME" item-title="name" item-value="code" v-model="locale"></v-autocomplete>
         </v-col>
       </v-row>
     </v-form>
