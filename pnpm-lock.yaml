@@ -35,9 +35,6 @@ importers:
       '@tauri-apps/plugin-shell':
         specifier: ~2.2.1
         version: 2.2.1
-      '@types/semver':
-        specifier: ^7.5.8
-        version: 7.5.8
       axios:
         specifier: ^1.7.0
         version: 1.7.9
@@ -84,6 +81,9 @@ importers:
       '@types/node':
         specifier: ^18.17.11
         version: 18.17.11
+      '@types/semver':
+        specifier: ^7.5.8
+        version: 7.5.8
       '@vitejs/plugin-vue':
         specifier: ^4.3.3
         version: 4.3.3(vite@4.4.9(@types/node@18.17.11))(vue@3.5.13(typescript@5.1.6))
@@ -3182,6 +3182,7 @@ snapshots:
       '@tauri-apps/plugin-shell': 2.2.1
       '@types/semver': 7.5.8
       axios: 1.7.9
+      markdown-it: 14.1.0
       moment: 2.29.4
       semver: 7.7.1
       vue: 3.5.13(typescript@5.1.6)
