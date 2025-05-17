@@ -21,6 +21,7 @@ use prpr::{
 };
 use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
 use serde::Serialize;
+use tauri_plugin_prevent_default::Flags;
 use std::{
     collections::HashMap,
     fs::File,
@@ -86,6 +87,11 @@ pub async fn run() -> Result<()> {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(
+            tauri_plugin_prevent_default::Builder::new()
+                .with_flags(Flags::all().difference(Flags::FIND | Flags::RELOAD))
+                .build()
+        )
         .manage(TaskQueue::new())
         .invoke_handler(tauri::generate_handler![
             is_the_only_instance,

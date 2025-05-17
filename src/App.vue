@@ -116,20 +116,6 @@ const icons = ref({
 });
 
 const rail = ref(true);
-// 监听菜单/右键
-document.addEventListener('contextmenu', (event) => {
-  event.preventDefault();
-  //console.log('Detected contextmenu', event);
-});
-
-// 监听中键
-document.addEventListener('mousedown', (event) => {
-  if (event.button === 1) {
-    event.preventDefault();
-    //console.log('Detected mousedown 1', event);
-    //rail.value = !rail.value;
-  }
-});
 
 window.goto = (name: string) => {
   router.push({ name });
