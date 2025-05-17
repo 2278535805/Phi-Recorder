@@ -95,7 +95,7 @@ export default {
 
 <script setup lang="ts">
 import { fetch } from '@tauri-apps/plugin-http';
-import type { Release, Assets } from './model';
+import type { Release, Assets, Config } from './model';
 import { open } from '@tauri-apps/plugin-shell';
 import { useTheme } from 'vuetify';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -118,8 +118,6 @@ const icons = ref({
   settings: 'mdi-cog',
   about: 'mdi-information-outline',
 });
-
-const rail = ref(true);
 
 window.goto = (name: string) => {
   router.push({ name });
@@ -256,16 +254,22 @@ async function checkForUpdates(dialog = true): Promise<boolean> {
     return false;
 }
 
+const listExpand = ref(false);
 
 onMounted(async () => {
-  //setTimeout(() => {
+  try {
+    const config = await invoke('read_config') as Config;
+    listExpand.value = config.listExpand;
+  } catch (e) {
+    console.log(e);
+  }
+
   testFFmpegFilter();
 
   if (await checkForUpdates()) {
     icons.value.about = 'mdi-cloud-download';
     update.value = true;
   }
-  //}, 100);
 });
 </script>
 
@@ -287,7 +291,7 @@ onMounted(async () => {
         <v-btn class="mr-4" size="small" color="red" icon="mdi-circle" @click="appClose()"></v-btn>
       </div>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
+    <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
       <v-list density="compact" nav>
         <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
@@ -296,9 +300,9 @@ onMounted(async () => {
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
           @click="routerPush(key)"
-          @contextmenu="rail = !rail"
+          @contextmenu="listExpand = !listExpand"
           class="list-item-hover"
-          v-if="rail"
+          v-if="listExpand"
         ></v-list-item>
 
         <v-list-item
@@ -308,9 +312,9 @@ onMounted(async () => {
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
           @click="routerPush(key)"
-          @contextmenu="rail = !rail"
+          @contextmenu="listExpand = !listExpand"
           class="list-item-hover-rail"
-          v-if="!rail"
+          v-if="!listExpand"
         ></v-list-item>
       </v-list>
     </v-navigation-drawer>

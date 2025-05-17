@@ -14,6 +14,7 @@ en:
   output-dir: Custom Output Directory
   encoder-avc: Specify AVC Encoder
   encoder-hevc: Specify HEVC Encoder
+  list-expand: Default Expand Sidebar
 
 zh-CN:
   setting: 设置
@@ -30,6 +31,7 @@ zh-CN:
   output-dir: 自定义输出目录
   encoder-avc: 指定 AVC 编码器
   encoder-hevc: 指定 HEVC 编码器
+  list-expand: 默认展开侧边栏
 
 </i18n>
 
@@ -55,6 +57,7 @@ const DEFAULT_CONFIG: Config = {
   outputDir: null,
   encoderAvc: null,
   encoderHevc: null,
+  listExpand: true,
 }
 
 const config = ref(DEFAULT_CONFIG);
@@ -81,8 +84,11 @@ async function saveConfig() {
     }
   }
   for (const key in config.value) {
-    if (config.value[key as keyof Config]?.trim() === "") {
-      config.value[key as keyof Config] = null;
+    if (typeof config.value[key as keyof Config] === 'string') {
+      const val = config.value[key as keyof Config] as string;
+      if (val.trim() === "") {
+        (config.value as any)[key] = null;
+      }
     }
   }
 
@@ -222,6 +228,11 @@ async function testEncoderAvc() {
         </v-col>
         <v-col cols="6">
           <v-text-field clearable class="mx-2" :label="t('encoder-hevc')" v-model="config.encoderHevc" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(true)" @contextmenu="testEncoderHevc"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mt-0 mx-2">
+        <v-col cols="6">
+          <v-switch class="mx-2" :label="t('list-expand')" v-model="config.listExpand"></v-switch>
         </v-col>
       </v-row>
     </v-form>

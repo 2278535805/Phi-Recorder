@@ -95,6 +95,8 @@ pub struct Config {
     pub output_dir: Option<PathBuf>,
     pub encoder_avc: Option<String>,
     pub encoder_hevc: Option<String>,
+
+    pub list_expand: bool,
 }
 
 impl Default for Config {
@@ -104,6 +106,8 @@ impl Default for Config {
             output_dir: None,
             encoder_avc: None,
             encoder_hevc: None,
+
+            list_expand: true,
         }
     }
 }
