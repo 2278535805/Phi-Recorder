@@ -97,6 +97,8 @@ export default {
 import { fetch } from '@tauri-apps/plugin-http';
 import type { Release, Assets } from './model';
 import { open } from '@tauri-apps/plugin-shell';
+import { useTheme } from 'vuetify';
+const theme = useTheme();
 
 const { t } = useI18n();
 
@@ -129,6 +131,19 @@ document.addEventListener('mousedown', (event) => {
 
 window.goto = (name: string) => {
   router.push({ name });
+};
+
+const themeIconDark = ref('mdi-weather-night');
+const themeIconLight = ref('mdi-white-balance-sunny');
+const themeIcon = ref('mdi-weather-night');
+function toggleTheme() {
+  if (themeIcon.value === themeIconDark.value) {
+    themeIcon.value = themeIconLight.value;
+  } else {
+    themeIcon.value = themeIconDark.value;
+  }
+  theme.global.name.value = theme.global.name.value === 'darkTheme' ? 'lightTheme' : 'darkTheme';
+  localStorage.setItem("theme", theme.global.name.value);
 };
 
 
@@ -246,9 +261,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-app id="phi-recorder" class="dark-theme">
+  <v-app id="phi-recorder" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.bgLeft}, ${theme.current.value.colors.bgRight}` }">
     <v-sonner position="top-center" />
-    <v-app-bar :elevation="0" class="app-bar-shadow blur-background">
+    <v-app-bar :elevation="0" class="app-bar-shadow blur-background" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
@@ -256,8 +271,10 @@ onMounted(async () => {
       <div v-if="update">
         <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
       </div>
+      <div class="flex-grow-1"></div>
+      <v-btn class="mx-2" :icon="themeIcon" @click="toggleTheme"></v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item">
+    <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
       <v-list density="compact" nav>
         <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
@@ -299,7 +316,7 @@ onMounted(async () => {
         </Suspense>
       </router-view>
     </v-main>
-    <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="ffmpegDialog" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
         <v-card-text>
@@ -309,18 +326,18 @@ onMounted(async () => {
           <v-btn variant="text" @click="getNewVersion" :loading="ffmpegGetNewVersionLoding" v-t="t('try-download')"></v-btn>
           <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
           <v-btn variant="text" @click="openAppFolder" v-t="t('open-app-folder')"></v-btn>
-          <v-btn color="primary" class="hover-scale" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
+          <v-btn color="btn" class="hover-scale" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="ffmpegDialogFilter" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="ffmpegDialogFilter" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-check')"> </v-card-title>
         <v-card-text>
           <pre class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</pre>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn color="primary" class="hover-scale" variant="text" @click="ffmpegDialogFilter = false" v-t="t('confirm')"></v-btn>
+          <v-btn color="btn" class="hover-scale" variant="text" @click="ffmpegDialogFilter = false" v-t="t('confirm')"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -335,18 +352,18 @@ onMounted(async () => {
 }
 
 ::-webkit-scrollbar-track {
-  background-color: rgba(54, 50, 98, 0.1);
+  background-color: rgba(58, 58, 58, 0.1);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(99, 102, 241, 0.5);
+  background-color: rgba(58, 58, 58, 0.4);
   border-radius: 4px;
   transition: background-color 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(139, 92, 246, 0.7);
+  background-color: rgba(94, 94, 94, 0.7);
 }
 
 html {
@@ -372,9 +389,7 @@ html {
 
 .v-form {
   scrollbar-width: thin;
-  /* Firefox */
-  scrollbar-color: rgba(99, 102, 241, 0.5) rgba(54, 50, 98, 0.1);
-  /* Firefox */
+  /* scrollbar-color: rgba(99, 102, 241, 0.5) rgba(54, 50, 98, 0.1); */
 }
 
 .v-overlay-container {
@@ -392,10 +407,6 @@ html {
   to {
     visibility: visible;
   }
-}
-
-.dark-theme {
-  background: linear-gradient(45deg, #292364, #302b63, #24243e);
 }
 
 .app-bar-shadow {
@@ -486,7 +497,6 @@ html {
 
 .blur-background {
   backdrop-filter: blur(40px) saturate(180%);
-  background: linear-gradient(45deg, rgba(122, 98, 168, 0.4), rgba(107, 66, 182, 0.4)) !important;
   transform: translateZ(0);
   position: relative;
   z-index: 1;

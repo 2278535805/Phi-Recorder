@@ -44,6 +44,8 @@ import type { Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
 import { toast, toastError, RULES } from './common';
 import type { VForm } from 'vuetify/components';
+import { useTheme } from 'vuetify';
+const theme = useTheme();
 
 const form = ref<VForm>();
 const loadingSave = ref(false);
@@ -201,7 +203,7 @@ async function testEncoderAvc() {
 </script>
 
 <template>
-  <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem">
+  <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem" :style="{ background: `${theme.current.value.colors.container}` }">
     <v-form ref="form" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
       <v-row>
         <h2 class="mt-1 mx-5">{{ t('setting') }}</h2>
