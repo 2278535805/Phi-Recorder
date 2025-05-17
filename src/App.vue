@@ -146,6 +146,11 @@ function toggleTheme() {
   localStorage.setItem("theme", theme.global.name.value);
 };
 
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
+  theme.global.name.value = event.matches ? "darkTheme" : "lightTheme";
+});
+
+
 
 // FFmpeg
 const platform = os.family();
