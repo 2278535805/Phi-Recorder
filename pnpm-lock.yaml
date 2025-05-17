@@ -35,15 +35,15 @@ importers:
       '@tauri-apps/plugin-shell':
         specifier: ~2.2.1
         version: 2.2.1
+      '@types/markdown-it':
+        specifier: ^14.1.2
+        version: 14.1.2
       '@types/semver':
         specifier: ^7.5.8
         version: 7.5.8
       axios:
         specifier: ^1.7.0
         version: 1.7.9
-      markdown-it:
-        specifier: ^14.1.0
-        version: 14.1.0
       moment:
         specifier: ^2.29.4
         version: 2.29.4
@@ -506,6 +506,15 @@ packages:
 
   '@types/json-schema@7.0.12':
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
+
+  '@types/linkify-it@5.0.0':
+    resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
+
+  '@types/markdown-it@14.1.2':
+    resolution: {integrity: sha512-promo4eFwuiW+TfGxhi+0x3czqTYJkG8qB17ZUJiVF10Xm7NLVRSLUsfRTU/6h1e24VvRnXCx+hG7li58lkzog==}
+
+  '@types/mdurl@2.0.0':
+    resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
 
   '@types/node@18.17.11':
     resolution: {integrity: sha512-r3hjHPBu+3LzbGBa8DHnr/KAeTEEOrahkcL+cZc4MaBMTM+mk8LtXR+zw+nqfjuDZZzYTYgTcpHuP+BEQk069g==}
@@ -2091,6 +2100,15 @@ snapshots:
 
   '@types/json-schema@7.0.12': {}
 
+  '@types/linkify-it@5.0.0': {}
+
+  '@types/markdown-it@14.1.2':
+    dependencies:
+      '@types/linkify-it': 5.0.0
+      '@types/mdurl': 2.0.0
+
+  '@types/mdurl@2.0.0': {}
+
   '@types/node@18.17.11': {}
 
   '@types/semver@7.5.8': {}
@@ -3159,6 +3177,7 @@ snapshots:
       '@tauri-apps/plugin-http': 2.4.3
       '@tauri-apps/plugin-os': 2.2.1
       '@tauri-apps/plugin-shell': 2.2.1
+      '@types/markdown-it': 14.1.2
       '@types/semver': 7.5.8
       axios: 1.7.9
       markdown-it: 14.1.0
