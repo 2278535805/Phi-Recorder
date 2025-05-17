@@ -107,6 +107,10 @@ const { t } = useI18n();
 const route = useRoute(),
   router = useRouter();
 
+function routerPush(name: string) {
+  router.push({ name });
+}
+
 const icons = ref({
   render: 'mdi-auto-fix',
   rpe: 'mdi-bookshelf',
@@ -273,7 +277,7 @@ onMounted(async () => {
       <div class="gradient-text">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
       </div>
-      <div v-if="update">
+      <div @click="routerPush('about')" style="cursor: pointer;" v-if="update">
         <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
       </div>
       <div data-tauri-drag-region class="flex-grow-1" style="height: 100%; min-width: 10px;"></div>
@@ -291,7 +295,7 @@ onMounted(async () => {
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
-          @click="router.push({ name: key })"
+          @click="routerPush(key)"
           @contextmenu="rail = !rail"
           class="list-item-hover"
           v-if="rail"
@@ -303,7 +307,7 @@ onMounted(async () => {
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
-          @click="router.push({ name: key })"
+          @click="routerPush(key)"
           @contextmenu="rail = !rail"
           class="list-item-hover-rail"
           v-if="!rail"
