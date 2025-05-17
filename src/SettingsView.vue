@@ -4,6 +4,10 @@ en:
   save: Save
   save-success: Save successfully
   reset: Reset
+  reset-confirm: Confirm to reset settings?
+  reset-only: Reset configuration only
+  reset-all: Reset and save all configurations
+  reset-confirm-desc: Your settings will be lost forever! (A long time!)
   select: Selected
   no-select: No selection
   no-encoder: No available hardware-accelerated encoder
@@ -22,6 +26,10 @@ zh-CN:
   save: 保存
   save-success: 保存成功
   reset: 重置
+  reset-confirm: 确认重置设置？
+  reset-only: 仅重置配置
+  reset-all: 重置并保存所有配置
+  reset-confirm-desc: 你的设置将会永久消失！（真的很久！）
   select: 已选择
   no-select: 没有选择
   no-encoder: 没有可用的硬件加速编码器
@@ -104,8 +112,15 @@ async function saveConfig() {
   toast(t('save-success'), 'success');
 }
 
-async function resetConfig() {
+const resetDialog = ref(false);
+async function resetConfig(all: boolean) {
   config.value = DEFAULT_CONFIG;
+  if (all) {
+    await saveConfig();
+    localStorage.clear();
+    window.location.reload();
+  }
+  resetDialog.value = false;
 }
 
 async function selectDir(title: string) {
@@ -267,11 +282,28 @@ watch(listExpand, (val) => {
       </v-row>
     </v-form>
     <div no-gutters class="mt-auto mx-2 d-flex flex-row" style="width: 100%">
-      <v-btn @click="resetConfig" v-t="'reset'" size="large"></v-btn>
+      <v-btn @click="resetDialog = true" v-t="'reset'" size="large"></v-btn>
       <div class="flex-grow-1"></div>
       <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" size="large"></v-btn>
     </div>
   </div>
+
+  <v-dialog v-model="resetDialog" theme="darkTheme" width="auto" min-width="300px" class="log-card-bg">
+    <v-card class="log-card-only-window">
+      <v-card-title v-t="'reset-confirm'"> </v-card-title>
+      <v-card-text>
+        <div>
+          <p v-t="'reset-confirm-desc'"></p>
+        </div>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn @click="resetConfig(false)" color="white" v-t="'reset-only'" ></v-btn>
+        <v-btn @click="resetConfig(true)" color="error" v-t="'reset-all'" ></v-btn>
+      </v-card-actions>
+
+    </v-card>
+  </v-dialog>
+
 
 </template>
 
