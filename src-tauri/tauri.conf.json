@@ -67,7 +67,8 @@
         "title": "Phi Recorder",
         "width": 900,
         "dragDropEnabled": true,
-        "useHttpsScheme": true
+        "useHttpsScheme": true,
+        "decorations": false
       }
     ],
     "security": {
