@@ -89,7 +89,7 @@ pub async fn run() -> Result<()> {
         .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_prevent_default::Builder::new()
-                .with_flags(Flags::all().difference(Flags::FIND | Flags::RELOAD))
+                .with_flags(Flags::all().difference(Flags::FIND))
                 .build()
         )
         .manage(TaskQueue::new())
