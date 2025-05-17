@@ -254,16 +254,13 @@ async function checkForUpdates(dialog = true): Promise<boolean> {
     return false;
 }
 
-const listExpand = ref(false);
+const listExpand = ref(
+  localStorage.getItem("listExpand") !== null
+    ? JSON.parse(localStorage.getItem("listExpand") as string)
+    : true
+);
 
 onMounted(async () => {
-  try {
-    const config = await invoke('read_config') as Config;
-    listExpand.value = config.listExpand;
-  } catch (e) {
-    console.log(e);
-  }
-
   testFFmpegFilter();
 
   if (await checkForUpdates()) {

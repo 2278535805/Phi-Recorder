@@ -60,7 +60,6 @@ const DEFAULT_CONFIG: Config = {
   outputDir: null,
   encoderAvc: null,
   encoderHevc: null,
-  listExpand: true,
 }
 
 const config = ref(DEFAULT_CONFIG);
@@ -209,12 +208,24 @@ async function testEncoderAvc() {
   }
 }
 
+
+
 const locale = ref(localStorage.getItem('locale'));
 watch(locale, (val) => {
   if (!locale.value) return;
   localStorage.setItem('locale', val as string);
   changeLocale(locale.value);
   // window.location.reload();
+});
+
+const listExpand = ref(
+  localStorage.getItem("listExpand") !== null
+    ? JSON.parse(localStorage.getItem("listExpand") as string)
+    : true
+);
+
+watch(listExpand, (val) => {
+  localStorage.setItem("listExpand", JSON.stringify(val))
 });
 
 </script>
@@ -248,7 +259,7 @@ watch(locale, (val) => {
 
       <v-row no-gutters class="mt-2 mx-0">
         <v-col cols="6">
-          <v-switch class="mx-4" :label="t('list-expand')" v-model="config.listExpand"></v-switch>
+          <v-switch class="mx-4" :label="t('list-expand')" v-model="listExpand"></v-switch>
         </v-col>
         <v-col cols="6">
           <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES" v-model="locale"></v-autocomplete>

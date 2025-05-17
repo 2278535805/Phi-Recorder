@@ -137,7 +137,6 @@ export interface Config {
   outputDir: string | null;
   encoderAvc: string | null;
   encoderHevc: string | null;
-  listExpand: boolean;
 }
 
 export interface RPEChart {
