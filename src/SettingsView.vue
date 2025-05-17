@@ -15,6 +15,7 @@ en:
   encoder-avc: Specify AVC Encoder
   encoder-hevc: Specify HEVC Encoder
   list-expand: Default Expand Sidebar
+  lang: Language
 
 zh-CN:
   setting: 设置
@@ -32,6 +33,7 @@ zh-CN:
   encoder-avc: 指定 AVC 编码器
   encoder-hevc: 指定 HEVC 编码器
   list-expand: 默认展开侧边栏
+  lang: 语言
 
 </i18n>
 
@@ -40,13 +42,14 @@ import { useI18n } from 'vue-i18n';
 useI18n();
 const { t } = useI18n();
 
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
-import { toast, toastError, RULES } from './common';
+import { toast, toastError, RULES, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
+import { SUPPORTED_LOCALES } from './main';
 const theme = useTheme();
 
 const form = ref<VForm>();
@@ -206,6 +209,14 @@ async function testEncoderAvc() {
   }
 }
 
+const locale = ref(localStorage.getItem('locale'));
+watch(locale, (val) => {
+  if (!locale.value) return;
+  localStorage.setItem('locale', val as string);
+  changeLocale(locale.value);
+  // window.location.reload();
+});
+
 </script>
 
 <template>
@@ -230,9 +241,17 @@ async function testEncoderAvc() {
           <v-text-field clearable class="mx-2" :label="t('encoder-hevc')" v-model="config.encoderHevc" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(true)" @contextmenu="testEncoderHevc"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-0 mx-2">
+
+      <div class="mt-3 mx-2">
+        <VDivider />
+      </div>
+
+      <v-row no-gutters class="mt-2 mx-0">
         <v-col cols="6">
-          <v-switch class="mx-2" :label="t('list-expand')" v-model="config.listExpand"></v-switch>
+          <v-switch class="mx-4" :label="t('list-expand')" v-model="config.listExpand"></v-switch>
+        </v-col>
+        <v-col cols="6">
+          <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES" v-model="locale"></v-autocomplete>
         </v-col>
       </v-row>
     </v-form>
