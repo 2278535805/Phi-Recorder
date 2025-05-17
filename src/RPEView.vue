@@ -67,6 +67,9 @@ import { toast, toastError } from './common';
 import type { RPEChart } from './model';
 import router from './router';
 
+import { useTheme } from 'vuetify';
+const theme = useTheme();
+
 async function getRPECharts() {
   return (await invoke('get_rpe_charts')) as RPEChart[] | null;
 }
@@ -216,7 +219,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       </v-form>
 
       <v-lazy v-for="(chart, index) in filteredCharts" :key="chart.id" :min-height="150"> <!--transition="fade-transition"-->
-        <v-card class="chart-card">
+        <v-card class="chart-card" :style="{ background: `${theme.current.value.colors.container}` }">
           <div class="d-flex flex-row align-stretch">
             <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
               <div
@@ -228,7 +231,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                   class="overlay"
                   @click="router.push({ name: 'render', query: { chart: chart.path } })"
                 >
-                  <i class="mdi mdi-play icon"></i>
+                  <i class="mdi mdi-play icon" style="color: white"></i>
                 </div>
               </div>
             </div>
@@ -281,7 +284,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
 }
 
 .v-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(127, 127, 127, 0.1);
   font-weight: 600;
   padding: 12px 24px;
   margin-bottom: 12px;
@@ -322,6 +325,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
   background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
   box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
   transition: transform 0.2s, box-shadow 0.2s;
+  color: white;
 }
 
 .render-btn:hover {

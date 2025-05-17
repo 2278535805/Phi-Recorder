@@ -17,7 +17,7 @@ import { VStepper, VStepperActions, VStepperHeader, VStepperItem } from 'vuetify
 
 import 'vuetify/styles';
 
-import theme from './theme';
+import { darkTheme, lightTheme } from './theme';
 
 export const SUPPORTED_LOCALES = ['en', 'zh-CN', 'zh-TW'];
 
@@ -82,13 +82,17 @@ const i18n = createI18n({
 });
 changeLocale(locale);
 
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'darkTheme' : 'lightTheme';
+const savedTheme = localStorage.getItem("theme") || systemTheme;
+
 const vuetify = createVuetify({
   components,
   directives,
   theme: {
-    defaultTheme: 'customTheme',
+    defaultTheme: savedTheme,
     themes: {
-      customTheme: theme,
+      darkTheme: darkTheme,
+      lightTheme: lightTheme,
     },
   },
   icons: {

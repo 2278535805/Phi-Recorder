@@ -173,6 +173,9 @@ import * as shell from "@tauri-apps/plugin-shell"
 import { listen } from "@tauri-apps/api/event";
 import { message, save, open } from '@tauri-apps/plugin-dialog';
 
+import { useTheme } from 'vuetify';
+const theme = useTheme();
+
 if (!(await invoke('is_the_only_instance'))) {
   await dialog.message(t('already-running'));
   await invoke('exit_program', { code: 0 });
@@ -504,7 +507,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
 <template>
   <div class="pa-8 w-100 h-100" style="max-width: 1280px">
-    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))" class="elevated-stepper fade-in">
+    <v-stepper v-model="stepIndex" hide-actions :items="steps.map((x) => t('steps.' + x))" class="elevated-stepper fade-in" :style="{ background: `${theme.current.value.colors.container}` }">
       <div v-if="step === 'config' || step === 'options' || step === 'render'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
@@ -575,7 +578,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
           <v-row no-gutters class="mt-1 my-2 align-center">
             <v-col cols="8" class="px-6 py-6">
-              <v-slider :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
+              <v-slider :label="t('info.backgroundDim')" thumb-label="always" color="btn" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
             <v-col cols="4">
               <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('info.holdPartialCover')"></v-switch>
@@ -587,7 +590,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         </v-form>
       </template>
 
-      <v-dialog v-model="moreInfo" width="auto" min-width="90%" class="log-card-bg">
+      <v-dialog v-model="moreInfo" theme="darkTheme" width="auto" min-width="90%" class="log-card-bg">
         <v-card class="log-card-only-window">
           <v-card-title v-t="'phira-info'"> </v-card-title>
           <v-card-text>
@@ -672,7 +675,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="tagEditor" width="auto" min-width="90%" class="log-card-bg">
+      <v-dialog v-model="tagEditor" theme="darkTheme" width="auto" min-width="90%" class="log-card-bg">
         <v-card class="log-card-only-window">
           <v-card-title v-t="'info.tag-editor'"> </v-card-title>
           <v-card-text>
@@ -733,6 +736,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
   background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
   box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
   transition: transform 0.2s, box-shadow 0.2s;
+  color: white;
 }
 
 .gradient-primary:hover {
@@ -743,7 +747,6 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 .elevated-stepper {
   border-radius: 16px !important;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
-  background: rgba(255, 255, 255, 0.03) !important;
 }
 
 .v-text-field :deep(.v-field--focused) {

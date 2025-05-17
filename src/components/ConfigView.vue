@@ -803,17 +803,17 @@ async function replacePreset() {
     </v-bottom-navigation>
   </v-layout>
 
-  <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: scroll; margin-top: 0px;">
+  <v-form ref="form" style="max-height: 48vh; min-height: 27vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
     <VDivider style="position: sticky; top: 0;"/>
     <div v-show="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
       <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"
         item-title="name" v-model="preset" style="flex: 1;"></v-combobox>
-      <v-btn class="text-caption" v-t="'preset-refresh'" size="large" @click="updatePresets" style="flex: .2;"></v-btn>
-      <v-btn class="text-caption" v-t="'preset-create'" size="large" @click="createPreset" style="flex: .2;"></v-btn>
-      <v-btn class="text-caption" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'"
+      <v-btn class="text-caption" color="primary" v-t="'preset-refresh'" size="large" @click="updatePresets" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" color="primary" v-t="'preset-create'" size="large" @click="createPreset" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" color="primary" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'"
         @click="deletePreset" style="flex: .2;"></v-btn>
-      <v-btn class="text-caption" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'"
+      <v-btn class="text-caption" color="primary" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'"
         @click="replacePreset" style="flex: .2;"></v-btn>
     </div>
 
@@ -877,7 +877,7 @@ async function replacePreset() {
           <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" class="mx-2" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
-          <TipSwitch :label="t('hw-accel')" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
+          <TipSwitch :label="t('hw-accel')" color="btn" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">
@@ -892,7 +892,7 @@ async function replacePreset() {
           <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipSwitch v-if="encoder !== encoderList[2]" :label="t('dynamic-bitrate-control')" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
+          <TipSwitch v-if="encoder !== encoderList[2]" :label="t('dynamic-bitrate-control')" color="btn" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
         </v-col>
       </v-row>
     </div>
@@ -934,26 +934,26 @@ async function replacePreset() {
           <v-combobox class="mr-1" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
+          <v-btn class="pa-1 text-caption" color="primary" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
+          <v-btn class="pa-1 text-caption" color="primary" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center">
         <v-col cols="6" class="px-6">
-          <v-slider :label="t('chart_debug_line')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"> </v-slider>
+          <v-slider :label="t('chart_debug_line')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"> </v-slider>
         </v-col>
         <v-col cols="6" class="px-6">
-          <v-slider :label="t('chart_ratio')" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </v-slider>
+          <v-slider :label="t('chart_ratio')" color="btn" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center">
         <v-col cols="6" class="px-6">
-          <v-slider :label="t('chart_debug_note')" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </v-slider>
+          <v-slider :label="t('chart_debug_note')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </v-slider>
         </v-col>
         <v-col cols="6" class="px-6">
-          <v-slider :label="t('note-scale')" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
+          <v-slider :label="t('note-scale')" color="btn" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6">
@@ -1003,14 +1003,14 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center px-6">
         <v-col cols="4">
-          <v-slider :label="t('volume-music')" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeMusic"> </v-slider>
+          <v-slider :label="t('volume-music')" color="btn" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeMusic"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider :label="t('volume-sfx')" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeSfx"> </v-slider>
+          <v-slider :label="t('volume-sfx')" color="btn" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
-          <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
+          <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" color="btn" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
     </div>
@@ -1042,7 +1042,7 @@ async function replacePreset() {
           <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('alpha-tint')" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
+          <TipSwitch :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

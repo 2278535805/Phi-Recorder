@@ -37,6 +37,9 @@ import { onMounted, ref } from 'vue';
 import MarkdownIt from 'markdown-it';
 const md = new MarkdownIt();
 
+import { useTheme } from 'vuetify';
+const theme = useTheme();
+
 import * as os from "@tauri-apps/plugin-os";
 
 const platform = os.family();
@@ -160,7 +163,7 @@ onMounted(() => {
 
 <template>
   <div class="pa-8 w-100 h-100 d-flex flex-column align-center" style="max-width: 1280px; gap: 1rem">
-    <div class="about-container container fade-in">
+    <div class="about-container container fade-in" :style="{ background: `${theme.current.value.colors.container}` }">
       <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
@@ -169,7 +172,7 @@ onMounted(() => {
     </div>
   </div>
 
-  <v-dialog v-model="dialog_update" width="auto" min-width="400px" class="log-card-bg">
+  <v-dialog v-model="dialog_update" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
     <v-card class="log-card-only-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
@@ -177,13 +180,13 @@ onMounted(() => {
         <div class="block overflow-auto" style="max-height: 60vh" v-html="md.render(updateBody)"></div>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn color="primary" variant="text" @click="dialog_update = false, getNewVersion()" v-t="t('download')"></v-btn>
-        <v-btn color="primary" variant="text" @click="dialog_update = false" v-t="t('close')"></v-btn>
+        <v-btn color="btn" variant="text" @click="dialog_update = false, getNewVersion()" v-t="t('download')"></v-btn>
+        <v-btn color="btn" variant="text" @click="dialog_update = false" v-t="t('close')"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog_non" width="auto" min-width="400px" class="log-card-bg">
+  <v-dialog v-model="dialog_non" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
     <v-card class="log-card-only-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
@@ -191,12 +194,12 @@ onMounted(() => {
         <div class="block overflow-auto" style="max-height: 60vh" v-html="md.render(updateBody)"></div>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn color="primary" variant="text" @click="dialog_non = false" v-t="t('close')"></v-btn>
+        <v-btn color="btn" variant="text" @click="dialog_non = false" v-t="t('close')"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog_error" width="auto" min-width="400px" class="log-card-bg">
+  <v-dialog v-model="dialog_error" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
     <v-card class="log-card-only-window">
       <v-card-title v-t="t('check')"> </v-card-title>
       <v-card-text>
@@ -204,12 +207,12 @@ onMounted(() => {
         <pre class="block whitespace-pre overflow-auto select wrap" style="max-height: 60vh">{{ updateBody }}</pre>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn color="primary" variant="text" @click="dialog_error = false" v-t="t('close')"></v-btn>
+        <v-btn color="btn" variant="text" @click="dialog_error = false" v-t="t('close')"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="dialog_download" width="auto" min-width="400px" class="log-card-bg">
+  <v-dialog v-model="dialog_download" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
     <v-card class="log-card-only-window">
       <v-card-title v-t="t('download')"> </v-card-title>
       <v-card-text>
@@ -219,7 +222,7 @@ onMounted(() => {
       <v-progress-linear :model-value="progress * 100" rounded></v-progress-linear>
 
       <v-card-actions class="justify-end">
-        <v-btn color="primary" variant="text" @click="dialog_download = false" v-t="t('close')"></v-btn>
+        <v-btn color="btn" variant="text" @click="dialog_download = false" v-t="t('close')"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -73,6 +73,9 @@ import { toastError } from './common';
 import router from './router';
 import { open } from '@tauri-apps/plugin-shell';
 
+import { useTheme } from 'vuetify';
+const theme = useTheme();
+
 const tasks = ref<Task[]>();
 
 async function updateList() {
@@ -168,7 +171,7 @@ async function showOutputFolder() {
     </v-form>
     <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in" v-t="'empty'"></h1>
     <v-lazy v-for="(task, index) in tasks" :key="task.id" :min-height="150" transition="fade-transition">
-      <v-card class="task-card">
+      <v-card class="task-card" :style="{ background: `${theme.current.value.colors.container}` }">
         <div class="d-flex flex-row align-stretch">
           <div class="d-flex flex-row align-center img-cover" style="width: 30%">
             <div
@@ -246,7 +249,7 @@ async function showOutputFolder() {
       </v-card>
     </v-lazy>
 
-    <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="outputDialog" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
@@ -315,7 +318,7 @@ pre {
 }
 
 .v-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(127, 127, 127, 0.10);
   padding: 8px 14px;
   margin: 4px 8px;
   font-weight: 600;

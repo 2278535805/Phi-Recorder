@@ -119,14 +119,6 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.v-switch {
-  color:#c7c0ff;
-}
-
-.v-slider {
-  color:#c7c0ff;
-}
-
 .fade-in {
   animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   opacity: 0; /* 初始状态透明 */
@@ -138,7 +130,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
