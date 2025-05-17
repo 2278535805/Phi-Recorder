@@ -98,6 +98,8 @@ import { fetch } from '@tauri-apps/plugin-http';
 import type { Release, Assets } from './model';
 import { open } from '@tauri-apps/plugin-shell';
 import { useTheme } from 'vuetify';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+const appWindow = getCurrentWindow();
 const theme = useTheme();
 
 const { t } = useI18n();
@@ -132,6 +134,18 @@ document.addEventListener('mousedown', (event) => {
 window.goto = (name: string) => {
   router.push({ name });
 };
+
+function appClose() {
+  appWindow.close();
+}
+
+function appMinimize() {
+  appWindow.minimize();
+}
+
+function appMaximize() {
+  appWindow.toggleMaximize();
+}
 
 const themeIconDark = ref('mdi-weather-night');
 const themeIconLight = ref('mdi-white-balance-sunny');
@@ -271,8 +285,12 @@ onMounted(async () => {
       <div v-if="update">
         <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
       </div>
-      <div class="flex-grow-1"></div>
-      <v-btn class="mx-2" :icon="themeIcon" @click="toggleTheme"></v-btn>
+      <div data-tauri-drag-region class="flex-grow-1" style="height: 100%; min-width: 10px;"></div>
+      <div class="d-flex" style="position: fixed; right: 0;">
+        <v-btn class="" size="small" :icon="themeIcon" @click="toggleTheme"></v-btn>
+        <v-btn class="mx-2" size="small" color="grey" icon="mdi-circle" @click="appMinimize" @contextmenu="appMaximize"></v-btn>
+        <v-btn class="mr-4" size="small" color="red" icon="mdi-circle" @click="appClose()"></v-btn>
+      </div>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" :expand-on-hover="rail" rail permanent class="nav-drawer-border blur-background list-item" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
       <v-list density="compact" nav>
