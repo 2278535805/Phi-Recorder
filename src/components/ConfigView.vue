@@ -60,8 +60,10 @@ en:
   volume-music: Music Volume
   volume-music-tip: |
     Hi-Res Reference: 
-    Lossless Audio: Enable, Music Volume: 1.0
-    Volume SFX: 0.5, Max SFX Volume: 0.65
+    Lossless Audio: Enable,
+    Music Volume: 1.0,
+    Volume SFX: 0.5,
+    Max SFX Volume: 0.65
   volume-sfx: SFX Volume
   compression-ratio: SFX Comp Ratio
   limit-threshold: Max SFX Volume
