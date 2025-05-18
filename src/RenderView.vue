@@ -224,7 +224,6 @@ async function loadChart(file: string) {
     chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
     stepIndex.value++;
     offset_text.value = String(Math.floor(chartInfo.value.offset * 1000));
-    lineLength.value = String(chartInfo.value.lineLength);
     aspectWidth.value = String(chartInfo.value.aspectRatio);
     aspectHeight.value = '1.0';
     for (let asp of [
@@ -252,8 +251,7 @@ async function loadChart(file: string) {
 const aspectWidth = ref('16'),
   aspectHeight = ref('9');
 
-const offset_text = ref('0'),
-  lineLength = ref('6.0');
+const offset_text = ref('0');
 
 const fileHovering = ref(false);
 
@@ -288,13 +286,16 @@ document.addEventListener('keydown', async (event) => {
 
 const form = ref<VForm>();
 
+function syncInfo() {
+  chartInfo.value!.offset = parseFloat(offset_text.value) / 1000;
+  if (!chartInfo.value!.tip?.trim().length) chartInfo.value!.tip = null;
+}
+
 const configView = ref<typeof ConfigView>();
 async function buildParams() {
+  syncInfo();
   let config = await configView.value!.buildConfig();
-  chartInfo.value!.offset = parseFloat(offset_text.value) / 1000;
-  chartInfo.value!.lineLength = parseFloat(lineLength.value);
   if (!config) return null;
-  if (!chartInfo.value!.tip?.trim().length) chartInfo.value!.tip = null;
   return {
     path: chartPath,
     info: chartInfo.value,
@@ -451,6 +452,7 @@ async function checkInfo() {
 
 async function saveInfo() {
   let check = checkInfo();
+  syncInfo();
   if (!check) return;
   let outputPath = await save({ title: t('output-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }], defaultPath: 'info.yml' });
   if (!outputPath) return;
@@ -512,7 +514,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
         <div class="flex-grow-1"></div>
-        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true; tryParseAspect();" class="mr-2">{{ t('more') }}</v-btn>
+        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true; tryParseAspect(); syncInfo();" class="mr-2">{{ t('more') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
         <v-btn v-if="step !== 'render'" :loading="loadingNext" variant="tonal" @click="moveNext" class="gradient-primary">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
@@ -613,7 +615,8 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
               <v-row>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :label="t('info.aspectRatio')" v-model="chartInfo.aspectRatio"></v-text-field>
+                  <v-text-field type="number" class="" :rules="[RULES.positive, RULES.nonZero]" :label="t('info.aspectRatio')"
+                  v-model="chartInfo.aspectRatio" @update:modelValue="chartInfo.aspectRatio = Number($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
@@ -625,16 +628,20 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
               <v-row>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.previewStart')" v-model="chartInfo.previewStart"></v-text-field>
+                  <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.previewStart')"
+                  v-model="chartInfo.previewStart" @update:modelValue="chartInfo.previewStart = Number($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positiveNull]" :label="t('info.previewEnd')" v-model="chartInfo.previewEnd"></v-text-field>
+                  <v-text-field type="number" class="" :rules="[RULES.positiveNull]" :label="t('info.previewEnd')"
+                  v-model="chartInfo.previewEnd" @update:modelValue="chartInfo.previewEnd = Number($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :label="t('info.offset')" v-model="offset_text"></v-text-field>
+                  <v-text-field type="number" class="" :rules="[RULES.non_empty]" :label="t('info.offset')"
+                  v-model="offset_text"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positive10000]" :label="t('info.lineLength')" v-model="lineLength"></v-text-field>
+                  <v-text-field type="number" class="" :rules="[RULES.positive10000, RULES.non_empty]" :label="t('info.lineLength')"
+                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = Number($event)"></v-text-field>
                 </v-col>
               </v-row>
               
