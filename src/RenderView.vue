@@ -217,14 +217,8 @@ async function chooseChart(folder?: boolean) {
 
   choosingChart.value = false;
 }
-async function loadChart(file: string) {
-  try {
-    parsingChart.value = true;
-    chartPath = file;
-    chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
-    stepIndex.value++;
-    offset_text.value = String(Math.floor(chartInfo.value.offset * 1000));
-    aspectWidth.value = String(chartInfo.value.aspectRatio);
+function updateAspectRatio() {
+    aspectWidth.value = String(chartInfo.value!.aspectRatio);
     aspectHeight.value = '1.0';
     for (let asp of [
       [16, 9],
@@ -235,12 +229,22 @@ async function loadChart(file: string) {
       [5, 4],
       [7, 5],
     ]) {
-      if (Math.abs(asp[0] / asp[1] - chartInfo.value.aspectRatio) < 1e-4) {
+      if (Math.abs(asp[0] / asp[1] - chartInfo.value!.aspectRatio) < 1e-4) {
         aspectWidth.value = String(asp[0]);
         aspectHeight.value = String(asp[1]);
         break;
       }
     }
+
+}
+async function loadChart(file: string) {
+  try {
+    parsingChart.value = true;
+    chartPath = file;
+    chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
+    stepIndex.value++;
+    offset_text.value = String(Math.floor(chartInfo.value.offset * 1000));
+    updateAspectRatio();
   } catch (e) {
     toastError(e);
   } finally {
@@ -468,8 +472,8 @@ async function readInfo() {
   let inputPath = await open({ title: t('rpe-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }] });
   if (!inputPath) return;
   try {
-    let info = await invoke('read_info', { path: inputPath }) as ChartInfo;
-    chartInfo.value = info;
+    chartInfo.value = await invoke('read_info', { path: inputPath }) as ChartInfo;
+    updateAspectRatio();
     message(t('read-success'), { title: t('read-info') })
 } catch (e) {
     toastError(e);
@@ -677,7 +681,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <v-card-actions class="justify-end">
             <v-btn class="hover-scale" variant="text" @click="readInfo" v-t="'read-info'"></v-btn>
             <v-btn class="hover-scale" variant="text" @click="saveInfo" v-t="'save-info'"></v-btn>
-            <v-btn class="hover-scale" variant="text" @click="moreInfo = false" v-t="'close'"></v-btn>
+            <v-btn class="hover-scale" variant="text" @click="moreInfo = false; updateAspectRatio();" v-t="'close'"></v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
