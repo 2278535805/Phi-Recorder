@@ -733,7 +733,7 @@ async function createPreset() {
   if (!config) return;
   let name = prompt(t('preset-create-title'));
   if (!name || !name.length) return;
-  if (name === 'default') {
+  if (name === 'default' || name === t('default-preset')) {
     toast(t('preset-cannot-use-default'), 'error');
     return;
   }
