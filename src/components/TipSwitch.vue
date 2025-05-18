@@ -8,7 +8,7 @@ defineProps<{ label: string; tooltip?: string }>();
   <v-switch class="mx-2 d-flex justify-center whitespace-pre">
     <template v-slot:label>
       {{ label }}
-      <TooltipIcon v-if="tooltip" :tooltip="tooltip"></TooltipIcon>
+      <TooltipIcon v-if="tooltip" :tooltip="tooltip" btn-class="whitespace-pre"></TooltipIcon>
     </template>
   </v-switch>
 </template>

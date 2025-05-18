@@ -904,22 +904,22 @@ async function replacePreset() {
         <v-col cols="3">
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
         </v-col>
-        <v-col cols="3" v-show="encoder !== encoderList[2]">
-          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" class="mx-2" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
+        <v-col cols="3">
+          <TipTextField :label="t('sample-count')" class="ml-2 mr-n4" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
           <TipSwitch :label="t('hw-accel')" color="btn" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">
-        <v-col cols="3">
-          <TipTextField :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
-        </v-col>
         <v-col cols="3" class="px-2">
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
+        <v-col cols="3" v-show="encoder !== encoderList[2]">
+          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" class="mx-2" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
+        </v-col>
         <v-col cols="3">
-          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
+          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="ml-2 mr-n4" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
           <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
@@ -975,7 +975,7 @@ async function replacePreset() {
         <v-col cols="6" class="pl-6">
           <TipSlider :label="t('chart-debug-line')" :tooltip="t('chart-debug-line-tip')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"></TipSlider>
         </v-col>
-        <v-col cols="6" class="px-6">
+        <v-col cols="6" class="pl-4 pr-4">
           <TipSlider :label="t('chart-ratio')" :tooltip="t('chart-ratio-tip')" color="btn" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </TipSlider>
         </v-col>
       </v-row>
@@ -983,7 +983,7 @@ async function replacePreset() {
         <v-col cols="6" class="pl-6">
           <TipSlider :label="t('chart-debug-note')" :tooltip="t('chart-debug-note-tip')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </TipSlider>
         </v-col>
-        <v-col cols="6" class="px-6">
+        <v-col cols="6" class="pl-4 pr-4">
           <TipSlider :label="t('note-scale')" :tooltip="t('note-scale-tip')" color="btn" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </TipSlider>
         </v-col>
       </v-row>
@@ -1076,7 +1076,7 @@ async function replacePreset() {
           <TipCombobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :tooltip="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></TipCombobox>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
+          <TipSwitch class="mx-2" :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
