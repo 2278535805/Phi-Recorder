@@ -50,6 +50,7 @@ export const RULES = {
     return i18n.global.t('rules.bitrate');
   },
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
+  nonZero: (value: string) => (Number(value) !== 0) || i18n.global.t('rules.non-zero'),
   nonCOMBO: (value: string) => {
     const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕⅭОмвＣＯＭＢ]/g, '').trim();
     if (value.length > 50) {

@@ -565,9 +565,9 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
             <v-col cols="4">
               <div class="mx-2 d-flex flex-column">
                 <div class="d-flex flex-row align-center justify-center">
-                  <v-text-field type="number" class="mr-2" :rules="[RULES.positive]" :label="t('width')" v-model="aspectWidth"></v-text-field>
+                  <v-text-field type="number" class="mr-2" :rules="[RULES.positive, RULES.nonZero]" :label="t('width')" v-model="aspectWidth"></v-text-field>
                   <p>:</p>
-                  <v-text-field type="number" class="ml-2" :rules="[RULES.positive]" :label="t('height')" v-model="aspectHeight"></v-text-field>
+                  <v-text-field type="number" class="ml-2" :rules="[RULES.positive, RULES.nonZero]" :label="t('height')" v-model="aspectHeight"></v-text-field>
                 </div>
               </div>
             </v-col>
