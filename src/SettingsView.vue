@@ -19,6 +19,7 @@ en:
   encoder-avc: Specify AVC Encoder
   encoder-hevc: Specify HEVC Encoder
   list-expand: Default Expand Sidebar
+  list-expand-tip: Right-click the sidebar to switch at any time
   lang: Language
 
 zh-CN:
@@ -41,6 +42,7 @@ zh-CN:
   encoder-avc: 指定 AVC 编码器
   encoder-hevc: 指定 HEVC 编码器
   list-expand: 默认展开侧边栏
+  list-expand-tip: 右键侧边栏即可随时切换
   lang: 语言
 
 </i18n>
@@ -59,6 +61,8 @@ import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
 import { SUPPORTED_LOCALES, SUPPORTED_LOCALES_NAME } from './main';
 const theme = useTheme();
+
+import TipSwitch from './components/TipSwitch.vue';
 
 const form = ref<VForm>();
 const loadingSave = ref(false);
@@ -268,13 +272,13 @@ watch(listExpand, (val) => {
         </v-col>
       </v-row>
 
-      <div class="mt-3 mx-2">
+      <div class="mx-2">
         <VDivider />
       </div>
 
       <v-row no-gutters class="mt-2 mx-0">
         <v-col cols="6">
-          <v-switch class="mx-4" :label="t('list-expand')" v-model="listExpand"></v-switch>
+          <TipSwitch class="mx-4" :tooltip="t('list-expand-tip')" :label="t('list-expand')" v-model="listExpand"></TipSwitch>
         </v-col>
         <v-col cols="6">
           <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES_NAME" item-title="name" item-value="code" v-model="locale"></v-autocomplete>
