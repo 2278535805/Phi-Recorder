@@ -198,7 +198,7 @@ zh-CN:
   volume-music-tip: |
     Hi-Res 参考值:
     无损音频: 开, 音乐音量 1.0
-    打击音量: 0.5, 最大打击音量: 0.65
+    音效音量: 0.5, 最大音效音量: 0.65
   volume-sfx: 音效音量
   compression-ratio: 音效压缩比
   limit-threshold: 最大音效音量
