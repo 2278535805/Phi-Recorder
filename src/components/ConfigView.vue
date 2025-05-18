@@ -10,7 +10,7 @@ en:
     other: Other
 
   resolution: Resolution
-  ffmpeg-preset: Preset
+  ffmpeg-preset: Encoder Preset
   fps: FPS
 
   hw-accel: Hardware Acceleration
@@ -26,11 +26,12 @@ en:
   encoder-list: Default(AVC),High Efficiency(HEVC),Fast(MPEG4)
 
   sample-count: Sample Count
-  sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA
+  sample-count-tips: Must be a power of 2. A non-1 sample count enables MSAA Anti-Aliasing
 
   bitrate-control: Bitrate Control
   bitrate: Bitrate
   bitrate-crf: Quantization parameters
+  bitrate-crf-tip: Range 1-51, the smaller the value, the higher the quality
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -48,8 +49,6 @@ en:
   respack-refresh: Refresh
   respack-open: Open Folder
 
-  note-scale: Note Scale
-
   double-hint: Double Hit Hint
 
   aggressive: Aggressive Optimization
@@ -59,22 +58,31 @@ en:
   disable-effect: Disable Effect
 
   volume-music: Music Volume
+  volume-music-tip: |
+    Hi-Res Reference: 
+    Lossless Audio: Enable, Music Volume: 1.0
+    Volume SFX: 0.5, Max SFX Volume: 0.65
   volume-sfx: SFX Volume
   compression-ratio: SFX Comp Ratio
-  force-limit: SFX Force Limit
   limit-threshold: Max SFX Volume
+  force-limit: SFX Force Limit
 
   ending-length: Result Screen Duration
   disable-loading: Remove loading screen
   hires: Lossless Audio
-  chart_debug_line: Chart Debug - Line
-  chart_debug_note: Chart Debug - Note
-  chart_ratio: Chart Zoom
+  chart-debug-line: Chart Debug - Line
+  chart-debug-line-tip: Debug text size of judge line
+  chart-debug-note: Chart Debug - Note
+  chart-debug-note-tip: Debug text size of note
+  note-scale: Note Scale
+  note-scale-tip: Zoom of each note
+  chart-ratio: Chart Zoom
+  chart-ratio-tip: Screen zoom
 
   judge-mode: Judge Mode
   judge-modes: Default,Good
-  all_good: Force Good judgment
-  all_bad: Force Bad judgment
+  all-good: Force Good judgment
+  all-bad: Force Bad judgment
 
   watermark: Watermark
   roman: Roman Mode
@@ -97,11 +105,16 @@ en:
 
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
+  max-particles-tip: Reference value 10000, related to VRAM
 
   render-start-time: Render Start Time
   render-end-time: Render End Time
 
   fade: Fade In/Out
+  fade-tip: |
+    1.0 unit size (half the screen)
+    Positive numbers hide on top,
+    Negative numbers hide on bottom
   bg-blurriness: Background Blurriness
   alpha-tint: Alpha Tint
   alpha-tint-tip: |
@@ -132,7 +145,7 @@ zh-CN:
     other: 其他
 
   resolution: 分辨率
-  ffmpeg-preset: 编码质量
+  ffmpeg-preset: 编码器预设
   fps: FPS
 
   hw-accel: 硬件加速
@@ -148,11 +161,12 @@ zh-CN:
   encoder-list: 默认(AVC),高效率(HEVC),快速(MPEG4)
 
   sample-count: 采样数
-  sample-count-tips: 大于 1 的采样数(必须为 2 的幂)会启用 MSAA
+  sample-count-tips: 大于 1 的采样数(必须为 2 的幂)会启用 MSAA 抗锯齿
 
   bitrate-control: 码率控制
   bitrate: 码率
   bitrate-crf: 质量参数
+  bitrate-crf-tip: 范围 1-51, 数值越小质量越高
 
   player-avatar: 玩家头像
   player-name: 玩家名
@@ -170,8 +184,6 @@ zh-CN:
   respack-refresh: 刷新
   respack-open: 打开文件夹
 
-  note-scale: 音符缩放
-
   double-hint: 双押提示
 
   aggressive: 激进优化
@@ -181,6 +193,10 @@ zh-CN:
   disable-effect: 禁用特效
 
   volume-music: 音乐音量
+  volume-music-tip: |
+    Hi-Res 参考值:
+    无损音频: 开, 音乐音量 1.0
+    打击音量: 0.5, 最大打击音量: 0.65
   volume-sfx: 音效音量
   compression-ratio: 音效压缩比
   limit-threshold: 最大音效音量
@@ -189,14 +205,19 @@ zh-CN:
   ending-length: 结算画面时长
   disable-loading: 禁用加载
   hires: 无损音频
-  chart_debug_line: 谱面调试 - 判定线
-  chart_debug_note: 谱面调试 - 音符
-  chart_ratio: 谱面缩放
+  chart-debug-line: 谱面调试 - 判定线
+  chart-debug-line-tip: 判定线的调试文字大小
+  chart-debug-note: 谱面调试 - 音符
+  chart-debug-note-tip: 音符的调试文字大小
+  note-scale: 音符缩放
+  note-scale-tip: 每个音符的缩放
+  chart-ratio: 谱面缩放
+  chart-ratio-tip: 画面的缩放
 
   judge-mode: 判定模式
   judge-modes: 默认,Good
-  all_good: 强制Good
-  all_bad: 强制Bad
+  all-good: 强制 Good
+  all-bad: 强制 Bad
 
   watermark: 水印
   roman: 罗马模式
@@ -218,11 +239,16 @@ zh-CN:
 
   max-particles: 粒子限制
   max-particles-list: 低,中,高
+  max-particles-tip: 参考值 100000, 与显存有关
 
   render-start-time: 渲染开始时间
   render-end-time: 渲染结束时间
 
   fade: 上隐/下隐
+  fade-tip: |
+    1.0 单位大小(半个屏幕)
+    正数上隐,
+    负数下隐
   bg-blurriness: 背景模糊
   alpha-tint: 透明度染色
   alpha-tint-tip: |
@@ -260,6 +286,9 @@ import type { RenderConfig } from '../model';
 
 import TipSwitch from './TipSwitch.vue';
 import TipTextField from './TipTextField.vue';
+import TipCombobox from './TipCombobox.vue';
+import TipSlider from './TipSlider.vue';
+import TooltipIcon from './TooltipIcon.vue';
 
 const form = ref<VForm>();
 const page = ref(0);
@@ -824,7 +853,7 @@ async function replacePreset() {
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
           <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
@@ -888,7 +917,7 @@ async function replacePreset() {
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
+          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
           <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
@@ -941,19 +970,19 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center">
-        <v-col cols="6" class="px-6">
-          <v-slider :label="t('chart_debug_line')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"> </v-slider>
+        <v-col cols="6" class="pl-6">
+          <TipSlider :label="t('chart-debug-line')" :tooltip="t('chart-debug-line-tip')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugLine"></TipSlider>
         </v-col>
         <v-col cols="6" class="px-6">
-          <v-slider :label="t('chart_ratio')" color="btn" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </v-slider>
+          <TipSlider :label="t('chart-ratio')" :tooltip="t('chart-ratio-tip')" color="btn" thumb-label="always" :min="0.05" :max="1" :step="0.01" v-model="chartRatio"> </TipSlider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center">
-        <v-col cols="6" class="px-6">
-          <v-slider :label="t('chart_debug_note')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </v-slider>
+        <v-col cols="6" class="pl-6">
+          <TipSlider :label="t('chart-debug-note')" :tooltip="t('chart-debug-note-tip')" color="btn" thumb-label="always" :min="0" :max="1" :step="0.01" v-model="chartDebugNote"> </TipSlider>
         </v-col>
         <v-col cols="6" class="px-6">
-          <v-slider :label="t('note-scale')" color="btn" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </v-slider>
+          <TipSlider :label="t('note-scale')" :tooltip="t('note-scale-tip')" color="btn" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </TipSlider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6">
@@ -997,8 +1026,11 @@ async function replacePreset() {
     <div v-show="page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-row no-gutters class="mt-2 align-center">
-        <v-col cols="12" class="">
+        <v-col cols="11" class="">
           <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
+        </v-col>
+        <v-col cols="1" class="">
+          <TooltipIcon :tooltip="t('volume-music-tip')"></TooltipIcon>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center px-6">
@@ -1028,7 +1060,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('fade')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
+          <TipTextField class="mx-2" :label="t('fade')" :tooltip="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.non_empty]"></TipTextField>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
@@ -1039,7 +1071,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
+          <TipCombobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :tooltip="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></TipCombobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
