@@ -5,9 +5,9 @@ en:
   prev-step: Previous
   next-step: Next
   steps:
-    choose: 'Choose the chart'
-    config: 'Configure chart'
-    options: 'Render options'
+    choose: 'Choose'
+    config: 'Info'
+    options: 'Options'
     render: 'Render'
 
   choose:
@@ -21,7 +21,7 @@ en:
     name: Chart name
     difficulty: Difficulty
     level: Display Difficulty
-    charter: Charter
+    charter: Chart Design
     composer: Composer
     illustrator: Illustrator
 
@@ -44,7 +44,7 @@ en:
 
     intro: Introduction
 
-    holdPartialCover: Hold Partial Cover
+    holdPartialCover: Hold Tail Cover
 
   error:
     preview-start-end-15s: Preview time cannot be greater than 15 seconds
@@ -83,14 +83,14 @@ zh-CN:
   next-step: 下一步
   steps:
     choose: '选择谱面'
-    config: '配置谱面'
+    config: '谱面信息'
     options: '渲染参数'
     render: '渲染视频'
 
   choose:
     archive: 压缩包
     folder: 文件夹
-    can-also-drop: 可直接拖放谱面至此处
+    can-also-drop: 可拖放谱面至此处
     drop: 拖放谱面至此处
     filter-name: 谱面文件
 
@@ -98,9 +98,9 @@ zh-CN:
     name: 谱面名
     difficulty: 难度
     level: 显示难度
-    charter: 谱师
-    composer: 曲师
-    illustrator: 画师
+    charter: 谱面设计
+    composer: 音乐制作
+    illustrator: 插画设计
 
     chart: 谱面文件
     music: 音乐文件
@@ -110,10 +110,10 @@ zh-CN:
     previewEnd: 预览结束时间
 
     aspectRatio: 宽高比
-    backgroundDim: 背景亮度
+    backgroundDim: 背景暗淡
     lineLength: 判定线长度
     offset: 偏移
-    tip: 提示
+    tip: Tip
     tip-placeholder: 留空则随机选择
     tags: 标签
     tag-editor: 标签编辑器
@@ -121,7 +121,7 @@ zh-CN:
 
     intro: 简介
 
-    holdPartialCover: Hold 遮罩位置
+    holdPartialCover: Hold 尾部遮罩
 
   error:
     preview-start-end-15s: 预览时间不能大于15秒

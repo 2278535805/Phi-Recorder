@@ -9,6 +9,6 @@ defineProps<{ tooltip: string; btnClass?: string[] | string }>();
         <v-icon> mdi-information-outline </v-icon>
       </v-btn>
     </template>
-    <span>{{ tooltip }}</span>
+    <span style="white-space: pre-wrap;">{{ tooltip }}</span>
   </v-tooltip>
 </template>

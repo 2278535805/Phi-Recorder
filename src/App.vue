@@ -396,9 +396,11 @@ html {
   /* Non-prefixed version, currently supported by Chrome, Opera, and Edge */
 }
 
-.v-input__details {
-  /* 不让details占据布局空间 */
-  display: none;
+.v-input__details { /* 不让details占据布局空间 */
+  /* display: none; */
+  margin-bottom: -6px;
+  min-height: 16px;
+  padding-top: 2px
 }
 
 .v-form {
