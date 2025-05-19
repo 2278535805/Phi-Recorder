@@ -434,6 +434,8 @@ html {
 }
 
 .gradient-text {
+  position: absolute;
+  pointer-events: none;
   background: linear-gradient(30deg, #04c9ff, #ff13d4);
   -webkit-background-clip: text;
   background-clip: text;
