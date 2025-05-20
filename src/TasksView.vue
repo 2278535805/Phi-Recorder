@@ -164,9 +164,10 @@ async function showOutputFolder() {
 }
 
 const removeDialog = ref(false);
-function removeTask(task: Task) {
+const removeTaskId = ref(0);
+function removeTask(task: number) {
   removeDialog.value = false;
-  invoke('remove_task', { id: task.id })
+  invoke('remove_task', { id: task })
     .catch((e) => {
       toastError(e);
     });
@@ -216,7 +217,11 @@ function removeTask(task: Task) {
                   rounded
                 ></v-progress-linear>
                 <div class="pt-4 d-flex justify-end">
-                  <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'" @contextmenu="removeDialog = true"></v-btn>
+                  <v-btn class="hover-scale"
+                    prepend-icon="mdi-cancel"
+                    variant="text"
+                    @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"
+                    @contextmenu="removeDialog = true; removeTaskId = task.id"></v-btn>
                 </div>
               </template>
               <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
@@ -231,7 +236,7 @@ function removeTask(task: Task) {
                       }
                     }
                   "
-                  @contextmenu="removeDialog = true"
+                  @contextmenu="removeDialog = true; removeTaskId = task.id"
                   v-t="'details'"
                   class="hover-scale"></v-btn>
               </div>
@@ -254,7 +259,7 @@ function removeTask(task: Task) {
                       }
                     }
                   "
-                  @contextmenu="removeDialog = true"
+                  @contextmenu="removeDialog = true; removeTaskId = task.id"
                   v-t="'show-output'"
                   class="hover-scale"></v-btn>
               </div>
@@ -283,7 +288,7 @@ function removeTask(task: Task) {
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>
-          <v-btn class="hover-scale" variant="text" @click="removeTask" v-t="'confirm'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskId)" v-t="'confirm'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
