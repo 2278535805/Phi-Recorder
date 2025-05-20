@@ -264,7 +264,7 @@ impl Task {
 pub struct TaskView {
     id: u32,
     name: String,
-    output: PathBuf,
+    pub output: PathBuf,
     path: String,
     cover: String,
     status: TaskStatus,
