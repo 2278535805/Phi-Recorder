@@ -227,15 +227,18 @@ function removeTask(task: number) {
               <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
                 <v-btn
                   variant="flat"
+                  @click="removeDialog = true; removeTaskId = task.id"
+                  v-t="'remove-task'"
+                  class="hover-scale"></v-btn>
+                <v-btn
+                  variant="flat"
                   prepend-icon="mdi-alert-circle-outline"
-                  @click="
-                    () => {
+                  @click="() => {
                       if (task.status.type === 'failed' || task.status.type === 'canceled') {
                         outputDialogMessage = task.status.output;
                         outputDialog = true;
                       }
-                    }
-                  "
+                    }"
                   @contextmenu="removeDialog = true; removeTaskId = task.id"
                   v-t="'details'"
                   class="hover-scale"></v-btn>
@@ -259,7 +262,6 @@ function removeTask(task: number) {
                       }
                     }
                   "
-                  @contextmenu="removeDialog = true; removeTaskId = task.id"
                   v-t="'show-output'"
                   class="hover-scale"></v-btn>
               </div>
@@ -284,7 +286,7 @@ function removeTask(task: number) {
       <v-card class="log-card-only-window">
         <v-card-title v-t="'remove-task'"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('remove-task-confirm') }}</pre>
+          <div class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('remove-task-confirm') }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>
