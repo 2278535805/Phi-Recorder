@@ -16,6 +16,8 @@ en:
 
   details: Details
   output: Output
+  remove-task: Remove Task
+  remove-task-confirm: Confirm to remove task?
 
   show-output: Show Output
   show-folder: Open Output Folder
@@ -43,6 +45,8 @@ zh-CN:
 
   details: 详情
   output: 输出
+  remove-task: 删除任务
+  remove-task-confirm: 确认删除任务?
 
   show-output: 查看输出
   show-folder: 打开输出文件夹
@@ -158,6 +162,15 @@ async function showOutputFolder() {
     toastError(e);
   }
 }
+
+const removeDialog = ref(false);
+function removeTask(task: Task) {
+  removeDialog.value = false;
+  invoke('remove_task', { id: task.id })
+    .catch((e) => {
+      toastError(e);
+    });
+}
 </script>
 
 <template>
@@ -203,7 +216,7 @@ async function showOutputFolder() {
                   rounded
                 ></v-progress-linear>
                 <div class="pt-4 d-flex justify-end">
-                  <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"></v-btn>
+                  <v-btn class="hover-scale" prepend-icon="mdi-cancel" variant="text" @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'" @contextmenu="removeDialog = true"></v-btn>
                 </div>
               </template>
               <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
@@ -218,11 +231,18 @@ async function showOutputFolder() {
                       }
                     }
                   "
+                  @contextmenu="removeDialog = true"
                   v-t="'details'"
                   class="hover-scale"></v-btn>
               </div>
               <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
                 <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale"></v-btn>
+                <v-btn 
+                  variant="flat"
+                  prepend-icon="mdi-folder-open-outline" 
+                  @click="showInFolder(task.output)"
+                  v-t="'show-in-folder'"
+                  class="hover-scale"></v-btn>
                 <v-btn
                   variant="flat"
                   prepend-icon="mdi-text-box-outline"
@@ -234,13 +254,8 @@ async function showOutputFolder() {
                       }
                     }
                   "
+                  @contextmenu="removeDialog = true"
                   v-t="'show-output'"
-                  class="hover-scale"></v-btn>
-                <v-btn 
-                  variant="flat"
-                  prepend-icon="mdi-folder-open-outline" 
-                  @click="showInFolder(task.output)" 
-                  v-t="'show-in-folder'"
                   class="hover-scale"></v-btn>
               </div>
             </div>
@@ -257,6 +272,18 @@ async function showOutputFolder() {
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'confirm'"></v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="removeDialog" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
+      <v-card class="log-card-only-window">
+        <v-card-title v-t="'remove-task'"> </v-card-title>
+        <v-card-text>
+          <pre class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('remove-task-confirm') }}</pre>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="removeTask" v-t="'confirm'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

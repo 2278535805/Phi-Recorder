@@ -325,6 +325,10 @@ impl TaskQueue {
     pub async fn cancel(&self, id: u32) {
         self.tasks.lock().await[id as usize].cancel();
     }
+
+    pub async fn remove(&self, id: u32) {
+        self.tasks.lock().await.remove(id as usize);
+    }
 }
 
 impl Drop for TaskQueue {
