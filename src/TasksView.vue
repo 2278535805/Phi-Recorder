@@ -220,8 +220,8 @@ function removeTask(task: number) {
                   <v-btn class="hover-scale"
                     prepend-icon="mdi-cancel"
                     variant="text"
-                    @click="invoke('cancel_task', { id: task.id })" v-t="'cancel'"
-                    @contextmenu="removeDialog = true; removeTaskId = task.id"></v-btn>
+                    @click="invoke('cancel_task', { id: task.id })"
+                    v-t="'cancel'"</v-btn>
                 </div>
               </template>
               <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
