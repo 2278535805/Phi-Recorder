@@ -2,8 +2,7 @@
 prpr::tl_file!("render");
 
 use crate::{
-    common::{output_dir, read_config, test_output_dir},
-    ASSET_PATH,
+    common::{output_dir, read_config, test_output_dir}, ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
 use chrono::Local;
@@ -562,6 +561,25 @@ pub async fn main(cmd: bool) -> Result<()> {
     let sfx_drag = res_pack.sfx_drag;
     let sfx_flick = res_pack.sfx_flick;
 
+    let sample_rate = 48000;
+    let sample_rate_f64 = sample_rate as f64;
+
+    fn check_sample_rate(expected: u32, actual: u32, name: &str) -> Result<()> {
+        if expected != actual {
+            bail!(
+                "Error: Sample rate mismatch - Expected {}, but `{}` has {}",
+                expected, name, actual
+            );
+        } else {
+            Ok(())
+        }
+    }
+
+    check_sample_rate(sample_rate, ending_music.sample_rate(), "ending_music")?;
+    check_sample_rate(sample_rate, sfx_click.sample_rate(), "sfx_click")?;
+    check_sample_rate(sample_rate, sfx_drag.sample_rate(), "sfx_drag")?;
+    check_sample_rate(sample_rate, sfx_flick.sample_rate(), "sfx_flick")?;
+
     let mut gl = unsafe { get_internal_gl() };
 
     let before_time: f64 = if config.disable_loading {
@@ -605,36 +623,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     if ipc {
         send(IPCEvent::StartMixing);
     }
-    let sample_rate = 48000;
-    let sample_rate_f64 = sample_rate as f64;
-    assert_eq!(
-        sample_rate,
-        ending_music.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        ending_music.sample_rate()
-    );
-    assert_eq!(
-        sample_rate,
-        sfx_click.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        sfx_click.sample_rate()
-    );
-    assert_eq!(
-        sample_rate,
-        sfx_drag.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        sfx_drag.sample_rate()
-    );
-    assert_eq!(
-        sample_rate,
-        sfx_flick.sample_rate(),
-        "Sample rate mismatch: expected {}, got {}",
-        sample_rate,
-        sfx_flick.sample_rate()
-    );
 
     let mut output_music =
         vec![0.0_f32; ((video_length + video_cut_time) * music_sample_rate as f64).ceil() as usize * 2];
