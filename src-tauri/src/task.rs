@@ -18,13 +18,13 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc,
     },
-    time::Instant,
+    time::{Duration, Instant},
 };
 use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
     sync::{mpsc, Mutex},
-    task::JoinHandle,
+    task::JoinHandle, time::sleep,
 };
 use tracing::{error, info};
 
@@ -144,76 +144,85 @@ impl Task {
         let mut frame_times = VecDeque::new();
         let mut last_update_fps_sec: u32 = 0;
         let mut last_fps: usize = 0;
+
         loop {
-            let line = lines.next_line().await?;
-            let Some(line) = line else { break };
-            let Ok(event): Result<IPCEvent, _> = serde_json::from_str(line.trim()) else {
-                continue;
-            };
-            match event {
-                IPCEvent::Loading => {
-                    *self.status.lock().await = TaskStatus::Loading;
-                }
-                IPCEvent::StartMixing => {
-                    *self.status.lock().await = TaskStatus::Mixing;
-                }
-                IPCEvent::StartRender(total_frame) => {
-                    *self.status.lock().await = TaskStatus::Rendering {
-                        progress: 0.,
-                        fps: 0,
-                        estimate: 0.,
-                    };
-                    total = total_frame;
-                }
-                IPCEvent::Frame => {
-                    frame_count += 1;
-                    let cur = start.elapsed().as_secs_f64();
-                    let sec = cur as u32;
-                    frame_times.push_back(cur);
-                    while frame_times.front().is_some_and(|it| cur - *it > 1.) {
-                        frame_times.pop_front();
+            tokio::select! {
+                _ = async {
+                    while !self.request_cancel.load(Ordering::Relaxed) {
+                        sleep(Duration::from_millis(50)).await;
                     }
-                    if last_update_fps_sec != sec {
-                        last_fps = frame_times.len();
-                        last_update_fps_sec = sec;
-                    }
-                    let estimate =
-                        total.saturating_sub(frame_count).max(1) as f64 / last_fps as f64;
-                    *self.status.lock().await = TaskStatus::Rendering {
-                        progress: frame_count as f64 / total as f64,
-                        fps: last_fps as u64,
-                        estimate,
-                    };
-                }
-                IPCEvent::Done(duration) => {
+                } => {
+                    child.kill().await?;
                     let output = child.wait_with_output().await?;
-                    *self.status.lock().await = TaskStatus::Done {
-                        duration,
+                    *self.status.lock().await = TaskStatus::Canceled {
                         output: format!(
-                        "{}\n{}",
-                        String::from_utf8(output.stdout)
-                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
-                        String::from_utf8(output.stderr)
-                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
-                    ),
+                            "{}\n{}",
+                            String::from_utf8(output.stdout)
+                                .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
+                            String::from_utf8(output.stderr)
+                                .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
+                        ),
                     };
                     return Ok(());
-                }
-            }
-            if self.request_cancel.load(Ordering::Relaxed) {
-                child.kill().await?;
-                let output = child.wait_with_output().await?;
-                *self.status.lock().await = TaskStatus::Canceled {
-                    output: format!(
-                        "{}\n{}",
-                        String::from_utf8(output.stdout)
-                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
-                        String::from_utf8(output.stderr)
-                            .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
-                    ),
-                };
+                },
 
-                return Ok(());
+                line_result = lines.next_line() => {
+                    let line = line_result?;
+                    let Some(line) = line else { break };
+                    let Ok(event): Result<IPCEvent, _> = serde_json::from_str(line.trim()) else {
+                        continue;
+                    };
+
+                    match event {
+                        IPCEvent::Loading => {
+                            *self.status.lock().await = TaskStatus::Loading;
+                        },
+                        IPCEvent::StartMixing => {
+                            *self.status.lock().await = TaskStatus::Mixing;
+                        },
+                        IPCEvent::StartRender(total_frame) => {
+                            *self.status.lock().await = TaskStatus::Rendering {
+                                progress: 0.0,
+                                fps: 0,
+                                estimate: 0.0,
+                            };
+                            total = total_frame;
+                        },
+                        IPCEvent::Frame => {
+                            frame_count += 1;
+                            let cur = start.elapsed().as_secs_f64();
+                            let sec = cur as u32;
+                            frame_times.push_back(cur);
+                            while frame_times.front().is_some_and(|it| cur - *it > 1.0) {
+                                frame_times.pop_front();
+                            }
+                            if last_update_fps_sec != sec {
+                                last_fps = frame_times.len();
+                                last_update_fps_sec = sec;
+                            }
+                            let estimate = total.saturating_sub(frame_count).max(1) as f64 / last_fps as f64;
+                            *self.status.lock().await = TaskStatus::Rendering {
+                                progress: frame_count as f64 / total as f64,
+                                fps: last_fps as u64,
+                                estimate,
+                            };
+                        },
+                        IPCEvent::Done(duration) => {
+                            let output = child.wait_with_output().await?;
+                            *self.status.lock().await = TaskStatus::Done {
+                                duration,
+                                output: format!(
+                                    "{}\n{}",
+                                    String::from_utf8(output.stdout)
+                                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
+                                    String::from_utf8(output.stderr)
+                                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
+                                ),
+                            };
+                            return Ok(());
+                        }
+                    }
+                }
             }
         }
 
