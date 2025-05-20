@@ -279,13 +279,6 @@ onMounted(() => {
   box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.gradient-text {
-  background: linear-gradient(45deg, #2196f3, #e91e63);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 .license-text {
   font-size: 0.9rem;
   opacity: 0.7;

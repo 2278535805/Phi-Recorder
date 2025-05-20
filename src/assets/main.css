@@ -1,15 +1,28 @@
 
 @font-face {
-  font-family: 'custom-font';
+  font-family: 'HarmonyOSSansSC';
   font-display: swap;
   src: url('./HarmonyOS_Sans_SC_Regular.ttf');
 }
 
+@font-face {
+  font-family: 'SarasaUiSC';
+  src: url('./SarasaUiSC-Regular.ttf');
+}
+
 @layer base {
   html {
-    font-family: custom-font, system-ui !important;
+    font-family: HarmonyOSSansSC, SarasaUiSC, system-ui !important;
     transition: background-color 0.5s;
   }
+}
+
+.gradient-text {
+  font-family: SarasaUiSC, HarmonyOSSansSC, system-ui !important;
+  background: linear-gradient(90deg, #B0B6E1, #C5B9D6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .select {

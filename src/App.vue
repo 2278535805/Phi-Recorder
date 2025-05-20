@@ -275,7 +275,7 @@ onMounted(async () => {
     <v-sonner position="top-center" />
     <v-app-bar :elevation="0" class="app-bar-shadow blur-background" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
-      <div class="gradient-text">
+      <div class="gradient-text" style="position: absolute; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
       </div>
       <div @click="routerPush('about')" style="cursor: pointer;" v-if="update">
@@ -431,15 +431,6 @@ html {
 
 .nav-drawer-border {
   border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.gradient-text {
-  position: absolute;
-  pointer-events: none;
-  background: linear-gradient(30deg, #04c9ff, #ff13d4);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .list-item {
