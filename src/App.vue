@@ -320,7 +320,7 @@ onMounted(async () => {
       <router-view v-slot="{ Component }">
         <Suspense timeout="0">
           <template #default>
-            <component :is="Component" ref="component" />
+            <component :is="Component" ref="component" :style="{ 'scrollbar-color': `${theme.current.value.colors.scrollbar} ${theme.current.value.colors.surface}` }" />
           </template>
           <template #fallback>
             <div class="flex justify-center pa-8">
