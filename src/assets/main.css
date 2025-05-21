@@ -19,10 +19,14 @@
 
 .gradient-text {
   font-family: SarasaUiSC, HarmonyOSSansSC, system-ui !important;
-  background: linear-gradient(90deg, #B0B6E1, #C5B9D6);
+  background: linear-gradient(90deg, #B0B6E1 10%, #C5B9D6 90%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.text-glow {
+  text-shadow: 0 0 12px rgba(186, 183, 220, 0.4);
 }
 
 .select {
@@ -40,10 +44,6 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.text-glow {
-  text-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
 }
 
 .log-card-bg {
