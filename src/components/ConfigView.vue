@@ -375,13 +375,13 @@ const
   chartRatio = ref(DEFAULT_CONFIG.chartRatio),
   allGood = ref(DEFAULT_CONFIG.allGood),
   allBad = ref(DEFAULT_CONFIG.allBad),
-  fpsList = ['60', '120', '30'],
+  fpsList = ['30', '60', '120'],
   fps = ref(String(DEFAULT_CONFIG.fps)),
   hwAccel = ref(DEFAULT_CONFIG.hardwareAccel),
   dynamicBitrateControl = ref(true),
   bitrate = ref('28'),
-  bitrateList = ['5M', '7M', '2M'],
-  bitrateCrfList = ['28', '24', '40'],
+  bitrateList = ['2M', '5M', '7M'],
+  bitrateCrfList = ['24', '28', '35', '40'],
   resolution = ref('1920x1080')
 const encoderList = ref(t('encoder-list').split(','))
 const encoder = ref(t('encoder-list').split(',')[0])
@@ -834,7 +834,7 @@ async function replacePreset() {
     </v-bottom-navigation>
   </v-layout>
 
-  <v-form ref="form" style="max-height: 48vh; min-height: 27vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
+  <v-form ref="form" style="max-height: 48vh; min-height: 200px; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
     <VDivider style="position: sticky; top: 0;"/>
     <div v-show="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
@@ -916,14 +916,25 @@ async function replacePreset() {
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3" v-show="encoder !== encoderList[2]">
-          <v-combobox :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" class="mx-2" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
+          <v-combobox class="mx-2" :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="ml-2 mr-n4" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
-          <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <TipCombobox class="ml-2 mr-n4" v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
+          <v-combobox class="mx-2" v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch v-if="encoder !== encoderList[2]" :label="t('dynamic-bitrate-control')" color="btn" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2">
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positive]" v-show="!render.includes(renderList[0])"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
       </v-row>
     </div>
@@ -1020,7 +1031,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.nonCOMBO]" v-model="combo"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
+          <TipCombobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :tooltip="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></TipCombobox>
         </v-col>
       </v-row>
     </div>
@@ -1053,13 +1064,13 @@ async function replacePreset() {
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positive]" v-show="!render.includes(renderList[0])"></v-text-field>
+          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
         <v-col cols="3">
           <TipTextField class="mx-2" :label="t('fade')" :tooltip="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.non_empty]"></TipTextField>
@@ -1067,16 +1078,7 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
-          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
-        </v-col>
-        <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
-        </v-col>
-        <v-col cols="3">
-          <TipCombobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :tooltip="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></TipCombobox>
-        </v-col>
-        <v-col cols="3">
-          <TipSwitch class="mx-2" :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
+          <TipSwitch class="mx-4" :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
