@@ -8,7 +8,7 @@ export const darkTheme: ThemeDefinition = {
     'primary': 'rgb(54, 50, 98)',
     'secondary': 'rgb(244, 67, 54)',
     'accent': 'rgb(75, 73, 172)',
-    'surface': 'rgb(49, 44, 102)',
+    'surface': 'rgb(47, 43, 95)',
     'btn': 'rgb(154, 148, 208)',
     'bgLeft': 'rgb(41, 35, 100)',
     'bgRight': 'rgb(36, 36, 62)',
