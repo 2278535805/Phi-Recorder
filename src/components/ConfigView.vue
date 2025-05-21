@@ -160,10 +160,10 @@ zh-CN:
   hevc-tips: 使用 HEVC 编码，压缩率更高，渲染速度更慢
 
   encoder: 编码器
-  encoder-list: 默认(AVC),高效率(HEVC),快速(MPEG4)
+  encoder-list: 默认 (AVC),高效率 (HEVC),快速 (MPEG4)
 
   sample-count: 采样数
-  sample-count-tips: 大于 1 的采样数(必须为 2 的幂)会启用 MSAA 抗锯齿
+  sample-count-tips: 大于 1 的采样数 (必须为 2 的幂) 会启用 MSAA 抗锯齿
 
   bitrate-control: 码率控制
   bitrate: 码率
@@ -224,7 +224,7 @@ zh-CN:
   watermark: 水印
   roman: 罗马模式
   chinese: 中文模式
-  combo: COMBO文字
+  combo: COMBO 文字
   difficulty: 自定义难度
   offset: 延时
   judgeOffset: 判定偏移
@@ -855,7 +855,7 @@ async function replacePreset() {
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
+          <TipCombobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" class="ml-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
           <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
