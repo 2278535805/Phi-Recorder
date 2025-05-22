@@ -292,7 +292,7 @@ watch(listExpand, (val) => {
     </div>
   </div>
 
-  <v-dialog v-model="resetDialog" theme="darkTheme" width="auto" min-width="300px" class="log-card-bg">
+  <v-dialog v-model="resetDialog" width="auto" min-width="300px" class="log-card-bg">
     <v-card class="log-card-only-window">
       <v-card-title v-t="'reset-confirm'"> </v-card-title>
       <v-card-text>

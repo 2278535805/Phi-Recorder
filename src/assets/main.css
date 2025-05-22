@@ -39,42 +39,6 @@
   white-space: pre-wrap;
 }
 
-.container {
-  margin: 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.log-card-bg {
-  backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
-}
-
-.log-card-window {
-  border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(80px) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.log-card-only-window {
-  border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(80px) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.log-card-msg {
-  user-select: text;
-  border-radius: 12px !important;
-  background: rgba(0, 0, 0, 0.4) !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .hover-scale {
   transition: transform 0.3s ease;
 }
@@ -128,36 +92,9 @@
   transform: translateX(20px);
 }
 
-.v-btn {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .fade-in {
   animation: fadeIn 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   opacity: 0; /* 初始状态透明 */
-}
-
-.overlay {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  cursor: pointer;
-}
-
-.overlay:hover {
-  opacity: 1;
-}
-
-.icon {
-  font-size: 250%;
 }
 
 @keyframes fadeIn {

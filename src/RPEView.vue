@@ -219,7 +219,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       </v-form>
 
       <v-lazy v-for="(chart, index) in filteredCharts" :key="chart.id" :min-height="150"> <!--transition="fade-transition"-->
-        <v-card class="chart-card" :style="{ background: `${theme.current.value.colors.container}` }">
+        <v-card class="chart-card">
           <div class="d-flex flex-row align-stretch">
             <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
               <div

@@ -596,7 +596,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         </v-form>
       </template>
 
-      <v-dialog v-model="moreInfo" theme="darkTheme" width="auto" min-width="90%" class="log-card-bg">
+      <v-dialog v-model="moreInfo" width="auto" min-width="90%" class="log-card-bg">
         <v-card class="log-card-only-window">
           <v-card-title v-t="'phira-info'"> </v-card-title>
           <v-card-text>
@@ -686,7 +686,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="tagEditor" theme="darkTheme" width="auto" min-width="90%" class="log-card-bg">
+      <v-dialog v-model="tagEditor" width="auto" min-width="90%" class="log-card-bg">
         <v-card class="log-card-only-window">
           <v-card-title v-t="'info.tag-editor'"> </v-card-title>
           <v-card-text>
