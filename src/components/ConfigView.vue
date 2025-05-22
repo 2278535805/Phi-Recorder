@@ -834,7 +834,7 @@ async function replacePreset() {
     </v-bottom-navigation>
   </v-layout>
 
-  <v-form ref="form" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
+  <v-form ref="form" class="scroll-mask" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
     <VDivider style="position: sticky; top: 0;"/>
     <div v-show="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">

@@ -408,6 +408,11 @@ html {
   /* scrollbar-color: rgba(99, 102, 241, 0.5) rgba(54, 50, 98, 0.1); */
 }
 
+.scroll-mask {
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 5%, rgba(0, 0, 0, 1) 95%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 5%, rgba(0, 0, 0, 1) 95%, rgba(0, 0, 0, 0) 100%);
+}
+
 .v-overlay__scrim {
   background: rgba(var(--v-theme-overlay), 0.5);
 }
