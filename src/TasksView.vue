@@ -185,7 +185,7 @@ function removeTask(task: number) {
     </v-form>
     <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in" v-t="'empty'"></h1>
     <v-lazy v-for="(task, index) in tasks" :key="task.id" :min-height="150" transition="fade-transition">
-      <v-card class="task-card" :style="{ background: `${theme.current.value.colors.container}` }">
+      <v-card class="task-card">
         <div class="d-flex flex-row align-stretch">
           <div class="d-flex flex-row align-center img-cover" style="width: 30%">
             <div
@@ -271,18 +271,18 @@ function removeTask(task: number) {
       </v-card>
     </v-lazy>
 
-    <v-dialog v-model="outputDialog" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</pre>
+          <div class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'confirm'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="removeDialog" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="removeDialog" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-only-window">
         <v-card-title v-t="'remove-task'"> </v-card-title>
         <v-card-text>

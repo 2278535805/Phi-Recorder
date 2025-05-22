@@ -273,7 +273,7 @@ onMounted(async () => {
 <template>
   <v-app id="phi-recorder" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.bgLeft}, ${theme.current.value.colors.bgRight}` }">
     <v-sonner position="top-center" />
-    <v-app-bar :elevation="0" class="app-bar-shadow blur-background" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
+    <v-app-bar :elevation="0" class="app-bar-shadow blur-background">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text" style="position: absolute; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
@@ -288,7 +288,7 @@ onMounted(async () => {
         <v-btn class="mr-4" size="small" color="red" icon="mdi-circle" @click="appClose()"></v-btn>
       </div>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.topLeft}, ${theme.current.value.colors.topRight})` }">
+    <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
       <v-list density="compact" nav>
         <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
@@ -320,7 +320,7 @@ onMounted(async () => {
       <router-view v-slot="{ Component }">
         <Suspense timeout="0">
           <template #default>
-            <component :is="Component" ref="component" :style="{ 'scrollbar-color': `${theme.current.value.colors.scrollbar} ${theme.current.value.colors.surface}` }" />
+            <component :is="Component" ref="component" :style="{ 'scrollbar-color': `${theme.current.value.colors.scrollbar} ${theme.current.value.colors.back}` }" />
           </template>
           <template #fallback>
             <div class="flex justify-center pa-8">
@@ -330,11 +330,11 @@ onMounted(async () => {
         </Suspense>
       </router-view>
     </v-main>
-    <v-dialog v-model="ffmpegDialog" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="ffmpegDialog" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-not-found')"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</pre>
+          <div class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-not-found-detail') }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="getNewVersion" :loading="ffmpegGetNewVersionLoding" v-t="t('try-download')"></v-btn>
@@ -344,11 +344,11 @@ onMounted(async () => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="ffmpegDialogFilter" theme="darkTheme" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="ffmpegDialogFilter" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title v-t="t('ffmpeg-check')"> </v-card-title>
         <v-card-text>
-          <pre class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</pre>
+          <div class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="btn" class="hover-scale" variant="text" @click="ffmpegDialogFilter = false" v-t="t('confirm')"></v-btn>
@@ -408,15 +408,79 @@ html {
   /* scrollbar-color: rgba(99, 102, 241, 0.5) rgba(54, 50, 98, 0.1); */
 }
 
-.v-overlay-container {
-  z-index: 1000;
-  /* 设置遮罩层的背景颜色,使其与主题一致 */
-  background-color: rgba(56, 56, 146, 0.8);
+.v-overlay__scrim {
+  background: rgba(var(--v-theme-overlay), 0.5);
 }
 
 .waitIn {
   visibility: hidden;
   animation: Up 0.5s 0.5s forwards;
+}
+
+.container {
+  margin: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-bg {
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.log-card-window {
+  border-radius: 16px !important;
+  background: rgba(var(--v-theme-dialog), 0.6) !important;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-only-window {
+  border-radius: 16px !important;
+  background: rgba(var(--v-theme-dialog), 0.7) !important;
+  backdrop-filter: blur(80px) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-card-msg {
+  user-select: text;
+  border-radius: 12px !important;
+  background: rgba(var(--v-theme-dialog), 0.6) !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: pre;
+  padding: 1rem 1rem 1rem 1rem;
+}
+
+.v-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: val(--v-theme-primary);
+}
+
+.overlay {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.overlay:hover {
+  opacity: 1;
+}
+
+.icon {
+  font-size: 250%;
 }
 
 @keyframes Up {
@@ -505,6 +569,7 @@ html {
 }
 
 .blur-background {
+  background: linear-gradient(300deg, rgba(var(--v-theme-topLeft), 0.4) 10%, rgba(var(--v-theme-topRight), 0.4) 90%) !important;
   backdrop-filter: blur(40px) saturate(180%);
   transform: translateZ(0);
   position: relative;
