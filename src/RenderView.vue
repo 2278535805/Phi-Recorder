@@ -783,6 +783,15 @@ h2 {
   font-weight: 600;
 }
 
+::v-deep(.v-stepper-header) {
+  box-shadow: none;
+}
+
+::v-deep(.v-stepper-window) {
+  margin: 0rem 1.5rem 0.5rem 1.5rem;
+}
+
+
 .drop-zone-overlay {
   background: rgba(99, 102, 241, 0.15) !important;
   backdrop-filter: blur(4px);
