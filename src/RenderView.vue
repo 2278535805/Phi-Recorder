@@ -793,8 +793,10 @@ h2 {
 
 
 .drop-zone-overlay {
-  background: rgba(99, 102, 241, 0.15) !important;
-  backdrop-filter: blur(4px);
+  /* background: rgba(255, 255, 255, 0.15) !important; */
+  /* backdrop-filter: blur(20px); */
+  /* animation: all 0.3s ease; */
+  animation: blurFade 0.4s ease forwards;
 }
 
 .drop-pulse {
