@@ -64,6 +64,7 @@ en:
     Loudness Equalization: Enable,
     Volume SFX: 0.25,
     Max SFX Volume: 0.50
+    (Click to apply)
   volume-sfx: SFX Volume
   compression-ratio: SFX Comp Ratio
   limit-threshold: Max SFX Volume
@@ -199,6 +200,7 @@ zh-CN:
     Hi-Res 参考值:
     无损音频: 开, 音乐响度均衡: 开
     音效音量: 0.25, 最大音效音量: 0.50
+    (点击以应用)
   volume-sfx: 音效音量
   compression-ratio: 音效压缩比
   limit-threshold: 最大音效音量
@@ -1050,7 +1052,7 @@ async function replacePreset() {
         <v-col cols="11" class="">
           <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
         </v-col>
-        <v-col cols="1" class="">
+        <v-col cols="1" class="" @click="volumeMusic = 1; volumeSfx = 0.25; limitThreshold = 0.50; if (!audio.includes(audioList[2])) audio.push(audioList[2])">
           <TooltipIcon :tooltip="t('volume-music-tip')"></TooltipIcon>
         </v-col>
       </v-row>
