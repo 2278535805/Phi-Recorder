@@ -13,6 +13,7 @@ en:
 
   cancel: Cancel
   confirm: Confirm
+  close: Close
 
   details: Details
   output: Output
@@ -42,6 +43,7 @@ zh-CN:
 
   cancel: 取消
   confirm: 确定
+  close: 关闭
 
   details: 详情
   output: 输出
@@ -275,10 +277,10 @@ function removeTask(task: number) {
       <v-card class="log-card-window">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
-          <div class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</div>
+          <div class="block whitespace-pre overflow-auto log-card-msg">{{ outputDialogMessage }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'confirm'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -286,7 +288,7 @@ function removeTask(task: number) {
       <v-card class="log-card-only-window">
         <v-card-title v-t="'remove-task'"> </v-card-title>
         <v-card-text>
-          <div class="block whitespace-pre overflow-auto" style="max-height: 60vh">{{ t('remove-task-confirm') }}</div>
+          <div class="block whitespace-pre overflow-auto">{{ t('remove-task-confirm') }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>

@@ -231,7 +231,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                   class="overlay"
                   @click="router.push({ name: 'render', query: { chart: chart.path } })"
                 >
-                  <i class="mdi mdi-play icon" style="color: white"></i>
+                  <i class="mdi mdi-play icon"></i>
                 </div>
               </div>
             </div>
@@ -243,7 +243,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                 <div class="pt-4 d-flex justify-end">
                   <v-menu>
                     <template v-slot:activator="{ props }">
-                      <v-btn class="open-btn mx-2" v-bind="props" :loading="moreLoading">
+                      <v-btn class="open-btn hover-scale mx-2" v-bind="props" :loading="moreLoading">
                         <i class="mdi mdi-cog" />
                       </v-btn>
                     </template>
@@ -254,7 +254,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                       <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
                     </v-list>
                   </v-menu>
-                  <v-btn class="render-btn mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'" />
+                  <v-btn class="render-btn hover-scale mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'" />
                 </div>
               </div>
             </div>
@@ -324,14 +324,13 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
   padding: 8px 16px;
   background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
   box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.4s ease;
   color: white;
 }
 
 .render-btn:hover {
   font-weight: 700;
   padding: 8px 16px;
-  transform: translateY(-1px);
   box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.3);
 }
 
@@ -339,13 +338,12 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
   font-weight: 600;
   padding: 8px 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.4s ease;
 }
 
 .open-btn:hover {
   font-weight: 700;
   padding: 8px 16px;
-  transform: translateY(-1px);
   box-shadow: 0 10px 15px -2px rgba(0, 0, 0, 0.2);
 }
 

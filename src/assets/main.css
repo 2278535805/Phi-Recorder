@@ -10,6 +10,11 @@
   src: url('./SarasaUiSC-Regular.ttf');
 }
 
+@font-face {
+  font-family: 'CascadiaMono';
+  src: url('./CascadiaMono.ttf');
+}
+
 @layer base {
   html {
     font-family: HarmonyOSSansSC, SarasaUiSC, system-ui !important;
@@ -44,8 +49,16 @@
 }
 
 .hover-scale:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 0 8px #ffffff50);
+  transform: scale(1.03);
+  filter: drop-shadow(0 0 8px #ffffff34);
+}
+
+.hover-move {
+  transition: transform 0.4s ease;
+}
+
+.hover-move:hover {
+  transform: translateY(-1px);
 }
 
 .hover-scale-text {
@@ -133,5 +146,27 @@
     opacity: 1;
     scale: 1.05;
     transform: translateY(-4px);
+  }
+}
+
+@keyframes Up {
+  to {
+    visibility: visible;
+  }
+}
+
+@keyframes animateFlow {
+  0% { transform: translate(-25%, -25%) rotate(0deg); }
+  100% { transform: translate(-25%, -25%) rotate(360deg); }
+}
+
+@keyframes blurFade {
+  from {
+    backdrop-filter: blur(0px);
+    opacity: 1;
+  }
+  to {
+    backdrop-filter: blur(20px);
+    opacity: 1;
   }
 }

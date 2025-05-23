@@ -273,7 +273,7 @@ onMounted(async () => {
 <template>
   <v-app id="phi-recorder" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.bgLeft}, ${theme.current.value.colors.bgRight}` }">
     <v-sonner position="top-center" />
-    <v-app-bar :elevation="0" class="app-bar-shadow blur-background">
+    <v-app-bar :elevation="0" class="blur-background">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text" style="position: absolute; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
@@ -289,7 +289,7 @@ onMounted(async () => {
       </div>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
-      <v-list density="compact" nav>
+      <v-list density="compact" nav class="v-list-none">
         <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
@@ -414,7 +414,7 @@ html {
 }
 
 .v-overlay__scrim {
-  background: rgba(var(--v-theme-overlay), 0.5);
+  background: rgba(255, 255, 255, 0.0);
 }
 
 .waitIn {
@@ -430,14 +430,13 @@ html {
 }
 
 .log-card-bg {
-  backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
+  animation: blurFade 0.3s ease forwards;
 }
+
 
 .log-card-window {
   border-radius: 16px !important;
   background: rgba(var(--v-theme-dialog), 0.6) !important;
-  backdrop-filter: blur(80px) !important;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -445,15 +444,25 @@ html {
 .log-card-only-window {
   border-radius: 16px !important;
   background: rgba(var(--v-theme-dialog), 0.7) !important;
-  backdrop-filter: blur(80px) !important;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.v-list-none {
+  background-color: none !important;
+  backdrop-filter: none !important;
+}
+
+.v-list {
+  background-color: rgba(var(--v-theme-primary), 0.0) !important; /* This color cannot be apply in tag editor */
+  backdrop-filter: blur(20px);
 }
 
 .log-card-msg {
   user-select: text;
   border-radius: 12px !important;
-  background: rgba(var(--v-theme-dialog), 0.6) !important;
+  background: rgba(var(--v-theme-dialog), 0.8) !important;
+  font-family: CascadiaMono, HarmonyOSSansSC, SarasaUiSC, system-ui !important;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
   white-space: pre;
@@ -462,7 +471,7 @@ html {
 
 .v-btn {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: val(--v-theme-primary);
+  color: var(--v-theme-primary);
 }
 
 .overlay {
@@ -471,7 +480,7 @@ html {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
+  background: rgba(var(--v-theme-overlay), 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -488,36 +497,29 @@ html {
   font-size: 250%;
 }
 
-@keyframes Up {
-  to {
-    visibility: visible;
-  }
-}
-
-.app-bar-shadow {
-  box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.2) !important;
-}
-
 .nav-drawer-border {
   border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .list-item {
   transition: all 0.3s cubic-bezier(0.2, 0, 0.1, 1);
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 .list-item-hover {
-  transition: all 0.3s ease;
-  margin: 8px 0px;
+  transition: all 0.5s ease;
+  margin: 8px 0 0 0;
   border-radius: 12px;
 }
 
 .list-item-hover:hover {
   background: rgba(255, 255, 255, 0.05) !important;
-  margin: 8px 4px;
-  transform: translateX(4px);
+  margin: 8px 0 0 4px;
   filter: drop-shadow(0 0 8px #ffffff8a);
+}
+
+.list-item-hover:active {
+  margin: 8px 0 0 6px;
 }
 
 .list-item-hover-rail {
@@ -566,11 +568,6 @@ html {
   );
   animation: animateFlow 2s linear infinite;
   opacity: 0.1;
-}
-
-@keyframes animateFlow {
-  0% { transform: translate(-25%, -25%) rotate(0deg); }
-  100% { transform: translate(-25%, -25%) rotate(360deg); }
 }
 
 .blur-background {
