@@ -286,9 +286,9 @@ watch(listExpand, (val) => {
       </v-row>
     </v-form>
     <div no-gutters class="mt-auto mx-2 d-flex flex-row" style="width: 100%">
-      <v-btn @click="resetDialog = true" v-t="'reset'" size="large"></v-btn>
+      <v-btn @click="resetDialog = true" v-t="'reset'" color="primary" size="large"></v-btn>
       <div class="flex-grow-1"></div>
-      <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" size="large"></v-btn>
+      <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" color="primary" size="large"></v-btn>
     </div>
   </div>
 
@@ -301,7 +301,7 @@ watch(listExpand, (val) => {
         </div>
       </v-card-text>
       <v-card-actions class="justify-end">
-        <v-btn @click="resetConfig(false)" color="white" v-t="'reset-only'" ></v-btn>
+        <v-btn @click="resetConfig(false)" color="btn" v-t="'reset-only'" ></v-btn>
         <v-btn @click="resetConfig(true)" color="error" v-t="'reset-all'" ></v-btn>
       </v-card-actions>
 

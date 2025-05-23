@@ -746,7 +746,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 .gradient-primary {
   background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
   box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.4s ease;
   color: white !important;
 }
 

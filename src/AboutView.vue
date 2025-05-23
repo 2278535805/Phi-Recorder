@@ -230,7 +230,7 @@ onMounted(() => {
 
 <style scoped>
 .about-container {
-  background: val(--v-theme-container);
+  background: rgba(var(--v-theme-container), 0.04) !important;
   margin: 0px;
   padding: 2rem;
   min-width: none;
