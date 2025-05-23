@@ -1,4 +1,7 @@
-use crate::render::{build_player, RenderConfig, RenderParams};
+use crate::{
+    common::parse_args,
+    render::{build_player, RenderConfig, RenderParams}
+};
 use anyhow::{Context, Result};
 use macroquad::prelude::*;
 use prpr::{
@@ -50,12 +53,29 @@ impl Scene for BaseScene {
     }
 }
 
-pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
+pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
     let (fs, config, info) = if cmd {
         init_assets();
 
-        let config: RenderConfig = toml::from_str(&std::fs::read_to_string("config.toml")?)?;
-        let path = std::env::args().nth(2).unwrap();
+        let (args_input, _, args_config) = parse_args(std::env::args().collect());
+
+        let config: RenderConfig = if let Some(config) = &args_config {
+            match serde_json::from_str(config) {
+                Ok(config_json) => {
+                    println!("Using config from json");
+                    config_json
+                }
+                Err(error) => {
+                    println!("Failed to parse json: {}", error);
+                    println!("Using config from toml file");
+                    toml::from_str(&std::fs::read_to_string(config)?)?
+                }
+            }
+        } else {
+            println!("Using config from config.toml");
+            toml::from_str(&std::fs::read_to_string("config.toml")?)?
+        };
+        let path = args_input.unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
         let info = fs::load_info(fs.deref_mut()).await?;
@@ -81,10 +101,7 @@ pub async fn main(cmd: bool, tweak_offset: bool) -> Result<()> {
     };
 
     let mut prpr_config: Config = config.to_config();
-    if matches!(
-        std::env::args().nth(1).as_deref(),
-        Some("preview") | Some("--preview")
-    ) {
+    if autoplay {
         prpr_config.mods |= Mods::AUTOPLAY;
     }
 

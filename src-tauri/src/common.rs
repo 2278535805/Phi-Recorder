@@ -14,6 +14,34 @@ use crate::render::RenderConfig;
 pub static CONFIG_DIR: OnceLock<PathBuf> = OnceLock::new();
 pub static DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
 
+pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<String>) {
+    let mut args_input = None;
+    let mut args_output = None;
+    let mut args_config = None;
+    let mut args_now = 1;
+    while args_now < args.len() {
+        match args[args_now].as_str() {
+            "--output" => {
+                args_output = args.get(args_now + 1).cloned();
+                args_now += 2;
+            }
+            "--config" => {
+                args_config = args.get(args_now + 1).cloned();
+                args_now += 2;
+            }
+            arg => {
+                if !arg.starts_with("--") && args_input.is_none() {
+                    args_input = Some(arg.to_string());
+                } else {
+                    println!("Unknown argument: {}", arg);
+                }
+                args_now += 1;
+            }
+        }
+    }
+    return (args_input, args_output, args_config);
+}
+
 pub fn ensure_dir(path: PathBuf) -> PathBuf {
     if path.exists() {
         if !path.is_dir() {

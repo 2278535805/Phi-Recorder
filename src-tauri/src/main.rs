@@ -15,14 +15,9 @@ pub fn build_conf() -> macroquad::window::Conf {
             big: BIG_ICON,
             small: SMALL_ICON,
         }),
-        headless: !matches!(
+        headless: std::env::args().len() <= 1 || matches!(
             std::env::args().skip(1).next().as_deref(),
-            Some("tweakoffset")
-                | Some("preview")
-                | Some("play")
-                | Some("--tweakoffset")
-                | Some("--preview")
-                | Some("--play")
+            Some("-render") | Some("--render")
         ),
         ..Default::default()
     }
