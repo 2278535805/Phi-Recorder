@@ -2,7 +2,8 @@
 prpr::tl_file!("render");
 
 use crate::{
-    common::{output_dir, read_config, test_output_dir}, ASSET_PATH
+    common::{output_dir, parse_args, read_config, test_output_dir},
+    ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
 use chrono::Local;
@@ -425,30 +426,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let (mut fs, output_path, mut config, info) = if cmd {
         init_assets();
 
-        let args: Vec<String> = std::env::args().collect();
-        let mut args_input = None;
-        let mut args_output = None;
-        let mut args_config = None;
-
-        let mut args_now = 1;
-        while args_now < args.len() {
-            match args[args_now].as_str() {
-                "--output" => {
-                    args_output = args.get(args_now + 1).cloned();
-                    args_now += 2;
-                }
-                "--config" => {
-                    args_config = args.get(args_now + 1).cloned();
-                    args_now += 2;
-                }
-                arg => {
-                    if !arg.starts_with("--") && args_input.is_none() {
-                        args_input = Some(arg.to_string());
-                    }
-                    args_now += 1;
-                }
-            }
-        }
+        let (args_input, args_output, args_config) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
             match serde_json::from_str(config) {

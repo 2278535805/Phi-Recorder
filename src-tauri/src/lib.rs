@@ -191,20 +191,26 @@ pub async fn run() -> Result<()> {
             "render" => {
                 run_wrapped(render::main(false)).await;
             }
-            "preview" | "play" => {
-                run_wrapped(preview::main(false, false)).await;
+            "play" => {
+                run_wrapped(preview::main(false, false, false)).await;
+            }
+            "preview" => {
+                run_wrapped(preview::main(false, false, true)).await;
             }
             "tweakoffset" => {
-                run_wrapped(preview::main(false, true)).await;
+                run_wrapped(preview::main(false, true, true)).await;
             }
             "--render" => {
                 run_wrapped(render::main(true)).await;
             }
-            "--preview" | "--play" => {
-                run_wrapped(preview::main(true, false)).await;
+            "--play" => {
+                run_wrapped(preview::main(true, false, false)).await;
+            }
+            "--preview" => {
+                run_wrapped(preview::main(true, false, true)).await;
             }
             "--tweakoffset" => {
-                run_wrapped(preview::main(true, true)).await;
+                run_wrapped(preview::main(true, true, true)).await;
             }
             cmd => {
                 eprintln!("Command: {cmd:?}");
@@ -214,14 +220,8 @@ pub async fn run() -> Result<()> {
                     || path.is_dir()
                 {
                     println!("Find a valid path, start preview");
-                    let mut child = Command::new(std::env::current_exe()?)
-                        .arg("--preview")
-                        .arg(args)
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()?;
-                    let status = child.wait().await?;
-                    exit_program(status.code().unwrap_or_default());
+                    run_wrapped(preview::main(true, false, true)).await;
+                    exit_program(0);
                 } else {
                     exit_program(1);
                 }
