@@ -791,6 +791,9 @@ h2 {
   margin: 0rem 1.5rem 0.5rem 1.5rem;
 }
 
+::v-deep(.v-window__container .v-stepper-window-item) {
+  transition: 0.5s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
 
 .drop-zone-overlay {
   /* background: rgba(255, 255, 255, 0.15) !important; */
