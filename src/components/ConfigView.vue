@@ -61,9 +61,9 @@ en:
   volume-music-tip: |
     Hi-Res Reference: 
     Lossless Audio: Enable,
-    Music Volume: 1.0,
-    Volume SFX: 0.5,
-    Max SFX Volume: 0.65
+    Loudness Equalization: Enable,
+    Volume SFX: 0.25,
+    Max SFX Volume: 0.50
   volume-sfx: SFX Volume
   compression-ratio: SFX Comp Ratio
   limit-threshold: Max SFX Volume
@@ -197,8 +197,8 @@ zh-CN:
   volume-music: 音乐音量
   volume-music-tip: |
     Hi-Res 参考值:
-    无损音频: 开, 音乐音量 1.0
-    音效音量: 0.5, 最大音效音量: 0.65
+    无损音频: 开, 音乐响度均衡: 开
+    音效音量: 0.25, 最大音效音量: 0.50
   volume-sfx: 音效音量
   compression-ratio: 音效压缩比
   limit-threshold: 最大音效音量
