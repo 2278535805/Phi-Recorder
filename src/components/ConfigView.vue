@@ -100,7 +100,7 @@ en:
   expand: Expand
   expand-list: Aggressive Optimization,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
-  audio-list: SFX Force Limit,Lossless Audio,Music Loudness Equalization
+  audio-list: SFX Force Limit,Lossless Audio,Music Loudness Equalization (-16 LUFS)
   others: More
   selects: Selected
   ffmpeg-preset-list: VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow
@@ -235,7 +235,7 @@ zh-CN:
   expand: 拓展内容
   expand-list: 激进优化,罗马模式,中文模式
   audio-expand: 音频拓展内容
-  audio-list: 音效强制限幅,无损音频,音乐响度均衡
+  audio-list: 音效强制限幅,无损音频,音乐响度均衡 (-16 LUFS)
   others: 更多
   selects: 已选中
   ffmpeg-preset-list: 非常快,更快,快,中等,好,更好,非常好
