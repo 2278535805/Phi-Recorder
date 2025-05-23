@@ -547,7 +547,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               <v-text-field class="mx-2" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
             </v-col>
             <v-col cols="2">
-              <v-text-field class="mx-2" :label="t('info.offset')" type="number" :rules="[RULES.int]" v-model="offset_text"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.offset')" type="number" :rules="[RULES.int]" :disabled="loadingTweakoffset" v-model="offset_text"></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field class="mx-2" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
