@@ -290,14 +290,9 @@ document.addEventListener('keydown', async (event) => {
 
 const form = ref<VForm>();
 
-function syncInfo() {
-  chartInfo.value!.offset = parseFloat(offset_text.value) / 1000;
-  if (!chartInfo.value!.tip?.trim().length) chartInfo.value!.tip = null;
-}
-
 const configView = ref<typeof ConfigView>();
 async function buildParams() {
-  syncInfo();
+  checkInfo();
   let config = await configView.value!.buildConfig();
   if (!config) return null;
   return {
@@ -440,23 +435,23 @@ async function checkInfo() {
   if (!(await form.value!.validate()).valid) {
     return false;
   }
-  if (chartInfo.value?.previewEnd && chartInfo.value?.previewEnd - chartInfo.value?.previewStart > 15) {
-    toast(t('error.preview-start-end-15s'), 'error');
-    return false;
+  chartInfo.value!.offset = parseFloat(offset_text.value) / 1000;
+  if (chartInfo.value?.previewEnd) {
+    if (chartInfo.value?.previewEnd - chartInfo.value?.previewStart > 15) {
+      toast(t('error.preview-start-end-15s'), 'error');
+      return false;
+    }
   }
   if (chartInfo.value!.previewEnd as string | null === '') {
     chartInfo.value!.previewEnd = null;
   }
-  if (chartInfo.value!.tip as string | null === '') {
-    chartInfo.value!.tip = null;
-  }
+  if (!chartInfo.value!.tip?.trim().length) chartInfo.value!.tip = null;
 
   return true;
 }
 
 async function saveInfo() {
   let check = checkInfo();
-  syncInfo();
   if (!check) return;
   let outputPath = await save({ title: t('output-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }], defaultPath: 'info.yml' });
   if (!outputPath) return;
@@ -518,7 +513,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
         <div class="flex-grow-1"></div>
-        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true; tryParseAspect(); syncInfo();" class="mr-2">{{ t('more') }}</v-btn>
+        <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true; tryParseAspect(); checkInfo();" class="mr-2">{{ t('more') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
         <v-btn v-if="step !== 'render'" :loading="loadingNext" variant="tonal" @click="moveNext" class="gradient-primary">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
@@ -596,7 +591,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         </v-form>
       </template>
 
-      <v-dialog v-model="moreInfo" width="auto" min-width="90%" class="log-card-bg">
+      <v-dialog v-model="moreInfo" width="auto" class="log-card-bg">
         <v-card class="log-card-only-window">
           <v-card-title v-t="'phira-info'"> </v-card-title>
           <v-card-text>
