@@ -871,9 +871,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
-        "[1:a]aresample=48000:resampler=soxr:precision=28,loudnorm=I=-14:LRA=12:TP=-1,aresample=48000:resampler=soxr:precision=28,volume={}[a1];", volume_music,
+        "[1:a]loudnorm=I=-16:LRA=12:TP=-1,aresample={}:resampler=soxr:precision=28,volume={}[a1];", sample_rate, volume_music,
     )} else { format!(
-        "[1:a]aresample=48000:resampler=soxr:precision=28,volume={}[a1];", volume_music,
+        "[1:a]aresample={}:resampler=soxr:precision=28,volume={}[a1];", sample_rate, volume_music,
     )};
 
     let ffmpeg_audio_filter_fx = if config.force_limit {
@@ -932,7 +932,17 @@ pub async fn main(cmd: bool) -> Result<()> {
         preparing_render_time.elapsed()
     );
 
-    //info!("Command: {} {} {} {} {}", "ffmpeg", args,"-", args2, output_path.display());
+    info!("Command: {} {} {} {} {} {} {} {} {} {}",
+        &ffmpeg,
+        args,
+        "-i",
+        output_music_temp.path().display(),
+        "-i", output_fx_temp.path().display(),
+        "-i", ASSET_PATH.get().unwrap().join("ending.ogg").display(),
+        args2,
+        output_path.display()
+    );
+
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg("-i")
