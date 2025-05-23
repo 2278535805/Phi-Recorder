@@ -1063,7 +1063,7 @@ async function replacePreset() {
         </v-col>
         <v-col cols="4">
           <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" color="btn" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
-          <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.05" v-model="limitThreshold"> </v-slider>
+          <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.01" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2">
