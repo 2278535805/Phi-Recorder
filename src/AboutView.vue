@@ -5,6 +5,8 @@ en:
   new-version: New version available!
   non-version: It's the latest version
   err-version: Check update failed
+  err-api-rate-limit: Current IP address API request limit reached
+  err-sending-request: Network connection failed
   download: Download
   close: Close
 
@@ -14,6 +16,8 @@ zh-CN:
   new-version: 发现新版本!
   non-version: 已是最新版本
   err-version: 检查更新失败
+  err-api-rate-limit: 当前 IP 地址 API 请求次数到达上限
+  err-sending-request: 网络连接失败
   download: 下载
   close: 关闭
 
@@ -77,7 +81,7 @@ async function checkForUpdates(dialog = true) {
         dialog_non.value = true;
       }
     } else {
-      updateBody.value = `${release.message}`;
+      updateBody.value = parseError(release.message);
       updates.value = false;
       dialog_error.value = true;
     }
@@ -88,6 +92,16 @@ async function checkForUpdates(dialog = true) {
     dialog_error.value = true;
   }
   checking.value = false;
+}
+
+function parseError(value: string): string {
+  if (value.startsWith('API rate limit')) {
+    return updateBody.value = `${ t('err-api-rate-limit') }\n${value}`;
+  } else if (value.startsWith('error sending request')) {
+    return updateBody.value = `${ t('err-sending-request') }\n${value}`;
+  } else {
+    return updateBody.value = `${value}`;
+  }
 }
 
 const clamp = (num: number, lower: number, upper: number) => {
