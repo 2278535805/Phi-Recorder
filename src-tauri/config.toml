@@ -1,7 +1,7 @@
 # Output 输出
 resolution = [1920, 1080]
 fps = 60
-ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf"
+ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf" or "any"
 hardwareAccel = true
 sampleCount = 8
 hevc = false
@@ -16,7 +16,7 @@ bitrate = "26"
 playerName = "HLMC"
 playerRks = 16.0
 challengeColor = "rainbow"
-challengeRank = 45
+challengeRank = 3
 
 
 # Graphics 图像
@@ -52,10 +52,10 @@ bgBlurriness = 80.0
 # Audio 音频
 forceLimit = true
 hires = true
-volumeMusic = 1.0
-volumeSfx = 0.7
+volumeMusic = 0.5
+volumeSfx = 0.4
 compressionRatio = 20.0
-limitThreshold = 1.0
+limitThreshold = 0.5
 
 
 # Other 其他
