@@ -66,7 +66,7 @@ en:
   volume-music: Music Volume
   volume-music-tip: |
     Hi-Fi Reference: 
-    Lossless Audio: Enable,
+    Music Volume: 1.0,
     Loudness Equalization: Enable,
     Volume SFX: 0.25,
     Max SFX Volume: 0.50
@@ -209,7 +209,7 @@ zh-CN:
   volume-music: 音乐音量
   volume-music-tip: |
     Hi-Fi 参考值:
-    无损音频: 开, 音乐响度均衡: 开
+    音乐音量: 1.0, 音乐响度均衡: 开
     音效音量: 0.25, 最大音效音量: 0.50
     (点击以应用)
   volume-sfx: 音效音量
