@@ -13,7 +13,8 @@ use prpr::{
     ui::{FontArc, TextPainter, Ui},
     Main,
 };
-use std::{cell::RefCell, io::BufRead, ops::DerefMut, rc::Rc};
+use tokio::time::Instant;
+use std::{cell::RefCell, collections::VecDeque, io::BufRead, ops::DerefMut, rc::Rc};
 
 struct BaseScene(Option<NextScene>, bool, Rc<RefCell<Option<f32>>>);
 impl Scene for BaseScene {
@@ -138,24 +139,38 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         None,
     )
     .await?;
-    let mut fps_time = -1;
+
+    let mut frame_times: VecDeque<(f64, u32)> = VecDeque::new(); // (time, fps)
+    let mut last_update_fps_sec: u32 = 0;
 
     'app: loop {
         let frame_start = tm.real_time();
+
         main.update()?;
         main.render(&mut painter)?;
         if main.should_exit() {
             break 'app;
         }
 
-        let t = tm.real_time();
-        let fps_now = t as i32;
-        if fps_now != fps_time {
-            fps_time = fps_now;
-            info!("| {}", (1. / (t - frame_start)) as u32);
+        let frame_end = tm.real_time();
+        let now_fps = (1. / (frame_end - frame_start)) as u32;
+        frame_times.push_back((frame_end, now_fps));
+        while frame_times.front().is_some_and(|it| frame_end - it.0 > 1.0) {
+            frame_times.pop_front();
         }
 
         next_frame().await;
+        let flash_end = tm.real_time();
+        let real_now_fps = (1. / (flash_end - frame_start)) as u32;
+
+        let sec = frame_start as u32;
+        if last_update_fps_sec != sec {
+            last_update_fps_sec = sec;
+            let real_fps = frame_times.len() as u32;
+            let avg_fps = frame_times.iter().map(|(_, fps)| fps).sum::<u32>() / real_fps;
+            let min_fps = frame_times.iter().map(|(_, fps)| fps).min().unwrap_or(&0);
+            info!("| AVG: {}|{} NOW: {}|{}, MIN: {}", real_fps, avg_fps, real_now_fps, now_fps, min_fps);
+        }
     }
 
     if tweak_offset {
