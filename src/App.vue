@@ -453,7 +453,7 @@ html {
 
 .log-card-only-window {
   border-radius: 16px !important;
-  background: rgba(var(--v-theme-dialog), 0.7) !important;
+  background: rgba(var(--v-theme-dialog), 0.8) !important;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
