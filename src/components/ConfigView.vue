@@ -30,8 +30,14 @@ en:
 
   bitrate-control: Bitrate Control
   bitrate: Bitrate
-  bitrate-crf: Quantization parameters
+  bitrate-crf: Quality
   bitrate-crf-tip: Range 1-51, the smaller the value, the higher the quality
+  output-tip: |
+    Reference:
+    -Discord etc.
+      Encoder: HEVC,
+      Quality: 40
+      (Click to apply)
 
   player-avatar: Player Avatar
   player-name: Player Name
@@ -170,6 +176,11 @@ zh-CN:
   bitrate: 码率
   bitrate-crf: 质量参数
   bitrate-crf-tip: 范围 1-51, 数值越小质量越高
+  output-tip: |
+    参考值:
+    -看看谱:
+      编码器: HEVC, 质量参数: 40
+      (点击以应用)
 
   player-avatar: 玩家头像
   player-name: 玩家名
@@ -939,6 +950,9 @@ async function replacePreset() {
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+        </v-col>
+        <v-col cols="3" @click="dynamicBitrateControl = true; encoder = encoderList[1]; bitrate = '40'">
+          <TooltipIcon :tooltip="t('output-tip')"></TooltipIcon>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2">
