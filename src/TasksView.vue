@@ -277,7 +277,7 @@ function removeTask(task: number) {
       <v-card class="log-card-window">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
-          <div class="block whitespace-pre overflow-auto log-card-msg">{{ outputDialogMessage }}</div>
+          <div class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
