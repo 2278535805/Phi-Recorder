@@ -429,6 +429,16 @@ html {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.v-list-none {
+  background-color: none !important;
+  backdrop-filter: none !important;
+}
+
+.v-list {
+  background-color: rgba(var(--v-theme-primary), 0.0) !important; /* This color cannot be apply in tag editor */
+  backdrop-filter: blur(20px);
+}
+
 .log-card-bg {
   animation: blurFade 0.3s ease forwards;
 }
@@ -446,16 +456,6 @@ html {
   background: rgba(var(--v-theme-dialog), 0.7) !important;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.v-list-none {
-  background-color: none !important;
-  backdrop-filter: none !important;
-}
-
-.v-list {
-  background-color: rgba(var(--v-theme-primary), 0.0) !important; /* This color cannot be apply in tag editor */
-  backdrop-filter: blur(20px);
 }
 
 .log-card-msg {

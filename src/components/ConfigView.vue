@@ -906,8 +906,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-2">
-      </v-row>
+      <v-row no-gutters class="mt-2" />
     </div>
 
     <div v-show="page === 1 || page === undefined">
@@ -987,8 +986,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-2">
-      </v-row>
+      <v-row no-gutters class="mt-2" />
     </div>
 
     <div v-show="page === 3 || page === undefined">
@@ -1056,8 +1054,7 @@ async function replacePreset() {
           <TipCombobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :tooltip="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></TipCombobox>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-2">
-      </v-row>
+      <v-row no-gutters class="mt-2" />
     </div>
 
     <div v-show="page === 4 || page === undefined">
@@ -1082,8 +1079,7 @@ async function replacePreset() {
           <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.01" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-2">
-      </v-row>
+      <v-row no-gutters class="mt-2" />
     </div>
 
     <div v-show="page === 5 || page === undefined">
@@ -1107,8 +1103,7 @@ async function replacePreset() {
           <TipSwitch class="mx-4" :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mt-2">
-      </v-row>
+      <v-row no-gutters class="mt-2" />
     </div>
   </v-form>
 </template>
