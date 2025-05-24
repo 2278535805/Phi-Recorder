@@ -865,7 +865,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             volume_sfx, config.compression_ratio
         )
     } else {
-        format!("[2:a]volume={}", volume_sfx)
+        format!("[2:a]volume={}[a2];", volume_sfx)
     };
 
     let ffmpeg_audio_filter_ending =
