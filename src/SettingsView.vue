@@ -284,6 +284,7 @@ watch(listExpand, (val) => {
           <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES_NAME" item-title="name" item-value="code" v-model="locale"></v-autocomplete>
         </v-col>
       </v-row>
+      <v-row class="my-2" />
     </v-form>
     <div no-gutters class="mt-auto mx-2 d-flex flex-row" style="width: 100%">
       <v-btn @click="resetDialog = true" v-t="'reset'" color="primary" size="large"></v-btn>
