@@ -17,7 +17,7 @@ pub fn build_conf() -> macroquad::window::Conf {
         }),
         headless: std::env::args().len() <= 1 || matches!(
             std::env::args().skip(1).next().as_deref(),
-            Some("-render") | Some("--render")
+            Some("render") | Some("--render")
         ),
         ..Default::default()
     }
