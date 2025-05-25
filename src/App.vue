@@ -278,8 +278,8 @@ onMounted(async () => {
       <div class="gradient-text" style="position: absolute; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
       </div>
-      <div @click="routerPush('about')" style="cursor: pointer;" v-if="update">
-        <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
+      <div @click="routerPush('about')" style="position: absolute; left: 152px; cursor: pointer;" v-if="update">
+          <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
       </div>
       <div data-tauri-drag-region class="flex-grow-1" style="height: 100%; min-width: 10px;"></div>
       <div class="d-flex" style="position: fixed; right: 0;">
