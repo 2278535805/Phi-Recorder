@@ -8,6 +8,8 @@ Fast Simple Lightweight Convenient
 
 已建 QQ 群: 907416249
 
+文档 / Documentation: [Docs](https://pr.xhsr.org.cn/)
+
 ## Installation 安装
 
 Check [Releases](https://github.com/2278535805/phigros-recorder/releases)
