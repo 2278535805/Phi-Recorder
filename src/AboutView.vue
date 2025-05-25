@@ -87,7 +87,7 @@ async function checkForUpdates(dialog = true) {
     }
   } catch (error) {
     console.error('Error fetching tags:', error);
-    updateBody.value = `${error}`;
+    updateBody.value = parseError(error as string);
     updates.value = false;
     dialog_error.value = true;
   }
