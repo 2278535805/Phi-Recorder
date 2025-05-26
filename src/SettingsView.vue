@@ -21,6 +21,9 @@ en:
   list-expand: Default Expand Sidebar
   list-expand-tip: Right-click the sidebar to switch at any time
   lang: Language
+  color-mode: Color Mode (F2)
+  color-mode-dark: Dark
+  color-mode-light: Light
 
 zh-CN:
   setting: 设置
@@ -42,8 +45,11 @@ zh-CN:
   encoder-avc: 指定 AVC 编码器
   encoder-hevc: 指定 HEVC 编码器
   list-expand: 默认展开侧边栏
-  list-expand-tip: 右键侧边栏即可随时切换
+  list-expand-tip: 右键侧边栏可随时切换
   lang: 语言
+  color-mode: 颜色模式 (F2)
+  color-mode-dark: 深色
+  color-mode-light: 浅色
 
 </i18n>
 
@@ -247,6 +253,11 @@ watch(listExpand, (val) => {
   localStorage.setItem("listExpand", JSON.stringify(val))
 });
 
+const SUPPORTED_THEME_NAME: { name: string, code: string }[] = [
+  { name: t('color-mode-dark'), code: 'darkTheme' },
+  { name: t('color-mode-light'), code: 'lightTheme' }
+];
+
 </script>
 
 <template>
@@ -278,10 +289,15 @@ watch(listExpand, (val) => {
 
       <v-row no-gutters class="mt-2 mx-0">
         <v-col cols="6">
-          <TipSwitch class="mx-4" :tooltip="t('list-expand-tip')" :label="t('list-expand')" v-model="listExpand"></TipSwitch>
+          <v-autocomplete class="mx-2" :label="t('color-mode')" :items="SUPPORTED_THEME_NAME" item-title="name" item-value="code" v-model="theme.global.name.value"></v-autocomplete>
         </v-col>
         <v-col cols="6">
           <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES_NAME" item-title="name" item-value="code" v-model="locale"></v-autocomplete>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mt-2 mx-0">
+        <v-col cols="6">
+          <TipSwitch class="mx-4" :tooltip="t('list-expand-tip')" :label="t('list-expand')" v-model="listExpand"></TipSwitch>
         </v-col>
       </v-row>
       <v-row class="my-2" />

@@ -19,8 +19,8 @@ import 'vuetify/styles';
 
 import { darkTheme, lightTheme } from './theme';
 
-export const SUPPORTED_LOCALES = ['en', 'zh-CN', 'zh-TW'];
-export const SUPPORTED_LOCALES_NAME = [
+export const SUPPORTED_LOCALES: string[] = ['en', 'zh-CN', 'zh-TW'];
+export const SUPPORTED_LOCALES_NAME: { name: string, code: string }[] = [
   { code: "en", name: "English" },
   { code: "zh-CN", name: "简体中文" },
   // { code: "zh-TW", name: "繁體中文" }, // TODO

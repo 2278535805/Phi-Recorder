@@ -135,18 +135,16 @@ function appMaximize() {
   appWindow.toggleMaximize();
 }
 
-const themeIconDark = ref('mdi-weather-night');
-const themeIconLight = ref('mdi-white-balance-sunny');
-const themeIcon = ref('mdi-weather-night');
 function toggleTheme() {
-  if (themeIcon.value === themeIconDark.value) {
-    themeIcon.value = themeIconLight.value;
-  } else {
-    themeIcon.value = themeIconDark.value;
-  }
   theme.global.name.value = theme.global.name.value === 'darkTheme' ? 'lightTheme' : 'darkTheme';
   localStorage.setItem("theme", theme.global.name.value);
 };
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "F2") {
+    toggleTheme();
+  }
+});
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
   theme.global.name.value = event.matches ? "darkTheme" : "lightTheme";
@@ -283,7 +281,6 @@ onMounted(async () => {
       </div>
       <div data-tauri-drag-region class="flex-grow-1" style="height: 100%; min-width: 10px;"></div>
       <div class="d-flex" style="position: fixed; right: 0;">
-        <v-btn class="" size="small" :icon="themeIcon" @click="toggleTheme"></v-btn>
         <v-btn class="mx-2" size="small" color="grey" icon="mdi-circle" @click="appMinimize" @contextmenu="appMaximize"></v-btn>
         <v-btn class="mr-4" size="small" color="red" icon="mdi-circle" @click="appClose()"></v-btn>
       </div>
