@@ -536,7 +536,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
       </template>
 
       <template v-slot:item.2>
-        <v-form ref="form" v-if="chartInfo">
+        <v-form ref="form" validateOn="eager" v-if="chartInfo">
           <v-row no-gutters class="my-2">
             <v-col cols="6">
               <v-text-field class="mx-2" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
@@ -596,7 +596,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <v-card-title v-t="'phira-info'"> </v-card-title>
           <v-card-text>
 
-            <v-form v-if="chartInfo">
+            <v-form v-if="chartInfo" validateOn="eager">
               <v-row>
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>

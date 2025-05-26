@@ -848,7 +848,7 @@ async function replacePreset() {
   </v-layout>
   <VDivider />
 
-  <v-form ref="form" class="scroll-mask" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
+  <v-form ref="form" validateOn="eager" class="scroll-mask" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
     <div v-show="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
       <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"

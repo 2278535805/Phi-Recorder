@@ -58,7 +58,7 @@ import { useI18n } from 'vue-i18n';
 useI18n();
 const { t } = useI18n();
 
-import { onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -125,6 +125,9 @@ async function saveConfig() {
 const resetDialog = ref(false);
 async function resetConfig(all: boolean) {
   config.value = DEFAULT_CONFIG;
+  nextTick(() => {
+    form.value?.resetValidation();
+  });
   if (all) {
     await saveConfig();
     localStorage.clear();
@@ -262,7 +265,7 @@ const SUPPORTED_THEME_NAME: { name: string, code: string }[] = [
 
 <template>
   <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem" :style="{ background: `${theme.current.value.colors.container}` }">
-    <v-form ref="form" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
+    <v-form ref="form" validateOn="eager" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
       <v-row>
         <h2 class="mt-1 mx-5">{{ t('setting') }}</h2>
       </v-row>
