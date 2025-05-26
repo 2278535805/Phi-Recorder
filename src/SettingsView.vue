@@ -256,10 +256,11 @@ watch(listExpand, (val) => {
   localStorage.setItem("listExpand", JSON.stringify(val))
 });
 
-const SUPPORTED_THEME_NAME: { name: string, code: string }[] = [
-  { name: t('color-mode-dark'), code: 'darkTheme' },
-  { name: t('color-mode-light'), code: 'lightTheme' }
-];
+const SUPPORTED_THEME_NAME = computed(() => [
+  { name: t("color-mode-dark"), code: "darkTheme" },
+  { name: t("color-mode-light"), code: "lightTheme" }
+]);
+
 
 </script>
 
