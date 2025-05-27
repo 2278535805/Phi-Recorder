@@ -35,7 +35,7 @@ zh-CN:
   reset-all: 重置并保存所有配置
   reset-confirm-desc: 你的设置将会永久消失！（真的很久！）
   select: 已选择
-  no-select: 没有选择
+  no-select: 选择已取消
   no-encoder: 没有可用的硬件加速编码器
   encoder-ok: 编码器可用
   encoder-error: 编码器不可用
@@ -137,7 +137,10 @@ async function resetConfig(all: boolean) {
 }
 
 async function selectDir(title: string) {
-  let file = await open({ directory: true, title });
+  let file = await open({
+    directory: true,
+    title
+  });
   if (!file) {
     toast(t('no-select'), 'error');
     return null;

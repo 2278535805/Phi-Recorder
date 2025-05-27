@@ -75,6 +75,7 @@ en:
   read-success: Read successfully
   save-info: Save Info
   read-info: Read Info
+  phira-chart-info: Phira Chart Info
 
 zh-CN:
   already-running: Phi Recorder 已经在运行
@@ -146,6 +147,7 @@ zh-CN:
   read-success: 读取成功
   save-info: 保存信息
   read-info: 读取信息
+  phira-chart-info: Phira 谱面信息
 
 </i18n>
 
@@ -453,7 +455,14 @@ async function checkInfo() {
 async function saveInfo() {
   let check = checkInfo();
   if (!check) return;
-  let outputPath = await save({ title: t('output-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }], defaultPath: 'info.yml' });
+  let outputPath = await save({
+    title: t('phira-chart-info'),
+    filters: [
+      { name: 'Phira Chart Info File', extensions: ['yml'] },
+      anyFilter(),
+    ],
+    defaultPath: 'info.yml',
+  });
   if (!outputPath) return;
   try {
     await invoke('save_info', { path: outputPath, info: chartInfo.value });
@@ -464,7 +473,13 @@ async function saveInfo() {
 }
 
 async function readInfo() {
-  let inputPath = await open({ title: t('rpe-folder'), filters: [{ name: 'Phira Chart Info File', extensions: ['yml'] }] });
+  let inputPath = await open({
+    title: t('phira-chart-info'),
+    filters: [
+      { name: 'Phira Chart Info File', extensions: ['yml'] },
+      anyFilter(),
+    ],
+  });
   if (!inputPath) return;
   try {
     chartInfo.value = await invoke('read_info', { path: inputPath }) as ChartInfo;

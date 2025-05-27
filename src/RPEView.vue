@@ -63,7 +63,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { open, save, confirm, message } from '@tauri-apps/plugin-dialog';
 
-import { toast, toastError } from './common';
+import { anyFilter, toast, toastError } from './common';
 import type { RPEChart } from './model';
 import router from './router';
 
@@ -109,7 +109,10 @@ watch(sortOption, () => {
 
 
 async function bindRPE() {
-  let file = await open({ directory: true, title: t('rpe-folder') });
+  let file = await open({
+    directory: true,
+    title: t('rpe-folder')
+  });
   if (!file) return;
   try {
     await invoke('set_rpe_dir', { path: file, save: true });
@@ -142,7 +145,14 @@ async function exportPez(chartPath: string, chartName: string) {
   moreLoading.value = true;
   try {
     const outputName = chartName.replace(/[\\/:*?"<>|]/g, "_") + '.pez';
-    const outputPath = await save({ title: t('output-folder'), filters: [{ name: 'RPE Chart File', extensions: ['pez', 'zip'] }], defaultPath: outputName });
+    const outputPath = await save({
+      title: t('output-folder'),
+      filters: [
+        { name: 'RPE Chart File', extensions: ['pez', 'zip'] },
+        anyFilter(),
+      ],
+      defaultPath: outputName
+    });
     if (!outputPath) return;
     await invoke('export_pez', { chartPath, outputPath });
     message(t('export-success'), { title: t('export') })
