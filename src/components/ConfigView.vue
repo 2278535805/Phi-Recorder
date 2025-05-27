@@ -114,7 +114,8 @@ en:
 
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
-  max-particles-tip: Reference value 10000, related to VRAM
+  max-particles-tip: Reference value 10000, related to RAM
+  max-particles-error: Invalid particle limit
 
   render-start-time: Render Start Time
   render-end-time: Render End Time
@@ -254,7 +255,8 @@ zh-CN:
 
   max-particles: 粒子限制
   max-particles-list: 低,中,高
-  max-particles-tip: 参考值 100000, 与显存有关
+  max-particles-tip: 参考值 100000, 与内存有关
+  max-particles-error: 粒子限制无效
 
   render-start-time: 渲染开始时间
   render-end-time: 渲染结束时间
@@ -516,9 +518,11 @@ function updateMaxParticles() {
   } else if (Number.isInteger(textNum) && textNum > 0) {
     maxParticles.value = parseInt(maxParticlesText.value);
   } else {
-    toast(t('has-error'), 'warning');
+    toast(t('max-particles-error'), 'error');
     maxParticles.value = 100000;
+    return false;
   }
+  return true;
 }
 
 function updateList(value: any, text: any, list: any, textList: any) {
@@ -547,7 +551,9 @@ async function buildConfig(): Promise<RenderConfig | null> {
     return null;
   }
 
-  updateMaxParticles();
+  if (!updateMaxParticles()) {
+    return null;
+  }
   updateList(ffmpegPreset, ffmpegPresetText, ffmpegPresetPresetList, ffmpegPresetPresetTextList);
 
   return {
