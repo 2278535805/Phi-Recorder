@@ -59,18 +59,6 @@
   },
   "plugins": {},
   "app": {
-    "windows": [
-      {
-        "fullscreen": false,
-        "height": 690,
-        "resizable": true,
-        "title": "Phi Recorder",
-        "width": 900,
-        "dragDropEnabled": true,
-        "useHttpsScheme": true,
-        "decorations": false
-      }
-    ],
     "security": {
       "assetProtocol": {
         "scope": {

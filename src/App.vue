@@ -269,9 +269,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-app id="phi-recorder" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.bgLeft}, ${theme.current.value.colors.bgRight}` }">
+  <v-app id="phi-recorder" style="background: transparent">
     <v-sonner position="top-center" />
-    <v-app-bar :elevation="0" class="blur-background">
+    <v-app-bar :elevation="0" class="blur-background" style="background: transparent">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text" style="position: absolute; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
@@ -285,7 +285,7 @@ onMounted(async () => {
         <v-btn class="mr-4" size="small" color="red" icon="mdi-circle" @click="appClose()"></v-btn>
       </div>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
+    <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item" style="background: transparent">
       <v-list density="compact" nav class="v-list-none">
         <v-list-item
           v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
@@ -432,7 +432,7 @@ html {
 }
 
 .v-list {
-  background-color: rgba(var(--v-theme-primary), 0.0) !important; /* This color cannot be apply in tag editor */
+  background-color: rgba(var(--v-theme-primary), 1) !important; /* This color cannot be apply in tag editor */
   backdrop-filter: blur(20px);
 }
 
@@ -568,7 +568,8 @@ html {
 }
 
 .blur-background {
-  background: linear-gradient(300deg, rgba(var(--v-theme-topLeft), 0.4) 10%, rgba(var(--v-theme-topRight), 0.4) 90%) !important;
+  /* background: linear-gradient(300deg, rgba(var(--v-theme-topLeft), 0.4) 10%, rgba(var(--v-theme-topRight), 0.4) 90%) !important; */
+  /* background: rgba(0, 0, 0, 0.1); */
   backdrop-filter: blur(40px) saturate(180%);
   transform: translateZ(0);
   position: relative;
