@@ -46,6 +46,7 @@ tauri-plugin-dialog = "2.2.1"
 zip = "0.6.6"
 serde_yaml = "0.9.21"
 tauri-plugin-prevent-default = "2.0.0"
+window-vibrancy = "0.6.0"
 # sysinfo = "0.29.0"
 
 [features]

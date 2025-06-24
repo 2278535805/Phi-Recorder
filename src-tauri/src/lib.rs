@@ -34,7 +34,7 @@ use std::{
     time::SystemTime,
 };
 use task::{TaskQueue, TaskView};
-use tauri::{ipc::InvokeError, Manager, State, WindowEvent};
+use tauri::{ipc::InvokeError, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 use tokio::{io::AsyncWriteExt, process::Command};
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
@@ -72,6 +72,29 @@ fn hide_cmd() {
     }
 }
 
+fn create_window(app: &mut tauri::App) -> tauri::Result<tauri::WebviewWindow> {
+    let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("/".into()))
+        .title("Phi Recorder")
+        .inner_size(900.0, 690.0)
+        .transparent(true);
+    #[cfg(target_os = "macos")]
+    let win_builder = win_builder
+        .title_bar_style(tauri::TitleBarStyle::Overlay)
+        .hidden_title(true)
+        .background_color(tauri::window::Color(0, 0, 0, 1))
+        .effects(tauri::window::EffectsBuilder::new()
+            .effects(vec![tauri::window::Effect::Sidebar])
+            .build());
+    let window = win_builder.build()?;
+    #[cfg(target_os = "windows")] {
+        let _ = window.set_decorations(false);
+        window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
+            .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+    }
+    Ok(window)
+}
+
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() -> Result<()> {
     let rt = tokio::runtime::Builder::new_multi_thread()
@@ -93,6 +116,16 @@ pub async fn run() -> Result<()> {
                 .build()
         )
         .manage(TaskQueue::new())
+        .setup(|app| {
+            let window = create_window(app)?;
+
+            window.on_window_event(move |event| {
+                if let tauri::WindowEvent::CloseRequested { .. } = event {
+                    exit_program(0);
+                }
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             is_the_only_instance,
             exit_program,
