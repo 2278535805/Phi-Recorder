@@ -941,7 +941,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let byte_size = vw as usize * vh as usize * 4;
 
-    const N: usize = 6;
+    const N: usize = 3; // Buffer Size
     let mut pbos: [GLuint; N] = [0; N];
     unsafe {
         use miniquad::gl::*;
@@ -1009,14 +1009,12 @@ pub async fn main(cmd: bool) -> Result<()> {
                 std::ptr::null_mut(),
             );
 
-            if frame >= N as u64 - 1 {
-                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1 ) as usize % N]);
-                let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8);
-                if !src.is_null() {
-                    input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
-                    glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-                }
+            let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8);
+            if !src.is_null() {
+                input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
             }
+            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1 ) as usize % N]);
         }
 
         if ipc {
