@@ -4,7 +4,7 @@ use crate::{
 };
 use anyhow::{Context, Result};
 use macroquad::prelude::*;
-use prpr::{
+use phire::{
     config::{Config, Mods},
     core::init_assets,
     fs,
@@ -49,7 +49,7 @@ impl Scene for BaseScene {
     fn render(&mut self, _tm: &mut TimeManager, _ui: &mut Ui) -> Result<()> {
         Ok(())
     }
-    fn next_scene(&mut self, _tm: &mut TimeManager) -> prpr::scene::NextScene {
+    fn next_scene(&mut self, _tm: &mut TimeManager) -> phire::scene::NextScene {
         self.0.take().unwrap_or_default()
     }
 }
