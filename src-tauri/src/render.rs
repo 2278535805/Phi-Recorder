@@ -1,5 +1,5 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
-prpr::tl_file!("render");
+phire::tl_file!("render");
 
 use crate::{
     common::{output_dir, parse_args, read_config, test_output_dir},
@@ -8,7 +8,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
-use prpr::{
+use phire::{
     config::{ChallengeModeColor, Config, Mods},
     core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
     fs,

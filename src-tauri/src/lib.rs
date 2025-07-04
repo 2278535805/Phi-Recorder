@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 // #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-prpr::tl_file!("main" mtl);
+phire::tl_file!("main" mtl);
 
 mod common;
 mod ipc;
@@ -15,7 +15,7 @@ use common::{
 };
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
-use prpr::{
+use phire::{
     fs::{self, FileSystem},
     info::ChartInfo,
 };
