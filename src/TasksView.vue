@@ -166,10 +166,15 @@ async function showOutputFolder() {
 }
 
 const removeDialog = ref(false);
-const removeTaskId = ref(0);
-function removeTask(task: number) {
+const removeTaskIndex = ref(0);
+function fromBackIndex(length: number, indexFromBack: number): number | null {
+    if (indexFromBack >= length) return null;
+    return length - indexFromBack - 1;
+}
+function removeTask(index: number) {
   removeDialog.value = false;
-  invoke('remove_task', { id: task })
+  let realIndex = fromBackIndex(tasks.value!.length, index);
+  invoke('remove_task', { index: realIndex })
     .catch((e) => {
       toastError(e);
     });
@@ -229,7 +234,7 @@ function removeTask(task: number) {
               <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
                 <v-btn
                   variant="flat"
-                  @click="removeDialog = true; removeTaskId = task.id"
+                  @click="removeDialog = true; removeTaskIndex =index"
                   v-t="'remove-task'"
                   class="hover-scale"></v-btn>
                 <v-btn
@@ -241,7 +246,7 @@ function removeTask(task: number) {
                         outputDialog = true;
                       }
                     }"
-                  @contextmenu="removeDialog = true; removeTaskId = task.id"
+                  @contextmenu="removeDialog = true; removeTaskIndex = task.id"
                   v-t="'details'"
                   class="hover-scale"></v-btn>
               </div>
@@ -292,7 +297,7 @@ function removeTask(task: number) {
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>
-          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskId)" v-t="'confirm'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex)" v-t="'confirm'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

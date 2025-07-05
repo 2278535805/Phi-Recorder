@@ -493,10 +493,10 @@ async fn cancel_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeE
 }
 
 #[tauri::command]
-async fn remove_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
+async fn remove_task(queue: State<'_, TaskQueue>, index: u32) -> Result<(), InvokeError> {
     wrap_async(async move {
-        if let Some(task) = queue.tasks().await.get(id as usize) {
-            queue.remove(id).await;
+        if let Some(task) = queue.tasks().await.get(index as usize) {
+            queue.remove(index).await;
             if task.output.exists() && task.output.is_file() {
                 tokio::fs::remove_file(&task.output).await?;
             }
