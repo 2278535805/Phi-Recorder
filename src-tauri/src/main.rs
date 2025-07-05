@@ -26,6 +26,6 @@ pub fn build_conf() -> macroquad::window::Conf {
 #[macroquad::main(build_conf)]
 async fn main() -> Result<(), anyhow::Error> {
     //#[allow(unused_must_use)]
-    app_lib::run().await?;
+    phi_recorder::run().await?;
     Ok(())
 }
