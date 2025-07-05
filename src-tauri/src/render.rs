@@ -126,7 +126,6 @@ impl RenderConfig {
             challenge_rank: self.challenge_rank,
             disable_effect: self.disable_effect,
             disable_loading: self.disable_loading,
-            hires: self.hires,
             double_hint: self.double_hint,
             fxaa: self.fxaa,
             note_scale: self.note_scale,
