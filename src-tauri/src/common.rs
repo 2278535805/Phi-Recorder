@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
+use tracing::{warn, info};
 use std::{
     collections::HashMap,
     fs::File,
@@ -242,6 +243,6 @@ pub async fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -
     }
 
     zip.finish()?;
-    println!("Create ZIP: {}", output_path.display());
+    info!("Create ZIP: {}", output_path.display());
     Ok(())
 }

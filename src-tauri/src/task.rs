@@ -8,6 +8,7 @@ use anyhow::Result;
 use chrono::Local;
 use phire::fs;
 use serde::Serialize;
+use tracing::{error, info};
 use std::{
     collections::VecDeque,
     io::Write,
@@ -113,7 +114,7 @@ impl Task {
     }
 
     pub async fn run(&self) -> Result<()> {
-        println!("Task #{} '{}' started ({})", self.id, self.name, self.params.path.display());
+        info!("Task #{} '{}' started ({})", self.id, self.name, self.params.path.display());
 
         *self.status.lock().await = TaskStatus::Loading;
 
@@ -150,7 +151,7 @@ impl Task {
                         sleep(Duration::from_millis(50)).await;
                     }
                 } => {
-                    println!("Task #{} cancelled", self.id);
+                    info!("Task #{} cancelled", self.id);
                     child.kill().await?;
                     let output = child.wait_with_output().await?;
                     *self.status.lock().await = TaskStatus::Canceled {
@@ -207,7 +208,7 @@ impl Task {
                             };
                         },
                         IPCEvent::Done(duration) => {
-                            println!("Task #{} completed", self.id);
+                            info!("Task #{} completed", self.id);
                             let output = child.wait_with_output().await?;
                             *self.status.lock().await = TaskStatus::Done {
                                 duration,
@@ -226,7 +227,7 @@ impl Task {
             }
         }
 
-        println!("Task #{} not completed", self.id);
+        info!("Task #{} not completed", self.id);
         let output = child.wait_with_output().await?;
         if !output.status.success() {
             *self.status.lock().await = TaskStatus::Failed {
@@ -287,7 +288,7 @@ impl TaskQueue {
                     continue;
                 };
                 if let Err(err) = task.run().await {
-                    println!("Failed to render: {err:?}");
+                    error!("Failed to render: {err:?}");
                     *task.status.lock().await = TaskStatus::Failed {
                         output: format!("{err:?}"),
                     };
