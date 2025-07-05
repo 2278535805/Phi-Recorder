@@ -65,7 +65,6 @@ impl Task {
     async fn new(id: u32, params: RenderParams) -> Result<Self> {
         let mut fs = fs::fs_from_file(&params.path)?;
         let info = fs::load_info(fs.deref_mut()).await?;
-        let config = params.config.to_config();
         let mut cover = NamedTempFile::new()?;
         cover.write_all(&fs.load_file(&info.illustration).await?)?;
 
@@ -80,7 +79,7 @@ impl Task {
             .chars()
             .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
             .collect();
-        let format = if config.hires { "mov" } else { "mp4" };
+        let format = if params.config.hires { "mov" } else { "mp4" };
         let file_name = if params.config.simple_file_name {
             let safe_name2: String = info
                 .composer

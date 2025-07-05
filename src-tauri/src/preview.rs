@@ -121,7 +121,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
                     if tweak_offset {
                         GameMode::TweakOffset
                     } else {
-                        GameMode::Normal
+                        GameMode::Exercise
                     },
                     info,
                     &prpr_config,
