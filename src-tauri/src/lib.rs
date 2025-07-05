@@ -16,12 +16,14 @@ use common::{
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
 use phire::{
+    log,
     fs::{self, FileSystem},
     info::ChartInfo,
 };
 use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
 use serde::Serialize;
 use tauri_plugin_prevent_default::Flags;
+use tracing::{error, info, warn};
 use std::{
     collections::HashMap,
     fs::File,
@@ -43,14 +45,14 @@ static LOCK_FILE: OnceLock<tokio::fs::File> = OnceLock::new();
 #[inline]
 async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeError> {
     f.await.map_err(|e| {
-        eprintln!("{e:?}");
+        error!("{e:?}");
         InvokeError::from_anyhow(e)
     })
 }
 
 async fn run_wrapped(f: impl Future<Output = Result<()>>) {
     if let Err(err) = f.await {
-        eprintln!("{err:?}");
+        error!("{err:?}");
         exit_program(1);
     }
     exit_program(0);
@@ -74,6 +76,7 @@ fn hide_cmd() {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() -> Result<()> {
+    log::register();
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
@@ -213,13 +216,13 @@ pub async fn run() -> Result<()> {
                 run_wrapped(preview::main(true, true, true)).await;
             }
             cmd => {
-                eprintln!("Command: {cmd:?}");
+                info!("Command: {cmd:?}");
                 let args = std::env::args().nth(1).unwrap_or_default();
                 let path = Path::new(&args);
                 if path.is_file() && (args.contains(".pez") || args.contains(".zip"))
                     || path.is_dir()
                 {
-                    println!("Find a valid path, start preview");
+                    info!("Find a valid path, start preview");
                     run_wrapped(preview::main(true, false, true)).await;
                     exit_program(0);
                 } else {
@@ -240,7 +243,7 @@ pub async fn run() -> Result<()> {
     if lock_file.try_lock_exclusive().is_ok() {
         LOCK_FILE.set(lock_file).unwrap();
     } else {
-        eprintln!("Lock failed");
+        error!("Lock app.lock failed");
     }
 
     app.run(|_, _| {});
@@ -278,7 +281,7 @@ fn exit_program(code: i32) {
 fn open_output_folder() -> Result<(), InvokeError> {
     (|| {
         let path = output_dir().unwrap();
-        println!("Opening output folder: {}", path.display());
+        info!("Opening output folder: {}", path.display());
         open::that_detached(path)?;
         Ok(())
     })()
@@ -288,7 +291,7 @@ fn open_output_folder() -> Result<(), InvokeError> {
 #[tauri::command]
 fn open_in_folder(path: &Path) -> Result<(), InvokeError> {
     (move || {
-        println!("Open in folder: {}", path.display());
+        info!("Open in folder: {}", path.display());
         open::that_detached(path)?;
         Ok(())
     })()
@@ -298,7 +301,7 @@ fn open_in_folder(path: &Path) -> Result<(), InvokeError> {
 #[tauri::command]
 fn show_in_folder(path: &Path) -> Result<(), InvokeError> {
     (move || {
-        println!("Show in folder: {}", path.display());
+        info!("Show in folder: {}", path.display());
         #[cfg(target_os = "windows")]
         {
             Command::new("explorer")
@@ -339,7 +342,7 @@ fn show_in_folder(path: &Path) -> Result<(), InvokeError> {
 #[tauri::command]
 fn open_file(path: &Path) -> Result<(), InvokeError> {
     let result = (move || {
-        println!("Opening file: {}", path.display());
+        info!("Opening file: {}", path.display());
         open::that_detached(path)?;
         Ok(())
     })();
@@ -356,7 +359,7 @@ async fn parse_chart(path: &Path) -> Result<ChartInfo, InvokeError> {
             .await
             .with_context(|| mtl!("load-info-failed"))?;
         //let info1 = format!("{}\n", serde_json::to_string(&info)?);
-        //println!("{}", info1);
+        //info!("{}", info1);
         Ok(info)
     })
     .await
@@ -442,7 +445,7 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, Invoke
 
         let status = child.wait().await?;
         if !status.success() {
-            println!("Child process exited with {}", status);
+            error!("Child process exited with {}", status);
         }
 
         Ok(offset)
@@ -532,7 +535,7 @@ fn get_respacks() -> Result<Vec<RespackInfo>, InvokeError> {
 fn open_respack_folder() -> Result<(), InvokeError> {
     (|| {
         let path = respack_dir()?;
-        println!("Opening respack folder: {}", path.display());
+        info!("Opening respack folder: {}", path.display());
         open::that_detached(path)?;
         Ok(())
     })()
@@ -678,7 +681,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
         }
 
         {
-            println!("Not found Chartlist.txt, start reading folder");
+            info!("Not found Chartlist.txt, start reading folder");
             use regex::Regex;
             let onely_num = Regex::new(r"^\d+$").unwrap();
             let mut folders = Vec::new();
@@ -695,10 +698,10 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                 }
             }
             for folder in folders {
-                println!("Found chart folder: {}", folder.file_name().unwrap_or_default().to_string_lossy());
+                info!("Found chart folder: {}", folder.file_name().unwrap_or_default().to_string_lossy());
                 if !folder.join("info.txt").exists() {
-                    println!("Not found info.txt");
                     let folder_name = folder.file_name().unwrap_or_default().to_string_lossy().to_string();
+                    warn!("Not found info.txt: {}", folder_name);
                     results.push(RPEChartInfo {
                         name: folder_name,
                         id: "Empty folder".to_string(),
@@ -723,22 +726,36 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                         continue;
                     };
                     *(match key {
-                        "Name" => &mut name,
-                        "Path" => &mut id,
-                        "Chart" => &mut chart,
-                        "Picture" => &mut illustration,
-                        "Charter" => &mut charter,
+                        "Name" => {
+                            info!("name: {}", value.trim());
+                            &mut name
+                        },
+                        "Path" => {
+                            info!("id: {}", value.trim());
+                            &mut id
+                        },
+                        "Chart" => {
+                            info!("chart: {}", value.trim());
+                            &mut chart
+                        },
+                        "Picture" => {
+                            info!("illustration: {}", value.trim());
+                            &mut illustration
+                        },
+                        "Charter" => {
+                            info!("charter: {}", value.trim());
+                            &mut charter
+                        },
                         _ => continue,
                     }) = Some(value.trim().to_owned());
-                    print!("{}, ", value.trim());
                 }
-                println!();
                 commit!();
             }
         }
 
         results.sort_by_key(|it| it.modified);
         results.reverse();
+        info!("found chart successfully");
 
         Ok(Some(results))
     })()
@@ -750,7 +767,7 @@ fn open_app_folder() -> Result<(), InvokeError> {
     (|| {
         let exe_path = std::env::current_exe()?;
         let path = exe_path.parent().unwrap();
-        println!("Opening current exe folder: {}", path.display());
+        info!("Opening current exe folder: {}", path.display());
         open::that_detached(path)?;
         Ok(())
     })()
@@ -767,7 +784,7 @@ async fn test_ffmpeg_filter() -> bool {
     let Ok(Some(ffmpeg)) = find_ffmpeg() else {
         return false;
     };
-    eprintln!("ffmpeg: {}", &ffmpeg);
+    info!("ffmpeg: {}", &ffmpeg);
 
     let output = Command::new(&ffmpeg)
         .arg("-filters")
@@ -777,7 +794,7 @@ async fn test_ffmpeg_filter() -> bool {
 
     let banner = String::from_utf8(output.stderr).unwrap_or_default();
     if !banner.contains("--enable-libsoxr") {
-        eprintln!("Missing lib: libsoxr, Place update FFmpeg to full version");
+        error!("Missing lib: libsoxr, Place update FFmpeg to full version");
         return false;
     }
 
@@ -785,7 +802,7 @@ async fn test_ffmpeg_filter() -> bool {
     let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
     for i in filter_required {
         if !filter.contains(i) {
-            eprintln!("Missing lib: {}, Place update FFmpeg to full version", i);
+            error!("Missing lib: {}, Place update FFmpeg to full version", i);
             return false;
         }
     }
@@ -826,7 +843,7 @@ async fn test_encoder(encoder: String) -> Result<bool, InvokeError> {
 #[tauri::command]
 async fn export_pez(chart_path: String, output_path: String) -> Result<(), InvokeError> {
     wrap_async(async move {
-        println!("Exporting PEZ: {} -> {}", chart_path, output_path);
+        info!("Exporting PEZ: {} -> {}", chart_path, output_path);
         let chart_path = PathBuf::from(chart_path);
         let output_path = PathBuf::from(output_path);
 
@@ -857,7 +874,7 @@ async fn export_pez(chart_path: String, output_path: String) -> Result<(), Invok
                 }
             }
         }
-        println!("files: {:?}", files);
+        info!("files: {:?}", files);
 
         create_zip(output_path, files).await?;
         Ok(())
@@ -869,6 +886,7 @@ async fn delete_path(path: String) -> Result<(), InvokeError> {
     wrap_async(async move {
         let path = PathBuf::from(path);
         if path.exists() && path.is_dir() {
+            info!("delete: {}", path.display());
             tokio::fs::remove_dir_all(path).await?;
         } else {
             bail!("Not a directory");
@@ -888,6 +906,7 @@ async fn delete_autosave(path: String) -> Result<(), InvokeError> {
                 let file_path = entry.path();
                 if let Some(file_name) = file_path.file_name().and_then(|s| s.to_str()) {
                     if file_name.starts_with("AutoSave_") {
+                        info!("delete: {}", file_path.display());
                         tokio::fs::remove_file(file_path).await?;
                     }
                 }
@@ -903,6 +922,7 @@ async fn delete_autosave(path: String) -> Result<(), InvokeError> {
 async fn save_info(path: String, info: ChartInfo) -> Result<(), InvokeError> {
     wrap_async(async move {
         let file = PathBuf::from(path);
+        info!("save: {}", file.display());
         let string = serde_yaml::to_string(&info)?;
         std::fs::write(file, string)?;
         Ok(())
@@ -913,6 +933,7 @@ async fn save_info(path: String, info: ChartInfo) -> Result<(), InvokeError> {
 async fn read_info(path: String) -> Result<ChartInfo, InvokeError> {
     wrap_async(async move {
         let file = PathBuf::from(path);
+        info!("read: {}", file.display());
         let info = serde_yaml::from_reader(BufReader::new(std::fs::File::open(file)?))?;
         Ok(info)
     }).await

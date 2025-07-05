@@ -430,17 +430,16 @@ pub async fn main(cmd: bool) -> Result<()> {
         let config: RenderConfig = if let Some(config) = &args_config {
             match serde_json::from_str(config) {
                 Ok(config_json) => {
-                    println!("Using config from json");
+                    info!("Using config from json");
                     config_json
                 }
                 Err(error) => {
-                    println!("Failed to parse json: {}", error);
-                    println!("Using config from toml file");
+                    info!("Failed to parse json: {}. Using config from toml file", error);
                     toml::from_str(&std::fs::read_to_string(config)?)?
                 }
             }
         } else {
-            println!("Using config from config.toml");
+            info!("Using config from config.toml");
             toml::from_str(&std::fs::read_to_string("config.toml")?)?
         };
         let path = args_input.unwrap();
