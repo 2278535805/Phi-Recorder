@@ -358,8 +358,8 @@ async fn parse_chart(path: &Path) -> Result<ChartInfo, InvokeError> {
         let info = fs::load_info(fs.deref_mut())
             .await
             .with_context(|| mtl!("load-info-failed"))?;
-        //let info1 = format!("{}\n", serde_json::to_string(&info)?);
-        //info!("{}", info1);
+        //let info_display = format!("{}\n", serde_json::to_string(&info)?);
+        //info_display!("{:?}", info);
         Ok(info)
     })
     .await
@@ -390,9 +390,9 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
             .spawn()?;
 
         let mut stdin = child.stdin.take().unwrap();
-        stdin
-            .write_all(format!("{}\n", serde_json::to_string(&params)?).as_bytes())
-            .await?;
+        let info = format!("{}\n", serde_json::to_string(&params)?);
+        info!("preview: {}", info);
+        stdin.write_all(info.as_bytes()).await?;
 
         Ok(())
     })
@@ -412,6 +412,7 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, Invoke
 
         let mut stdin = child.stdin.take().unwrap();
         let info = format!("{}\n", serde_json::to_string(&params)?);
+        info!("preview tweakoffset: {}", info);
         stdin.write_all(info.as_bytes()).await?;
 
         // Read and process stdout to get the offset value
@@ -466,6 +467,7 @@ async fn preview_play(params: RenderParams) -> Result<(), InvokeError> {
 
         let mut stdin = child.stdin.take().unwrap();
         let info = format!("{}\n", serde_json::to_string(&params)?);
+        info!("preview play: {}", info);
         stdin.write_all(info.as_bytes()).await?;
         Ok(())
     })
@@ -483,7 +485,9 @@ async fn post_render(queue: State<'_, TaskQueue>, params: RenderParams) -> Resul
 
 #[tauri::command]
 async fn get_tasks(queue: State<'_, TaskQueue>) -> Result<Vec<TaskView>, InvokeError> {
-    wrap_async(async move { Ok(queue.tasks().await) }).await
+    wrap_async(async move {
+        Ok(queue.tasks().await)
+    }).await
 }
 
 #[tauri::command]
@@ -496,6 +500,7 @@ async fn cancel_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeE
 async fn remove_task(queue: State<'_, TaskQueue>, index: u32) -> Result<(), InvokeError> {
     wrap_async(async move {
         if let Some(task) = queue.tasks().await.get(index as usize) {
+            info!("Task #{}(index: {}) deleted", task.id, index);
             queue.remove(index).await;
             if task.output.exists() && task.output.is_file() {
                 tokio::fs::remove_file(&task.output).await?;
