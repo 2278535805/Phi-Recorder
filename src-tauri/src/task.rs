@@ -264,7 +264,7 @@ impl Task {
 
 #[derive(Serialize)]
 pub struct TaskView {
-    id: u32,
+    pub id: u32,
     name: String,
     pub output: PathBuf,
     path: String,
