@@ -3797,7 +3797,7 @@ dependencies = [
 [[package]]
 name = "phire"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/phire#275d1e91c61061ab5e68905a760f07cdc9cf89ec"
+source = "git+https://github.com/2278535805/phire#1fffe22d64fcc2ccaccce28c50cdb291d5a76655"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3999,7 +3999,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/phire#275d1e91c61061ab5e68905a760f07cdc9cf89ec"
+source = "git+https://github.com/2278535805/phire#1fffe22d64fcc2ccaccce28c50cdb291d5a76655"
 dependencies = [
  "anyhow",
  "tracing",
@@ -4534,7 +4534,7 @@ dependencies = [
 [[package]]
 name = "sasa"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/sasa#42d3aea121c82e9c47cdb554996c48c46595b9cb"
+source = "git+https://github.com/2278535805/sasa#dc8ac7a77488a7c2d1e3f7555b05ac6051bc747b"
 dependencies = [
  "anyhow",
  "cpal",
