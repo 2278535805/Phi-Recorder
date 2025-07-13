@@ -2,6 +2,7 @@
 en:
   render: Render
   rpe: RPE
+  batch: Batch Render
   tasks: Tasks
   settings: Settings
   about: About
@@ -26,6 +27,7 @@ en:
 zh-CN:
   render: 渲染
   rpe: RPE
+  batch: 批量渲染
   tasks: 任务列表
   settings: 设置
   about: 关于
@@ -113,6 +115,7 @@ function routerPush(name: string) {
 
 const icons = ref({
   render: 'mdi-auto-fix',
+  batch: 'mdi-filmstrip-box-multiple',
   rpe: 'mdi-bookshelf',
   tasks: 'mdi-server',
   settings: 'mdi-cog',
@@ -288,7 +291,7 @@ onMounted(async () => {
     <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
       <v-list density="compact" nav class="v-list-none">
         <v-list-item
-          v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
+          v-for="key in ['render', 'batch', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
@@ -300,7 +303,7 @@ onMounted(async () => {
         ></v-list-item>
 
         <v-list-item
-          v-for="key in ['render', 'rpe', 'tasks', 'settings', 'about']"
+          v-for="key in ['render', 'batch', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"

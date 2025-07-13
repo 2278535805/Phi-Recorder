@@ -132,6 +132,73 @@ export interface RenderConfig {
   alphaTint: boolean;
 }
 
+export const DEFAULT_CONFIG: RenderConfig = {
+  resolution: [1920, 1080],
+  ffmpegPreset: 'medium p4 balanced',
+  endingLength: 0.0,
+  disableLoading: true,
+  hires: false,
+  chartDebugLine: 0.,
+  chartDebugNote: 0.,
+  chartRatio: 1,
+  allGood: false,
+  allBad: false,
+  fps: 60,
+  hardwareAccel: true,
+  hevc: false,
+  mpeg4: false,
+  customEncoder: null,
+  dynamicBitrateControl: true,
+  bitrate: '28',
+
+  aggressive: false,
+  challengeColor: 'rainbow',
+  challengeRank: 3,
+  disableEffect: false,
+  doubleHint: true,
+  fxaa: false,
+  noteScale: 1,
+  particle: true,
+  playerAvatar: null,
+  playerName: '',
+  playerRks: 16.00,
+  sampleCount: 8,
+  resPackPath: null,
+  speed: 1,
+  volumeMusic: 0.5,
+  volumeSfx: 0.4,
+  compressionRatio: 20.0,
+  forceLimit: true,
+  limitThreshold: 0.5,
+  loudnessEqualization: false,
+  watermark: '',
+  roman: false,
+  chinese: false,
+  combo: 'AUTOPLAY',
+  difficulty: '',
+  judgeOffset: 0,
+  simpleFileName: false,
+  renderLine: true,
+  renderLineExtra: true,
+  renderNote: true,
+  renderUiPause: true,
+  renderUiName: true,
+  renderUiLevel: true,
+  renderUiScore: true,
+  renderUiCombo: true,
+  renderUiBar: true,
+  renderBg: true,
+  renderBgDim: true,
+  bgBlurriness: 80,
+
+  maxParticles: 100000,
+  renderStartTime: 0.0,
+  renderEndTime: null,
+
+  fade: 0.0,
+  alphaTint: false,
+};
+
 export interface Config {
   rpeDir: string | null;
   outputDir: string | null;
@@ -159,3 +226,17 @@ export type Release = {
   body: string,
   message: string, // error message
 };
+
+export interface RenderChart {
+  id: number;
+  path: string;
+  isChosen: boolean;
+
+  chartInfo: ChartInfo;
+}
+
+export interface Preset {
+  name: string;
+  key: string;
+  config: RenderConfig;
+}

@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import AboutView from '../AboutView.vue';
 import RenderView from '../RenderView.vue';
+import BatchView from '../BatchView.vue';
 import RPEView from '../RPEView.vue';
 import TasksView from '../TasksView.vue';
 import SettingsView from '../SettingsView.vue';
@@ -15,6 +16,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'render', component: RenderView },
+    { path: '/batch', name: 'batch', component: BatchView },
     { path: '/rpe', name: 'rpe', component: RPEView },
     { path: '/tasks', name: 'tasks', component: TasksView },
     { path: '/settings', name: 'settings', component: SettingsView },
