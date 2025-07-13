@@ -299,7 +299,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { VDivider, VForm } from 'vuetify/components';
 
 import { RULES, isNumeric, toast, anyFilter, toastError } from '../common';
-import type { RenderConfig } from '../model';
+import { DEFAULT_CONFIG, type Preset, type RenderConfig } from '../model';
 
 import TipSwitch from './TipSwitch.vue';
 import TipTextField from './TipTextField.vue';
@@ -309,73 +309,6 @@ import TooltipIcon from './TooltipIcon.vue';
 
 const form = ref<VForm>();
 const page = ref(0);
-
-const DEFAULT_CONFIG: RenderConfig = {
-  resolution: [1920, 1080],
-  ffmpegPreset: 'medium p4 balanced',
-  endingLength: 0.0,
-  disableLoading: true,
-  hires: false,
-  chartDebugLine: 0.,
-  chartDebugNote: 0.,
-  chartRatio: 1,
-  allGood: false,
-  allBad: false,
-  fps: 60,
-  hardwareAccel: true,
-  hevc: false,
-  mpeg4: false,
-  customEncoder: null,
-  dynamicBitrateControl: true,
-  bitrate: '28',
-
-  aggressive: false,
-  challengeColor: 'rainbow',
-  challengeRank: 3,
-  disableEffect: false,
-  doubleHint: true,
-  fxaa: false,
-  noteScale: 1,
-  particle: true,
-  playerAvatar: null,
-  playerName: '',
-  playerRks: 16.00,
-  sampleCount: 8,
-  resPackPath: null,
-  speed: 1,
-  volumeMusic: 0.5,
-  volumeSfx: 0.4,
-  compressionRatio: 20.0,
-  forceLimit: true,
-  limitThreshold: 0.5,
-  loudnessEqualization: false,
-  watermark: '',
-  roman: false,
-  chinese: false,
-  combo: 'AUTOPLAY',
-  difficulty: '',
-  judgeOffset: 0,
-  simpleFileName: false,
-  renderLine: true,
-  renderLineExtra: true,
-  renderNote: true,
-  renderUiPause: true,
-  renderUiName: true,
-  renderUiLevel: true,
-  renderUiScore: true,
-  renderUiCombo: true,
-  renderUiBar: true,
-  renderBg: true,
-  renderBgDim: true,
-  bgBlurriness: 80,
-
-  maxParticles: 100000,
-  renderStartTime: 0.0,
-  renderEndTime: null,
-
-  fade: 0.0,
-  alphaTint: false,
-};
 
 const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160']
 const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
@@ -643,7 +576,7 @@ function applyAspectRatio(aspectRatio: number) {
   }
 }
 
-defineExpose({ buildConfig, applyAspectRatio });
+defineExpose({ buildConfig, applyAspectRatio, applyConfig });
 
 function StickyLabel(props: { title: string }) {
   return h('div', { class: 'mb-4 bg-surface sticky-label', style: 'z-index: 2' }, [h('h3', { class: 'pa-1' }, props.title), h(VDivider)]);
@@ -739,11 +672,6 @@ function applyConfig(config: RenderConfig) {
   alphaTint.value = config.alphaTint;
 }
 
-interface Preset {
-  name: string;
-  key: string;
-  config: RenderConfig;
-}
 const DEFAULT_PRESET: Preset = {
   name: t('default-preset'),
   key: 'default',

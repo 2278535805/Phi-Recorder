@@ -212,7 +212,7 @@ async function chooseChart(folder?: boolean) {
   if (!file) {
     choosingChart.value = false;
     return;
-  };
+  }
 
   // noexcept
   await loadChart(file as string);
@@ -527,7 +527,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
       <div v-if="step === 'config' || step === 'options' || step === 'render'" class="d-flex flex-row pa-6 pb-4 pt-0">
         <v-btn variant="text" @click="stepIndex && stepIndex--">{{ t('prev-step') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingTweakoffset" variant="text" @click="previewTweakoffset" class="mr-2">{{ t('tweakoffset') }}</v-btn>
-        <div class="flex-grow-1"></div>
+        <v-spacer />
         <v-btn v-if="step === 'config'" variant="text" @click="moreInfo = true; tryParseAspect(); checkInfo();" class="mr-2">{{ t('more') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
