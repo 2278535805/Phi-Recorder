@@ -237,6 +237,7 @@ export interface RenderChart {
   chartInfo: ChartInfo;
 
   taskId: number | null;
+  output: string;
   status: TaskStatus;
 }
 
