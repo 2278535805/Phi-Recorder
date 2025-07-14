@@ -2,8 +2,7 @@
 phire::tl_file!("render");
 
 use crate::{
-    common::{output_dir, parse_args, read_config, test_output_dir},
-    ASSET_PATH
+    common::{output_dir, parse_args, read_config, test_output_dir}, ipc::IPCEvent, ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
 use chrono::Local;
@@ -249,15 +248,6 @@ pub struct RenderParams {
     pub path: PathBuf,
     pub info: ChartInfo,
     pub config: RenderConfig,
-}
-
-#[derive(Serialize, Deserialize)]
-pub enum IPCEvent {
-    Loading,
-    StartMixing,
-    StartRender(u64),
-    Frame,
-    Done(f64),
 }
 
 pub async fn build_player(config: &RenderConfig) -> Result<BasicPlayer> {

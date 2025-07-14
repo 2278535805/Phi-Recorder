@@ -365,7 +365,7 @@ function selectInvert() {
 </script>
 
 <template>
-  <v-card class="d-flex flex-column" width="100%" style="border-radius: 0">
+  <v-card color="transparent" class="d-flex flex-column fade-in" width="100%" style="border-radius: 0px; box-shadow: none;">
     <v-toolbar color="transparent" class="px-2" style="position: sticky; top: 0px;">
       <v-btn class="mx-2" variant="tonal" :loading="choosingChart" @click="chooseChart(false)" @contextmenu="chooseChart(true)">{{ t('choose.chart') }}</v-btn>
       <v-combobox class="mx-4 mt-2" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset" style="flex: 4;"></v-combobox>
@@ -377,7 +377,7 @@ function selectInvert() {
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" >{{ t('choose.post-select-render') }}</v-btn>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto">
-      <v-table fixed-header density="compact" style="position: absolute; top: 64px; left: 0px; right: 0px; bottom: 0px;">
+      <v-table fixed-header density="compact" style="position: absolute; top: 64px; left: 0px; right: 0px; bottom: 0px; background-color: transparent;">
         <thead>
           <tr>
             <th class="text-center" style="width: 3.3em; padding-left: 1.4em;">({{ charts.length }})</th>
@@ -385,7 +385,7 @@ function selectInvert() {
             <th class="text-left" style="min-width: 5em;">{{ t('info.level') }}</th>
             <th class="text-left" style="min-width: 5em;">{{ t('info.charter') }}</th>
             <th class="text-left" style="max-width: 25%;">{{ t('info.chart') }}</th>
-            <th class="text-center" style="width: 5em;">{{ t('chart-info') }}</th>
+            <th class="text-center" style="width: 7em;">{{ t('chart-info') }}</th>
             <th class="text-center" style="width: 5em;">{{ t('preview') }}</th>
           </tr>
         </thead>
