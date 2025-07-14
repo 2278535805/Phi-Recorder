@@ -65,6 +65,7 @@ en:
   render: Render
   play: Play
   edit: Edit
+  sort-tip: Click to sort, right-click to reverse
 
   render-started: Rendering has started!
   see-tasks: See tasks
@@ -142,6 +143,7 @@ zh-CN:
   render: 渲染
   play: 游玩
   edit: 编辑
+  sort-tip: 点击排序 右键反转
 
   render-started: 视频已开始渲染!
   see-tasks: 查看任务列表
@@ -385,6 +387,30 @@ async function savePreset() {
   preset.value = temp_preset;
 }
 
+function sortChartsByKey(key: string) {
+  switch (key) {
+    case 'id':
+      charts.value.sort((a, b) => a.id - b.id);
+      break;
+    case 'name':
+      charts.value.sort((a, b) => a.chartInfo.name.localeCompare(b.chartInfo.name, undefined, { numeric: true, sensitivity: 'case', caseFirst: 'upper' }));
+      break;
+    case 'path':
+      charts.value.sort((a, b) => a.path.localeCompare(b.path, undefined, { numeric: true, sensitivity: 'case', caseFirst: 'upper' }));
+      break;
+    case 'level':
+      charts.value.sort((a, b) => a.chartInfo.level.localeCompare(b.chartInfo.level, undefined, { numeric: true, sensitivity: 'case', caseFirst: 'upper' }));
+      break;
+    case 'charter':
+      charts.value.sort((a, b) => a.chartInfo.charter.localeCompare(b.chartInfo.charter, undefined, { numeric: true, sensitivity: 'case', caseFirst: 'upper' }));
+      break;
+  }
+}
+
+function sortChartsReverse() {
+  charts.value.reverse();
+}
+
 </script>
 
 <template>
@@ -408,12 +434,12 @@ async function savePreset() {
     <div class="flex-grow-1 overflow-y-auto">
       <v-table fixed-header density="compact" style="position: absolute; top: 64px; left: 0px; right: 0px; bottom: 0px; background-color: transparent;">
         <thead>
-          <tr>
-            <th class="text-center" style="width: 3.3em; padding-left: 1.4em;">({{ charts.length }})</th>
-            <th class="text-left" style="min-width: 5em;">{{ t('info.name') }}</th>
-            <th class="text-left" style="min-width: 5em;">{{ t('info.level') }}</th>
-            <th class="text-left" style="min-width: 5em;">{{ t('info.charter') }}</th>
-            <th class="text-left" style="max-width: 25%;">{{ t('info.chart') }}</th>
+          <tr :title="t('sort-tip')" @contextmenu="sortChartsReverse">
+            <th class="text-center" @click="sortChartsByKey('id')" style="width: 3.3em; padding-left: 1.4em;">({{ charts.length }})</th>
+            <th class="text-left" @click="sortChartsByKey('name')" style="min-width: 5em;">{{ t('info.name') }}</th>
+            <th class="text-left" @click="sortChartsByKey('level')" style="min-width: 5em;">{{ t('info.level') }}</th>
+            <th class="text-left" @click="sortChartsByKey('charter')" style="min-width: 5em;">{{ t('info.charter') }}</th>
+            <th class="text-left" @click="sortChartsByKey('path')" style="max-width: 25%;">{{ t('info.chart') }}</th>
             <th class="text-center" style="width: 7em;">{{ t('chart-info') }}</th>
             <th class="text-center" style="width: 5em;">{{ t('preview') }}</th>
           </tr>
@@ -490,7 +516,7 @@ async function savePreset() {
   </v-dialog>
 
   <v-dialog v-model="presetDialog" width="850px" class="log-card-bg">
-    <v-card class="log-card-only-window" style="background: rgba(40, 40, 80, 0.5) !important;">
+    <v-card class="log-card-only-window" style="background: rgba(var(--v-theme-dialog), 0.4) !important;">
       <v-card-title v-t="'presets'"> </v-card-title>
       <v-card-text>
         <template v-slot>
