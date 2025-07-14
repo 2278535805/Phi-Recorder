@@ -162,7 +162,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { event } from '@tauri-apps/api';
 
 import { toastError, RULES, toast, anyFilter, isString } from './common';
-import type { ChartInfo } from './model';
+import type { ChartInfo, FileDropEvent } from './model';
 
 import { VForm } from 'vuetify/components';
 
@@ -261,13 +261,8 @@ const offset_text = ref('0');
 
 const fileHovering = ref(false);
 
-interface FileDropEvent {
-  paths: string[];
-  position: { x: number; y: number };
-}
-
-listen('tauri://drag-over', (_event) => (fileHovering.value = step.value === 'choose'));
-listen('tauri://drag-leave', (_event) => (fileHovering.value = false));
+listen('tauri://drag-over', () => (fileHovering.value = step.value === 'choose'));
+listen('tauri://drag-leave', () => (fileHovering.value = false));
 listen('tauri://drag-drop', async (event) => {
   const files = (event.payload as FileDropEvent).paths;
   
@@ -282,7 +277,7 @@ listen('tauri://drag-drop', async (event) => {
 });
 
 document.addEventListener('keydown', async (event) => {
-  if (document.hasFocus() && event.key === 'Enter' && !moreInfo.value) {
+  if (document.hasFocus() && event.key === 'Enter' && stepIndex && !moreInfo.value) {
     await moveNext();
   }
   if (document.hasFocus() && event.key === 'Escape' && stepIndex && !moreInfo.value) {
@@ -803,13 +798,6 @@ h2 {
 
 ::v-deep(.v-window__container .v-stepper-window-item) {
   transition: 0.5s cubic-bezier(0.2, 0.8, 0.25, 1);
-}
-
-.drop-zone-overlay {
-  /* background: rgba(255, 255, 255, 0.15) !important; */
-  /* backdrop-filter: blur(20px); */
-  /* animation: all 0.3s ease; */
-  animation: blurFade 0.4s ease forwards;
 }
 
 .drop-pulse {

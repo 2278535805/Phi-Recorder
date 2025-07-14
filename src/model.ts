@@ -240,3 +240,8 @@ export interface Preset {
   key: string;
   config: RenderConfig;
 }
+
+export interface FileDropEvent {
+  paths: string[];
+  position: { x: number; y: number };
+}
