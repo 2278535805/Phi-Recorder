@@ -13,6 +13,7 @@ en:
     filter-name: Chart file
     select-all: Select All
     select-invert: Invert
+    cancel-select: Cancel
     remove-select: Remove
     remove-after-render: Remove After Render
     post-select-render: Render
@@ -83,6 +84,16 @@ en:
   edit-preset: Edit Preset
   temp-preset: (Edited)
 
+  task:
+    pending: Pending
+    loading: Loading
+    mixing: Mixing
+    done: Completed
+    canceled: Canceled
+    failed: Failed
+    output: Output
+    show-output: Show Output
+
 zh-CN:
   prev-step: 上一步
   next-step: 下一步
@@ -97,6 +108,7 @@ zh-CN:
     filter-name: 谱面文件
     select-all: 全选
     select-invert: 反选
+    cancel-select: 取消
     remove-select: 移除
     remove-after-render: 渲染后移除
     post-select-render: 渲染
@@ -161,11 +173,20 @@ zh-CN:
   edit-preset: 编辑预设
   temp-preset: (已编辑)
 
+  task:
+    pending: 待处理
+    loading: 加载中
+    mixing: 混音中
+    done: 完成
+    canceled: 取消
+    failed: 失败
+    output: 输出
+    show-output: 查看输出
 
 </i18n>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, nextTick, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -175,7 +196,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { event } from '@tauri-apps/api';
 
 import { toastError, RULES, toast, anyFilter } from './common';
-import { DEFAULT_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent } from './model';
+import { DEFAULT_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
 
 import { VForm } from 'vuetify/components';
 
@@ -230,6 +251,8 @@ async function loadCharts(files: string[]) {
         id: charts.value.length,
         path: file,
         isChosen: false,
+        taskId: null,
+        status: { type: 'null' },
         chartInfo: chartInfo,
       });
     } catch (e) {
@@ -261,24 +284,24 @@ async function buildParams(chartPath: string, chartInfo: ChartInfo, config: Rend
 }
 
 async function postRender(chart: RenderChart) {
+  let params = await buildParams(chart.path, chart.chartInfo, preset.value.config);
+  if (!params) return false;
   try {
-    let params = await buildParams(chart.path, chart.chartInfo, preset.value.config);
-    if (!params) return false;
     await invoke('post_render', { params });
-    if (removeAfterRender.value) {
-      charts.value.splice(charts.value.indexOf(chart), 1);
-    }
-    return true;
   } catch (e) {
     toastError(e);
     return false;
   }
+  let tasks = await invoke<Task[]>('get_tasks');
+  chart.taskId = tasks[0].id;
+  chart.isChosen = false;
+  return true;
 }
 
 async function postSelectRender() {
   for (let chart of charts.value) {
     if (chart.isChosen) {
-      postRender(chart);
+      await postRender(chart);
     }
   }
 }
@@ -292,7 +315,6 @@ function removeSelectChart() {
 }
 
 const loadingPreview = ref(false);
-const removeAfterRender = ref(true);
 
 const chartInfoDialog = ref(false);
 const chartInfoSelect = ref(0);
@@ -411,6 +433,40 @@ function sortChartsReverse() {
   charts.value.reverse();
 }
 
+const tasks = ref<Task[]>();
+
+async function updateList() {
+  tasks.value = await invoke<Task[]>('get_tasks');
+  console.log(tasks.value);
+  for (let chart of charts.value) {
+    let task = tasks.value.find((x) => x.id === chart.taskId);
+    if (task) {
+      chart.status = task.status;
+      console.log(chart.status);
+    }
+  }
+}
+
+async function cancelSelectTask() {
+  for (let chart of charts.value) {
+    if (chart.isChosen) {
+      try {
+        await invoke('cancel_task', { id: chart.taskId });
+      } catch (e) {
+        toastError(e);
+      }
+    }
+  }
+}
+
+await updateList();
+
+const updateTask = setInterval(updateList, 700);
+onUnmounted(() => clearInterval(updateTask));
+
+const outputDialog = ref(false),
+  outputDialogMessage = ref('');
+
 </script>
 
 <template>
@@ -425,10 +481,10 @@ function sortChartsReverse() {
       <v-combobox class="mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset"></v-combobox>
       <v-btn class="mx-1" :title="t('edit-preset')" icon="mdi-pencil" @click="editPreset"></v-btn>
       <v-spacer />
-      <v-checkbox class="mt-2 mx-2" :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
       <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
+      <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" >{{ t('choose.post-select-render') }}</v-btn>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto">
@@ -448,9 +504,27 @@ function sortChartsReverse() {
           <tr v-for="chart in charts" :key="chart.id">
             <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isChosen"></v-checkbox></td>
             <td style="max-width: 12em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.name">{{ chart.chartInfo.name }}</td>
-            <td style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.level">{{ chart.chartInfo.level }}</td>
-            <td style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.charter">{{ chart.chartInfo.charter }}</td>
-            <td style="max-width: 11em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.path">{{ chart.path }}</td>
+
+            <td v-if="chart.status.type === 'pending'" style="max-width: 8em;">{{ t('task.pending') }}</td>
+            <td v-else-if="chart.status.type === 'loading'" style="max-width: 8em;">{{ t('task.loading') }}</td>
+            <td v-else-if="chart.status.type === 'mixing'" style="max-width: 8em;">{{ t('task.mixing') }}</td>
+            <td v-else-if="chart.status.type === 'rendering'" style="max-width: 8em;">{{ (chart.status.progress * 100).toFixed(2) }}%</td>
+            <td v-else-if="chart.status.type === 'done'" style="max-width: 8em;">{{ t('task.done') }}</td>
+            <td v-else-if="chart.status.type === 'canceled'" style="max-width: 8em;">{{ t('task.canceled') }}</td>
+            <td v-else-if="chart.status.type === 'failed'" style="max-width: 8em;">{{ t('task.failed') }}</td>
+            <td v-else style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.level">{{ chart.chartInfo.level }}</td>
+
+            <td v-if="chart.status.type === 'pending' || 'loading' || 'mixing' || 'done' || 'canceled' || 'failed'" style="max-width: 8em;">-</td>
+            <td v-else-if="chart.status.type === 'rendering'" style="max-width: 8em;">{{ chart.status.fps }} FPS</td>
+            <td v-else style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.charter">{{ chart.chartInfo.charter }}</td>
+
+            <td v-if="chart.status.type === 'pending' || 'loading' || 'mixing'" style="max-width: 8em;">-</td>
+            <td v-else-if="chart.status.type === 'rendering'" style="max-width: 8em;">{{ chart.status.estimate.toFixed(0) }} s</td>
+            <td v-else-if="chart.status.type === 'done'" @click="outputDialogMessage = chart.status.output; outputDialog = true;" style="max-width: 8em;">{{ t('task.show-output') }}</td>
+            <td v-else-if="chart.status.type === 'canceled'" @click="outputDialogMessage = chart.status.output; outputDialog = true;" style="max-width: 8em;">{{ t('task.show-output') }}</td>
+            <td v-else-if="chart.status.type === 'failed'" @click="outputDialogMessage = chart.status.output; outputDialog = true;" style="max-width: 8em;">{{ t('task.show-output') }}</td>
+            <td v-else style="max-width: 11em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.path">{{ chart.path }}</td>
+
             <td><v-btn variant="tonal" @click="chartInfoSelect = chart.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></td>
             <td><v-btn variant="tonal" :loading="loadingPreview" @click="previewChart(chart)">{{ t('preview') }}</v-btn></td>
           </tr>
@@ -528,6 +602,19 @@ function sortChartsReverse() {
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
+    <v-card class="log-card-window">
+      <v-card-title v-t="'task.output'"> </v-card-title>
+      <v-card-text>
+        <div class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</div>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
 
   <v-overlay v-model="fileHovering" contained class="align-center justify-center drop-zone-overlay" persistent :close-on-content-click="false">
     <div class="drop-pulse">

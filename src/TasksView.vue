@@ -115,6 +115,8 @@ function formatDuration(seconds: number) {
 
 function describeStatus(status: TaskStatus): string {
   switch (status.type) {
+    case 'null':
+      return ''
     case 'pending':
       return t('status.pending');
     case 'loading':
