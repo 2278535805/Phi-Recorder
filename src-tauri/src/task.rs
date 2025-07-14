@@ -115,6 +115,10 @@ impl Task {
     }
 
     pub async fn run(&self) -> Result<()> {
+        if self.request_cancel.load(std::sync::atomic::Ordering::Relaxed) {
+            return Ok(());
+        }
+
         info!("Task #{} '{}' started ({})", self.id, self.name, self.params.path.display());
 
         *self.status.lock().await = TaskStatus::Loading;
