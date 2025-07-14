@@ -25,7 +25,7 @@ use std::{
 use tempfile::NamedTempFile;
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
-    sync::{mpsc, Mutex},
+    sync::{mpsc, Mutex, Semaphore},
     task::JoinHandle, time::sleep,
 };
 
@@ -281,25 +281,48 @@ pub struct TaskQueue {
 }
 impl TaskQueue {
     pub fn new() -> Self {
-        let (sender, mut receiver) = mpsc::unbounded_channel::<Arc<Task>>();
-        let task = tokio::spawn(async move {
-            loop {
-                let Ok(task) = receiver.try_recv() else {
-                    std::thread::sleep(std::time::Duration::from_millis(50));
-                    continue;
-                };
-                if let Err(err) = task.run().await {
-                    error!("Failed to render: {err:?}");
-                    *task.status.lock().await = TaskStatus::Failed {
-                        output: format!("{err:?}"),
-                    };
+    let (sender, mut receiver) = mpsc::unbounded_channel::<Arc<Task>>();
+
+    let worker = tokio::spawn(async move {
+        let spawn_quene = Arc::new(Semaphore::new(1));
+        let mut queue: VecDeque<Arc<Task>> = VecDeque::new();
+
+        loop {
+            while let Ok(task) = receiver.try_recv() {
+                queue.push_back(task);
+            }
+
+            for task in queue.iter() {
+                if task.request_cancel.load(std::sync::atomic::Ordering::Relaxed) {
+                    let mut status = task.status.lock().await;
+                    if !matches!(*status, TaskStatus::Canceled { .. }) {
+                        *status = TaskStatus::Canceled { output: String::new() };
+                        info!("Task #{} canceled", task.id);
+                    }
                 }
             }
-        });
+
+            if let Some(task) = queue.pop_front() {
+                if let Ok(permit) = spawn_quene.clone().try_acquire_owned() {
+                    tokio::spawn(async move {
+                        if let Err(err) = task.run().await {
+                            error!("Task #{} failed: {:?}", task.id, err);
+                            let mut status = task.status.lock().await;
+                            *status = TaskStatus::Failed { output: format!("{err:?}") };
+                        }
+                        drop(permit);
+                    });
+                } else {
+                    queue.push_front(task);
+                }
+            }
+        sleep(Duration::from_millis(50)).await;
+        }
+    });
 
         Self {
             sender,
-            worker: task,
+            worker,
 
             tasks: Mutex::default(),
         }

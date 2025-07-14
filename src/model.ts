@@ -26,6 +26,9 @@ export interface ChartInfo {
 
 export type TaskStatus =
   | {
+      type: 'null';
+    }
+  | {
       type: 'pending';
     }
   | {
@@ -231,8 +234,10 @@ export interface RenderChart {
   id: number;
   path: string;
   isChosen: boolean;
-
   chartInfo: ChartInfo;
+
+  taskId: number | null;
+  status: TaskStatus;
 }
 
 export interface Preset {
