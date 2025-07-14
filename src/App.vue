@@ -97,7 +97,7 @@ export default {
 
 <script setup lang="ts">
 import { fetch } from '@tauri-apps/plugin-http';
-import type { Release, Assets, Config } from './model';
+import type { Release, Assets } from './model';
 import { open } from '@tauri-apps/plugin-shell';
 import { useTheme } from 'vuetify';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -611,6 +611,13 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.drop-zone-overlay {
+  /* background: rgba(255, 255, 255, 0.15) !important; */
+  /* backdrop-filter: blur(20px); */
+  /* animation: all 0.3s ease; */
+  animation: blurFade 0.4s ease forwards;
 }
 
 html {

@@ -11,7 +11,7 @@ en:
     drop: DROP CHART HERE
     filter-name: Chart file
     select-all: Select All
-    select-invert: Invert Select
+    select-invert: Invert
     remove-select: Remove
     remove-after-render: Remove After Render
     post-select-render: Render
@@ -78,6 +78,7 @@ en:
 
   presets: Presets
   default-preset: Default
+  temp-preset: (Edited)
 
 zh-CN:
   prev-step: 上一步
@@ -152,12 +153,13 @@ zh-CN:
 
   presets: 预设配置
   default-preset: 默认
+  temp-preset: (已编辑)
 
 
 </i18n>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -166,8 +168,8 @@ const { t } = useI18n();
 import { invoke } from '@tauri-apps/api/core';
 import { event } from '@tauri-apps/api';
 
-import { toastError, RULES, toast, anyFilter, isString } from './common';
-import { DEFAULT_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset } from './model';
+import { toastError, RULES, toast, anyFilter } from './common';
+import { DEFAULT_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent } from './model';
 
 import { VForm } from 'vuetify/components';
 
@@ -175,10 +177,8 @@ import ConfigView from './components/ConfigView.vue';
 
 import moment from 'moment';
 import * as dialog from "@tauri-apps/plugin-dialog"
-import * as shell from "@tauri-apps/plugin-shell"
 
 import { listen } from "@tauri-apps/api/event";
-import { message, save, open } from '@tauri-apps/plugin-dialog';
 
 import { useTheme } from 'vuetify';
 const theme = useTheme();
@@ -233,12 +233,12 @@ async function loadCharts(files: string[]) {
   parsingChart.value = false;
 }
 
-interface FileDropEvent {
-  paths: string[];
-  position: { x: number; y: number };
-}
+const fileHovering = ref(false);
 
+listen('tauri://drag-over', () => (fileHovering.value = true));
+listen('tauri://drag-leave', () => (fileHovering.value = false));
 listen('tauri://drag-drop', async (event) => {
+  fileHovering.value = false;
   const files = (event.payload as FileDropEvent).paths;
   await loadCharts(files);
 });
@@ -259,7 +259,7 @@ async function postRender(chart: RenderChart) {
     let params = await buildParams(chart.path, chart.chartInfo, preset.value.config);
     if (!params) return false;
     await invoke('post_render', { params });
-    if (removeOnRender.value) {
+    if (removeAfterRender.value) {
       charts.value.splice(charts.value.indexOf(chart), 1);
     }
     return true;
@@ -286,7 +286,7 @@ function removeSelectChart() {
 }
 
 const loadingPreview = ref(false);
-const removeOnRender = ref(true);
+const removeAfterRender = ref(true);
 
 const chartInfoDialog = ref(false);
 const chartInfoSelect = ref(0);
@@ -302,7 +302,7 @@ async function previewChart(chart: RenderChart) {
     toastError(e);
     return false;
   } finally {
-    setTimeout(() => (loadingPreview.value = false), 1000)
+    loadingPreview.value = false
   }
 }
 
@@ -362,17 +362,41 @@ function selectInvert() {
   })
 }
 
+const configView = ref<typeof ConfigView>();
+const presetDialog = ref(false);
+async function editPreset() {
+  presetDialog.value = true;
+  await nextTick();
+  await configView.value?.applyConfig(preset.value.config);
+}
+
+async function savePreset() {
+  presetDialog.value = false;
+  await updatePresets();
+  let temp_preset: Preset = {
+    name: t('temp-preset'),
+    key: 'temp',
+    config: await configView.value!.buildConfig(),
+  };
+  preset.value = temp_preset;
+}
+
 </script>
 
 <template>
   <v-card color="transparent" class="d-flex flex-column fade-in" width="100%" style="border-radius: 0px; box-shadow: none;">
-    <v-toolbar color="transparent" class="px-2" style="position: sticky; top: 0px;">
-      <v-btn class="mx-2" variant="tonal" :loading="choosingChart" @click="chooseChart(false)" @contextmenu="chooseChart(true)">{{ t('choose.chart') }}</v-btn>
-      <v-combobox class="mx-4 mt-2" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset" style="flex: 4;"></v-combobox>
+    <v-toolbar v-if="charts.length === 0" color="transparent" class="px-1" style="position: sticky; top: 0px;">
       <v-spacer />
-      <v-checkbox class="mt-2 mx-2" :label="t('choose.remove-after-render')" v-model="removeOnRender"></v-checkbox>
-      <v-btn class="mx-2" variant="tonal" :loading="choosingChart" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
-      <v-btn class="mx-2" variant="tonal" :loading="choosingChart" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
+      <v-btn class="mx-8" variant="tonal" style="width: 15em;" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
+      <v-btn class="mx-8" variant="tonal" style="width: 15em;" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
+      <v-spacer />
+    </v-toolbar>
+    <v-toolbar v-else color="transparent" class="px-1" style="position: sticky; top: 0px;">
+      <v-combobox class="mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset" append-icon="mdi-pencil" @click:append="editPreset"></v-combobox>
+      <v-spacer />
+      <v-checkbox class="mt-2 mx-2" :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
+      <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
+      <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" >{{ t('choose.post-select-render') }}</v-btn>
     </v-toolbar>
@@ -392,12 +416,12 @@ function selectInvert() {
         <tbody>
           <tr v-for="chart in charts" :key="chart.id">
             <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isChosen"></v-checkbox></td>
-            <td>{{ chart.chartInfo.name }}</td>
-            <td>{{ chart.chartInfo.level }}</td>
-            <td>{{ chart.chartInfo.charter }}</td>
-            <td>{{ chart.path }}</td>
+            <td style="max-width: 12em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.name">{{ chart.chartInfo.name }}</td>
+            <td style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.level">{{ chart.chartInfo.level }}</td>
+            <td style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.charter">{{ chart.chartInfo.charter }}</td>
+            <td style="max-width: 11em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.path">{{ chart.path }}</td>
             <td><v-btn variant="tonal" @click="chartInfoSelect = chart.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></td>
-            <td><v-btn variant="tonal" @click="previewChart(chart)">{{ t('preview') }}</v-btn></td>
+            <td><v-btn variant="tonal" :loading="loadingPreview" @click="previewChart(chart)">{{ t('preview') }}</v-btn></td>
           </tr>
         </tbody>
       </v-table>
@@ -460,6 +484,26 @@ function selectInvert() {
     </v-card>
   </v-dialog>
 
+  <v-dialog v-model="presetDialog" width="850px" class="log-card-bg">
+    <v-card class="log-card-only-window" style="background: rgba(40, 40, 80, 0.5) !important;">
+      <v-card-title v-t="'presets'"> </v-card-title>
+      <v-card-text>
+        <template v-slot>
+          <ConfigView ref="configView"></ConfigView>
+        </template>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn class="hover-scale" variant="text" @click="savePreset" v-t="'save'"></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-overlay v-model="fileHovering" contained class="align-center justify-center drop-zone-overlay" persistent :close-on-content-click="false">
+    <div class="drop-pulse">
+      <h1 v-t="'choose.drop'"></h1>
+    </div>
+  </v-overlay>
+
 </template>
 
 <style scoped>
@@ -519,13 +563,6 @@ h2 {
 
 ::v-deep(.v-window__container .v-stepper-window-item) {
   transition: 0.5s cubic-bezier(0.2, 0.8, 0.25, 1);
-}
-
-.drop-zone-overlay {
-  /* background: rgba(255, 255, 255, 0.15) !important; */
-  /* backdrop-filter: blur(20px); */
-  /* animation: all 0.3s ease; */
-  animation: blurFade 0.4s ease forwards;
 }
 
 .drop-pulse {
