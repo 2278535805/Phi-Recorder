@@ -7,7 +7,8 @@ en:
     chart: Choose chart
     archive: Archive
     folder: Folder
-    can-also-drop: You can also drag & drop the file to here
+    can-also-drop: You can also drag and drop the file to here
+    select-or-drop: Select or drag and drop files
     drop: DROP CHART HERE
     filter-name: Chart file
     select-all: Select All
@@ -78,6 +79,7 @@ en:
 
   presets: Presets
   default-preset: Default
+  edit-preset: Edit Preset
   temp-preset: (Edited)
 
 zh-CN:
@@ -89,6 +91,7 @@ zh-CN:
     archive: 压缩包
     folder: 文件夹
     can-also-drop: 可拖放谱面至此处
+    select-or-drop: 选择或拖放谱面
     drop: 拖放谱面至此处
     filter-name: 谱面文件
     select-all: 全选
@@ -153,6 +156,7 @@ zh-CN:
 
   presets: 预设配置
   default-preset: 默认
+  edit-preset: 编辑预设
   temp-preset: (已编辑)
 
 
@@ -387,12 +391,13 @@ async function savePreset() {
   <v-card color="transparent" class="d-flex flex-column fade-in" width="100%" style="border-radius: 0px; box-shadow: none;">
     <v-toolbar v-if="charts.length === 0" color="transparent" class="px-1" style="position: sticky; top: 0px;">
       <v-spacer />
-      <v-btn class="mx-8" variant="tonal" style="width: 15em;" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
-      <v-btn class="mx-8" variant="tonal" style="width: 15em;" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
+      <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('choose.select-or-drop')" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
+      <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('choose.select-or-drop')" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
       <v-spacer />
     </v-toolbar>
     <v-toolbar v-else color="transparent" class="px-1" style="position: sticky; top: 0px;">
-      <v-combobox class="mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset" append-icon="mdi-pencil" @click:append="editPreset"></v-combobox>
+      <v-combobox class="mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset"></v-combobox>
+      <v-btn class="mx-1" :title="t('edit-preset')" icon="mdi-pencil" @click="editPreset"></v-btn>
       <v-spacer />
       <v-checkbox class="mt-2 mx-2" :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
       <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>

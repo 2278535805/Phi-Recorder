@@ -13,7 +13,8 @@ en:
   choose:
     archive: Archive
     folder: Folder
-    can-also-drop: You can also drag & drop the file to here
+    can-also-drop: You can also drag and drop the file to here
+    select-or-drop: Select or drag and drop files
     drop: DROP CHART HERE
     filter-name: Chart file
 
@@ -92,6 +93,7 @@ zh-CN:
     archive: 压缩包
     folder: 文件夹
     can-also-drop: 可拖放谱面至此处
+    select-or-drop: 选择或拖放谱面
     drop: 拖放谱面至此处
     filter-name: 谱面文件
 
@@ -532,11 +534,11 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
       <template v-slot:item.1>
         <div class="mt-8 d-flex" style="gap: 1rem">
           <div class="flex-grow-1 d-flex align-center justify-center w-0 py-8">
-            <v-btn class="w-75 gradient-primary" style="overflow: hidden" size="large" color="primary" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
+            <v-btn class="w-75 gradient-primary" :title="t('choose.select-or-drop')" size="large" color="primary" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
           </div>
           <v-divider vertical></v-divider>
           <div class="flex-grow-1 d-flex align-center justify-center w-0">
-            <v-btn class="w-75 gradient-primary" size="large" color="primary" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
+            <v-btn class="w-75 gradient-primary" :title="t('choose.select-or-drop')" size="large" color="primary" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
           </div>
         </div>
         <p class="mb-8 w-100 text-center mt-2 text-disabled" v-t="'choose.can-also-drop'"></p>
