@@ -15,7 +15,8 @@ en:
     select-invert: Invert
     cancel-select: Cancel
     remove-select: Remove
-    remove-start-render: Remove after initiating rendering
+    dis-select-start-render: Deselect after rendering is initiated
+    remove-start-render: Remove after rendering is initiated
     remove-after-render: Remove after rendering is completed
     post-select-render: Render
     auto-change-aspect-ratio: Auto Change Aspect Ratio
@@ -114,6 +115,7 @@ zh-CN:
     select-invert: 反选
     cancel-select: 取消
     remove-select: 移除
+    dis-select-start-render: 发起渲染后取消选择
     remove-start-render: 发起渲染后移除
     remove-after-render: 渲染完成后移除
     post-select-render: 渲染
@@ -276,7 +278,7 @@ async function loadCharts(files: string[]) {
       charts.value.push({
         id: charts.value.length,
         path: file,
-        isChosen: false,
+        isSelect: false,
         taskId: null,
         output: '',
         status: { type: 'null' },
@@ -327,13 +329,13 @@ async function postRender(chart: RenderChart) {
   let tasks = await invoke<Task[]>('get_tasks');
   chart.taskId = tasks[0].id;
   chart.output = tasks[0].output;
-  chart.isChosen = false;
+  if (disSelectStartRender.value) chart.isSelect = false;
   return true;
 }
 
 async function postSelectRender() {
   for (let chart of charts.value) {
-    if (chart.isChosen) {
+    if (chart.isSelect) {
       await postRender(chart);
     }
   }
@@ -354,7 +356,7 @@ function applyAspectRatio(resolution: number[], aspectRatio: number) {
 
 function removeSelectChart() {
   for (let i = charts.value.length - 1; i >= 0; i--) {
-    if (charts.value[i].isChosen) {
+    if (charts.value[i].isSelect) {
       charts.value.splice(i, 1)
     }
   }
@@ -364,6 +366,7 @@ const loadingPreview = ref(false);
 
 const chartInfoDialog = ref(false);
 const chartInfoSelect = ref(0);
+const disSelectStartRender = ref(true);
 const removeStartRender = ref(false);
 const removeAfterRender = ref(false);
 const autoChangeAspectRatio = ref(false);
@@ -429,13 +432,13 @@ updatePresets();
 
 function selectAll() {
   charts.value.forEach(chart => {
-    chart.isChosen = true
+    chart.isSelect = true
   })
 }
 
 function selectInvert() {
   charts.value.forEach(chart => {
-    chart.isChosen = !chart.isChosen
+    chart.isSelect = !chart.isSelect
   })
 }
 
@@ -503,7 +506,7 @@ async function updateList() {
 
 async function cancelSelectTask() {
   for (let chart of charts.value) {
-    if (chart.isChosen) {
+    if (chart.isSelect) {
       try {
         await invoke('cancel_task', { id: chart.taskId });
       } catch (e) {
@@ -566,6 +569,7 @@ const outputDialog = ref(false),
       <v-spacer />
       <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
+      <v-btn class="mx-2" variant="tonal" @click="disSelectStartRender" >{{ t('choose.dis-select-start-render') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" >{{ t('choose.post-select-render') }}</v-btn>
@@ -585,7 +589,7 @@ const outputDialog = ref(false),
         </thead>
         <tbody>
           <tr v-for="chart in charts" :key="chart.id">
-            <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isChosen"></v-checkbox></td>
+            <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isSelect"></v-checkbox></td>
             <td style="max-width: 12em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.name">{{ chart.chartInfo.name }}</td>
 
             <td v-if="chart.status.type === 'pending'">{{ t('task.pending') }}</td>
