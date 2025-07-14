@@ -194,7 +194,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, nextTick, onUnmounted } from 'vue';
+import { ref, nextTick, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -222,6 +222,23 @@ const theme = useTheme();
 const router = useRouter();
 
 const charts = ref<RenderChart[]>([]);
+try {
+  let raw = localStorage.getItem('batchViewChartList');
+  if (raw) {
+    let val: RenderChart[] = JSON.parse(raw)
+    charts.value = val;
+  }
+} catch(e) {
+  localStorage.removeItem('batchViewChartList')
+  toastError(e);
+}
+
+watch(charts, (val) => {
+  localStorage.setItem('batchViewChartList', JSON.stringify(val))
+}, {
+  deep: true,
+  immediate: false
+})
 
 const choosingChart = ref(false),
   parsingChart = ref(false);
@@ -261,6 +278,7 @@ async function loadCharts(files: string[]) {
         path: file,
         isChosen: false,
         taskId: null,
+        output: '',
         status: { type: 'null' },
         chartInfo: chartInfo,
       });
@@ -467,6 +485,7 @@ function sortChartsReverse() {
 const tasks = ref<Task[]>();
 
 async function updateList() {
+  if (!charts.value) return;
   tasks.value = await invoke<Task[]>('get_tasks');
   // console.log(tasks.value);
   for (let i = charts.value.length - 1; i >= 0; i--) {
