@@ -233,7 +233,7 @@ export type Release = {
 export interface RenderChart {
   id: number;
   path: string;
-  isChosen: boolean;
+  isSelect: boolean;
   chartInfo: ChartInfo;
 
   taskId: number | null;
