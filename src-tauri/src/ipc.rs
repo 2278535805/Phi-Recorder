@@ -1,3 +1,14 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+pub enum IPCEvent {
+    Loading,
+    StartMixing,
+    StartRender(u64),
+    Frame,
+    Done(f64),
+}
+
 pub mod client {
     use serde::Serialize;
 

@@ -58,14 +58,14 @@ import { useI18n } from 'vue-i18n';
 useI18n();
 const { t } = useI18n();
 
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
 import { toast, toastError, RULES, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
-import { SUPPORTED_LOCALES, SUPPORTED_LOCALES_NAME } from './main';
+import { SUPPORTED_LOCALES_NAME } from './main';
 const theme = useTheme();
 
 import TipSwitch from './components/TipSwitch.vue';

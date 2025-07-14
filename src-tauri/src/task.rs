@@ -1,8 +1,9 @@
 use crate::{
     cmd_hidden,
     common::{output_dir, read_config},
-    render::{IPCEvent, RenderParams},
+    render::{RenderParams},
     ASSET_PATH,
+    ipc::IPCEvent,
 };
 use anyhow::Result;
 use chrono::Local;
@@ -137,7 +138,7 @@ impl Task {
         stdin.flush().await?;
 
         let mut lines = BufReader::new(stdout).lines();
-        let mut total = 0;
+        let mut total: u64 = 0;
         let mut frame_count: u64 = 0;
         let start = Instant::now();
         let mut frame_times = VecDeque::new();
