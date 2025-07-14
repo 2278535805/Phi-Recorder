@@ -15,8 +15,10 @@ en:
     select-invert: Invert
     cancel-select: Cancel
     remove-select: Remove
-    remove-after-render: Remove After Render
+    remove-start-render: Remove after initiating rendering
+    remove-after-render: Remove after rendering is completed
     post-select-render: Render
+    auto-change-aspect-ratio: Auto Change Aspect Ratio
 
   info:
     name: Chart name
@@ -93,6 +95,8 @@ en:
     failed: Failed
     output: Output
     show-output: Show Output
+    show-folder: Open Output Folder
+    open-file: Open File
 
 zh-CN:
   prev-step: 上一步
@@ -110,8 +114,10 @@ zh-CN:
     select-invert: 反选
     cancel-select: 取消
     remove-select: 移除
-    remove-after-render: 渲染后移除
+    remove-start-render: 发起渲染后移除
+    remove-after-render: 渲染完成后移除
     post-select-render: 渲染
+    auto-change-aspect-ratio: 自动调整宽高比
 
   info:
     name: 谱面名
@@ -182,6 +188,8 @@ zh-CN:
     failed: 失败
     output: 输出
     show-output: 查看输出
+    show-folder: 打开输出文件夹
+    open-file: 打开文件
 
 </i18n>
 
@@ -208,6 +216,7 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 import { listen } from "@tauri-apps/api/event";
 
 import { useTheme } from 'vuetify';
+import * as shell from '@tauri-apps/plugin-shell';
 const theme = useTheme();
 
 const router = useRouter();
@@ -284,7 +293,9 @@ async function buildParams(chartPath: string, chartInfo: ChartInfo, config: Rend
 }
 
 async function postRender(chart: RenderChart) {
-  let params = await buildParams(chart.path, chart.chartInfo, preset.value.config);
+  let config = preset.value.config;
+  applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio);
+  let params = await buildParams(chart.path, chart.chartInfo, config);
   if (!params) return false;
   try {
     await invoke('post_render', { params });
@@ -292,8 +303,12 @@ async function postRender(chart: RenderChart) {
     toastError(e);
     return false;
   }
+  if (removeStartRender.value) {
+    charts.value.splice(charts.value.indexOf(chart), 1);
+  }
   let tasks = await invoke<Task[]>('get_tasks');
   chart.taskId = tasks[0].id;
+  chart.output = tasks[0].output;
   chart.isChosen = false;
   return true;
 }
@@ -303,6 +318,19 @@ async function postSelectRender() {
     if (chart.isChosen) {
       await postRender(chart);
     }
+  }
+}
+
+function applyAspectRatio(resolution: number[], aspectRatio: number) {
+  if (preset.value.key !== 'default') return;
+
+  let h = resolution[1];
+
+  if (aspectRatio < 1.0) {
+    resolution = [h, h]
+  } else {
+    let w = Math.floor(h * aspectRatio);
+    resolution = [w, h]
   }
 }
 
@@ -318,6 +346,9 @@ const loadingPreview = ref(false);
 
 const chartInfoDialog = ref(false);
 const chartInfoSelect = ref(0);
+const removeStartRender = ref(false);
+const removeAfterRender = ref(false);
+const autoChangeAspectRatio = ref(false);
 
 async function previewChart(chart: RenderChart) {
   loadingPreview.value = true;
@@ -437,12 +468,16 @@ const tasks = ref<Task[]>();
 
 async function updateList() {
   tasks.value = await invoke<Task[]>('get_tasks');
-  console.log(tasks.value);
-  for (let chart of charts.value) {
+  // console.log(tasks.value);
+  for (let i = charts.value.length - 1; i >= 0; i--) {
+    let chart = charts.value[i];
     let task = tasks.value.find((x) => x.id === chart.taskId);
     if (task) {
       chart.status = task.status;
-      console.log(chart.status);
+      // console.log(chart.status);
+    }
+    if (removeAfterRender.value && chart.status.type === 'done') {
+      charts.value.splice(i, 1);
     }
   }
 }
@@ -456,6 +491,22 @@ async function cancelSelectTask() {
         toastError(e);
       }
     }
+  }
+}
+
+async function showOutputFolder() {
+  try {
+    await invoke('open_output_folder');
+  } catch (e) {
+    toastError(e);
+  }
+}
+
+async function openFile(path: string) {
+  try {
+    await invoke('open_file', { path });
+  } catch (e) {
+    toastError(e);
   }
 }
 
@@ -478,8 +529,21 @@ const outputDialog = ref(false),
       <v-spacer />
     </v-toolbar>
     <v-toolbar v-else color="transparent" class="px-1" style="position: sticky; top: 0px;">
-      <v-combobox class="mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset"></v-combobox>
-      <v-btn class="mx-1" :title="t('edit-preset')" icon="mdi-pencil" @click="editPreset"></v-btn>
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn icon="mdi-menu" variant="text" v-bind="props"></v-btn>
+        </template>
+        <v-list>
+          <v-list-item class="mr-2">
+            <v-btn class="mx-2" variant="text" @click="showOutputFolder">{{ t('task.show-folder') }}</v-btn>
+            <v-checkbox :label="t('choose.remove-start-render')" v-model="removeStartRender"></v-checkbox>
+            <v-checkbox :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
+            <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-combobox class="mx-2 mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset"></v-combobox>
+      <v-btn class="" :title="t('edit-preset')" icon="mdi-pencil" @click="editPreset"></v-btn>
       <v-spacer />
       <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
@@ -505,24 +569,31 @@ const outputDialog = ref(false),
             <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isChosen"></v-checkbox></td>
             <td style="max-width: 12em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.name">{{ chart.chartInfo.name }}</td>
 
-            <td v-if="chart.status.type === 'pending'" style="max-width: 8em;">{{ t('task.pending') }}</td>
-            <td v-else-if="chart.status.type === 'loading'" style="max-width: 8em;">{{ t('task.loading') }}</td>
-            <td v-else-if="chart.status.type === 'mixing'" style="max-width: 8em;">{{ t('task.mixing') }}</td>
-            <td v-else-if="chart.status.type === 'rendering'" style="max-width: 8em;">{{ (chart.status.progress * 100).toFixed(2) }}%</td>
-            <td v-else-if="chart.status.type === 'done'" style="max-width: 8em;">{{ t('task.done') }}</td>
-            <td v-else-if="chart.status.type === 'canceled'" style="max-width: 8em;">{{ t('task.canceled') }}</td>
-            <td v-else-if="chart.status.type === 'failed'" style="max-width: 8em;">{{ t('task.failed') }}</td>
+            <td v-if="chart.status.type === 'pending'">{{ t('task.pending') }}</td>
+            <td v-else-if="chart.status.type === 'loading'">{{ t('task.loading') }}</td>
+            <td v-else-if="chart.status.type === 'mixing'">{{ t('task.mixing') }}</td>
+            <td v-else-if="chart.status.type === 'rendering'">{{ (chart.status.progress * 100).toFixed(2) }}%</td>
+            <td v-else-if="chart.status.type === 'done'">{{ t('task.done') }}</td>
+            <td v-else-if="chart.status.type === 'canceled'">{{ t('task.canceled') }}</td>
+            <td v-else-if="chart.status.type === 'failed'">{{ t('task.failed') }}</td>
             <td v-else style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.level">{{ chart.chartInfo.level }}</td>
 
-            <td v-if="chart.status.type === 'pending' || 'loading' || 'mixing' || 'done' || 'canceled' || 'failed'" style="max-width: 8em;">-</td>
-            <td v-else-if="chart.status.type === 'rendering'" style="max-width: 8em;">{{ chart.status.fps }} FPS</td>
+            <td v-if="chart.status.type === 'pending'">-</td>
+            <td v-else-if="chart.status.type === 'loading'">-</td>
+            <td v-else-if="chart.status.type === 'mixing'">-</td>
+            <td v-else-if="chart.status.type === 'rendering'">{{ chart.status.fps }} FPS</td>
+            <td v-else-if="chart.status.type === 'done'" @click="openFile(chart.output)">{{ t('task.open-file') }}</td>
+            <td v-else-if="chart.status.type === 'canceled'">-</td>
+            <td v-else-if="chart.status.type === 'failed'">-</td>
             <td v-else style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.charter">{{ chart.chartInfo.charter }}</td>
 
-            <td v-if="chart.status.type === 'pending' || 'loading' || 'mixing'" style="max-width: 8em;">-</td>
-            <td v-else-if="chart.status.type === 'rendering'" style="max-width: 8em;">{{ chart.status.estimate.toFixed(0) }} s</td>
-            <td v-else-if="chart.status.type === 'done'" @click="outputDialogMessage = chart.status.output; outputDialog = true;" style="max-width: 8em;">{{ t('task.show-output') }}</td>
-            <td v-else-if="chart.status.type === 'canceled'" @click="outputDialogMessage = chart.status.output; outputDialog = true;" style="max-width: 8em;">{{ t('task.show-output') }}</td>
-            <td v-else-if="chart.status.type === 'failed'" @click="outputDialogMessage = chart.status.output; outputDialog = true;" style="max-width: 8em;">{{ t('task.show-output') }}</td>
+            <td v-if="chart.status.type === 'pending'">-</td>
+            <td v-else-if="chart.status.type === 'loading'">-</td>
+            <td v-else-if="chart.status.type === 'mixing'">-</td>
+            <td v-else-if="chart.status.type === 'rendering'">{{ chart.status.estimate.toFixed(0) }} s</td>
+            <td v-else-if="chart.status.type === 'done'" @click="outputDialogMessage = chart.status.output; outputDialog = true;">{{ t('task.show-output') }}</td>
+            <td v-else-if="chart.status.type === 'canceled'" @click="outputDialogMessage = chart.status.output; outputDialog = true;">{{ t('task.show-output') }}</td>
+            <td v-else-if="chart.status.type === 'failed'" @click="outputDialogMessage = chart.status.output; outputDialog = true;">{{ t('task.show-output') }}</td>
             <td v-else style="max-width: 11em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.path">{{ chart.path }}</td>
 
             <td><v-btn variant="tonal" @click="chartInfoSelect = chart.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></td>
