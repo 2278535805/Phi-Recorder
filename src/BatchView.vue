@@ -502,7 +502,7 @@ async function updateList() {
 
 async function cancelSelectTask() {
   for (let chart of charts.value) {
-    if (chart.isSelect && chart.taskId) {
+    if (chart.isSelect && chart.taskId !== null) {
       try {
         await invoke('cancel_task', { id: chart.taskId });
       } catch (e) {
