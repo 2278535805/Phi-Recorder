@@ -549,6 +549,7 @@ const outputDialog = ref(false),
         <v-list>
           <v-list-item class="mr-2">
             <v-btn class="mx-2" variant="text" @click="showOutputFolder">{{ t('task.show-folder') }}</v-btn>
+            <v-checkbox :label="t('choose.dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
             <v-checkbox :label="t('choose.remove-start-render')" v-model="removeStartRender"></v-checkbox>
             <v-checkbox :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
             <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
@@ -560,7 +561,6 @@ const outputDialog = ref(false),
       <v-spacer />
       <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
-      <v-btn class="mx-2" variant="tonal" @click="disSelectStartRender" >{{ t('choose.dis-select-start-render') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" >{{ t('choose.post-select-render') }}</v-btn>
