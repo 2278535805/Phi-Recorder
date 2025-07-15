@@ -197,13 +197,11 @@ zh-CN:
 
 <script setup lang="ts">
 import { ref, nextTick, onUnmounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { invoke } from '@tauri-apps/api/core';
-import { event } from '@tauri-apps/api';
 
 import { toastError, RULES, toast, anyFilter } from './common';
 import { DEFAULT_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
@@ -212,16 +210,9 @@ import { VForm } from 'vuetify/components';
 
 import ConfigView from './components/ConfigView.vue';
 
-import moment from 'moment';
 import * as dialog from "@tauri-apps/plugin-dialog"
 
 import { listen } from "@tauri-apps/api/event";
-
-import { useTheme } from 'vuetify';
-import * as shell from '@tauri-apps/plugin-shell';
-const theme = useTheme();
-
-const router = useRouter();
 
 const charts = ref<RenderChart[]>([]);
 try {

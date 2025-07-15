@@ -143,7 +143,7 @@ function appMaximize() {
 function toggleTheme() {
   theme.global.name.value = theme.global.name.value === 'darkTheme' ? 'lightTheme' : 'darkTheme';
   localStorage.setItem("theme", theme.global.name.value);
-};
+}
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "F2") {
@@ -291,7 +291,7 @@ onMounted(async () => {
       </div>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
-      <v-list density="compact" nav class="v-list-none">
+      <v-list density="compact" nav class="v-list-none" v-if="listExpand">
         <v-list-item
           v-for="key in ['render', 'batch', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
@@ -301,9 +301,9 @@ onMounted(async () => {
           @click="routerPush(key)"
           @contextmenu="listExpand = !listExpand"
           class="list-item-hover"
-          v-if="listExpand"
         ></v-list-item>
-
+      </v-list>
+      <v-list density="compact" nav class="v-list-none" v-else>
         <v-list-item
           v-for="key in ['render', 'batch', 'rpe', 'tasks', 'settings', 'about']"
           :active="route.name === key"
@@ -313,7 +313,6 @@ onMounted(async () => {
           @click="routerPush(key)"
           @contextmenu="listExpand = !listExpand"
           class="list-item-hover-rail"
-          v-if="!listExpand"
         ></v-list-item>
       </v-list>
     </v-navigation-drawer>
