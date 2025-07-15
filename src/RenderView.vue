@@ -195,11 +195,11 @@ const chartInfo = ref<ChartInfo>();
 
 let chartPath = '';
 
-const choosingChart = ref(false),
-  parsingChart = ref(false);
+const loadingChoosingChart = ref(false),
+  loadingParsingChart = ref(false);
 async function chooseChart(folder?: boolean) {
-  if (choosingChart.value) return;
-  choosingChart.value = true;
+  if (loadingChoosingChart.value) return;
+  loadingChoosingChart.value = true;
   let file = folder
     ? await dialog.open({ directory: true })
     : await dialog.open({
@@ -212,14 +212,14 @@ async function chooseChart(folder?: boolean) {
         ],
       });
   if (!file) {
-    choosingChart.value = false;
+    loadingChoosingChart.value = false;
     return;
   }
 
   // noexcept
   await loadChart(file as string);
 
-  choosingChart.value = false;
+  loadingChoosingChart.value = false;
 }
 function updateAspectRatio() {
     aspectWidth.value = String(chartInfo.value!.aspectRatio);
@@ -243,7 +243,7 @@ function updateAspectRatio() {
 }
 async function loadChart(file: string) {
   try {
-    parsingChart.value = true;
+    loadingParsingChart.value = true;
     chartPath = file;
     chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
     stepIndex.value++;
@@ -252,7 +252,7 @@ async function loadChart(file: string) {
   } catch (e) {
     toastError(e);
   } finally {
-    parsingChart.value = false;
+    loadingParsingChart.value = false;
   }
 }
 
@@ -542,7 +542,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           </div>
         </div>
         <p class="mb-8 w-100 text-center mt-2 text-disabled" v-t="'choose.can-also-drop'"></p>
-        <v-overlay v-model="parsingChart" contained class="align-center justify-center" persistent :close-on-content-click="false">
+        <v-overlay v-model="loadingParsingChart" contained class="align-center justify-center" persistent :close-on-content-click="false">
           <v-progress-circular indeterminate> </v-progress-circular>
         </v-overlay>
       </template>

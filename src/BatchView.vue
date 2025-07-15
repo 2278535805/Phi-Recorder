@@ -233,11 +233,21 @@ watch(charts, (val) => {
   immediate: false
 })
 
-const choosingChart = ref(false),
-  parsingChart = ref(false);
+const loadingChoosingChart = ref(false);
+const loadingParsingChart = ref(false);
+const loadingPreview = ref(false);
+const loadingPostRender = ref(false);
+
+const chartInfoDialog = ref(false);
+const chartInfoSelect = ref(0);
+const disSelectStartRender = ref(true);
+const removeStartRender = ref(false);
+const removeAfterRender = ref(false);
+const autoChangeAspectRatio = ref(false);
+
 async function chooseChart(folder?: boolean) {
-  if (choosingChart.value) return;
-  choosingChart.value = true;
+  if (loadingChoosingChart.value) return;
+  loadingChoosingChart.value = true;
   let file = folder
     ? await dialog.open({ directory: true, multiple: true })
     : await dialog.open({
@@ -251,20 +261,20 @@ async function chooseChart(folder?: boolean) {
         multiple: true,
       });
   if (!file) {
-    choosingChart.value = false;
+    loadingChoosingChart.value = false;
     return;
   }
 
   // noexcept
   await loadCharts(file);
 
-  choosingChart.value = false;
+  loadingChoosingChart.value = false;
 }
 
 async function loadCharts(files: string[]) {
+  loadingParsingChart.value = true;
   for (let file of files) {
     try {
-      parsingChart.value = true;
       let chartInfo: ChartInfo = (await invoke('parse_chart', { path: file }));
       charts.value.push({
         id: charts.value.length,
@@ -279,7 +289,7 @@ async function loadCharts(files: string[]) {
       toastError(e);
     }
   }
-  parsingChart.value = false;
+  loadingParsingChart.value = false;
 }
 
 const fileHovering = ref(false);
@@ -325,11 +335,13 @@ async function postRender(chart: RenderChart) {
 }
 
 async function postSelectRender() {
+  loadingPostRender.value = true;
   for (let chart of charts.value) {
     if (chart.isSelect) {
       await postRender(chart);
     }
   }
+  loadingPostRender.value = false;
 }
 
 function applyAspectRatio(resolution: number[], aspectRatio: number) {
@@ -352,15 +364,6 @@ function removeSelectChart() {
     }
   }
 }
-
-const loadingPreview = ref(false);
-
-const chartInfoDialog = ref(false);
-const chartInfoSelect = ref(0);
-const disSelectStartRender = ref(true);
-const removeStartRender = ref(false);
-const removeAfterRender = ref(false);
-const autoChangeAspectRatio = ref(false);
 
 async function previewChart(chart: RenderChart) {
   loadingPreview.value = true;
@@ -563,7 +566,7 @@ const outputDialog = ref(false),
       <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
-      <v-btn class="mx-2" variant="tonal" @click="postSelectRender" >{{ t('choose.post-select-render') }}</v-btn>
+      <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('choose.post-select-render') }}</v-btn>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto">
       <v-table fixed-header density="compact" style="position: absolute; top: 64px; left: 0px; right: 0px; bottom: 0px; background-color: transparent;">
@@ -615,6 +618,9 @@ const outputDialog = ref(false),
           </tr>
         </tbody>
       </v-table>
+      <v-overlay v-model="loadingParsingChart" contained class="align-center justify-center" persistent scroll-strategy="none" :close-on-content-click="false">
+          <v-progress-circular indeterminate> </v-progress-circular>
+        </v-overlay>
     </div>
   </v-card>
 
