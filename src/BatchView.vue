@@ -199,6 +199,7 @@ zh-CN:
 
 <script setup lang="ts">
 import { ref, nextTick, onUnmounted, watch } from 'vue';
+import { useStorage } from '@vueuse/core';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -216,24 +217,8 @@ import * as dialog from "@tauri-apps/plugin-dialog"
 
 import { listen } from "@tauri-apps/api/event";
 
-const charts = ref<RenderChart[]>([]);
-try {
-  let raw = localStorage.getItem('batchViewChartList');
-  if (raw) {
-    let val: RenderChart[] = JSON.parse(raw)
-    charts.value = val;
-  }
-} catch(e) {
-  localStorage.removeItem('batchViewChartList')
-  toastError(e);
-}
-
-watch(charts, (val) => {
-  localStorage.setItem('batchViewChartList', JSON.stringify(val))
-}, {
-  deep: true,
-  immediate: false
-})
+const form = ref<VForm>();
+const charts = useStorage<RenderChart[]>('BatchView.ChartList', []);
 
 const loadingChoosingChart = ref(false);
 const loadingParsingChart = ref(false);
@@ -242,10 +227,10 @@ const loadingPostRender = ref(false);
 
 const chartInfoDialog = ref(false);
 const chartInfoSelect = ref(0);
-const disSelectStartRender = ref(true);
-const removeStartRender = ref(false);
-const removeAfterRender = ref(false);
-const autoChangeAspectRatio = ref(false);
+const disSelectStartRender = useStorage<boolean>('BatchView.disSelectStartRender', true);
+const removeStartRender = useStorage<boolean>('BatchView.removeStartRender', false);
+const removeAfterRender = useStorage<boolean>('BatchView.removeAfterRender', false);
+const autoChangeAspectRatio = useStorage<boolean>('BatchView.autoChangeAspectRatio', false);
 
 async function chooseChart(folder?: boolean) {
   if (loadingChoosingChart.value) return;
@@ -295,7 +280,6 @@ async function loadCharts(files: string[]) {
 }
 
 const fileHovering = ref(false);
-
 listen('tauri://drag-over', () => (fileHovering.value = true));
 listen('tauri://drag-leave', () => (fileHovering.value = false));
 listen('tauri://drag-drop', async (event) => {
@@ -303,8 +287,6 @@ listen('tauri://drag-drop', async (event) => {
   const files = (event.payload as FileDropEvent).paths;
   await loadCharts(files);
 });
-
-const form = ref<VForm>();
 
 async function buildParams(chartPath: string, chartInfo: ChartInfo, config: RenderConfig) {
   checkInfo(chartInfo);
