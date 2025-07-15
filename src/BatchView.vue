@@ -315,7 +315,9 @@ async function buildParams(chartPath: string, chartInfo: ChartInfo, config: Rend
 
 async function postRender(chart: RenderChart) {
   let config = preset.value.config;
-  applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio);
+  if (autoChangeAspectRatio.value) {
+    applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio);
+  }
   let params = await buildParams(chart.path, chart.chartInfo, config);
   if (!params) return false;
   try {
