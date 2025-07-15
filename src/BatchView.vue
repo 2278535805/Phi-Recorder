@@ -15,6 +15,7 @@ en:
     select-invert: Invert
     cancel-select: Cancel
     remove-select: Remove
+    clear-tasks: Clear Task List
     dis-select-start-render: Deselect after rendering is initiated
     remove-start-render: Remove after rendering is initiated
     remove-after-render: Remove after rendering is completed
@@ -115,6 +116,7 @@ zh-CN:
     select-invert: 反选
     cancel-select: 取消
     remove-select: 移除
+    clear-tasks: 清空任务列表
     dis-select-start-render: 发起渲染后取消选择
     remove-start-render: 发起渲染后移除
     remove-after-render: 渲染完成后移除
@@ -528,6 +530,14 @@ async function openFile(path: string) {
   }
 }
 
+async function clearTasks() {
+  try {
+    await invoke('clear_tasks');
+  } catch (e) {
+    toastError(e);
+  }
+}
+
 await updateList();
 
 const updateTask = setInterval(updateList, 700);
@@ -547,17 +557,31 @@ const outputDialog = ref(false),
       <v-spacer />
     </v-toolbar>
     <v-toolbar v-else color="transparent" class="px-1" style="position: sticky; top: 0px;">
-      <v-menu>
+      <v-menu :close-on-content-click="false">
         <template v-slot:activator="{ props }">
           <v-btn icon="mdi-menu" variant="text" v-bind="props"></v-btn>
         </template>
         <v-list>
-          <v-list-item class="mr-2">
-            <v-btn class="mx-2" variant="text" @click="showOutputFolder">{{ t('task.show-folder') }}</v-btn>
-            <v-checkbox :label="t('choose.dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
-            <v-checkbox :label="t('choose.remove-start-render')" v-model="removeStartRender"></v-checkbox>
-            <v-checkbox :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
-            <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
+          <v-list-item>
+            <v-row no-gutters class="justify-center">
+              <v-btn variant="text" @click="showOutputFolder">{{ t('task.show-folder') }}</v-btn>
+            </v-row>
+            <v-row no-gutters class="justify-center">
+              <v-btn variant="text" @click="clearTasks">{{ t('choose.clear-tasks') }}</v-btn>
+            </v-row>
+            <VDivider class="my-2"></VDivider>
+            <v-row no-gutters>
+              <v-checkbox :label="t('choose.dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
+            </v-row>
+            <v-row no-gutters>
+              <v-checkbox :label="t('choose.remove-start-render')" v-model="removeStartRender"></v-checkbox>
+            </v-row>
+            <v-row no-gutters>
+              <v-checkbox :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
+            </v-row>
+            <v-row no-gutters>
+              <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
+            </v-row>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -583,7 +607,8 @@ const outputDialog = ref(false),
             <th class="text-center" style="width: 5em;">{{ t('preview') }}</th>
           </tr>
         </thead>
-        <tbody>
+        
+        <tbody v-if="!loadingParsingChart">
           <tr v-for="chart in charts" :key="chart.id">
             <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isSelect"></v-checkbox></td>
             <td style="max-width: 12em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.name">{{ chart.chartInfo.name }}</td>
@@ -620,9 +645,9 @@ const outputDialog = ref(false),
           </tr>
         </tbody>
       </v-table>
-      <v-overlay v-model="loadingParsingChart" contained class="align-center justify-center" persistent scroll-strategy="none" :close-on-content-click="false">
-          <v-progress-circular indeterminate> </v-progress-circular>
-        </v-overlay>
+      <v-overlay v-model="loadingParsingChart" contained class="align-center justify-center" persistent noClickAnimation :close-on-content-click="false">
+        <v-progress-circular indeterminate style="filter: none;"> </v-progress-circular>
+      </v-overlay>
     </div>
   </v-card>
 
@@ -707,7 +732,6 @@ const outputDialog = ref(false),
       </v-card-actions>
     </v-card>
   </v-dialog>
-
 
   <v-overlay v-model="fileHovering" contained class="align-center justify-center drop-zone-overlay" persistent :close-on-content-click="false">
     <div class="drop-pulse">
