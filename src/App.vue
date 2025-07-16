@@ -104,7 +104,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 const appWindow = getCurrentWindow();
 const theme = useTheme();
 
-localStorage.removeItem('batchViewChartList')
+localStorage.removeItem('BatchView.ChartList')
 
 const { t } = useI18n();
 
