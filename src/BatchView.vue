@@ -15,7 +15,7 @@ en:
     select-invert: Invert
     cancel-select: Cancel
     remove-select: Remove
-    clear-tasks: Clear Task List
+    clear-tasks: Force Clear Task List
     dis-select-start-render: Deselect after rendering is initiated
     remove-start-render: Remove after rendering is initiated
     remove-after-render: Remove after rendering is completed
@@ -116,7 +116,7 @@ zh-CN:
     select-invert: 反选
     cancel-select: 取消
     remove-select: 移除
-    clear-tasks: 清空任务列表
+    clear-tasks: 强制清空任务列表
     dis-select-start-render: 发起渲染后取消选择
     remove-start-render: 发起渲染后移除
     remove-after-render: 渲染完成后移除
@@ -280,12 +280,21 @@ async function loadCharts(files: string[]) {
 }
 
 const fileHovering = ref(false);
-listen('tauri://drag-over', () => (fileHovering.value = true));
-listen('tauri://drag-leave', () => (fileHovering.value = false));
+let files: string[] = [];
+listen('tauri://drag-over', () => {
+  if (loadingParsingChart.value) return;
+  fileHovering.value = true
+});
+listen('tauri://drag-leave', () => {
+  fileHovering.value = false
+});
 listen('tauri://drag-drop', async (event) => {
-  fileHovering.value = false;
-  const files = (event.payload as FileDropEvent).paths;
+  fileHovering.value = false
+  const newFiles = (event.payload as FileDropEvent).paths;
+  files.push(...newFiles);
+  if (loadingParsingChart.value) return;
   await loadCharts(files);
+  files = [];
 });
 
 async function buildParams(chartPath: string, chartInfo: ChartInfo, config: RenderConfig) {
@@ -299,30 +308,27 @@ async function buildParams(chartPath: string, chartInfo: ChartInfo, config: Rend
 
 async function postRender(chart: RenderChart) {
   let config = preset.value.config;
-  if (autoChangeAspectRatio.value) {
-    applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio);
-  }
+  if (autoChangeAspectRatio.value) applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio);
   let params = await buildParams(chart.path, chart.chartInfo, config);
   if (!params) return false;
   try {
     await invoke('post_render', { params });
+    let tasks = await invoke<Task[]>('get_tasks');
+    chart.taskId = tasks[0].id;
+    chart.output = tasks[0].output;
   } catch (e) {
     toastError(e);
     return false;
   }
-  if (removeStartRender.value) {
-    charts.value.splice(charts.value.indexOf(chart), 1);
-  }
-  let tasks = await invoke<Task[]>('get_tasks');
-  chart.taskId = tasks[0].id;
-  chart.output = tasks[0].output;
   if (disSelectStartRender.value) chart.isSelect = false;
+  if (removeStartRender.value) charts.value.splice(charts.value.indexOf(chart), 1);
   return true;
 }
 
 async function postSelectRender() {
   loadingPostRender.value = true;
   for (let chart of charts.value) {
+    if (!loadingPostRender.value) break;
     if (chart.isSelect) {
       await postRender(chart);
     }
@@ -513,6 +519,8 @@ async function openFile(path: string) {
 }
 
 async function clearTasks() {
+  loadingPostRender.value = false;
+  charts.value = [];
   try {
     await invoke('clear_tasks');
   } catch (e) {
@@ -576,58 +584,62 @@ const outputDialog = ref(false),
       <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('choose.post-select-render') }}</v-btn>
     </v-toolbar>
-    <div class="flex-grow-1 overflow-y-auto">
-      <v-table fixed-header density="compact" style="position: absolute; top: 64px; left: 0px; right: 0px; bottom: 0px; background-color: transparent;">
-        <thead>
-          <tr :title="t('sort-tip')" @contextmenu="sortChartsReverse">
-            <th class="text-center" @click="sortChartsByKey('id')" style="width: 3.3em; padding-left: 1.4em;">({{ charts.length }})</th>
-            <th class="text-left" @click="sortChartsByKey('name')" style="min-width: 5em;">{{ t('info.name') }}</th>
-            <th class="text-left" @click="sortChartsByKey('level')" style="min-width: 5em;">{{ t('info.level') }}</th>
-            <th class="text-left" @click="sortChartsByKey('charter')" style="min-width: 5em;">{{ t('info.charter') }}</th>
-            <th class="text-left" @click="sortChartsByKey('path')" style="max-width: 25%;">{{ t('info.chart') }}</th>
-            <th class="text-center" style="width: 7em;">{{ t('chart-info') }}</th>
-            <th class="text-center" style="width: 5em;">{{ t('preview') }}</th>
-          </tr>
-        </thead>
-        
-        <tbody v-if="!loadingParsingChart">
-          <tr v-for="chart in charts" :key="chart.id">
-            <td><v-checkbox class="mt-2 ml-n1" v-model="chart.isSelect"></v-checkbox></td>
-            <td style="max-width: 12em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.name">{{ chart.chartInfo.name }}</td>
+    <div class="flex-grow-1 overflow-y-auto" style="font-size: 0.9em;">
+      <v-row no-gutters class="d-flex align-center" :title="t('sort-tip')" @contextmenu="sortChartsReverse" style="background-color: rgba(255, 255, 255, 0.05); height: 40px; padding-right: 8px;">
+        <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')">({{ charts.length }})</v-col>
+        <v-col cols="3" @click="sortChartsByKey('name')">{{ t('info.name') }}</v-col>
+        <v-col cols="2" @click="sortChartsByKey('level')">{{ t('info.level') }}</v-col>
+        <v-col cols="2" @click="sortChartsByKey('charter')">{{ t('info.charter') }}</v-col>
+        <v-col @click="sortChartsByKey('path')">{{ t('info.chart') }}</v-col>
+        <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('chart-info') }}</v-col>
+        <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('preview') }}</v-col>
+      </v-row>
+      <VDivider></VDivider>
+      <v-virtual-scroll
+        :items="charts"
+        height="calc(100vh - 170px)"
+        item-key="id"
+        v-if="!loadingParsingChart"
+        style="overflow-y: scroll;"
+      >
+        <template v-slot:default="{ item }">
+          <v-row no-gutters class="d-flex align-center" style="height: 5em;">
+            <v-col cols="1" class="d-flex justify-center" style="max-width: 60px;"><v-checkbox class="mt-2 ml-n1" v-model="item.isSelect"></v-checkbox></v-col>
+            <v-col cols="3" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="item.chartInfo.name">{{ item.chartInfo.name }}</v-col>
 
-            <td v-if="chart.status.type === 'pending'">{{ t('task.pending') }}</td>
-            <td v-else-if="chart.status.type === 'loading'">{{ t('task.loading') }}</td>
-            <td v-else-if="chart.status.type === 'mixing'">{{ t('task.mixing') }}</td>
-            <td v-else-if="chart.status.type === 'rendering'">{{ (chart.status.progress * 100).toFixed(2) }}%</td>
-            <td v-else-if="chart.status.type === 'done'">{{ t('task.done') }}</td>
-            <td v-else-if="chart.status.type === 'canceled'">{{ t('task.canceled') }}</td>
-            <td v-else-if="chart.status.type === 'failed'">{{ t('task.failed') }}</td>
-            <td v-else style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.level">{{ chart.chartInfo.level }}</td>
+            <v-col cols="2" v-if="item.status.type === 'pending'">{{ t('task.pending') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'loading'">{{ t('task.loading') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'mixing'">{{ t('task.mixing') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'rendering'">{{ (item.status.progress * 100).toFixed(2) }}%</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'done'">{{ t('task.done') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'canceled'">{{ t('task.canceled') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'failed'">{{ t('task.failed') }}</v-col>
+            <v-col cols="2" v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="item.chartInfo.level">{{ item.chartInfo.level }}</v-col>
 
-            <td v-if="chart.status.type === 'pending'">-</td>
-            <td v-else-if="chart.status.type === 'loading'">-</td>
-            <td v-else-if="chart.status.type === 'mixing'">-</td>
-            <td v-else-if="chart.status.type === 'rendering'">{{ chart.status.fps }} FPS</td>
-            <td v-else-if="chart.status.type === 'done'" @click="openFile(chart.output)">{{ t('task.open-file') }}</td>
-            <td v-else-if="chart.status.type === 'canceled'">-</td>
-            <td v-else-if="chart.status.type === 'failed'">-</td>
-            <td v-else style="max-width: 8em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.chartInfo.charter">{{ chart.chartInfo.charter }}</td>
+            <v-col cols="2" v-if="item.status.type === 'pending'">-</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'loading'">-</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'mixing'">-</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'rendering'">{{ item.status.fps }} FPS</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'done'" @click="openFile(item.output)">{{ t('task.open-file') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'canceled'">-</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'failed'">-</v-col>
+            <v-col cols="2" v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="item.chartInfo.charter">{{ item.chartInfo.charter }}</v-col>
 
-            <td v-if="chart.status.type === 'pending'">-</td>
-            <td v-else-if="chart.status.type === 'loading'">-</td>
-            <td v-else-if="chart.status.type === 'mixing'">-</td>
-            <td v-else-if="chart.status.type === 'rendering'">{{ chart.status.estimate.toFixed(0) }} s</td>
-            <td v-else-if="chart.status.type === 'done'" @click="outputDialogMessage = chart.status.output; outputDialog = true;">{{ t('task.show-output') }}</td>
-            <td v-else-if="chart.status.type === 'canceled'" @click="outputDialogMessage = chart.status.output; outputDialog = true;">{{ t('task.show-output') }}</td>
-            <td v-else-if="chart.status.type === 'failed'" @click="outputDialogMessage = chart.status.output; outputDialog = true;">{{ t('task.show-output') }}</td>
-            <td v-else style="max-width: 11em; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="chart.path">{{ chart.path }}</td>
+            <v-col v-if="item.status.type === 'pending'">-</v-col>
+            <v-col v-else-if="item.status.type === 'loading'">-</v-col>
+            <v-col v-else-if="item.status.type === 'mixing'">-</v-col>
+            <v-col v-else-if="item.status.type === 'rendering'">{{ item.status.estimate.toFixed(0) }} s</v-col>
+            <v-col v-else-if="item.status.type === 'done'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'canceled'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'failed'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
+            <v-col v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" :title="item.path">{{ item.path }}</v-col>
 
-            <td><v-btn variant="tonal" @click="chartInfoSelect = chart.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></td>
-            <td><v-btn variant="tonal" :loading="loadingPreview" @click="previewChart(chart)">{{ t('preview') }}</v-btn></td>
-          </tr>
-        </tbody>
-      </v-table>
-      <v-overlay v-model="loadingParsingChart" contained class="align-center justify-center" persistent noClickAnimation :close-on-content-click="false">
+            <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" @click="chartInfoSelect = item.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></v-col>
+            <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" :loading="loadingPreview" @click="previewChart(item)">{{ t('preview') }}</v-btn></v-col>
+          </v-row>
+        </template>
+      </v-virtual-scroll>
+      <v-overlay v-model="loadingParsingChart" class="align-center justify-center" persistent noClickAnimation :close-on-content-click="false">
         <v-progress-circular indeterminate style="filter: none;"> </v-progress-circular>
       </v-overlay>
     </div>
