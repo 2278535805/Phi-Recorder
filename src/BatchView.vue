@@ -526,6 +526,7 @@ async function clearTasks() {
   } catch (e) {
     toastError(e);
   }
+  window.location.reload();
 }
 
 await updateList();
