@@ -1,13 +1,9 @@
 use crate::{
-    cmd_hidden,
-    common::{output_dir, read_config},
-    render::{RenderParams},
-    ASSET_PATH,
-    ipc::IPCEvent,
+    cmd_hidden, common::{output_dir, read_config}, ipc::IPCEvent, render::{RenderConfig, RenderParams}, ASSET_PATH
 };
 use anyhow::Result;
 use chrono::Local;
-use phire::fs;
+use phire::{fs, info::ChartInfo};
 use serde::Serialize;
 use tracing::{error, info};
 use std::{
@@ -260,6 +256,8 @@ impl Task {
             id: self.id,
             name: self.name.clone(),
             output: self.output.clone(),
+            info: self.params.info.clone(),
+            config: self.params.config.clone(),
             path: self.params.path.display().to_string(),
             cover: self.cover.path().display().to_string(),
             status: self.status.lock().await.clone(),
@@ -272,6 +270,8 @@ pub struct TaskView {
     pub id: u32,
     name: String,
     pub output: PathBuf,
+    info: ChartInfo,
+    config: RenderConfig,
     path: String,
     cover: String,
     status: TaskStatus,
