@@ -88,8 +88,6 @@ export interface RenderConfig {
   aggressive: boolean;
   challengeColor: string;
   challengeRank: number;
-  disableEffect: boolean;
-  doubleHint: boolean;
   fxaa: boolean;
   noteScale: number;
   //offset: number;
@@ -117,6 +115,7 @@ export interface RenderConfig {
   renderLine: boolean;
   renderLineExtra: boolean;
   renderNote: boolean;
+  renderDoubleHint: boolean;
   renderUiPause: boolean;
   renderUiName: boolean;
   renderUiLevel: boolean;
@@ -125,6 +124,7 @@ export interface RenderConfig {
   renderUiBar: boolean;
   renderBg: boolean;
   renderBgDim: boolean;
+  renderExtra: boolean;
   bgBlurriness: number;
 
   maxParticles: number;
@@ -157,8 +157,6 @@ export const DEFAULT_CONFIG: RenderConfig = {
   aggressive: false,
   challengeColor: 'rainbow',
   challengeRank: 3,
-  disableEffect: false,
-  doubleHint: true,
   fxaa: false,
   noteScale: 1,
   particle: true,
@@ -184,6 +182,7 @@ export const DEFAULT_CONFIG: RenderConfig = {
   renderLine: true,
   renderLineExtra: true,
   renderNote: true,
+  renderDoubleHint: true,
   renderUiPause: true,
   renderUiName: true,
   renderUiLevel: true,
@@ -192,6 +191,7 @@ export const DEFAULT_CONFIG: RenderConfig = {
   renderUiBar: true,
   renderBg: true,
   renderBgDim: true,
+  renderExtra: false,
   bgBlurriness: 80,
 
   maxParticles: 100000,
