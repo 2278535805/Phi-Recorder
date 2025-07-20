@@ -164,7 +164,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { event } from '@tauri-apps/api';
 
 import { toastError, RULES, toast, anyFilter, isString } from './common';
-import type { ChartInfo, FileDropEvent } from './model';
+import type { ChartInfo, FileDropEvent, RenderConfig } from './model';
 
 import { VForm } from 'vuetify/components';
 
@@ -241,11 +241,15 @@ function updateAspectRatio() {
     }
 
 }
-async function loadChart(file: string) {
+async function loadChart(file: string, info?: ChartInfo) {
   try {
     loadingParsingChart.value = true;
     chartPath = file;
-    chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
+    if (info) {
+      chartInfo.value = info
+    } else {
+      chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
+    }
     stepIndex.value++;
     offset_text.value = String(Math.floor(chartInfo.value.offset * 1000));
     updateAspectRatio();
@@ -412,8 +416,25 @@ async function moveNext() {
 }
 
 let chartInQuery = router.currentRoute.value.query.chart;
-if (isString(chartInQuery)) {
-  onMounted(() => loadChart(chartInQuery as string));
+let infoInQuery = router.currentRoute.value.query.info;
+let configInQuery = router.currentRoute.value.query.config;
+if (isString(chartInQuery) && isString(infoInQuery) && isString(configInQuery)) {
+  onMounted(() => {
+    loadQuery(chartInQuery as string, infoInQuery as string, configInQuery as string);
+  });
+} else if (isString(chartInQuery)) {
+  onMounted(() => {
+    loadChart(chartInQuery as string);
+  });
+}
+
+async function loadQuery(chart: string, info: string, config: string) {
+  let chartInfo: ChartInfo = JSON.parse(info as string);
+  let chartConfig: RenderConfig = JSON.parse(config as string);
+  await loadChart(chart as string, chartInfo);
+  stepIndex.value = 3;
+  await nextTick();
+  await configView.value?.applyConfig(chartConfig);
 }
 
 function tryParseAspect(): number | undefined {

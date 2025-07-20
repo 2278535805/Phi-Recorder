@@ -203,7 +203,7 @@ function removeTask(index: number) {
             >
               <div 
                 class="overlay"
-                @click="router.push({ name: 'render', query: { chart: task.path } })"
+                @click="router.push({ name: 'render', query: { chart: task.path, info: JSON.stringify(task.info), config: JSON.stringify(task.config) } })"
               >
                 <i class="mdi mdi-reload icon"></i>
               </div>

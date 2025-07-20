@@ -46,7 +46,7 @@ where
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
     pub resolution: (u32, u32),

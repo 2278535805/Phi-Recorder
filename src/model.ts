@@ -62,6 +62,8 @@ export interface Task {
   name: string;
   output: string;
   path: string;
+  info: ChartInfo;
+  config: RenderConfig;
   cover: string;
   status: TaskStatus;
 }
