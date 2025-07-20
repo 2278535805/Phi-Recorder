@@ -522,7 +522,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let music = music.with_context(|| tl!("load-music-failed"))?;
     let music_length = music.length() as f64;
     let music_sample_rate = music.sample_rate();
-    let ending_music = res_pack.ending;
+    let ending_music = res_pack.endings[0].clone();
     let sfx_click = res_pack.sfx_click;
     let sfx_drag = res_pack.sfx_drag;
     let sfx_flick = res_pack.sfx_flick;
