@@ -70,8 +70,6 @@ pub struct RenderConfig {
     pub aggressive: bool,
     pub challenge_color: ChallengeModeColor,
     pub challenge_rank: u32,
-    pub disable_effect: bool,
-    pub double_hint: bool,
     pub fxaa: bool,
     pub note_scale: f32,
     //pub offset: f32,
@@ -99,6 +97,7 @@ pub struct RenderConfig {
     pub render_line: bool,
     pub render_line_extra: bool,
     pub render_note: bool,
+    pub render_double_hint: bool,
     pub render_ui_pause: bool,
     pub render_ui_name: bool,
     pub render_ui_level: bool,
@@ -107,6 +106,7 @@ pub struct RenderConfig {
     pub render_ui_bar: bool,
     pub render_bg: bool,
     pub render_bg_dim: bool,
+    pub render_extra: bool,
     pub bg_blurriness: f32,
 
     pub max_particles: usize,
@@ -123,9 +123,7 @@ impl RenderConfig {
             aggressive: self.aggressive,
             challenge_color: self.challenge_color.clone(),
             challenge_rank: self.challenge_rank,
-            disable_effect: self.disable_effect,
             disable_loading: self.disable_loading,
-            double_hint: self.double_hint,
             fxaa: self.fxaa,
             note_scale: self.note_scale,
             //offset: self.offset,
@@ -153,6 +151,7 @@ impl RenderConfig {
             render_line: self.render_line,
             render_line_extra: self.render_line_extra,
             render_note: self.render_note,
+            render_double_hint: self.render_double_hint,
             render_ui_pause: self.render_ui_pause,
             render_ui_name: self.render_ui_name,
             render_ui_level: self.render_ui_level,
@@ -161,6 +160,7 @@ impl RenderConfig {
             render_ui_bar: self.render_ui_bar,
             render_bg: self.render_bg,
             render_bg_dim: self.render_bg_dim,
+            render_extra: self.render_extra,
             bg_blurriness: self.bg_blurriness,
 
             max_particles: self.max_particles,
@@ -189,8 +189,6 @@ impl Default for RenderConfig {
             aggressive: false,
             challenge_color: ChallengeModeColor::Rainbow,
             challenge_rank: 3,
-            disable_effect: false,
-            double_hint: true,
             fxaa: false,
             note_scale: 1.0,
             particle: true,
@@ -222,6 +220,7 @@ impl Default for RenderConfig {
             render_line: true,
             render_line_extra: true,
             render_note: true,
+            render_double_hint: true,
             render_ui_pause: true,
             render_ui_name: true,
             render_ui_level: true,
@@ -230,6 +229,7 @@ impl Default for RenderConfig {
             render_ui_bar: true,
             render_bg: true,
             render_bg_dim: true,
+            render_extra: true,
             bg_blurriness: 80.,
 
             max_particles: 100000,
@@ -512,7 +512,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         bail!("FFmpeg not found")
     };
 
-    let (mut chart, ..) = GameScene::load_chart(fs.deref_mut(), &info)
+    let (mut chart, ..) = GameScene::load_chart(fs.deref_mut(), &info, &prpr_config)
         .await
         .with_context(|| tl!("load-chart-failed"))?;
     let res_pack = ResourcePack::from_path(config.res_pack_path.as_ref())

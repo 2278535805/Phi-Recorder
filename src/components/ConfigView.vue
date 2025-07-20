@@ -102,7 +102,7 @@ en:
   judgeOffset: Judge Offset
 
   render: Render
-  render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Name,Difficulty,Score,Combo Number,Progress Bar,Background,Background Dim,Hit Particle,Shader,Double Hint
+  render-list: Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Name,Difficulty,Score,Combo Number,Progress Bar,Background,Background Dim,Hit Particle,Extra (Shader),Double Hint
   expand: Expand
   expand-list: Aggressive Optimization,Roman Mode,Chinese Mode
   audio-expand: Audio Expand
@@ -243,7 +243,7 @@ zh-CN:
   offset: 延时
   judgeOffset: 判定偏移
   render: 渲染内容
-  render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,曲目名称,谱面难度,分数,连击数,进度条,背景,背景压暗,打击粒子,着色器,双押提示
+  render-list: 加载画面,判定线,其他判定线,音符,暂停按钮,曲目名称,谱面难度,分数,连击数,进度条,背景,背景压暗,打击特效,额外内容 (着色器),双押提示
   expand: 拓展内容
   expand-list: 激进优化,罗马模式,中文模式
   audio-expand: 音频拓展内容
@@ -543,8 +543,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     renderBg: render.value.includes(renderList.value[10]),
     renderBgDim: render.value.includes(renderList.value[11]),
     particle: render.value.includes(renderList.value[12]),
-    disableEffect: !render.value.includes(renderList.value[13]),
-    doubleHint: render.value.includes(renderList.value[14]),
+    renderExtra: render.value.includes(renderList.value[13]),
+    renderDoubleHint: render.value.includes(renderList.value[14]),
 
     aggressive: expand.value.includes(expandList.value[0]),
     roman: expand.value.includes(expandList.value[1]),
@@ -647,8 +647,8 @@ function applyConfig(config: RenderConfig) {
   if (config.renderBg) render.value.push(renderList.value[10]);
   if (config.renderBgDim) render.value.push(renderList.value[11]);
   if (config.particle) render.value.push(renderList.value[12]);
-  if (!config.disableEffect) render.value.push(renderList.value[13]);
-  if (config.doubleHint) render.value.push(renderList.value[14]);
+  if (config.renderExtra) render.value.push(renderList.value[13]);
+  if (config.renderDoubleHint) render.value.push(renderList.value[14]);
   
 
   expand.value = [];
