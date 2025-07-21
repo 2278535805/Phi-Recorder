@@ -46,6 +46,7 @@ en:
     intro: Introduction
 
     holdPartialCover: Hold Tail Cover
+    noteUniformScale: Note Uniform Scale
 
   error:
     preview-start-end-15s: Preview time cannot be greater than 15 seconds
@@ -125,6 +126,7 @@ zh-CN:
     intro: 简介
 
     holdPartialCover: Hold 尾部遮罩
+    noteUniformScale: Note 等比缩放
 
   error:
     preview-start-end-15s: 预览时间不能大于15秒
@@ -608,11 +610,14 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           </v-row>
 
           <v-row no-gutters class="mt-1 my-2 align-center">
-            <v-col cols="8" class="px-6 py-6">
+            <v-col cols="6" class="px-6 py-6">
               <v-slider :label="t('info.backgroundDim')" thumb-label="always" color="btn" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="3">
               <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('info.holdPartialCover')"></v-switch>
+            </v-col>
+            <v-col cols="3">
+              <v-switch class="mx-2" v-model="chartInfo.noteUniformScale" :label="t('info.noteUniformScale')"></v-switch>
             </v-col>
           </v-row>
 
@@ -627,7 +632,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <v-card-text>
 
             <v-form v-if="chartInfo" validateOn="eager">
-              <v-row>
+              <v-row class="my-n2">
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
                 </v-col>
@@ -642,7 +647,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 </v-col>
               </v-row>
 
-              <v-row>
+              <v-row class="my-n2">
                 <v-col cols="3">
                   <v-text-field type="number" class="" :rules="[RULES.positive, RULES.nonZero]" :label="t('info.aspectRatio')"
                   v-model="chartInfo.aspectRatio" @update:modelValue="chartInfo.aspectRatio = parseFloat($event)"></v-text-field>
@@ -655,7 +660,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 </v-col>
               </v-row>
 
-              <v-row>
+              <v-row class="my-n2">
                 <v-col cols="3">
                   <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.previewStart')"
                   v-model="chartInfo.previewStart" @update:modelValue="chartInfo.previewStart = parseFloat($event)"></v-text-field>
@@ -674,7 +679,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 </v-col>
               </v-row>
               
-              <v-row>
+              <v-row class="my-n2">
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.chart')" v-model="chartInfo.chart"></v-text-field>
                 </v-col>
@@ -689,7 +694,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 </v-col>
               </v-row>
 
-              <v-row>
+              <v-row class="my-n2">
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.tip')" v-model="chartInfo.tip"></v-text-field>
                 </v-col>
@@ -706,7 +711,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <v-card-actions class="justify-end">
             <v-btn class="hover-scale" variant="text" @click="readInfo" v-t="'read-info'"></v-btn>
             <v-btn class="hover-scale" variant="text" @click="saveInfo" v-t="'save-info'"></v-btn>
-            <v-btn class="hover-scale" variant="text" @click="moreInfo = false; updateAspectRatio();" v-t="'close'"></v-btn>
+            <v-btn class="hover-scale" variant="text" @click="moreInfo = false; updateAspectRatio();" v-t="'confirm'"></v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
