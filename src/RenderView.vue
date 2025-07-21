@@ -246,7 +246,8 @@ async function loadChart(file: string, info?: ChartInfo) {
     loadingParsingChart.value = true;
     chartPath = file;
     if (info) {
-      chartInfo.value = info
+      chartInfo.value = info;
+      await new Promise(r => setTimeout(r, 0));
     } else {
       chartInfo.value = (await invoke('parse_chart', { path: file })) as ChartInfo;
     }
@@ -419,22 +420,18 @@ let chartInQuery = router.currentRoute.value.query.chart;
 let infoInQuery = router.currentRoute.value.query.info;
 let configInQuery = router.currentRoute.value.query.config;
 if (isString(chartInQuery) && isString(infoInQuery) && isString(configInQuery)) {
-  onMounted(() => {
-    loadQuery(chartInQuery as string, infoInQuery as string, configInQuery as string);
+  onMounted(async () => {
+    let chartInfo: ChartInfo = JSON.parse(infoInQuery as string);
+    let chartConfig: RenderConfig = JSON.parse(configInQuery as string);
+    await loadChart(chartInQuery as string, chartInfo);
+    stepIndex.value = 3;
+    await nextTick();
+    await configView.value?.applyConfig(chartConfig);
   });
 } else if (isString(chartInQuery)) {
-  onMounted(() => {
-    loadChart(chartInQuery as string);
+  onMounted(async () => {
+    await loadChart(chartInQuery as string);
   });
-}
-
-async function loadQuery(chart: string, info: string, config: string) {
-  let chartInfo: ChartInfo = JSON.parse(info as string);
-  let chartConfig: RenderConfig = JSON.parse(config as string);
-  await loadChart(chart as string, chartInfo);
-  stepIndex.value = 3;
-  await nextTick();
-  await configView.value?.applyConfig(chartConfig);
 }
 
 function tryParseAspect(): number | undefined {
