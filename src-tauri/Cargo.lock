@@ -3797,7 +3797,7 @@ dependencies = [
 [[package]]
 name = "phire"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/phire#b22eb94fb8a38e47f2fca218af35b99af30fe680"
+source = "git+https://github.com/2278535805/phire#8a975b9e90ae81b8dd58d7d0cbdb1b07994e82f8"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3841,6 +3841,7 @@ dependencies = [
  "phf 0.11.2",
  "prpr-avc",
  "rand 0.8.5",
+ "rand_pcg 0.9.0",
  "rayon",
  "regex",
  "rfd",
@@ -3999,7 +4000,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/phire#b22eb94fb8a38e47f2fca218af35b99af30fe680"
+source = "git+https://github.com/2278535805/phire#8a975b9e90ae81b8dd58d7d0cbdb1b07994e82f8"
 dependencies = [
  "anyhow",
  "tracing",
@@ -4117,7 +4118,7 @@ dependencies = [
  "rand_chacha 0.2.2",
  "rand_core 0.5.1",
  "rand_hc",
- "rand_pcg",
+ "rand_pcg 0.2.1",
 ]
 
 [[package]]
@@ -4214,6 +4215,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16abd0c1b639e9eb4d7c50c0b8100b0d0f849be2349829c740fe8e6eb4816429"
 dependencies = [
  "rand_core 0.5.1",
+]
+
+[[package]]
+name = "rand_pcg"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b48ac3f7ffaab7fac4d2376632268aa5f89abdb55f7ebf8f4d11fffccb2320f7"
+dependencies = [
+ "rand_core 0.9.3",
 ]
 
 [[package]]
