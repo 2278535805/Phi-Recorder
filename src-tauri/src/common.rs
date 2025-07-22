@@ -212,6 +212,7 @@ pub fn collect_chart_files(
                     if filename.starts_with("AutoSave_")
                         || filename.starts_with("blur_")
                         || filename.starts_with("blur1_")
+                        || filename.starts_with("tempfile_")
                         || filename == "createTime.txt"
                     {
                         continue;
@@ -233,6 +234,7 @@ pub async fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -
 
     let options = FileOptions::default()
         .compression_method(zip::CompressionMethod::Deflated)
+        .compression_level(Some(9))
         .unix_permissions(0o755);
 
     for (file_name, file_path) in files {

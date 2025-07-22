@@ -853,7 +853,7 @@ async fn test_encoder(encoder: String) -> Result<bool, InvokeError> {
 }
 
 #[tauri::command]
-async fn export_pez(chart_path: String, output_path: String) -> Result<(), InvokeError> {
+async fn export_pez(chart_path: String, output_path: String, minify: bool) -> Result<(), InvokeError> {
     wrap_async(async move {
         info!("Exporting PEZ: {} -> {}", chart_path, output_path);
         let chart_path = PathBuf::from(chart_path);
@@ -864,6 +864,29 @@ async fn export_pez(chart_path: String, output_path: String) -> Result<(), Invok
         }
 
         let mut files = collect_chart_files(chart_path.clone(), chart_path.clone())?;
+        if minify {
+            let mut fs: Box<dyn FileSystem + Send + Sync + 'static> =
+                fs::fs_from_file(&chart_path).with_context(|| mtl!("read-chart-failed"))?;
+            let info = fs::load_info(fs.deref_mut())
+                .await
+                .with_context(|| mtl!("load-info-failed"))?;
+            let chart_data = tokio::fs::read_to_string(chart_path.join(&info.chart)).await?;
+            let chart_json: phire::parse::RPEChart = serde_json::from_str(&chart_data)?;
+            let chart_minified = serde_json::to_string(&chart_json)?;
+            let chart_minified_path = chart_path.join("tempfile_minified.json");
+            tokio::fs::write(&chart_minified_path, chart_minified).await?;
+
+            if let Err(_) = fs.load_file("info.yml").await {
+                let info_path = chart_path.join("tempfile_info.yml");
+                let info_yaml = serde_yaml::to_string(&info)?;
+                tokio::fs::write(&info_path, info_yaml).await?;
+                files.insert(String::from("info.yml"), info_path);
+            };
+
+            files.remove(&info.chart);
+            files.insert(info.chart, chart_minified_path);
+        }
+
         let res_path = chart_path.parent().unwrap().join("shaders").join("pr");
 
         let extra_file = chart_path.join("extra.json");
