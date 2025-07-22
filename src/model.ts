@@ -23,6 +23,7 @@ export interface ChartInfo {
 
   holdPartialCover: boolean;
   noteUniformScale: boolean;
+  scoreTotal: number;
 }
 
 export type TaskStatus =
