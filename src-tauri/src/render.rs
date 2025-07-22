@@ -865,8 +865,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         )
     } else {
         format!(
-        "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[aa];[aa]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
-    )
+            "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[aa];[aa]alimiter=limit=1.0:level=false:attack=0.1:release=1[a]"
+        )
     };
 
     let ffmpeg_audio_filter = format!(
