@@ -1,30 +1,33 @@
 # Output 输出
 resolution = [1920, 1080]
 fps = 60
-ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf" or "any"
-hardwareAccel = true
 sampleCount = 8
+hardwareAccel = true
 hevc = false
 mpeg4 = false
 # customEncoder = ""
+ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf" or "any"
 dynamicBitrateControl = true
 bitrate = "26"
+endingLength = 0.0
+renderStartTime = 0.0
+# renderEndTime = 
 
 
 # Player 玩家
 # playerAvatar = ""
 playerName = "HLMC"
 playerRks = 16.0
-challengeColor = "rainbow"
+challengeColor = "rainbow" # white green blue red golden rainbow
 challengeRank = 3
 
 
 # Graphics 图像
 # res_pack_path = ""
-noteScale = 1.0
 chartDebugLine = 0.0
 chartDebugNote = 0.0
 chartRatio = 1.0
+noteScale = 1.0
 
 disableLoading = true
 renderLine = true
@@ -38,8 +41,8 @@ renderUiCombo = true
 renderUiBar = true
 renderBg = true
 renderBgDim = true
+renderExtra = true
 particle = true
-disableEffect = false
 doubleHint = true
 
 aggressive = false
@@ -47,11 +50,15 @@ roman = false
 chinese = false
 
 bgBlurriness = 80.0
-
+watermark = ""
+combo = "AUTOPLAY"
+maxParticles = 100000
 
 # Audio 音频
 forceLimit = true
 hires = true
+loudnessEqualization = false
+
 volumeMusic = 0.5
 volumeSfx = 0.4
 compressionRatio = 20.0
@@ -59,14 +66,10 @@ limitThreshold = 0.5
 
 
 # Other 其他
-endingLength = 0.0
-watermark = ""
-combo = "AUTOPLAY"
-difficulty = ""
 allGood = false
 allBad = false
 judgeOffset = 0.0
-maxParticles = 100000
+difficulty = ""
 fade = 0.0
 
 simpleFileName = false
