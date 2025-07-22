@@ -8,6 +8,7 @@ en:
   rpe-folder: Please select RPE's folder
   search: Search
   export: Export
+  export-minify: Export (Minify)
   export-success: Exported successfully
   delete: Delete
   delete-chart: Delete Chart
@@ -34,6 +35,7 @@ zh-CN:
   rpe-folder: 请选择 RPE 所在文件夹
   search: 搜索
   export: 导出
+  export-minify: 导出 (最小)
   export-success: 导出成功
   delete: 删除
   delete-chart: 删除谱面
@@ -141,7 +143,7 @@ async function openInFolder(path: string) {
 }
 
 const moreLoading = ref(false);
-async function exportPez(chartPath: string, chartName: string) {
+async function exportPez(chartPath: string, chartName: string, minify: boolean = false) {
   moreLoading.value = true;
   try {
     const outputName = chartName.replace(/[\\/:*?"<>|]/g, "_") + '.pez';
@@ -154,7 +156,7 @@ async function exportPez(chartPath: string, chartName: string) {
       defaultPath: outputName
     });
     if (!outputPath) return;
-    await invoke('export_pez', { chartPath, outputPath });
+    await invoke('export_pez', { chartPath, outputPath, minify });
     message(t('export-success'), { title: t('export') })
   } catch (e) {
     toastError(e);
@@ -258,7 +260,8 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item @click="exportPez(chart.path, chart.name)" v-t="'export'" />
+                      <v-list-item @click="exportPez(chart.path, chart.name, false)" v-t="'export'" />
+                      <v-list-item @click="exportPez(chart.path, chart.name, true)" v-t="'export-minify'" />
                       <v-list-item @click="openInFolder(chart.path)" v-t="'show-folder'" />
                       <v-list-item @click="deleteChart(chart.name, chart.path)" v-t="'delete-chart'" />
                       <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
