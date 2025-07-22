@@ -14,7 +14,7 @@ en:
   fps: FPS
 
   hw-accel: Hardware Acceleration
-  hw-accel-tips: Improve rendering speed, slightly reduce quality
+  hw-accel-tips: Use GPU encoding for better performance
 
   fxaa: FXAA
   fxaa-tips: FXAA, as a low-cost anti-aliasing method, will cause the picture to be blurred, and it is not recommended to turn it on
@@ -159,7 +159,7 @@ zh-CN:
   fps: FPS
 
   hw-accel: 硬件加速
-  hw-accel-tips: 提升渲染速度，略微降低质量
+  hw-accel-tips: 使用显卡编码视频，提升渲染速度
 
   fxaa: FXAA
   fxaa-tips: FXAA 以低成本实现抗锯齿，但会导致画面模糊，不建议开启
@@ -202,7 +202,7 @@ zh-CN:
   double-hint: 双押提示
 
   aggressive: 激进优化
-  aggressive-tips: 剔除屏幕外按键，提升渲染速度，但可能会导致部分音符消失
+  aggressive-tips: 剔除屏幕外音符, 提升渲染速度, 但可能导致部分音符消失
 
   disable-particle: 禁用粒子
   disable-effect: 禁用特效
@@ -269,7 +269,7 @@ zh-CN:
   bg-blurriness: 背景模糊
   alpha-tint: 透明度染色
   alpha-tint-tip: |
-    根据不同的透明度对 Note 染色:
+    根据不同的透明度对音符染色:
     (0.0, 0.5] 蓝色,
     (0.5, 1.0) 红色
 
@@ -853,10 +853,10 @@ async function replacePreset() {
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipTextField :label="t('sample-count')" class="ml-2 mr-n4" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :tooltip="t('sample-count-tips')"></TipTextField>
+          <v-text-field :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :title="t('sample-count-tips')"></v-text-field>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
-          <TipSwitch :label="t('hw-accel')" color="btn" v-model="hwAccel"></TipSwitch> <!-- :tooltip="t('hw-accel-tips')" -->
+          <TipSwitch :label="t('hw-accel')" color="btn" v-model="hwAccel" :title="t('hw-accel-tips')"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">
@@ -867,7 +867,7 @@ async function replacePreset() {
           <v-combobox class="mx-2" :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <TipCombobox class="ml-2 mr-n4" v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :tooltip="t('bitrate-crf-tip')" type="number" :rules="[RULES.crf]" v-model="bitrate"></TipCombobox>
+          <v-combobox class="mx-2" v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
           <v-combobox class="mx-2" v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
@@ -884,7 +884,8 @@ async function replacePreset() {
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
-        <v-col cols="3" @click="dynamicBitrateControl = true; encoder = encoderList[1]; bitrate = '40'">
+        <v-col></v-col>
+        <v-col cols="1" class="mx-2 justify-right" @click="dynamicBitrateControl = true; encoder = encoderList[1]; bitrate = '40'">
           <TooltipIcon :tooltip="t('output-tip')"></TooltipIcon>
         </v-col>
       </v-row>
@@ -985,7 +986,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.nonCOMBO]" v-model="combo"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <TipCombobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :tooltip="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></TipCombobox>
+          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :title="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
@@ -1029,12 +1030,12 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <TipTextField class="mx-2" :label="t('fade')" :tooltip="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.non_empty]"></TipTextField>
+          <v-text-field class="mx-2" :label="t('fade')" :title="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
-          <TipSwitch class="mx-4" :label="t('alpha-tint')" color="btn" :tooltip="t('alpha-tint-tip')" v-model="alphaTint"></TipSwitch>
+          <v-switch class="mx-4" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
