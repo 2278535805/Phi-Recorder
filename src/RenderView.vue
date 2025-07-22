@@ -342,7 +342,7 @@ async function previewChart() {
     toastError(e);
     return false;
   } finally {
-    setTimeout(() => (loadingPreview.value = false), 1000)
+    loadingPreview.value = false;
   }
 }
 
@@ -379,7 +379,7 @@ async function previewPlay() {
     toastError(e);
     return false;
   } finally {
-    setTimeout(() => (loadingPlay.value = false), 1000)
+    loadingPlay.value = false;
   }
 }
 
