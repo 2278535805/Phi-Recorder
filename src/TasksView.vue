@@ -311,19 +311,19 @@ function removeTask(index: number) {
 
 .task-card {
   border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--v-theme-container), 0.04);
   margin: 5px;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.05);
   animation: fadeUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
   opacity: 0; /* 初始状态透明 */
 }
 
 .task-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0px 24px rgba(0, 0, 0, 0.3) !important;
-  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0px 24px rgba(0, 0, 0, 0.2) !important;
+  background: rgba(var(--v-theme-container), 0.02);
 }
 
 .margin-btn {

@@ -309,8 +309,8 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(var(--v-theme-container), 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   margin: 5px;
   box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
   animation: fadeUp 0.5s cubic-bezier(0, 0, 0, 1) forwards;
@@ -318,8 +318,8 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
 }
 
 .chart-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.3);
+  background: rgba(var(--v-theme-container), 0.02);
+  box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.2);
 }
 
 .chart-name {
