@@ -45,8 +45,10 @@ en:
 
     intro: Introduction
 
-    holdPartialCover: Hold Tail Cover
-    noteUniformScale: Note Uniform Scale
+    hold-partial-cover: Hold Tail Cover
+    hold-partial-cover-tip: Default at the head, enable to cover at the tail
+    note-uniform-scale: Note Uniform Scale
+    note-uniform-scale-tip: Default only scales X axis, enable to scale Note uniformly
     score-total: Total Score
 
   error:
@@ -126,8 +128,10 @@ zh-CN:
 
     intro: 简介
 
-    holdPartialCover: Hold 尾部遮罩
-    noteUniformScale: Note 等比缩放
+    hold-partial-cover: Hold 尾部遮罩
+    hold-partial-cover-tip: 默认在头部, 开启后在尾部
+    note-uniform-scale: Note 等比缩放
+    note-uniform-scale-tip: 默认仅缩放 X 轴, 开启后 Note 等比缩放
     score-total: 总分
 
   error:
@@ -616,10 +620,10 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               <v-slider :label="t('info.backgroundDim')" thumb-label="always" color="btn" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('info.holdPartialCover')"></v-switch>
+              <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="chartInfo.noteUniformScale" :label="t('info.noteUniformScale')"></v-switch>
+              <v-switch class="mx-2" v-model="chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
             </v-col>
           </v-row>
 
