@@ -47,6 +47,7 @@ en:
 
     holdPartialCover: Hold Tail Cover
     noteUniformScale: Note Uniform Scale
+    score-total: Total Score
 
   error:
     preview-start-end-15s: Preview time cannot be greater than 15 seconds
@@ -127,6 +128,7 @@ zh-CN:
 
     holdPartialCover: Hold 尾部遮罩
     noteUniformScale: Note 等比缩放
+    score-total: 总分
 
   error:
     preview-start-end-15s: 预览时间不能大于15秒
@@ -632,20 +634,6 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <v-card-text>
 
             <v-form v-if="chartInfo" validateOn="eager">
-              <v-row class="my-n2">
-                <v-col cols="3">
-                  <v-text-field type="text" class="" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
-                </v-col>
-                <v-col cols="3">
-                  <v-text-field type="text" class="" :label="t('info.charter')" v-model="chartInfo.charter"></v-text-field>
-                </v-col>
-                <v-col cols="3">
-                  <v-text-field type="text" class="" :label="t('info.composer')" v-model="chartInfo.composer"></v-text-field>
-                </v-col>
-                <v-col cols="3">
-                  <v-text-field type="text" class="" :label="t('info.illustrator')" v-model="chartInfo.illustrator"></v-text-field>
-                </v-col>
-              </v-row>
 
               <v-row class="my-n2">
                 <v-col cols="3">
@@ -653,10 +641,11 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                   v-model="chartInfo.aspectRatio" @update:modelValue="chartInfo.aspectRatio = parseFloat($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="text" class="" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
+                  <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.positive4000000000]"
+                  v-model="chartInfo.scoreTotal" @update:modelValue="chartInfo.scoreTotal = parseInt($event)"></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"> </v-slider>
+                  <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"></v-slider>
                 </v-col>
               </v-row>
 
@@ -670,7 +659,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                   v-model="chartInfo.previewEnd" @update:modelValue="chartInfo.previewEnd = parseFloat($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.non_empty]" :label="t('info.offset')"
+                  <v-text-field type="number" class="" :rules="[RULES.non_empty]" :disabled="loadingTweakoffset" :label="t('info.offset')"
                   v-model="offset_text"></v-text-field>
                 </v-col>
                 <v-col cols="3">
@@ -695,10 +684,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               </v-row>
 
               <v-row class="my-n2">
-                <v-col cols="3">
-                  <v-text-field type="text" class="" :label="t('info.tip')" v-model="chartInfo.tip"></v-text-field>
-                </v-col>
-                <v-col cols="3">
+                <v-col cols="6">
                   <v-text-field type="text" class="" :label="t('info.intro')" v-model="chartInfo.intro"></v-text-field>
                 </v-col>
                 <v-col cols="6">
