@@ -586,7 +586,7 @@ const outputDialog = ref(false),
       <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('choose.post-select-render') }}</v-btn>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto" style="font-size: 0.9em;">
-      <v-row no-gutters class="d-flex align-center" :title="t('sort-tip')" @contextmenu="sortChartsReverse" style="background-color: rgba(255, 255, 255, 0.05); height: 40px; padding-right: 8px;">
+      <v-row no-gutters class="d-flex align-center batch-title" :title="t('sort-tip')" @contextmenu="sortChartsReverse">
         <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')">({{ charts.length }})</v-col>
         <v-col cols="3" @click="sortChartsByKey('name')">{{ t('info.name') }}</v-col>
         <v-col cols="2" @click="sortChartsByKey('level')">{{ t('info.level') }}</v-col>
@@ -743,21 +743,10 @@ const outputDialog = ref(false),
   transition: none;
 }
 
-.gradient-primary {
-  background: linear-gradient(45deg, #6366f1, #8b5cf6) !important;
-  box-shadow: 0 4px 6px -1px rgb(99 102 241 / 0.2);
-  transition: all 0.4s ease;
-  color: white !important;
-}
-
-.gradient-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgb(99 102 241 / 0.3);
-}
-
-.elevated-stepper {
-  border-radius: 16px !important;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+.batch-title {
+  background-color: rgba(var(--v-theme-container), 0.05);
+  height: 40px;
+  padding-right: 8px;
 }
 
 .v-text-field :deep(.v-field--focused) {
