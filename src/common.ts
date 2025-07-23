@@ -19,51 +19,31 @@ export function isString(s: unknown): s is string {
 }
 
 export const RULES = {
-  non_empty: (value: string) => value.trim().length > 0 || i18n.global.t('rules.non-empty'),
-  positive: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.positive'),
-  positiveNull: (value: string) => (isNumeric(value) && Number(value) >= 0 || value === null || value === '') || i18n.global.t('rules.positive'),
-  positive10000: (value: string) => {
+  notEmpty: (value: string) => value.trim().length > 0 || i18n.global.t('rules.not-empty'),
+  notNull: (value: string) => (value != null) || i18n.global.t('rules.not-null'),
+  int: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4) || i18n.global.t('rules.int'),
+  positive: (value: string) => (isNumeric(value) && Number(value) > 0) || i18n.global.t('rules.positive'),
+  positiveOrZero: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.positive'),
+  less10000: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) < 0) return i18n.global.t('rules.positive');
       if (Number(value) > 100000) return i18n.global.t('rules.big');
     }
     return true;
   },
-  positive4000000000: (value: string) => {
+  less4000000000: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) < 0) return i18n.global.t('rules.positive');
       if (Number(value) > 4000000000) return i18n.global.t('rules.big');
     }
     return true;
   },
-  positiveInt: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4 && Number(value) > 0) || i18n.global.t('rules.positive-int'),
-  int: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4) || i18n.global.t('rules.int'),
-  // greaterThanZero: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.greater-than-zero'),
-  crf: (value: string) => (Number.isInteger(Number(value)) && Number(value) >= 1 && Number(value) <= 51) || i18n.global.t('rules.crf'),
-  bitrate: (value: string) => {
-    if (!value || value.trim() === '') {
-      return i18n.global.t('rules.bitrate');
-    }
-    const regex = /^(\d+)(Kbps|Mbps|K|M)$/i;
-    const match = value.match(regex);
-    if (!match) return i18n.global.t('rules.bitrate');
-    
-    const number = Number(match[1]);
-    const unit = match[2].toLowerCase();
-  
-    if ((unit === 'kbps' || unit === 'k') && number > 0 && number <= 1000000) return true;
-    if ((unit === 'mbps' || unit === 'm') && number > 0 && number <= 1000) return true;
-  
-    return i18n.global.t('rules.bitrate');
-  },
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
-  nonZero: (value: string) => (Number(value) !== 0) || i18n.global.t('rules.non-zero'),
-  nonCOMBO: (value: string) => {
+  notZero: (value: string) => (Number(value) != 0) || i18n.global.t('rules.not-zero'),
+  notCOMBO: (value: string) => {
     const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕⅭОмвＣＯＭＢМⅯВ]/g, '').trim();
     if (value.length > 50) {
       return i18n.global.t('rules.long');
     }
-    return !/^[CСⅭＣ][OՕΟ0ОＯ][MΜмＭМⅯ][BΒ8вＢВ][OՕΟ0ОＯ]$/.test(filteredValue) || i18n.global.t('rules.combo');
+    return !/^[CСⅭＣ][OՕΟ0ОＯ][MΜмＭМⅯ][BΒ8вＢВ][OՕΟ0ОＯ]$/.test(filteredValue) || i18n.global.t('rules.not-combo');
   },
 };
 

@@ -580,7 +580,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               <v-text-field class="mx-2" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
             </v-col>
             <v-col cols="2">
-              <v-text-field class="mx-2" :label="t('info.offset')" type="number" :rules="[RULES.int]" :disabled="loadingTweakoffset" v-model="offset_text"></v-text-field>
+              <v-text-field class="mx-2" :label="t('info.offset')" type="number" :rules="[RULES.notEmpty]" :disabled="loadingTweakoffset" v-model="offset_text"></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field class="mx-2" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
@@ -604,9 +604,9 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
             <v-col cols="4">
               <div class="mx-2 d-flex flex-column">
                 <div class="d-flex flex-row align-center justify-center">
-                  <v-text-field type="number" class="mr-2" :rules="[RULES.positive, RULES.nonZero]" :label="t('width')" v-model="aspectWidth"></v-text-field>
+                  <v-text-field type="number" class="mr-2" :rules="[RULES.positive]" :label="t('width')" v-model="aspectWidth"></v-text-field>
                   <p>:</p>
-                  <v-text-field type="number" class="ml-2" :rules="[RULES.positive, RULES.nonZero]" :label="t('height')" v-model="aspectHeight"></v-text-field>
+                  <v-text-field type="number" class="ml-2" :rules="[RULES.positive]" :label="t('height')" v-model="aspectHeight"></v-text-field>
                 </div>
               </div>
             </v-col>
@@ -641,11 +641,11 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
               <v-row class="my-n2">
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positive, RULES.nonZero]" :label="t('info.aspectRatio')"
+                  <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.aspectRatio')"
                   v-model="chartInfo.aspectRatio" @update:modelValue="chartInfo.aspectRatio = parseFloat($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.positive4000000000]"
+                  <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000, RULES.positive]"
                   v-model="chartInfo.scoreTotal" @update:modelValue="chartInfo.scoreTotal = parseInt($event)"></v-text-field>
                 </v-col>
                 <v-col cols="6">
@@ -655,19 +655,19 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
               <v-row class="my-n2">
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.previewStart')"
+                  <v-text-field type="number" class="" :rules="[RULES.positiveOrZero]" :label="t('info.previewStart')"
                   v-model="chartInfo.previewStart" @update:modelValue="chartInfo.previewStart = parseFloat($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positiveNull]" :label="t('info.previewEnd')"
+                  <v-text-field type="number" class="" :label="t('info.previewEnd')"
                   v-model="chartInfo.previewEnd" @update:modelValue="chartInfo.previewEnd = parseFloat($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.non_empty]" :disabled="loadingTweakoffset" :label="t('info.offset')"
+                  <v-text-field type="number" class="" :rules="[RULES.notEmpty]" :disabled="loadingTweakoffset" :label="t('info.offset')"
                   v-model="offset_text"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positive10000, RULES.non_empty]" :label="t('info.lineLength')"
+                  <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.positive]" :label="t('info.lineLength')"
                   v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
                 </v-col>
               </v-row>

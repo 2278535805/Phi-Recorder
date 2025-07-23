@@ -677,18 +677,18 @@ const outputDialog = ref(false),
 
           <v-row>
             <v-col cols="3">
-              <v-text-field type="number" class="" :rules="[RULES.positive, RULES.nonZero]" :label="t('info.aspectRatio')"
+              <v-text-field type="number" class="" :rules="[RULES.positiveOrZero, RULES.notZero]" :label="t('info.aspectRatio')"
               v-model="charts[chartInfoSelect].chartInfo.aspectRatio" @update:modelValue="charts[chartInfoSelect].chartInfo.aspectRatio = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
               <v-text-field type="text" class="" :label="t('info.level')" v-model="charts[chartInfoSelect].chartInfo.level"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="number" class="" :rules="[RULES.non_empty]" :label="t('info.offset')"
+              <v-text-field type="number" class="" :rules="[RULES.notEmpty]" :label="t('info.offset')"
               v-model="charts[chartInfoSelect].chartInfo.offset" @update:modelValue="charts[chartInfoSelect].chartInfo.offset = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="number" class="" :rules="[RULES.positive10000, RULES.non_empty]" :label="t('info.lineLength')"
+              <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.notEmpty]" :label="t('info.lineLength')"
               v-model="charts[chartInfoSelect].chartInfo.lineLength" @update:modelValue="charts[chartInfoSelect].chartInfo.lineLength = parseFloat($event)"></v-text-field>
             </v-col>
           </v-row>
@@ -704,7 +704,7 @@ const outputDialog = ref(false),
 
           <v-row>
             <v-col cols="6">
-              <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.positive4000000000]"
+              <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000]"
               v-model="charts[chartInfoSelect].chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect].chartInfo.scoreTotal = parseInt($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
