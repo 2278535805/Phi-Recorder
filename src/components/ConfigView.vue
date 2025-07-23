@@ -394,6 +394,24 @@ function parseResolution(resolution: string): [number, number] | null {
 }
 const resolutionRule = (value: string) => parseResolution(value) !== null || t('rules.resolution');
 const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number(value)) % 1 === 0) || t('rules.sample-count');
+const isCrf = (value: string) => (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 51) || t('rules.crf');
+const isBitrate = (value: string) => {
+    if (!value || value.trim() === '') {
+      return t('rules.bitrate');
+    }
+    const regex = /^(\d+)(Kbps|Mbps|K|M)$/i;
+    const match = value.match(regex);
+    if (!match) return t('rules.bitrate');
+    
+    const number = Number(match[1]);
+    const unit = match[2].toLowerCase();
+  
+    if ((unit === 'kbps' || unit === 'k') && number > 0 && number <= 1000000) return true;
+    if ((unit === 'mbps' || unit === 'm') && number > 0 && number <= 1000) return true;
+  
+    return t('rules.bitrate');
+  };
+
 
 async function chooseAvatar() {
   let file = await open({
@@ -802,8 +820,8 @@ async function replacePreset() {
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[isCrf]" v-model="bitrate"></v-combobox>
+          <v-combobox v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" class="mx-2" :rules="[isBitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-text-field
@@ -831,13 +849,13 @@ async function replacePreset() {
           </v-select>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
+          <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positiveOrZero]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
+          <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.int, RULES.positiveOrZero]" type="number" v-model="challengeRank"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
@@ -850,7 +868,7 @@ async function replacePreset() {
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.positiveInt]" v-model="fps"></v-combobox>
+          <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.int, RULES.positive]" v-model="fps"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-text-field :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :title="t('sample-count-tips')"></v-text-field>
@@ -864,11 +882,11 @@ async function replacePreset() {
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3" v-show="encoder !== encoderList[2]">
-          <v-combobox class="mx-2" :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" :rules="[RULES.nonSpaces]" v-model="ffmpegPresetText"></v-combobox>
+          <v-combobox class="mx-2" :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" :rules="[RULES.nonSpaces, RULES.notEmpty]" v-model="ffmpegPresetText"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-combobox class="mx-2" v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" type="number" :rules="[RULES.crf]" v-model="bitrate"></v-combobox>
-          <v-combobox class="mx-2" v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" :rules="[RULES.bitrate]" v-model="bitrate"></v-combobox>
+          <v-combobox class="mx-2" v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" type="number" :rules="[isCrf]" v-model="bitrate"></v-combobox>
+          <v-combobox class="mx-2" v-if="!dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate')" :items="bitrateList" :rules="[isBitrate]" v-model="bitrate"></v-combobox>
         </v-col>
         <v-col cols="3">
           <TipSwitch v-if="encoder !== encoderList[2]" :label="t('dynamic-bitrate-control')" color="btn" @change="updateBitrate" v-model="dynamicBitrateControl"></TipSwitch>
@@ -876,13 +894,13 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.non_empty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positive]" v-show="!render.includes(renderList[0])"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positiveOrZero]" v-show="!render.includes(renderList[0])"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
         <v-col></v-col>
         <v-col cols="1" class="mx-2 justify-right" @click="dynamicBitrateControl = true; encoder = encoderList[1]; bitrate = '40'">
@@ -912,13 +930,13 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-1">
         <v-col cols="4">
-          <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positive]" type="number" v-model="playerRks"></v-text-field>
+          <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positiveOrZero]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-autocomplete class="mx-2" :label="t('challenge-color')" :rules="[RULES.non_empty]" :items="t('challenge-colors').split(',')" v-model="challengeColor"></v-autocomplete>
+          <v-autocomplete class="mx-2" :label="t('challenge-color')" :rules="[RULES.notEmpty]" :items="t('challenge-colors').split(',')" v-model="challengeColor"></v-autocomplete>
         </v-col>
         <v-col cols="4">
-          <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.positiveInt]" type="number" v-model="challengeRank"></v-text-field>
+          <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.int, RULES.positiveOrZero]" type="number" v-model="challengeRank"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
@@ -928,7 +946,7 @@ async function replacePreset() {
       <StickyLabel :title="t('title.graphics')"></StickyLabel>
       <v-row no-gutters class="mr-1 mt-4 align-center">
         <v-col cols="8">
-          <v-combobox class="mr-1" :label="t('respack')" :rues="[RULES.non_empty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
+          <v-combobox class="mr-1" :label="t('respack')" :rues="[RULES.notEmpty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
           <v-btn class="pa-1 text-caption" color="primary" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
@@ -977,16 +995,16 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positive10000]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positive, RULES.less10000]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.nonCOMBO]" v-model="combo"></v-text-field>
+          <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.notCOMBO]" v-model="combo"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.non_empty]" :title="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
+          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.notEmpty, RULES.int]" :title="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
@@ -1021,16 +1039,16 @@ async function replacePreset() {
       <StickyLabel :title="t('title.other')"></StickyLabel>
       <v-row no-gutters class="mx-n2 align-center">
         <v-col cols="3">
-          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.non_empty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
+          <v-autocomplete class="mx-2" :label="t('judge-mode')" :rules="[RULES.notEmpty]" :items="t('judge-modes').split(',')" v-model="judgeMode"></v-autocomplete>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.int]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('fade')" :title="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.non_empty]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('fade')" :title="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">

@@ -41,7 +41,8 @@ const i18n = createI18n({
   messages: {
     en: {
       rules: {
-        'non-empty': 'Must not be empty',
+        'not-empty': 'Must not be empty',
+        'not-null': 'Must not be empty',
         'positive': 'Must be a positive number',
         'positive-int': 'Must be a positive integer',
         'resolution': "Must be like '1920x1080'",
@@ -50,8 +51,8 @@ const i18n = createI18n({
         'crf': 'Must be an integer between 0 and 51',
         'bitrate': 'Must be a valid bitrate',
         'non-spaces': 'Must not contain spaces',
-        'non-zero': 'Must not be zero',
-        'combo': 'Must not be COMBO',
+        'not-zero': 'Must not be zero',
+        'not-combo': 'Must not be COMBO',
         'long': 'Input is too long',
         'big': 'Input is too big',
         'invalid-path': 'Invalid path',
@@ -61,7 +62,8 @@ const i18n = createI18n({
     },
     'zh-CN': {
       rules: {
-        'non-empty': '不能为空',
+        'not-empty': '不能为空',
+        'not-null': '不能为空',
         'positive': '必须是正数',
         'positive-int': '必须是正整数',
         'resolution': "必须为 '宽x高'",
@@ -70,8 +72,8 @@ const i18n = createI18n({
         'crf': '必须是 0 到 51 之间的整数',
         'bitrate': '必须是有效的码率',
         'non-spaces': '不能包含空格',
-        'non-zero': '不能为零',
-        'combo': '不能为 COMBO',
+        'not-zero': '不能为零',
+        'not-combo': '不能为 COMBO',
         'long': '输入内容过长',
         'big': '输入内容过大',
         'invalid-path': '路径不合法',
