@@ -65,21 +65,6 @@ export const RULES = {
     }
     return !/^[CСⅭＣ][OՕΟ0ОＯ][MΜмＭМⅯ][BΒ8вＢВ][OՕΟ0ОＯ]$/.test(filteredValue) || i18n.global.t('rules.combo');
   },
-  isPath: (value: string) => {
-    // const pathRegex = /^([a-zA-Z]:\\|\/)?([\w\s\-\.]+[\\\/]?)*$/;
-    const pathRegex = /^([a-zA-Z]:\\|\/)([\w\s\-\.]+[\\\/]?)*$/;
-
-    if (!value || value.trim() === "") {
-      // return i18n.global.t('rules.non-empty');
-      return true;
-    }
-
-    if (!pathRegex.test(value)) {
-      return i18n.global.t('rules.invalid-path');
-    }
-
-    return true;
-  },
 };
 
 export function isNumeric(num: any) {
