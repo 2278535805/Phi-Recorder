@@ -837,9 +837,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
-        "[1:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=soxr:precision=28,volume={}[a1];", sample_rate, volume_music,
+        "[1:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr,volume={}[a1];", sample_rate, volume_music,
     )} else { format!(
-        "[1:a]aresample={}:resampler=soxr:precision=28,volume={}[a1];", sample_rate, volume_music,
+        "[1:a]aresample={}:resampler=swr,volume={}[a1];", sample_rate, volume_music,
     )};
 
     let ffmpeg_audio_filter_fx = if config.force_limit {
