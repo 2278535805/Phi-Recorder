@@ -59,11 +59,11 @@ export const RULES = {
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
   nonZero: (value: string) => (Number(value) !== 0) || i18n.global.t('rules.non-zero'),
   nonCOMBO: (value: string) => {
-    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕⅭОмвＣＯＭＢ]/g, '').trim();
+    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕⅭОмвＣＯＭＢМⅯВ]/g, '').trim();
     if (value.length > 50) {
       return i18n.global.t('rules.long');
     }
-    return !/^[CСⅭＣ][OՕΟ0ОＯ][MΜмＭ][BΒ8вＢ][OՕΟ0ОＯ]$/.test(filteredValue) || i18n.global.t('rules.combo');
+    return !/^[CСⅭＣ][OՕΟ0ОＯ][MΜмＭМⅯ][BΒ8вＢВ][OՕΟ0ОＯ]$/.test(filteredValue) || i18n.global.t('rules.combo');
   },
   isPath: (value: string) => {
     // const pathRegex = /^([a-zA-Z]:\\|\/)?([\w\s\-\.]+[\\\/]?)*$/;
