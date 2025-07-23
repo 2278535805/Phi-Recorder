@@ -33,7 +33,7 @@ zh-CN:
   about: 关于
 
   ffmpeg-check: FFmpeg 检查
-  ffmpeg-check-detail: FFmpeg 不完整, 请安装 full 版本的 FFmpeg
+  ffmpeg-check-detail: FFmpeg 不完整, 请检查 FFmpeg 的可用性
 
   update-available: 有新版本可用!
 
@@ -346,10 +346,10 @@ onMounted(async () => {
       </v-card>
     </v-dialog>
     <v-dialog v-model="ffmpegDialogFilter" width="auto" min-width="400px" class="log-card-bg">
-      <v-card class="log-card-window">
+      <v-card class="log-card-only-window">
         <v-card-title v-t="t('ffmpeg-check')"> </v-card-title>
         <v-card-text>
-          <div class="block whitespace-pre overflow-auto log-card-msg select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</div>
+          <div class="block whitespace-pre overflow-auto select wrap" style="max-height: 60vh; white-space: pre-wrap">{{ t('ffmpeg-check-detail') }}</div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="btn" class="hover-scale" variant="text" @click="ffmpegDialogFilter = false" v-t="t('confirm')"></v-btn>

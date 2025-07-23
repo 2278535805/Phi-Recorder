@@ -804,12 +804,6 @@ async fn test_ffmpeg_filter() -> bool {
         .await
         .expect("failed test filter");
 
-    let banner = String::from_utf8(output.stderr).unwrap_or_default();
-    if !banner.contains("--enable-libsoxr") {
-        error!("Missing lib: libsoxr, Place update FFmpeg to full version");
-        return false;
-    }
-
     let filter = String::from_utf8(output.stdout).unwrap_or_default();
     let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
     for i in filter_required {
