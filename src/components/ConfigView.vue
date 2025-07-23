@@ -1004,7 +1004,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.notCOMBO]" v-model="combo"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.notEmpty, RULES.int]" :title="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
+          <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.notEmpty]" :title="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
