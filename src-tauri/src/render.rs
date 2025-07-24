@@ -343,36 +343,8 @@ pub fn get_encoder(
         }
     }
 
-    let test_encoder = |encoder: &str| -> bool {
-        info!("Testing encoder: {}", encoder);
-        let output = Command::new(&ffmpeg)
-            .args([
-                "-f",
-                "lavfi",
-                "-i",
-                "testsrc=size=1920x1080:rate=5:duration=1",
-                "-pix_fmt",
-                "yuv420p",
-                "-c:v",
-                encoder,
-                "-f",
-                "null",
-                "-",
-            ])
-            .arg("-loglevel")
-            .arg("error")
-            .arg("-hide_banner")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .output()
-            .with_context(|| tl!("run-ffmpeg-failed"))
-            .expect("failed test encoder");
-
-        output.status.success()
-    };
-
     for encoder in encoder_list {
-        if test_encoder(encoder) {
+        if test_encoder(ffmpeg, encoder) {
             return Some(encoder.to_string());
         } else {
             warn!("Encoder {} not supported", encoder);
@@ -382,9 +354,9 @@ pub fn get_encoder(
     None
 }
 
-pub fn test_encoder(ffmpeg: String, encoder: String) -> bool {
+pub fn test_encoder(ffmpeg: &String, encoder: &str) -> bool {
     info!("Testing encoder: {}", encoder);
-    let output = Command::new(&ffmpeg)
+    let output = Command::new(ffmpeg)
         .args([
             "-f",
             "lavfi",
@@ -393,13 +365,13 @@ pub fn test_encoder(ffmpeg: String, encoder: String) -> bool {
             "-pix_fmt",
             "yuv420p",
             "-c:v",
-            encoder.as_str(),
+            encoder,
             "-f",
             "null",
             "-",
         ])
         .arg("-loglevel")
-        .arg("info")
+        .arg("warning")
         // .arg("-hide_banner")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())

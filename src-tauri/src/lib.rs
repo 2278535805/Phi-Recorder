@@ -837,12 +837,12 @@ async fn get_encoder(hevc: bool) -> Result<Option<String>, InvokeError> {
 }
 
 #[tauri::command]
-async fn test_encoder(encoder: String) -> Result<bool, InvokeError> {
+async fn test_encoder(encoder: &str) -> Result<bool, InvokeError> {
     (|| {
         let Some(ffmpeg) = find_ffmpeg()? else {
             bail!("FFmpeg not found")
         };
-        Ok(render::test_encoder(ffmpeg, encoder))
+        Ok(render::test_encoder(&ffmpeg, encoder))
     })()
     .map_err(InvokeError::from_anyhow)
 }
