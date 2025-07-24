@@ -894,6 +894,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         .arg("-loglevel")
         .arg("warning")
         .stdin(Stdio::piped())
+        .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn()
         .with_context(|| tl!("run-ffmpeg-failed"))?;
@@ -901,7 +902,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let byte_size = vw as usize * vh as usize * 4;
 
-    const N: usize = 3; // Buffer Size
+    const N: usize = 5; // Buffer Size
     let mut pbos: [GLuint; N] = [0; N];
     unsafe {
         use miniquad::gl::*;
@@ -931,6 +932,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         frames
     };
     let mut step_time = Instant::now();
+    let mut writed_frames: u64 = 0;
     for frame in 0..frames {
         let now = (frame as f64) / fps;
         *my_time.borrow_mut() = now.max(0.);
@@ -958,7 +960,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         unsafe {
             use miniquad::gl::*;
             glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[writed_frames as usize % N]);
             glReadPixels(
                 0,
                 0,
@@ -968,13 +970,15 @@ pub async fn main(cmd: bool) -> Result<()> {
                 GL_UNSIGNED_BYTE,
                 std::ptr::null_mut(),
             );
-
-            let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8);
-            if !src.is_null() {
-                input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
+            writed_frames += 1;
+            if writed_frames >= N as u64 {
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(writed_frames) as usize % N]);
+                let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
+                if !src.is_null() {
+                    input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
+                }
+                glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
             }
-            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1 ) as usize % N]);
         }
 
         if ipc {
