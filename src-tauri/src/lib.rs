@@ -125,7 +125,7 @@ pub async fn run() -> Result<()> {
             get_rpe_charts,
             open_app_folder,
             test_ffmpeg,
-            test_ffmpeg_filter,
+            check_ffmpeg_filter,
             get_encoder,
             test_encoder,
             export_pez,
@@ -792,7 +792,7 @@ fn test_ffmpeg() -> Result<bool, InvokeError> {
 }
 
 #[tauri::command]
-async fn test_ffmpeg_filter() -> bool {
+async fn check_ffmpeg_filter() -> bool {
     let Ok(Some(ffmpeg)) = find_ffmpeg() else {
         return false;
     };
@@ -802,17 +802,18 @@ async fn test_ffmpeg_filter() -> bool {
         .arg("-filters")
         .output()
         .await
-        .expect("failed test filter");
+        .expect("failed get filters");
 
     let filter = String::from_utf8(output.stdout).unwrap_or_default();
     let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
+    let mut complete = true;
     for i in filter_required {
         if !filter.contains(i) {
-            error!("Missing lib: {}, Place update FFmpeg to full version", i);
-            return false;
+            error!("Missing lib: {}, Please check FFmpeg availability", i);
+            complete = false;
         }
     }
-    return true;
+    return complete;
 }
 
 #[tauri::command]

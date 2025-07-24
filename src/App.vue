@@ -215,15 +215,15 @@ async function openDownload() {
   await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
 }
 
-async function testFFmpegFilter() {
+async function checkFFmpegFilter() {
   try {
     if (!(await invoke('test_ffmpeg'))) {
       ffmpegDialog.value = true;
       return false;
     }
-    ffmpegDialogFilter.value = !(await invoke("test_ffmpeg_filter"));
+    ffmpegDialogFilter.value = !(await invoke("check_ffmpeg_filter"));
     } catch (error) {
-      console.error('Error running test_ffmpeg_filter:', error);
+      console.error('Error running check_ffmpeg_filter:', error);
     }
 }
 
@@ -264,7 +264,7 @@ const listExpand = ref(
 );
 
 onMounted(async () => {
-  testFFmpegFilter();
+  checkFFmpegFilter();
 
   if (await checkForUpdates()) {
     icons.value.about = 'mdi-cloud-download';
