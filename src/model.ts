@@ -13,6 +13,7 @@ export interface ChartInfo {
   previewStart: number;
   previewEnd: number | null;
   aspectRatio: number;
+  forceAspectRatio: boolean;
   backgroundDim: number;
   lineLength: number;
   offset: number;

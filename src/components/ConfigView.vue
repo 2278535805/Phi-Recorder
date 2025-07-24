@@ -586,7 +586,7 @@ function applyAspectRatio(aspectRatio: number) {
 
   let h = parseInt(resolution.value.split('x')[1]);
 
-  if (aspectRatio < 1.0) {
+  if (aspectRatio <= 1.0) {
     resolution.value = `${ h }x${ h }`
   } else {
     let w = Math.floor(h * aspectRatio);
