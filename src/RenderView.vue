@@ -34,6 +34,7 @@ en:
     previewEnd: Preview End Time
 
     aspectRatio: Aspect Ratio
+    force-aspect-ratio: Force Aspect Ratio
     backgroundDim: Background Dim
     lineLength: Line Length
     offset: Offset
@@ -117,6 +118,7 @@ zh-CN:
     previewEnd: 预览结束时间
 
     aspectRatio: 宽高比
+    force-aspect-ratio: 强制宽高比
     backgroundDim: 背景暗淡
     lineLength: 判定线长度
     offset: 偏移
@@ -648,27 +650,25 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                   <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000, RULES.positive]"
                   v-model="chartInfo.scoreTotal" @update:modelValue="chartInfo.scoreTotal = parseInt($event)"></v-text-field>
                 </v-col>
-                <v-col cols="6">
-                  <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"></v-slider>
-                </v-col>
-              </v-row>
-
-              <v-row class="my-n2">
-                <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.positiveOrZero]" :label="t('info.previewStart')"
-                  v-model="chartInfo.previewStart" @update:modelValue="chartInfo.previewStart = parseFloat($event)"></v-text-field>
-                </v-col>
                 <v-col cols="3">
                   <v-text-field type="number" class="" :label="t('info.previewEnd')"
                   v-model="chartInfo.previewEnd" @update:modelValue="chartInfo.previewEnd = parseFloat($event)"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.notEmpty]" :disabled="loadingTweakoffset" :label="t('info.offset')"
-                  v-model="offset_text"></v-text-field>
+                  <v-text-field type="number" class="" :rules="[RULES.positiveOrZero]" :label="t('info.previewStart')"
+                  v-model="chartInfo.previewStart" @update:modelValue="chartInfo.previewStart = parseFloat($event)"></v-text-field>
                 </v-col>
+              </v-row>
+
+              <v-row class="my-n2">
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.positive]" :label="t('info.lineLength')"
-                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
+                  <v-switch class="d-flex justify-center ml-n2" :label="t('info.force-aspect-ratio')" color="btn" v-model="chartInfo.forceAspectRatio"></v-switch>
+                </v-col>
+                <v-col cols="6">
+                  <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"></v-slider>
+                </v-col>
+                <v-col cols="3" class="d-flex align-center justify-center">
+                  <v-btn class="mt-n2" color="#414047" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
                 </v-col>
               </v-row>
               
@@ -682,17 +682,15 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 <v-col cols="3">
                   <v-text-field type="text" class="" :label="t('info.illustration')" v-model="chartInfo.illustration"></v-text-field>
                 </v-col>
-                <v-col cols="3" class="d-flex align-center justify-center">
-                  <v-btn class="" color="#414047" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.positive]" :label="t('info.lineLength')"
+                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
                 </v-col>
               </v-row>
 
               <v-row class="my-n2">
-                <v-col cols="6">
+                <v-col cols="12">
                   <v-text-field type="text" class="" :label="t('info.intro')" v-model="chartInfo.intro"></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="chartInfo.backgroundDim"> </v-slider>
                 </v-col>
               </v-row>
 
