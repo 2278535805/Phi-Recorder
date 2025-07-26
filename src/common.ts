@@ -24,6 +24,7 @@ export const RULES = {
   int: (value: string) => (isNumeric(value) && Math.abs(Number(value) - Math.round(Number(value))) < 1e-4) || i18n.global.t('rules.int'),
   positive: (value: string) => (isNumeric(value) && Number(value) > 0) || i18n.global.t('rules.positive'),
   positiveOrZero: (value: string) => (isNumeric(value) && Number(value) >= 0) || i18n.global.t('rules.positive'),
+  positiveOrNull: (value: string | null) => (value == null || value == '' || (isNumeric(value) && Number(value) > 0)) || i18n.global.t('rules.positive'),
   less10000: (value: string) => {
     if (isNumeric(value)) {
       if (Number(value) > 100000) return i18n.global.t('rules.big');

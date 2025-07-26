@@ -900,7 +900,7 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positiveOrZero]" v-show="!render.includes(renderList[0])"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveOrNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
         </v-col>
         <v-col></v-col>
         <v-col cols="1" class="mx-2 justify-right" @click="dynamicBitrateControl = true; encoder = encoderList[1]; bitrate = '40'">
