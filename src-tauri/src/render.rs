@@ -485,7 +485,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         bail!("FFmpeg not found")
     };
 
-    let (mut chart, ..) = GameScene::load_chart(fs.deref_mut(), &info, &prpr_config)
+    let (chart, chart_format) = GameScene::load_chart(fs.deref_mut(), &info, &prpr_config)
         .await
         .with_context(|| tl!("load-chart-failed"))?;
     let res_pack = ResourcePack::from_path(config.res_pack_path.as_ref())
@@ -604,11 +604,11 @@ pub async fn main(cmd: bool) -> Result<()> {
         info!("Process Music Time:{:.2?}", music_time.elapsed())
     }
 
-    type AudioMap = std::collections::HashMap<String, Vec<f32>>;
-    let mut extra_sfxs: AudioMap = AudioMap::new();
+    type HitSoundMap = std::collections::HashMap<String, Vec<f32>>;
+    let mut extra_sfxs: HitSoundMap = HitSoundMap::new();
 
-    chart.hitsounds.drain().for_each(|(name, clip)| {
-        extra_sfxs.insert(name, clip.to_vec());
+    chart.hitsounds.iter().for_each(|(name, clip)| {
+        extra_sfxs.insert(name.clone(), clip.to_vec());
     });
 
     let get_hitsound = |note: &Note| match &note.hitsound {
@@ -711,6 +711,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut main = Main::new(
         Box::new(
             LoadingScene::new(
+                Some((chart, chart_format)),
                 GameMode::Normal,
                 info,
                 &prpr_config,
