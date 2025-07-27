@@ -493,7 +493,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         .context("Failed to load resource pack")?;
     let music: Result<_> = async { AudioClip::new(fs.load_file(&info.music).await?) }.await;
     let music = music.with_context(|| tl!("load-music-failed"))?;
-    let music_length = music.length() as f64;
+    let music_length = music.length();
     let music_sample_rate = music.sample_rate();
     let ending_music = res_pack.endings[0].clone();
     let sfx_click = res_pack.sfx_click;
@@ -597,7 +597,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let slice = &mut output_music[start_index..];
         for i in 0..len.min(slice.len() / 2) {
             let position = i as f64 * ratio + offset.max(0.) as f64;
-            let frame = music.sample_f64(position).unwrap_or_default();
+            let frame = music.sample(position).unwrap_or_default();
             slice[i * 2] += frame.0;
             slice[i * 2 + 1] += frame.1;
         }
