@@ -117,6 +117,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         Box::new(BaseScene(
             Some(NextScene::Overlay(Box::new(
                 LoadingScene::new(
+                    None,
                     if tweak_offset {
                         GameMode::TweakOffset
                     } else {
