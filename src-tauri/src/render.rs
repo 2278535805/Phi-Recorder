@@ -7,7 +7,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
-use ndarray::{s, ArrayView1, ArrayViewMut1};
+use ndarray::{s, Array1, ArrayView1, ArrayViewMut1};
 use phire::{
     config::{ChallengeModeColor, Config, Mods},
     core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
@@ -519,9 +519,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     check_sample_rate(sample_rate, sfx_drag.sample_rate(), "sfx_drag")?;
     check_sample_rate(sample_rate, sfx_flick.sample_rate(), "sfx_flick")?;
 
-    let sfx_click = sfx_click.to_vec();
-    let sfx_drag = sfx_drag.to_vec();
-    let sfx_flick = sfx_flick.to_vec();
+    let sfx_click = Array1::from_vec(sfx_click.to_vec());
+    let sfx_drag = Array1::from_vec(sfx_drag.to_vec());
+    let sfx_flick = Array1::from_vec(sfx_flick.to_vec());
 
     let mut gl = unsafe { get_internal_gl() };
 
@@ -576,16 +576,11 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut output_fx_array = ArrayViewMut1::from_shape(output_fx_len, &mut output_fx)?;
 
     // let stereo_sfx = false; // TODO stereo sound effects
-    let mut place_fx = |pos: f64, clip: &Vec<f32>| {
+    let mut place_fx = |pos: f64, clip: &Array1<f32>| {
         let position = (pos * sample_rate_f64).round() as usize * 2;
         let len = clip.len();
-        if position >= output_fx_array.len() + len {
-            return;
-        }
-
         let mut slice = output_fx_array.slice_mut(s![position..position + len]);
-        let frames = ArrayView1::from(clip);
-        slice += &frames;
+        slice += clip;
     };
 
     if volume_music != 0.0 {
@@ -601,14 +596,14 @@ pub async fn main(cmd: bool) -> Result<()> {
             slice[i * 2] += frame.0;
             slice[i * 2 + 1] += frame.1;
         }
-        info!("Process Music Time:{:.2?}", music_time.elapsed())
+        info!("Process Music Time:{:.2?}", music_time.elapsed());
     }
 
-    type HitSoundMap = std::collections::HashMap<String, Vec<f32>>;
+    type HitSoundMap = std::collections::HashMap<String, Array1<f32>>;
     let mut extra_sfxs: HitSoundMap = HitSoundMap::new();
 
     chart.hitsounds.iter().for_each(|(name, clip)| {
-        extra_sfxs.insert(name.clone(), clip.to_vec());
+        extra_sfxs.insert(name.clone(), Array1::from_vec(clip.to_vec()));
     });
 
     let get_hitsound = |note: &Note| match &note.hitsound {
@@ -622,19 +617,18 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        for line in &chart.lines {
-            for note in &line.notes {
-                if !note.fake {
-                    if let Some(sfx) = get_hitsound(note) {
-                        if note.time as f64 > chart_length {
-                            continue;
-                        }
-                        place_fx(before_time + note.time as f64 + judge_offset, sfx);
-                    }
-                }
+        let chart_length = chart_length as f32;
+        let mut count: u64 = 0;
+
+        chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < chart_length).for_each(|note| {
+            if let Some(sfx) = get_hitsound(&note) {
+                place_fx(before_time + note.time as f64 + judge_offset, sfx);
+                count += 1;
             }
-        }
-        info!("Process Hit Effects Time:{:.2?}", sfx_time.elapsed())
+        });
+
+        let elapsed = sfx_time.elapsed();
+        info!("Process Hit Effects Time:{:.2?} Speed: {:.2} notes/sec", elapsed, count as f32 / elapsed.as_secs_f32())
     }
 
     let output_music_temp = NamedTempFile::new()?;
