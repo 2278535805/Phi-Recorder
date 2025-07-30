@@ -535,12 +535,11 @@ pub async fn main(cmd: bool) -> Result<()> {
     } else {
         0.0
     };
-    let fade_out_time: f64 = -0.5;
 
     let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 1.;
-    let video_length = chart_length + fade_out_time + config.ending_length - video_cut_time;
+    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 0.5;
+    let video_length = chart_length + config.ending_length - video_cut_time;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
@@ -617,10 +616,10 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        let chart_length = chart_length as f32;
+        let length = chart_length as f32;
         let mut count: u64 = 0;
 
-        chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < chart_length).for_each(|note| {
+        chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < length).for_each(|note| {
             if let Some(sfx) = get_hitsound(&note) {
                 place_fx(before_time + note.time as f64 + judge_offset, sfx);
                 count += 1;
@@ -804,7 +803,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     )?;
 
     let delay_ending =
-        (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME - video_cut_time) * 1000.;
+        (chart_length + 0.5 + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME - video_cut_time) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
