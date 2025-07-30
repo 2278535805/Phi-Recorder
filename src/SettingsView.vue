@@ -55,7 +55,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import type { Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
-import { toast, toastError, RULES, changeLocale } from './common';
+import { toast, toastError, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
 import { SUPPORTED_LOCALES_NAME } from './main';

@@ -2,7 +2,7 @@ use crate::{
     common::parse_args,
     render::{build_player, RenderConfig, RenderParams}
 };
-use anyhow::{Context, Result};
+use anyhow::{Result};
 use macroquad::prelude::*;
 use phire::{
     config::{Config, Mods},
@@ -13,7 +13,6 @@ use phire::{
     ui::{FontArc, TextPainter, Ui},
     Main,
 };
-use tokio::time::Instant;
 use std::{cell::RefCell, collections::VecDeque, io::BufRead, ops::DerefMut, rc::Rc};
 
 struct BaseScene(Option<NextScene>, bool, Rc<RefCell<Option<f32>>>);

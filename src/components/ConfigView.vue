@@ -302,8 +302,6 @@ import { RULES, isNumeric, toast, anyFilter, toastError } from '../common';
 import { DEFAULT_CONFIG, type Preset, type RenderConfig } from '../model';
 
 import TipSwitch from './TipSwitch.vue';
-import TipTextField from './TipTextField.vue';
-import TipCombobox from './TipCombobox.vue';
 import TipSlider from './TipSlider.vue';
 import TooltipIcon from './TooltipIcon.vue';
 
@@ -336,7 +334,6 @@ const encoder = ref(t('encoder-list').split(',')[0])
 
 const challengeColor = ref(t('challenge-colors').split(',')[5]),
   challengeRank = ref(String(DEFAULT_CONFIG.challengeRank)),
-  fxaa = ref(DEFAULT_CONFIG.fxaa),
   noteScale = ref(DEFAULT_CONFIG.noteScale),
   playerAvatar = ref<string>(),
   playerName = ref(DEFAULT_CONFIG.playerName),
@@ -527,7 +524,6 @@ async function buildConfig(): Promise<RenderConfig | null> {
 
     challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
     challengeRank: parseInt(challengeRank.value),
-    fxaa: false, //Disable FXAA
     noteScale: noteScale.value,
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
@@ -629,7 +625,6 @@ function applyConfig(config: RenderConfig) {
 
   challengeColor.value = t('challenge-colors').split(',')[STD_CHALLENGE_COLORS.indexOf(config.challengeColor)];
   challengeRank.value = String(config.challengeRank);
-  //fxaa.value = config.fxaa;
   noteScale.value = config.noteScale;
   playerAvatar.value = config.playerAvatar || undefined;
   playerName.value = config.playerName;
