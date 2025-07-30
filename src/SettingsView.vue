@@ -21,9 +21,6 @@ en:
   list-expand: Default Expand Sidebar
   list-expand-tip: Right-click the sidebar to switch at any time
   lang: Language
-  color-mode: Color Mode (F2)
-  color-mode-dark: Dark
-  color-mode-light: Light
 
 zh-CN:
   setting: 设置
@@ -47,10 +44,6 @@ zh-CN:
   list-expand: 默认展开侧边栏
   list-expand-tip: 右键侧边栏可随时切换
   lang: 语言
-  color-mode: 颜色模式 (F2)
-  color-mode-dark: 深色
-  color-mode-light: 浅色
-
 </i18n>
 
 <script setup lang="ts">
@@ -69,6 +62,7 @@ import { SUPPORTED_LOCALES_NAME } from './main';
 const theme = useTheme();
 
 import TipSwitch from './components/TipSwitch.vue';
+import { useStorage } from '@vueuse/core';
 
 const form = ref<VForm>();
 const loadingSave = ref(false);
@@ -240,13 +234,10 @@ async function testEncoderAvc() {
 }
 
 
-
-const locale = ref(localStorage.getItem('locale'));
+const locale = useStorage<string>('locale', 'en');
 watch(locale, (val) => {
-  if (!locale.value) return;
-  localStorage.setItem('locale', val as string);
-  changeLocale(locale.value);
-  // window.location.reload();
+  if (!val) return;
+  changeLocale(val);
 });
 
 const listExpand = ref(
@@ -259,9 +250,16 @@ watch(listExpand, (val) => {
   localStorage.setItem("listExpand", JSON.stringify(val))
 });
 
+const now_theme = useStorage<string>('theme', 'Light');
+watch(now_theme, (val) => {
+  if (!val) return;
+  theme.global.name.value = val;
+});
+
 const SUPPORTED_THEME_NAME = computed(() => [
-  { name: t("color-mode-dark"), code: "darkTheme" },
-  { name: t("color-mode-light"), code: "lightTheme" }
+  { name: t("theme.light"), code: "Light" },
+  { name: t("theme.dark"), code: "Dark" },
+  { name: t("theme.deep-dark"), code: "DeepDark" },
 ]);
 
 
@@ -296,7 +294,7 @@ const SUPPORTED_THEME_NAME = computed(() => [
 
       <v-row no-gutters class="mt-2 mx-0">
         <v-col cols="6">
-          <v-autocomplete class="mx-2" :label="t('color-mode')" :items="SUPPORTED_THEME_NAME" item-title="name" item-value="code" v-model="theme.global.name.value"></v-autocomplete>
+          <v-autocomplete class="mx-2" :label="t('theme.theme')" :items="SUPPORTED_THEME_NAME" item-title="name" item-value="code" v-model="now_theme"></v-autocomplete>
         </v-col>
         <v-col cols="6">
           <v-autocomplete class="mx-2" :label="t('lang')" :items="SUPPORTED_LOCALES_NAME" item-title="name" item-value="code" v-model="locale"></v-autocomplete>
@@ -310,9 +308,9 @@ const SUPPORTED_THEME_NAME = computed(() => [
       <v-row class="my-2" />
     </v-form>
     <div no-gutters class="mt-auto mx-2 d-flex flex-row" style="width: 100%">
-      <v-btn @click="resetDialog = true" v-t="'reset'" color="primary" size="large"></v-btn>
+      <v-btn @click="resetDialog = true" v-t="'reset'" color="btn-large" size="large"></v-btn>
       <div class="flex-grow-1"></div>
-      <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" color="primary" size="large"></v-btn>
+      <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" color="btn-large" size="large"></v-btn>
     </div>
   </div>
 

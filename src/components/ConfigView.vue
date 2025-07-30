@@ -805,11 +805,11 @@ async function replacePreset() {
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
       <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"
         item-title="name" v-model="preset" style="flex: 1;"></v-combobox>
-      <v-btn class="text-caption" color="primary" v-t="'preset-refresh'" size="large" @click="updatePresets" style="flex: .2;"></v-btn>
-      <v-btn class="text-caption" color="primary" v-t="'preset-create'" size="large" @click="createPreset" style="flex: .2;"></v-btn>
-      <v-btn class="text-caption" color="primary" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'"
+      <v-btn class="text-caption" color="btn-large" v-t="'preset-refresh'" size="large" @click="updatePresets" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" color="btn-large" v-t="'preset-create'" size="large" @click="createPreset" style="flex: .2;"></v-btn>
+      <v-btn class="text-caption" color="btn-large" v-t="'preset-delete'" size="large" :disabled="preset.key === 'default'"
         @click="deletePreset" style="flex: .2;"></v-btn>
-      <v-btn class="text-caption" color="primary" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'"
+      <v-btn class="text-caption" color="btn-large" v-t="'preset-replace'" size="large" :disabled="preset.key === 'default'"
         @click="replacePreset" style="flex: .2;"></v-btn>
     </div>
 
@@ -949,10 +949,10 @@ async function replacePreset() {
           <v-combobox class="mr-1" :label="t('respack')" :rues="[RULES.notEmpty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" color="primary" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
+          <v-btn class="pa-1 text-caption" color="btn-large" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" color="primary" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
+          <v-btn class="pa-1 text-caption" color="btn-large" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center">
