@@ -182,7 +182,6 @@ import ConfigView from './components/ConfigView.vue';
 
 import moment from 'moment';
 import * as dialog from "@tauri-apps/plugin-dialog"
-import * as shell from "@tauri-apps/plugin-shell"
 
 import { listen } from "@tauri-apps/api/event";
 import { message, save, open } from '@tauri-apps/plugin-dialog';

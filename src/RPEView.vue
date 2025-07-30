@@ -69,9 +69,6 @@ import { anyFilter, toast, toastError } from './common';
 import type { RPEChart } from './model';
 import router from './router';
 
-import { useTheme } from 'vuetify';
-const theme = useTheme();
-
 async function getRPECharts() {
   return (await invoke('get_rpe_charts')) as RPEChart[] | null;
 }

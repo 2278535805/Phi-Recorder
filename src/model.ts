@@ -93,9 +93,7 @@ export interface RenderConfig {
   aggressive: boolean;
   challengeColor: string;
   challengeRank: number;
-  fxaa: boolean;
   noteScale: number;
-  //offset: number;
   particle: boolean;
   playerAvatar: string | null;
   playerName: string;
@@ -162,7 +160,6 @@ export const DEFAULT_CONFIG: RenderConfig = {
   aggressive: false,
   challengeColor: 'rainbow',
   challengeRank: 3,
-  fxaa: false,
   noteScale: 1,
   particle: true,
   playerAvatar: null,

@@ -77,10 +77,6 @@ import moment from 'moment';
 import { toastError } from './common';
 
 import router from './router';
-import { open } from '@tauri-apps/plugin-shell';
-
-import { useTheme } from 'vuetify';
-const theme = useTheme();
 
 const tasks = ref<Task[]>();
 

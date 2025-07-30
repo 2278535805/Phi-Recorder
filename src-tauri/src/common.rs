@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
-use tracing::{warn, info};
+use tracing::info;
 use std::{
     collections::HashMap,
     fs::File,

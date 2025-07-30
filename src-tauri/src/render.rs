@@ -7,7 +7,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
-use ndarray::{s, Array1, ArrayView1, ArrayViewMut1};
+use ndarray::{s, Array1, ArrayViewMut1};
 use phire::{
     config::{ChallengeModeColor, Config, Mods},
     core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
@@ -19,7 +19,7 @@ use phire::{
     Main,
 };
 use sasa::AudioClip;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
     io::{BufRead, BufWriter, Write},
@@ -32,20 +32,6 @@ use std::{
 };
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
-use toml::Value;
-
-fn deserialize_f32_or_default<'de, D>(deserializer: D) -> Result<f32, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let value = Value::deserialize(deserializer)?;
-    match value {
-        Value::Float(f) => Ok(f as f32),
-        Value::Integer(i) => Ok(i as f32),
-        Value::Boolean(b) => Ok(if b { 0.2 } else { 0.0 }),
-        _ => Ok(0.0),
-    }
-}
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", default)]
