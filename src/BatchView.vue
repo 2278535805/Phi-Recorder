@@ -666,7 +666,7 @@ const outputDialog = ref(false),
   </v-card>
 
   <v-dialog v-model="chartInfoDialog" width="auto" class="log-card-bg">
-    <v-card class="log-card-only-window">
+    <v-card class="log-card-only-window" style="background: rgba(var(--v-theme-dialog), 0.4) !important;">
       <v-card-title v-t="'chart-info'"> </v-card-title>
       <v-card-text>
 

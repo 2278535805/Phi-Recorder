@@ -20,6 +20,11 @@ export const Dark: ThemeDefinition = {
     'container': 'rgba(255, 255, 255, 0.04)',
     'dialog': 'rgb(39, 39, 39)',
     'overlay': 'rgb(0, 0, 0)',
+    
+    'error': 'hsl(6 60% 41%)',
+    'warning': 'hsl(52 23% 34%)',
+    'success': 'hsl(150 37% 43%)',
+    'info': 'hsl(217 58% 44%)',
   },
 };
 
@@ -41,6 +46,11 @@ export const Light: ThemeDefinition = {
     'container': 'rgba(0, 0, 0, 0.04)',
     'dialog': 'rgb(220, 220, 220)',
     'overlay': 'rgb(255, 255, 255)',
+
+    'error': 'hsl(6 60% 41%)',
+    'warning': 'hsl(52 23% 34%)',
+    'success': 'hsl(150 37% 43%)',
+    'info': 'hsl(217 58% 44%)',
   },
 };
 
@@ -63,9 +73,35 @@ export const DeepDark: ThemeDefinition = {
     'dialog': 'rgb(20, 20, 29)',
     'overlay': 'rgb(0, 0, 0)',
 
-    'danger': 'hsl(9 37% 65%)',
+    'error': 'hsl(6 60% 41%)',
     'warning': 'hsl(52 26% 54%)',
-    'success': 'hsl(147 24% 57%)',
+    'success': 'hsl(147 34% 37%)',
     'info': 'hsl(217 40% 66%)',
+  },
+};
+
+export const LightBlue: ThemeDefinition = {
+  dark: false,
+  colors: {
+    'primary': 'oklch(0.4 0.1 264)',
+    'secondary': 'oklch(0.4 0.1 84)',
+    'accent': 'rgb(75, 73, 172)',
+    'surface': 'rgb(230, 230, 240)',
+    'back': 'hsl(220 100% 97%)',
+    'scrollbar': 'rgb(173, 173, 173)',
+    'btn': 'hsl(220 10% 60%)',
+    'btn-large': 'hsl(220 59% 94%)',
+    'bgLeft': 'oklch(0.96 0.025 264)',
+    'bgRight': 'oklch(0.96 0.025 264)',
+    'topLeft': 'oklch(0.92 0.025 264)',
+    'topRight': 'oklch(0.92 0.025 264)',
+    'container': 'rgba(255, 255, 255, 0.2)',
+    'dialog': 'rgb(220, 220, 220)',
+    'overlay': 'rgb(255, 255, 255)',
+
+    'error': 'hsl(6 60% 41%)',
+    'warning': 'hsl(52 23% 34%)',
+    'success': 'hsl(150 37% 43%)',
+    'info': 'hsl(217 58% 44%)',
   },
 };

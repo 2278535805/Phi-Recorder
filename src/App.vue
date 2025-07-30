@@ -147,8 +147,8 @@ watch(now_theme, (val) => {
   theme.global.name.value = val;
 });
 
-function toggleTheme() {
-  const themes = ['Light', 'Dark', 'DeepDark'];
+function switchTheme() {
+  const themes = ['Light', 'Dark', 'DeepDark', 'LightBlue'];
   const current = theme.global.name.value;
   const nextIndex = (themes.indexOf(current) + 1) % themes.length;
   const nextTheme = themes[nextIndex];
@@ -158,7 +158,7 @@ function toggleTheme() {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "F2") {
-    toggleTheme();
+    switchTheme();
   }
 });
 

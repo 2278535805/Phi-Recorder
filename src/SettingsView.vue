@@ -260,6 +260,7 @@ const SUPPORTED_THEME_NAME = computed(() => [
   { name: t("theme.light"), code: "Light" },
   { name: t("theme.dark"), code: "Dark" },
   { name: t("theme.deep-dark"), code: "DeepDark" },
+  { name: t("theme.light-blue"), code: "LightBlue" },
 ]);
 
 
