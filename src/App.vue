@@ -62,6 +62,7 @@ import semver from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
 import * as os from "@tauri-apps/plugin-os"
 import * as shell from "@tauri-apps/plugin-shell"
+import { useStorage } from '@vueuse/core';
 
 const onLoaded = ref<() => void>();
 const component = ref();
@@ -140,9 +141,19 @@ function appMaximize() {
   appWindow.toggleMaximize();
 }
 
+const now_theme = useStorage<string>('theme', 'Light');
+watch(now_theme, (val) => {
+  if (!val) return;
+  theme.global.name.value = val;
+});
+
 function toggleTheme() {
-  theme.global.name.value = theme.global.name.value === 'darkTheme' ? 'lightTheme' : 'darkTheme';
-  localStorage.setItem("theme", theme.global.name.value);
+  const themes = ['Light', 'Dark', 'DeepDark'];
+  const current = theme.global.name.value;
+  const nextIndex = (themes.indexOf(current) + 1) % themes.length;
+  const nextTheme = themes[nextIndex];
+
+  now_theme.value = nextTheme;
 }
 
 document.addEventListener("keydown", (event) => {
@@ -152,7 +163,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
-  theme.global.name.value = event.matches ? "darkTheme" : "lightTheme";
+  now_theme.value = event.matches ? "Dark" : "Light";
 });
 
 

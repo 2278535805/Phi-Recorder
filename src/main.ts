@@ -16,7 +16,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi';
 
 import 'vuetify/styles';
 
-import { darkTheme, lightTheme } from './theme';
+import { Dark, DeepDark, Light } from './theme';
 
 export const SUPPORTED_LOCALES: string[] = ['en', 'zh-CN', 'zh-TW'];
 export const SUPPORTED_LOCALES_NAME: { name: string, code: string }[] = [
@@ -59,6 +59,12 @@ const i18n = createI18n({
       },
       'has-error': 'There are errors in the configuration',
       'any-filter': 'All files',
+      'theme': {
+        'theme': 'Theme',
+        'dark': 'Azure Whisper',
+        'light': 'Frost Glow',
+        'deep-dark': 'Obsidian Glow',
+      }
     },
     'zh-CN': {
       rules: {
@@ -80,6 +86,12 @@ const i18n = createI18n({
       },
       'has-error': '配置中有错误',
       'any-filter': '所有文件',
+      'theme': {
+        'theme': '主题',
+        'dark': '浅澜微蓝',
+        'light': '冰雾微光',
+        'deep-dark': '黑曜光辉',
+      }
     },
   },
   legacy: false,
@@ -90,7 +102,7 @@ const i18n = createI18n({
 });
 changeLocale(locale);
 
-const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'darkTheme' : 'lightTheme';
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
 const savedTheme = localStorage.getItem("theme") || systemTheme;
 
 const vuetify = createVuetify({
@@ -99,8 +111,9 @@ const vuetify = createVuetify({
   theme: {
     defaultTheme: savedTheme,
     themes: {
-      darkTheme: darkTheme,
-      lightTheme: lightTheme,
+      Dark,
+      DeepDark,
+      Light,
     },
   },
   icons: {
