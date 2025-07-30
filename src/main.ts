@@ -16,7 +16,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi';
 
 import 'vuetify/styles';
 
-import { Dark, DeepDark, Light } from './theme';
+import { Dark, DeepDark, Light, LightBlue } from './theme';
 
 export const SUPPORTED_LOCALES: string[] = ['en', 'zh-CN', 'zh-TW'];
 export const SUPPORTED_LOCALES_NAME: { name: string, code: string }[] = [
@@ -61,9 +61,10 @@ const i18n = createI18n({
       'any-filter': 'All files',
       'theme': {
         'theme': 'Theme',
-        'dark': 'Azure Whisper',
-        'light': 'Frost Glow',
-        'deep-dark': 'Obsidian Glow',
+        'dark': 'Dark - Azure Whisper',
+        'light': 'Light - Frost Glow',
+        'deep-dark': 'Dark - Obsidian Glow',
+        'light-blue': 'Light - Crystal Luminous'
       }
     },
     'zh-CN': {
@@ -88,9 +89,10 @@ const i18n = createI18n({
       'any-filter': '所有文件',
       'theme': {
         'theme': '主题',
-        'dark': '浅澜微蓝',
-        'light': '冰雾微光',
-        'deep-dark': '黑曜光辉',
+        'dark': '深色 - 浅澜微蓝',
+        'light': '浅色 - 冰雾微光',
+        'deep-dark': '深色 - 黑曜光辉',
+        'light-blue': '浅色 - 璃光素澈'
       }
     },
   },
@@ -114,6 +116,7 @@ const vuetify = createVuetify({
       Dark,
       DeepDark,
       Light,
+      LightBlue,
     },
   },
   icons: {
