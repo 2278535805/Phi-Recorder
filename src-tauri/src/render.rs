@@ -7,7 +7,7 @@ use crate::{
 use anyhow::{bail, Context, Result};
 use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
-use ndarray::{s, Array1, ArrayViewMut1};
+use ndarray::{s, Array1};
 use phire::{
     config::{ChallengeModeColor, Config, Mods},
     core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
@@ -22,6 +22,7 @@ use sasa::AudioClip;
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
+    collections::HashMap,
     io::{BufRead, BufWriter, Write},
     ops::DerefMut,
     path::PathBuf,
@@ -505,6 +506,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     check_sample_rate(sample_rate, sfx_drag.sample_rate(), "sfx_drag")?;
     check_sample_rate(sample_rate, sfx_flick.sample_rate(), "sfx_flick")?;
 
+    let music = Array1::from_vec(music.to_vec());
     let sfx_click = Array1::from_vec(sfx_click.to_vec());
     let sfx_drag = Array1::from_vec(sfx_drag.to_vec());
     let sfx_flick = Array1::from_vec(sfx_flick.to_vec());
@@ -555,36 +557,28 @@ pub async fn main(cmd: bool) -> Result<()> {
     let output_music_len = ((video_length + video_cut_time) * music_sample_rate as f64).ceil() as usize * 2;
     let output_fx_len = ((video_length + video_cut_time) * sample_rate_f64).ceil() as usize * 2;
 
-    let mut output_music = vec![0.0_f32; output_music_len];
-    let mut output_fx = vec![0.0_f32; output_fx_len];
+    let mut output_music = Array1::from_vec(vec![0.0_f32; output_music_len]);
+    let mut output_fx = Array1::from_vec(vec![0.0_f32; output_fx_len]);
 
-    let mut output_fx_array = ArrayViewMut1::from_shape(output_fx_len, &mut output_fx)?;
-
-    // let stereo_sfx = false; // TODO stereo sound effects
     let mut place_fx = |pos: f64, clip: &Array1<f32>| {
-        let position = (pos * sample_rate_f64).round() as usize * 2;
+        let position = (pos * sample_rate_f64).ceil() as usize * 2;
         let len = clip.len();
-        let mut slice = output_fx_array.slice_mut(s![position..position + len]);
+        let mut slice = output_fx.slice_mut(s![position..position + len]);
         slice += clip;
     };
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
         let pos = before_time - offset.min(0.) as f64;
-        let len = ((music_length + config.ending_length) * music_sample_rate as f64) as usize;
-        let start_index = (pos * music_sample_rate as f64).round() as usize * 2;
-        let ratio = 1.0 / music_sample_rate as f64;
-        let slice = &mut output_music[start_index..];
-        for i in 0..len.min(slice.len() / 2) {
-            let position = i as f64 * ratio + offset.max(0.) as f64;
-            let frame = music.sample(position).unwrap_or_default();
-            slice[i * 2] += frame.0;
-            slice[i * 2 + 1] += frame.1;
-        }
+        let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
+        let position_read = (offset.max(0.) as f64 * music_sample_rate as f64).ceil() as usize * 2;
+        let clip = music.slice(s![position_read..]);
+        let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + clip.len()]);
+        slice += &clip;
         info!("Process Music Time:{:.2?}", music_time.elapsed());
     }
 
-    type HitSoundMap = std::collections::HashMap<String, Array1<f32>>;
+    type HitSoundMap = HashMap<String, Array1<f32>>;
     let mut extra_sfxs: HitSoundMap = HitSoundMap::new();
 
     chart.hitsounds.iter().for_each(|(name, clip)| {
