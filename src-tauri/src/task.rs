@@ -9,7 +9,6 @@ use tracing::{error, info};
 use std::{
     collections::VecDeque,
     io::Write,
-    ops::DerefMut,
     path::PathBuf,
     process::Stdio,
     sync::{
@@ -48,6 +47,36 @@ pub enum TaskStatus {
     },
 }
 
+pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
+    fn safe_filename(name: String) -> String {
+        name
+            .chars()
+            .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
+            .collect()
+    }
+
+    let safe_level = safe_filename(
+            info
+            .level
+            .split_whitespace()
+            .next()
+            .unwrap_or("UK")
+            .to_string()
+        );
+    let safe_name = safe_filename(info.name.clone());
+    let format = if config.hires { "mov" } else { "mp4" };
+
+    if config.simple_file_name {
+        let safe_composer = safe_filename(info.composer.clone());
+        format!("{safe_name}.{safe_composer}_{safe_level}.{format}",)
+    } else {
+        format!(
+            "{} {safe_name}_{safe_level}.{format}",
+            Local::now().format("%Y-%m-%d %H-%M-%S")
+        )
+    }
+}
+
 pub struct Task {
     id: u32,
     name: String,
@@ -62,35 +91,11 @@ pub struct Task {
 impl Task {
     async fn new(id: u32, params: RenderParams) -> Result<Self> {
         let mut fs = fs::fs_from_file(&params.path)?;
-        let info = fs::load_info(fs.deref_mut()).await?;
+        let info = params.info.clone();
         let mut cover = NamedTempFile::new()?;
         cover.write_all(&fs.load_file(&info.illustration).await?)?;
 
-        let level: String = info
-            .level
-            .split_whitespace()
-            .next()
-            .unwrap_or("UK")
-            .to_string();
-        let safe_name: String = info
-            .name
-            .chars()
-            .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
-            .collect();
-        let format = if params.config.hires { "mov" } else { "mp4" };
-        let file_name = if params.config.simple_file_name {
-            let safe_name2: String = info
-                .composer
-                .chars()
-                .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
-                .collect();
-            format!("{safe_name}.{safe_name2}_{level}.{format}",)
-        } else {
-            format!(
-                "{} {safe_name}_{level}.{format}",
-                Local::now().format("%Y-%m-%d %H-%M-%S")
-            )
-        };
+        let file_name = generate_filename(&info, &params.config);
 
         let output = if let Some(set_output_dir) = read_config()?.output_dir {
             set_output_dir.join(file_name)

@@ -2,10 +2,9 @@
 phire::tl_file!("render");
 
 use crate::{
-    common::{output_dir, parse_args, read_config, test_output_dir}, ipc::IPCEvent, ASSET_PATH
+    common::{output_dir, parse_args, read_config, test_output_dir}, ipc::IPCEvent, task::generate_filename, ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
-use chrono::Local;
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use ndarray::{s, Array1};
 use phire::{
@@ -396,31 +395,8 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
         let info = fs::load_info(fs.deref_mut()).await?;
-        let level: String = info
-            .level
-            .split_whitespace()
-            .next()
-            .unwrap_or("UK")
-            .to_string();
-        let safe_name: String = info
-            .name
-            .chars()
-            .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
-            .collect();
-        let format = if config.hires { "mov" } else { "mp4" };
-        let file_name = if config.simple_file_name {
-            let safe_name2: String = info
-                .composer
-                .chars()
-                .filter(|&it| it == '-' || it == '_' || it.is_alphanumeric())
-                .collect();
-            format!("{safe_name}.{safe_name2}_{level}.{format}",)
-        } else {
-            format!(
-                "{} {safe_name}_{level}.{format}",
-                Local::now().format("%Y-%m-%d %H-%M-%S")
-            )
-        };
+
+        let file_name = generate_filename(&info, &config);
 
         let output_path = if let Some(output_string) = args_output {
             let output_dir = PathBuf::from(output_string);
