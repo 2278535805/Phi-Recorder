@@ -114,7 +114,7 @@ en:
 
   max-particles: Particle Limit
   max-particles-list: Low,Medium,High
-  max-particles-tip: Reference value 10000, related to RAM
+  max-particles-tip: Low 20000, Medium 100000, High 800000, related to RAM
   max-particles-error: Invalid particle limit
 
   render-start-time: Render Start Time
@@ -255,7 +255,7 @@ zh-CN:
 
   max-particles: 粒子限制
   max-particles-list: 低,中,高
-  max-particles-tip: 参考值 100000, 与内存有关
+  max-particles-tip: 低 20000, 中 100000, 高 800000, 与内存有关
   max-particles-error: 粒子限制无效
 
   render-start-time: 渲染开始时间
@@ -364,7 +364,7 @@ const
   bgBlurriness = ref(String(DEFAULT_CONFIG.bgBlurriness)),
   watermark = ref(DEFAULT_CONFIG.watermark)
 
-const maxParticlesText = ref(t('max-particles-list').split(',')[1])
+const maxParticlesText = ref(t('max-particles-list').split(',')[0])
 const maxParticles = ref(DEFAULT_CONFIG.maxParticles)
 const maxParticlesTextList = t('max-particles-list').split(',')
 const maxParticlesList = [20000, 100000, 800000];

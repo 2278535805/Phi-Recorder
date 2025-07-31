@@ -196,7 +196,7 @@ export const DEFAULT_CONFIG: RenderConfig = {
   renderExtra: false,
   bgBlurriness: 80,
 
-  maxParticles: 100000,
+  maxParticles: 20000,
   renderStartTime: 0.0,
   renderEndTime: null,
 
