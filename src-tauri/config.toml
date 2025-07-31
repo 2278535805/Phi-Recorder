@@ -72,6 +72,6 @@ judgeOffset = 0.0
 difficulty = ""
 fade = 0.0
 
-simpleFileName = false
+simpleFileName = false # {date} {name}_{level} -> {name}.{composer}_{level}
 fxaa = false
 speed = 1.0
