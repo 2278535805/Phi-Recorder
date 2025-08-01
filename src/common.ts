@@ -40,11 +40,11 @@ export const RULES = {
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
   notZero: (value: string) => (Number(value) != 0) || i18n.global.t('rules.not-zero'),
   notCOMBO: (value: string) => {
-    const filteredValue = value.replace(/[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕⅭОмвＣＯＭＢМⅯВ]/g, '').trim();
+    const filteredValue = value.replace(/[^a-zA-Z0-9!"'#$%&'()*+,\-.\/:;<=>?@\\\[\]^_`{|}~ΜΟΒСՕⅭОмвＣＯＭＢМⅯВϹȮΌϺϺƁ]/g, '').trim();
     if (value.length > 50) {
       return i18n.global.t('rules.long');
     }
-    return !/^[CСⅭＣ][OՕΟ0ОＯ][MΜмＭМⅯ][BΒ8вＢВ][OՕΟ0ОＯ]$/.test(filteredValue) || i18n.global.t('rules.not-combo');
+    return !/^[CСⅭＣϹ][OՕΟ0ОＯȮΌ][MΜмＭМⅯϺϺ][BΒ8вＢВ][OՕΟ0ОＯȮΌ]$/.test(filteredValue) || i18n.global.t('rules.not-combo');
   },
 };
 

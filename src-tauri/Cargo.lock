@@ -1878,13 +1878,13 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glyph_brush"
-version = "0.7.11"
+version = "0.7.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "225e5bd28cddb97578e31da78ae24eff4d6611523fb03b73f300d511461834c0"
+checksum = "0060f4ed4ef64a5876d9836d7d6c9ed43a463f3ca431682bec1c326064c8c93e"
 dependencies = [
  "glyph_brush_draw_cache",
  "glyph_brush_layout",
- "ordered-float 4.6.0",
+ "ordered-float 5.0.0",
  "rustc-hash 2.1.0",
  "twox-hash",
 ]
@@ -3501,9 +3501,9 @@ dependencies = [
 
 [[package]]
 name = "ordered-float"
-version = "4.6.0"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7bb71e1b3fa6ca1c61f383464aaf2bb0e2f8e772a1f01d486832464de363b951"
+checksum = "e2c1f9f56e534ac6a9b8a4600bdf0f530fb393b5f393e7b4d03489c3cf0c3f01"
 dependencies = [
  "num-traits",
 ]
@@ -3819,7 +3819,7 @@ dependencies = [
 [[package]]
 name = "phire"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/phire#27da4e04556063dfb371da30b71698aa2d7374e1"
+source = "git+https://github.com/2278535805/phire#787c2f334acf2df1c6f96bfb444c69005fe11212"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4037,7 +4037,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/phire#27da4e04556063dfb371da30b71698aa2d7374e1"
+source = "git+https://github.com/2278535805/phire#787c2f334acf2df1c6f96bfb444c69005fe11212"
 dependencies = [
  "anyhow",
  "tracing",
