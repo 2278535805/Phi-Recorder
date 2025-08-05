@@ -141,7 +141,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
     .await?;
 
     let mut frame_times: VecDeque<(f64, u32)> = VecDeque::new(); // (time, fps)
-    let mut last_update_fps_sec: u32 = 0;
+    let mut fps_last_update_sec: u32 = 0;
 
     'app: loop {
         let frame_start = tm.real_time();
@@ -161,12 +161,12 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
 
         next_frame().await;
         let flash_end = tm.real_time();
-        let real_now_fps = (1. / (flash_end - frame_start)) as u32;
 
-        let sec = frame_start as u32;
-        if last_update_fps_sec != sec {
-            last_update_fps_sec = sec;
+        let fps_now_sec = frame_start as u32;
+        if fps_last_update_sec != fps_now_sec {
+            fps_last_update_sec = fps_now_sec;
             let real_fps = frame_times.len() as u32;
+            let real_now_fps = (1. / (flash_end - frame_start)) as u32;
             let avg_fps = frame_times.iter().map(|(_, fps)| fps).sum::<u32>() / real_fps;
             let min_fps = frame_times.iter().map(|(_, fps)| fps).min().unwrap_or(&0);
             info!("| AVG: {}|{} NOW: {}|{}, MIN: {}", real_fps, avg_fps, real_now_fps, now_fps, min_fps);
