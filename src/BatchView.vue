@@ -21,6 +21,7 @@ en:
     remove-after-render: Remove after rendering is completed
     post-select-render: Render
     auto-change-aspect-ratio: Auto Change Aspect Ratio
+    simple-file-name: Simple File Name
 
   info:
     name: Chart name
@@ -126,6 +127,7 @@ zh-CN:
     remove-after-render: 渲染完成后移除
     post-select-render: 渲染
     auto-change-aspect-ratio: 自动调整宽高比
+    simple-file-name: 简单文件名
 
   info:
     name: 谱面名
@@ -206,7 +208,7 @@ zh-CN:
 </i18n>
 
 <script setup lang="ts">
-import { ref, nextTick, onUnmounted } from 'vue';
+import { ref, nextTick, onUnmounted, watch } from 'vue';
 import { useStorage } from '@vueuse/core';
 
 import { useI18n } from 'vue-i18n';
@@ -228,6 +230,32 @@ import { listen } from "@tauri-apps/api/event";
 const form = ref<VForm>();
 const charts = useStorage<RenderChart[]>('BatchView.ChartList', []);
 
+const DEFAULT_PRESET: Preset = {
+  name: t('default-preset'),
+  key: 'default',
+  config: DEFAULT_CONFIG,
+};
+
+async function getPresets() {
+  let result = [DEFAULT_PRESET];
+  let pairs = (await invoke('get_presets')) as Record<string, RenderConfig>;
+  for (let key of Object.keys(pairs).sort()) {
+    result.push({
+      name: key,
+      key,
+      config: pairs[key],
+    });
+  }
+  return result;
+}
+const presets = ref([DEFAULT_PRESET]);
+const preset = ref(DEFAULT_PRESET);
+async function updatePresets() {
+  presets.value = await getPresets();
+  preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
+}
+updatePresets();
+
 const loadingChoosingChart = ref(false);
 const loadingParsingChart = ref(false);
 const loadingPreview = ref(false);
@@ -239,6 +267,11 @@ const disSelectStartRender = useStorage<boolean>('BatchView.disSelectStartRender
 const removeStartRender = useStorage<boolean>('BatchView.removeStartRender', false);
 const removeAfterRender = useStorage<boolean>('BatchView.removeAfterRender', false);
 const autoChangeAspectRatio = useStorage<boolean>('BatchView.autoChangeAspectRatio', false);
+const simpleFileName = useStorage<boolean>('BatchView.simpleFileName', false);
+watch(simpleFileName, (val) => {
+  preset.value.config.simpleFileName = val;
+}, { immediate: true });
+
 
 async function chooseChart(folder?: boolean) {
   if (loadingChoosingChart.value) return;
@@ -407,32 +440,6 @@ async function checkInfo(chartInfo: ChartInfo) {
   return true;
 }
 
-const DEFAULT_PRESET: Preset = {
-  name: t('default-preset'),
-  key: 'default',
-  config: DEFAULT_CONFIG,
-};
-
-async function getPresets() {
-  let result = [DEFAULT_PRESET];
-  let pairs = (await invoke('get_presets')) as Record<string, RenderConfig>;
-  for (let key of Object.keys(pairs).sort()) {
-    result.push({
-      name: key,
-      key,
-      config: pairs[key],
-    });
-  }
-  return result;
-}
-const presets = ref([DEFAULT_PRESET]);
-const preset = ref(DEFAULT_PRESET);
-async function updatePresets() {
-  presets.value = await getPresets();
-  preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
-}
-updatePresets();
-
 function selectAll() {
   charts.value.forEach(chart => {
     chart.isSelect = true
@@ -583,6 +590,9 @@ const outputDialog = ref(false),
             </v-row>
             <v-row no-gutters>
               <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
+            </v-row>
+            <v-row no-gutters>
+              <v-checkbox :label="t('choose.simple-file-name')" v-model="simpleFileName"></v-checkbox>
             </v-row>
           </v-list-item>
         </v-list>
