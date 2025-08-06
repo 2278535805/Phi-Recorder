@@ -502,7 +502,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64 + 0.5;
+    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64;
     let video_length = chart_length + config.ending_length - video_cut_time;
     let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
