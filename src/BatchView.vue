@@ -268,9 +268,6 @@ const removeStartRender = useStorage<boolean>('BatchView.removeStartRender', fal
 const removeAfterRender = useStorage<boolean>('BatchView.removeAfterRender', false);
 const autoChangeAspectRatio = useStorage<boolean>('BatchView.autoChangeAspectRatio', false);
 const simpleFileName = useStorage<boolean>('BatchView.simpleFileName', false);
-watch(simpleFileName, (val) => {
-  preset.value.config.simpleFileName = val;
-}, { immediate: true });
 
 
 async function chooseChart(folder?: boolean) {
@@ -349,7 +346,8 @@ async function buildParams(chartPath: string, chartInfo: ChartInfo, config: Rend
 
 async function postRender(chart: RenderChart) {
   let config = preset.value.config;
-  if (autoChangeAspectRatio.value) applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio);
+  if (autoChangeAspectRatio.value) { applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio); }
+  if (simpleFileName.value) { preset.value.config.simpleFileName = true; } else { preset.value.config.simpleFileName = false; }
   let params = await buildParams(chart.path, chart.chartInfo, config);
   if (!params) return false;
   try {
