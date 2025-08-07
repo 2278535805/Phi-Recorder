@@ -193,7 +193,7 @@ export const DEFAULT_CONFIG: RenderConfig = {
   renderUiBar: true,
   renderBg: true,
   renderBgDim: true,
-  renderExtra: false,
+  renderExtra: true,
   bgBlurriness: 80,
 
   maxParticles: 20000,
