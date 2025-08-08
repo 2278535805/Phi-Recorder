@@ -304,7 +304,7 @@ async function loadCharts(files: string[]) {
       charts.value.push({
         id: charts.value.length,
         path: file,
-        isSelect: false,
+        isSelect: true,
         taskId: null,
         output: '',
         status: { type: 'null' },
