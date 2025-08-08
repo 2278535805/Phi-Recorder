@@ -531,7 +531,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     }
 
     let output_music_len = ((video_length + video_cut_time) * music_sample_rate as f64).ceil() as usize * 2;
-    let output_fx_len = ((video_length + video_cut_time) * sample_rate_f64).ceil() as usize * 2;
+    let output_fx_len = ((video_length + video_cut_time + 1.0) * sample_rate_f64).ceil() as usize * 2;
 
     let mut output_music = Array1::from_vec(vec![0.0_f32; output_music_len]);
     let mut output_fx = Array1::from_vec(vec![0.0_f32; output_fx_len]);
