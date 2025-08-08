@@ -1,28 +1,3 @@
-<i18n>
-en:
-  app: Phi Recorder
-  check: Check Update
-  new-version: New version available!
-  non-version: It's the latest version
-  err-version: Check update failed
-  err-api-rate-limit: Current IP address API request limit reached
-  err-sending-request: Network connection failed
-  download: Download
-  close: Close
-
-zh-CN:
-  app: Phi Recorder
-  check: 检查更新
-  new-version: 发现新版本!
-  non-version: 已是最新版本
-  err-version: 检查更新失败
-  err-api-rate-limit: 当前 IP 地址 API 请求次数到达上限
-  err-sending-request: 网络连接失败
-  download: 下载
-  close: 关闭
-
-</i18n>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 useI18n();
