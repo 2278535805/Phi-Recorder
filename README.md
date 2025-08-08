@@ -27,3 +27,5 @@ cargo tauri build
   Forgery of game results, official content, and related materials is strictly prohibited.
 - 游玩界面必须与本家有明显区分, COMBO 处文本必须与 `COMBO` 有明显区分  
   The game interface must be clearly distinguishable from the official one, The text in the COMBO area must be clearly distinguished from `COMBO`
+- 禁止向不使用 `Re: PhiEdit` 的玩家分享本软件
+- Sharing this software with players who do not use `Re: PhiEdit` is not allowed
