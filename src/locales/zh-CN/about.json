@@ -1,0 +1,10 @@
+{
+    "app": "Phi Recorder",
+    "check": "检查更新",
+    "new-version": "发现新版本!",
+    "non-version": "已是最新版本",
+    "err-version": "检查更新失败",
+    "err-api-rate-limit": "当前 IP 地址 API 请求次数到达上限",
+    "err-sending-request": "网络连接失败",
+    "download": "下载"
+}

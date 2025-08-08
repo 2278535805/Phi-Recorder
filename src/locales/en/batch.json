@@ -1,0 +1,32 @@
+{
+    "select-all": "Select All",
+    "select-invert": "Invert",
+    "cancel-select": "Cancel",
+    "remove-select": "Remove",
+    "clear-tasks": "Force Clear Task List",
+    "dis-select-start-render": "Deselect after rendering is initiated",
+    "remove-start-render": "Remove after rendering is initiated (Reverse)",
+    "remove-after-render": "Remove after rendering is completed",
+    "post-select-render": "Render",
+    "auto-change-aspect-ratio": "Auto Change Aspect Ratio",
+    "simple-file-name": "Simple File Name",
+    "chart-info": "Chart Info",
+    "edit": "Edit",
+    "sort-tip": "Click to sort, right-click to reverse",
+    "presets": "Presets",
+    "default-preset": "Default",
+    "edit-preset": "Edit Preset",
+    "temp-preset": "(Edited)",
+    "task": {
+        "pending": "Pending",
+        "loading": "Loading",
+        "mixing": "Mixing",
+        "done": "Completed",
+        "canceled": "Canceled",
+        "failed": "Failed",
+        "output": "Output",
+        "show-output": "Show Output",
+        "show-folder": "Open Output Folder",
+        "open-file": "Open File"
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "select-all": "全选",
+    "select-invert": "反选",
+    "cancel-select": "取消",
+    "remove-select": "移除",
+    "clear-tasks": "强制清空任务列表",
+    "dis-select-start-render": "发起渲染后取消选择",
+    "remove-start-render": "发起渲染后移除 (倒序)",
+    "remove-after-render": "渲染完成后移除",
+    "post-select-render": "渲染",
+    "auto-change-aspect-ratio": "自动调整宽高比",
+    "simple-file-name": "简单文件名",
+    "chart-info": "谱面信息",
+    "edit": "编辑",
+    "sort-tip": "点击排序 右键反转",
+    "presets": "预设配置",
+    "default-preset": "默认",
+    "edit-preset": "编辑预设",
+    "temp-preset": "(已编辑)",
+    "task": {
+        "pending": "待处理",
+        "loading": "加载中",
+        "mixing": "混音中",
+        "done": "完成",
+        "canceled": "取消",
+        "failed": "失败",
+        "output": "输出",
+        "show-output": "查看输出",
+        "show-folder": "打开输出文件夹",
+        "open-file": "打开文件"
+    }
+}

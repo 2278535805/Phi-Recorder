@@ -1,0 +1,20 @@
+{
+    "setting": "设置",
+    "reset": "重置",
+    "reset-confirm": "确认重置设置？",
+    "reset-only": "仅重置配置",
+    "reset-all": "重置并保存所有配置",
+    "reset-confirm-desc": "你的设置将会永久消失！（真的很久！）",
+    "select": "已选择",
+    "no-select": "选择已取消",
+    "no-encoder": "没有可用的硬件加速编码器",
+    "encoder-ok": "编码器可用",
+    "encoder-error": "编码器不可用",
+    "rpe-dir": "RPE 目录",
+    "output-dir": "自定义输出目录",
+    "encoder-avc": "指定 AVC 编码器",
+    "encoder-hevc": "指定 HEVC 编码器",
+    "list-expand": "默认展开侧边栏",
+    "list-expand-tip": "右键侧边栏可随时切换",
+    "lang": "语言"
+}

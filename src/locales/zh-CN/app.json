@@ -1,0 +1,19 @@
+{
+    "render": "渲染",
+    "rpe": "RPE",
+    "batch": "批量渲染",
+    "tasks": "任务列表",
+    "settings": "设置",
+    "about": "关于",
+    "ffmpeg-check": "FFmpeg 检查",
+    "ffmpeg-check-detail": "FFmpeg 不完整, 请检查 FFmpeg 的可用性",
+    "update-available": "有新版本可用!",
+    "open-app-folder": "打开程序文件夹",
+    "open-download": "打开 FFmpeg 下载页",
+    "try-download": "尝试下载 FFmpeg",
+    "ffmpeg-not-found": "未找到 FFmpeg!",
+    "ffmpeg-not-found-detail": "请下载 ffmpeg, Windows 用户一般只需下载 \"ffmpeg-master-latest-win64-gpl.zip\"\n将 bin 文件夹内的所有文件放置在程序文件夹内或配置 ffmpeg 环境变量",
+    "confirm": "确定",
+    "cancel": "取消",
+    "close": "关闭"
+}

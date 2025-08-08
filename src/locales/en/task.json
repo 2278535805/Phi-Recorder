@@ -1,0 +1,24 @@
+{
+    "empty": "Nothing here",
+    "status": {
+        "pending": "Pending…",
+        "loading": "Loading…",
+        "mixing": "Mixing…",
+        "rendering": "Rendering ({ progress }%), { fps } FPS, estimated to end { estimate }",
+        "done": "Done, took { duration }",
+        "canceled": "Canceled",
+        "failed": "Failed"
+    },
+    "details": "Details",
+    "output": "Output",
+    "remove-task": "Remove Task",
+    "remove-task-confirm": "Confirm to remove task?",
+    "show-output": "Show Output",
+    "show-in-folder": "Show in Folder",
+    "open-file": "Open File",
+    "duration": {
+        "hours": "h",
+        "minutes": "m",
+        "seconds": "s"
+    }
+}

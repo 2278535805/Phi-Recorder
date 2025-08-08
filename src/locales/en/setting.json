@@ -1,0 +1,20 @@
+{
+    "setting": "Setting",
+    "reset": "Reset",
+    "reset-confirm": "Confirm to reset settings?",
+    "reset-only": "Reset configuration only",
+    "reset-all": "Reset and save all configurations",
+    "reset-confirm-desc": "Your settings will be lost forever! (A long time!)",
+    "select": "Selected",
+    "no-select": "No selection",
+    "no-encoder": "No available hardware-accelerated encoder",
+    "encoder-ok": "Encoder available",
+    "encoder-error": "Encoder unavailable",
+    "rpe-dir": "RPE Directory",
+    "output-dir": "Custom Output Directory",
+    "encoder-avc": "Specify AVC Encoder",
+    "encoder-hevc": "Specify HEVC Encoder",
+    "list-expand": "Default Expand Sidebar",
+    "list-expand-tip": "Right-click the sidebar to switch at any time",
+    "lang": "Language"
+}

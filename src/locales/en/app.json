@@ -1,0 +1,19 @@
+{
+    "render": "Render",
+    "rpe": "RPE",
+    "batch": "Batch Render",
+    "tasks": "Tasks",
+    "settings": "Settings",
+    "about": "About",
+    "ffmpeg-check": "FFmpeg Check",
+    "ffmpeg-check-detail": "FFmpeg is incomplete, please install the full version of FFmpeg",
+    "update-available": "Update available!",
+    "open-app-folder": "Open app folder",
+    "open-download": "Open FFmpeg Download Page",
+    "try-download": "Try to download FFmpeg",
+    "ffmpeg-not-found": "FFmpeg not found!",
+    "ffmpeg-not-found-detail": "Please download ffmpeg, Windows users usually only need to download \"ffmpeg-master-latest-win64-gpl.zip\"\nPlace all files in the bin folder in the program folder or configure the ffmpeg environment variables",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close"
+}

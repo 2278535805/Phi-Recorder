@@ -469,14 +469,12 @@ pub async fn main(cmd: bool) -> Result<()> {
     fn check_sample_rate(expected: u32, actual: u32, name: &str) -> Result<()> {
         if expected != actual {
             bail!(
-                "Error: Sample rate mismatch - Expected {}, but `{}` has {}",
-                expected, name, actual
+                tl!("match-sample-rate-failed", "expected" => expected, "name" => name, "actual" => actual)
             );
         } else {
             Ok(())
         }
     }
-
     check_sample_rate(sample_rate, ending_music.sample_rate(), "ending_music")?;
     check_sample_rate(sample_rate, sfx_click.sample_rate(), "sfx_click")?;
     check_sample_rate(sample_rate, sfx_drag.sample_rate(), "sfx_drag")?;

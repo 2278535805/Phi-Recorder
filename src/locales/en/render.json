@@ -1,0 +1,72 @@
+{
+    "already-running": "Phi Recorder is already running",
+    "prev-step": "Previous",
+    "next-step": "Next",
+    "steps": {
+        "choose": "Choose",
+        "config": "Info",
+        "options": "Options",
+        "render": "Render"
+    },
+    "choose": {
+        "archive": "Archive",
+        "folder": "Folder",
+        "can-also-drop": "You can also drag and drop the file to here",
+        "select-or-drop": "Select or drag and drop files",
+        "drop": "DROP CHART HERE",
+        "filter-name": "Chart file"
+    },
+    "info": {
+        "name": "Chart name",
+        "difficulty": "Difficulty",
+        "level": "Display Difficulty",
+        "charter": "Chart Design",
+        "composer": "Composer",
+        "illustrator": "Illustrator",
+        "chart": "Chart file",
+        "music": "Music file",
+        "illustration": "illustration File",
+        "previewStart": "Preview Start Time",
+        "previewEnd": "Preview End Time",
+        "aspectRatio": "Aspect Ratio",
+        "force-aspect-ratio": "Force Aspect Ratio",
+        "backgroundDim": "Background Dim",
+        "lineLength": "Line Length",
+        "offset": "Offset",
+        "tip": "Tip",
+        "tip-placeholder": "Leave empty to choose randomly",
+        "tags": "Tags",
+        "tag-editor": "Tag Editor",
+        "tag-list": "Regular, Troll, Plain, Visual",
+        "intro": "Introduction",
+        "hold-partial-cover": "Hold Tail Cover",
+        "hold-partial-cover-tip": "Default at the head, enable to cover at the tail",
+        "note-uniform-scale": "Note Uniform Scale",
+        "note-uniform-scale-tip": "Default only scales X axis, enable to scale Note uniformly",
+        "score-total": "Total Score"
+    },
+    "error": {
+        "preview-start-end-15s": "Preview time cannot be greater than 15 seconds"
+    },
+    "width": "Width",
+    "height": "Height",
+    "file": {
+        "title": "File",
+        "chart": "Chart file (empty for default)",
+        "music": "Music (empty for default)",
+        "illustration": "Illustration (empty for default)"
+    },
+    "tweakoffset": "Tweak Offset",
+    "more": "More",
+    "phira-info": "Phira Chart Info",
+    "preview": "Preview",
+    "play": "Play",
+    "render-started": "Rendering has started!",
+    "see-tasks": "See tasks",
+    "save": "Save",
+    "save-success": "Saved successfully",
+    "read-success": "Read successfully",
+    "save-info": "Save Info",
+    "read-info": "Read Info",
+    "phira-chart-info": "Phira Chart Info"
+}

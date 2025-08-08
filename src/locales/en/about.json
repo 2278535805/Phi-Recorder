@@ -1,0 +1,10 @@
+{
+    "app": "Phi Recorder",
+    "check": "Check Update",
+    "new-version": "New version available!",
+    "non-version": "It's the latest version",
+    "err-version": "Check update failed",
+    "err-api-rate-limit": "Current IP address API request limit reached",
+    "err-sending-request": "Network connection failed",
+    "download": "Download"
+}
