@@ -448,7 +448,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         bail!("FFmpeg not found")
     };
 
-    let chart = GameScene::load_chart(fs.deref_mut(), &info, &prpr_config)
+    let (chart, format) = GameScene::load_chart(fs.deref_mut(), &info, &prpr_config)
         .await
         .with_context(|| tl!("load-chart-failed"))?;
     let res_pack = ResourcePack::from_path(config.res_pack_path.as_ref())
@@ -658,7 +658,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut main = Main::new(
         Box::new(
             LoadingScene::new(
-                Some(chart),
+                Some((chart, format)),
                 GameMode::Normal,
                 info,
                 &prpr_config,
