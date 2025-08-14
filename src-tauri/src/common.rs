@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
     sync::OnceLock,
 };
-use zip::{write::FileOptions, ZipWriter};
+use zip::{write::FileOptions, ZipWriter, CompressionMethod};
 
 use crate::render::RenderConfig;
 
@@ -207,8 +207,7 @@ pub fn collect_chart_files(
                     let file_path = path
                         .strip_prefix(&parent)?
                         .display()
-                        .to_string()
-                        .replace('\\', "/");
+                        .to_string();
                     if filename.starts_with("AutoSave_")
                         || filename.starts_with("blur_")
                         || filename.starts_with("blur1_")
@@ -232,13 +231,13 @@ pub async fn create_zip(output_path: PathBuf, files: HashMap<String, PathBuf>) -
     let file = File::create(&output_path)?;
     let mut zip = ZipWriter::new(BufWriter::new(file));
 
-    let options = FileOptions::default()
-        .compression_method(zip::CompressionMethod::Deflated)
+    let options = FileOptions::<()>::default()
+        .compression_method(CompressionMethod::Deflated)
         .compression_level(Some(9))
         .unix_permissions(0o755);
 
     for (file_name, file_path) in files {
-        zip.start_file(file_name, options)?;
+        zip.start_file_from_path(file_name, options)?;
         let mut buffer = Vec::new();
         File::open(&file_path)?.read_to_end(&mut buffer)?;
         zip.write_all(&buffer)?;
