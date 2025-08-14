@@ -133,6 +133,7 @@ impl Task {
             .spawn()?;
         let mut stdin = child.stdin.take().unwrap();
         let stdout = child.stdout.take().unwrap();
+        let stderr = child.stderr.take().unwrap();
 
         stdin
             .write_all(format!("{}\n", serde_json::to_string(&self.params)?).as_bytes())
@@ -142,7 +143,9 @@ impl Task {
             .await?;
         stdin.flush().await?;
 
-        let mut lines = BufReader::new(stdout).lines();
+        let mut stdout_lines = BufReader::new(stdout).lines();
+        let mut stderr_lines = BufReader::new(stderr).lines();
+        let mut output_stderr = String::new();
         let mut total: u64 = 0;
         let mut frame_count: u64 = 0;
         let start = Instant::now();
@@ -159,21 +162,21 @@ impl Task {
                 } => {
                     info!("Task #{} cancelled", self.id);
                     child.kill().await?;
-                    let output = child.wait_with_output().await?;
                     *self.status.lock().await = TaskStatus::Canceled {
-                        output: format!(
-                            "{}\n{}",
-                            String::from_utf8(output.stdout)
-                                .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
-                            String::from_utf8(output.stderr)
-                                .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
-                        ),
+                        output: output_stderr,
                     };
                     return Ok(());
                 },
 
-                line_result = lines.next_line() => {
-                    let line = line_result?;
+                stderr_result = stderr_lines.next_line() => {
+                    let line = stderr_result?;
+                    let Some(line) = line else { break };
+                    output_stderr.push_str(&line);
+                    output_stderr.push('\n');
+                },
+
+                stdout_result = stdout_lines.next_line() => {
+                    let line = stdout_result?;
                     let Some(line) = line else { break };
                     let Ok(event): Result<IPCEvent, _> = serde_json::from_str(line.trim()) else {
                         continue;
@@ -215,16 +218,10 @@ impl Task {
                         },
                         IPCEvent::Done(duration) => {
                             info!("Task #{} completed", self.id);
-                            let output = child.wait_with_output().await?;
+                            child.wait().await?;
                             *self.status.lock().await = TaskStatus::Done {
                                 duration,
-                                output: format!(
-                                    "{}\n{}",
-                                    String::from_utf8(output.stdout)
-                                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
-                                    String::from_utf8(output.stderr)
-                                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
-                                ),
+                                output: output_stderr,
                             };
                             return Ok(());
                         }
@@ -234,16 +231,12 @@ impl Task {
         }
 
         info!("Task #{} not completed", self.id);
-        let output = child.wait_with_output().await?;
-        if !output.status.success() {
+        let status = child.wait().await?;
+        if !status.success() {
             *self.status.lock().await = TaskStatus::Failed {
                 output: format!(
-                    "Child process exited abnormally ({:?})\n{}\n{}",
-                    output.status.code().unwrap_or_default(),
-                    String::from_utf8(output.stdout)
-                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string())),
-                    String::from_utf8(output.stderr)
-                        .unwrap_or_else(|error| format!("Invalid output: {}", error.to_string()))
+                    "Child process exited abnormally ({:?})\n{}",
+                    status.code().unwrap_or_default(), output_stderr
                 ),
             };
             return Ok(());
