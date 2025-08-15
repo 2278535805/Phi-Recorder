@@ -546,8 +546,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         let pos = before_time - offset.min(0.) as f64;
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
         let position_read = (offset.max(0.) as f64 * music_sample_rate as f64).ceil() as usize * 2;
-        let clip = music.slice(s![position_read..]);
-        let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + clip.len()]);
+        let len = (music.len() - position_read).min(output_music_len - position_wrtie);
+        let clip = music.slice(s![position_read..position_read + len]);
+        let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + len]);
         slice += &clip;
         info!("Process Music Time:{:.2?}", music_time.elapsed());
     }
