@@ -50,8 +50,9 @@ pub enum TaskStatus {
 pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
     fn safe_filename(name: String) -> String {
         name
+            .trim()
             .chars()
-            .filter(|&it| it == '-' || it == '_' || it == ' ' || it.is_alphanumeric())
+            .filter(|&it| it.is_alphanumeric() || " !#$%&'()+,-.;=@[]^_`{}~".contains(it))
             .collect()
     }
 
