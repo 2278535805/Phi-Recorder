@@ -52,7 +52,7 @@ chinese = false
 bgBlurriness = 80.0
 watermark = ""
 combo = "AUTOPLAY"
-maxParticles = 20000 # 20000 100000 800000
+maxParticles = 5000 # 5000 25000 200000
 
 # Audio 音频
 forceLimit = true
