@@ -81,7 +81,7 @@
     "dynamic-bitrate-control": "动态码率",
     "max-particles": "粒子限制",
     "max-particles-list": "低,中,高",
-    "max-particles-tip": "低 20000, 中 100000, 高 800000, 与内存有关",
+    "max-particles-tip": "最大同时显示多少个打击特效, 低 5000, 中 25000, 高 200000",
     "max-particles-error": "粒子限制无效",
     "render-start-time": "渲染开始时间",
     "render-end-time": "渲染结束时间",

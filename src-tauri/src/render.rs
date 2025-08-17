@@ -219,7 +219,7 @@ impl Default for RenderConfig {
             render_extra: true,
             bg_blurriness: 80.,
 
-            max_particles: 100000,
+            max_particles: 5000,
             render_start_time: 0.0,
             render_end_time: None,
 

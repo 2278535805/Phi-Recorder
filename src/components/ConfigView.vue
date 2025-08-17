@@ -78,7 +78,7 @@ const
 const maxParticlesText = ref(t('max-particles-list').split(',')[0])
 const maxParticles = ref(DEFAULT_CONFIG.maxParticles)
 const maxParticlesTextList = t('max-particles-list').split(',')
-const maxParticlesList = [20000, 100000, 800000];
+const maxParticlesList = [5000, 25000, 200000];
 
 const
   renderStartTime = ref(String(DEFAULT_CONFIG.renderStartTime)),
