@@ -154,6 +154,8 @@ impl Task {
         let mut last_update_fps_sec: u32 = 0;
         let mut last_fps: usize = 0;
 
+        let config = read_config()?;
+
         loop {
             tokio::select! {
                 _ = async {
@@ -172,7 +174,9 @@ impl Task {
                 stderr_result = stderr_lines.next_line() => {
                     let line = stderr_result?;
                     let Some(line) = line else { break };
-                    eprintln!("{}", line);
+                    if config.print_stderr {
+                        println!("{}", line);
+                    }
                     output_stderr.push_str(&line);
                     output_stderr.push('\n');
                 },

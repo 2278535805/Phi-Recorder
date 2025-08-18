@@ -14,6 +14,8 @@
     "output-dir": "Custom Output Directory",
     "encoder-avc": "Specify AVC Encoder",
     "encoder-hevc": "Specify HEVC Encoder",
+    "print-stderr": "Output logs to main terminal",
+    "print-stderr-tip": "Display rendering output in the main terminal",
     "list-expand": "Default Expand Sidebar",
     "list-expand-tip": "Right-click the sidebar to switch at any time",
     "lang": "Language"

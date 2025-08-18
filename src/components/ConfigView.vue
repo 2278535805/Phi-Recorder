@@ -10,7 +10,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { VDivider, VForm } from 'vuetify/components';
 
 import { RULES, isNumeric, toast, anyFilter, toastError } from '../common';
-import { DEFAULT_CONFIG, type Preset, type RenderConfig } from '../model';
+import { DEFAULT_RENDER_CONFIG, type Preset, type RenderConfig } from '../model';
 
 import TipSwitch from './TipSwitch.vue';
 import TipSlider from './TipSlider.vue';
@@ -26,15 +26,15 @@ const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
   ffmpegPreset = ref(ffmpegPresetPresetList[3])
 
 const
-  endingLength = ref(String(DEFAULT_CONFIG.endingLength)),
-  chartDebugLine = ref(DEFAULT_CONFIG.chartDebugLine),
-  chartDebugNote = ref(DEFAULT_CONFIG.chartDebugNote),
-  chartRatio = ref(DEFAULT_CONFIG.chartRatio),
-  allGood = ref(DEFAULT_CONFIG.allGood),
-  allBad = ref(DEFAULT_CONFIG.allBad),
+  endingLength = ref(String(DEFAULT_RENDER_CONFIG.endingLength)),
+  chartDebugLine = ref(DEFAULT_RENDER_CONFIG.chartDebugLine),
+  chartDebugNote = ref(DEFAULT_RENDER_CONFIG.chartDebugNote),
+  chartRatio = ref(DEFAULT_RENDER_CONFIG.chartRatio),
+  allGood = ref(DEFAULT_RENDER_CONFIG.allGood),
+  allBad = ref(DEFAULT_RENDER_CONFIG.allBad),
   fpsList = ['30', '60', '120'],
-  fps = ref(String(DEFAULT_CONFIG.fps)),
-  hwAccel = ref(DEFAULT_CONFIG.hardwareAccel),
+  fps = ref(String(DEFAULT_RENDER_CONFIG.fps)),
+  hwAccel = ref(DEFAULT_RENDER_CONFIG.hardwareAccel),
   dynamicBitrateControl = ref(true),
   bitrate = ref('28'),
   bitrateList = ['2M', '5M', '7M'],
@@ -44,17 +44,17 @@ const encoderList = ref(t('encoder-list').split(','))
 const encoder = ref(t('encoder-list').split(',')[0])
 
 const challengeColor = ref(t('challenge-colors').split(',')[5]),
-  challengeRank = ref(String(DEFAULT_CONFIG.challengeRank)),
-  noteScale = ref(DEFAULT_CONFIG.noteScale),
+  challengeRank = ref(String(DEFAULT_RENDER_CONFIG.challengeRank)),
+  noteScale = ref(DEFAULT_RENDER_CONFIG.noteScale),
   playerAvatar = ref<string>(),
-  playerName = ref(DEFAULT_CONFIG.playerName),
-  playerRks = ref(String(DEFAULT_CONFIG.playerRks)),
-  sampleCount = ref(String(DEFAULT_CONFIG.sampleCount))
+  playerName = ref(DEFAULT_RENDER_CONFIG.playerName),
+  playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks)),
+  sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount))
 
-const volumeMusic = ref(DEFAULT_CONFIG.volumeMusic),
-  volumeSfx = ref(DEFAULT_CONFIG.volumeSfx),
-  compressionRatio = ref(DEFAULT_CONFIG.compressionRatio),
-  limitThreshold = ref(DEFAULT_CONFIG.limitThreshold)
+const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic),
+  volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx),
+  compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio),
+  limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold)
 
 
 const renderList = ref(t('render-list').split(','))
@@ -68,25 +68,25 @@ const audioList = ref(t('audio-list').split(','))
 const audio = ref([audioList.value[0]])
 
 const
-  combo = ref(DEFAULT_CONFIG.combo),
-  difficulty = ref(DEFAULT_CONFIG.difficulty),
-  judgeOffset = ref(String(DEFAULT_CONFIG.judgeOffset)),
-  simpleFileName = ref(DEFAULT_CONFIG.simpleFileName),
-  bgBlurriness = ref(String(DEFAULT_CONFIG.bgBlurriness)),
-  watermark = ref(DEFAULT_CONFIG.watermark)
+  combo = ref(DEFAULT_RENDER_CONFIG.combo),
+  difficulty = ref(DEFAULT_RENDER_CONFIG.difficulty),
+  judgeOffset = ref(String(DEFAULT_RENDER_CONFIG.judgeOffset)),
+  simpleFileName = ref(DEFAULT_RENDER_CONFIG.simpleFileName),
+  bgBlurriness = ref(String(DEFAULT_RENDER_CONFIG.bgBlurriness)),
+  watermark = ref(DEFAULT_RENDER_CONFIG.watermark)
 
 const maxParticlesText = ref(t('max-particles-list').split(',')[0])
-const maxParticles = ref(DEFAULT_CONFIG.maxParticles)
+const maxParticles = ref(DEFAULT_RENDER_CONFIG.maxParticles)
 const maxParticlesTextList = t('max-particles-list').split(',')
 const maxParticlesList = [5000, 25000, 200000];
 
 const
-  renderStartTime = ref(String(DEFAULT_CONFIG.renderStartTime)),
+  renderStartTime = ref(String(DEFAULT_RENDER_CONFIG.renderStartTime)),
   renderEndTime = ref('');
 
 const judgeMode = ref(t('judge-modes').split(',')[0])
-const fade = ref(String(DEFAULT_CONFIG.fade))
-const alphaTint = ref(DEFAULT_CONFIG.alphaTint)
+const fade = ref(String(DEFAULT_RENDER_CONFIG.fade))
+const alphaTint = ref(DEFAULT_RENDER_CONFIG.alphaTint)
 
 
 function parseResolution(resolution: string): [number, number] | null {
@@ -399,7 +399,7 @@ function applyConfig(config: RenderConfig) {
 const DEFAULT_PRESET: Preset = {
   name: t('default-preset'),
   key: 'default',
-  config: DEFAULT_CONFIG,
+  config: DEFAULT_RENDER_CONFIG,
 };
 
 async function getPresets() {
