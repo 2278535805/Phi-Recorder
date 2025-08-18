@@ -5,7 +5,7 @@ const { t } = useI18n();
 
 import { computed, nextTick, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
-import type { Config } from './model';
+import { DEFAULT_CONFIG, type Config } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
 import { toast, toastError, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
@@ -18,13 +18,6 @@ import { useStorage } from '@vueuse/core';
 
 const form = ref<VForm>();
 const loadingSave = ref(false);
-
-const DEFAULT_CONFIG: Config = {
-  rpeDir: null,
-  outputDir: null,
-  encoderAvc: null,
-  encoderHevc: null,
-}
 
 const config = ref(DEFAULT_CONFIG);
 
@@ -240,8 +233,13 @@ const SUPPORTED_THEME_NAME = computed(() => [
           <v-text-field clearable class="mx-2" :label="t('encoder-hevc')" v-model="config.encoderHevc" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(true)" @contextmenu="testEncoderHevc"></v-text-field>
         </v-col>
       </v-row>
+      <v-row no-gutters class="mx-0">
+        <v-col cols="6">
+          <TipSwitch class="mx-4" :tooltip="t('print-stderr-tip')" :label="t('print-stderr')" v-model="config.printStderr"></TipSwitch>
+        </v-col>
+      </v-row>
 
-      <div class="mx-2">
+      <div class="mt-1 mx-2">
         <VDivider />
       </div>
 

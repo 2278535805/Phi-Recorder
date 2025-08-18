@@ -8,7 +8,7 @@ const { t } = useI18n();
 import { invoke } from '@tauri-apps/api/core';
 
 import { toastError, RULES, toast, anyFilter } from './common';
-import { DEFAULT_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
+import { DEFAULT_RENDER_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
 
 import { VForm } from 'vuetify/components';
 
@@ -24,7 +24,7 @@ const charts = useStorage<RenderChart[]>('BatchView.ChartList', []);
 const DEFAULT_PRESET: Preset = {
   name: t('default-preset'),
   key: 'default',
-  config: DEFAULT_CONFIG,
+  config: DEFAULT_RENDER_CONFIG,
 };
 
 async function getPresets() {

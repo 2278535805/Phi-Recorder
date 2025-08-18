@@ -138,7 +138,7 @@ export interface RenderConfig {
   alphaTint: boolean;
 }
 
-export const DEFAULT_CONFIG: RenderConfig = {
+export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
   ffmpegPreset: 'medium p4 balanced',
   endingLength: 0.0,
@@ -209,6 +209,15 @@ export interface Config {
   outputDir: string | null;
   encoderAvc: string | null;
   encoderHevc: string | null;
+  printStderr: boolean;
+}
+
+export const DEFAULT_CONFIG: Config = {
+  rpeDir: null,
+  outputDir: null,
+  encoderAvc: null,
+  encoderHevc: null,
+  printStderr: false,
 }
 
 export interface RPEChart {
