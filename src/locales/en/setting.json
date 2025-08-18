@@ -16,6 +16,8 @@
     "encoder-hevc": "Specify HEVC Encoder",
     "print-stderr": "Output logs to main terminal",
     "print-stderr-tip": "Display rendering output in the main terminal",
+    "show-detailed-log": "Show Detailed Log",
+    "show-detailed-log-tip": "Effective after restart",
     "list-expand": "Default Expand Sidebar",
     "list-expand-tip": "Right-click the sidebar to switch at any time",
     "lang": "Language"

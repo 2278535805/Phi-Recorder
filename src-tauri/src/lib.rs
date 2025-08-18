@@ -76,7 +76,6 @@ fn hide_cmd() {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() -> Result<()> {
-    log::register();
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
@@ -133,6 +132,7 @@ pub async fn run() -> Result<()> {
             delete_autosave,
             save_info,
             read_info,
+            restart_app,
         ])
         .on_window_event(|_, event| match event {
             //WindowEvent::CloseRequested { api, .. } => {
@@ -182,6 +182,11 @@ pub async fn run() -> Result<()> {
     let asset_dir = exe_dir.join("assets");
     ASSET_PATH.set(asset_dir.clone()).ok();
     set_pc_assets_folder(&asset_dir.display().to_string());
+
+    let config = common::read_config()?;
+    if config.show_detailed_log {
+        log::register();
+    }
 
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref().unwrap_or_default() {
@@ -966,5 +971,15 @@ async fn read_info(path: String) -> Result<ChartInfo, InvokeError> {
         info!("read: {}", file.display());
         let info = serde_yaml::from_reader(BufReader::new(std::fs::File::open(file)?))?;
         Ok(info)
+    }).await
+}
+
+#[tauri::command]
+async fn restart_app() -> Result<(), InvokeError> {
+    wrap_async(async move {
+        std::process::Command::new(std::env::current_exe()?)
+            .spawn()?;
+        exit_program(0);
+        Ok(())
     }).await
 }
