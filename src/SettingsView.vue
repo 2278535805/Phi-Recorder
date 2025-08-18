@@ -20,6 +20,7 @@ const form = ref<VForm>();
 const loadingSave = ref(false);
 
 const config = ref(DEFAULT_APP_CONFIG);
+const needRestart = ref(false);
 
 async function updateConfig() {
   config.value = await invoke('read_config') as AppConfig;
@@ -56,6 +57,11 @@ async function saveConfig() {
   } catch (e) {
     toastError(e);
   }
+
+  if (needRestart.value) {
+    await invoke('restart_app');
+  }
+
   updateConfig();
   loadingSave.value = false;
   toast(t('save-success'), 'success');
@@ -236,6 +242,9 @@ const SUPPORTED_THEME_NAME = computed(() => [
       <v-row no-gutters class="mx-0">
         <v-col cols="6">
           <TipSwitch class="mx-4" :tooltip="t('print-stderr-tip')" :label="t('print-stderr')" v-model="config.printStderr"></TipSwitch>
+        </v-col>
+        <v-col cols="6">
+          <TipSwitch class="mx-4" :tooltip="t('show-detailed-log-tip')" :label="t('show-detailed-log')" v-model="config.showDetailedLog" @update:model-value="needRestart = true"></TipSwitch>
         </v-col>
       </v-row>
 

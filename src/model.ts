@@ -210,6 +210,7 @@ export interface AppConfig {
   encoderAvc: string | null;
   encoderHevc: string | null;
   printStderr: boolean;
+  showDetailedLog: boolean;
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
@@ -218,6 +219,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   encoderAvc: null,
   encoderHevc: null,
   printStderr: false,
+  showDetailedLog: true,
 }
 
 export interface RPEChart {

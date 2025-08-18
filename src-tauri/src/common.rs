@@ -125,6 +125,7 @@ pub struct AppConfig {
     pub encoder_avc: Option<String>,
     pub encoder_hevc: Option<String>,
     pub print_stderr: bool,
+    pub show_detailed_log: bool,
 }
 
 impl Default for AppConfig {
@@ -135,6 +136,7 @@ impl Default for AppConfig {
             encoder_avc: None,
             encoder_hevc: None,
             print_stderr: false,
+            show_detailed_log: true,
         }
     }
 }
