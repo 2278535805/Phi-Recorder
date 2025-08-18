@@ -11,7 +11,7 @@ mod task;
 
 use anyhow::{bail, Context, Result};
 use common::{
-    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, save_presets, Config, Extra, CONFIG_DIR, DATA_DIR
+    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, save_presets, AppConfig, Extra, CONFIG_DIR, DATA_DIR
 };
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
@@ -604,12 +604,12 @@ async fn remove_preset(name: String) -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-async fn read_config() -> Result<Config, InvokeError> {
+async fn read_config() -> Result<AppConfig, InvokeError> {
     common::read_config().map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]
-async fn save_config(config: Config) -> Result<(), InvokeError> {
+async fn save_config(config: AppConfig) -> Result<(), InvokeError> {
     common::save_config(config).map_err(InvokeError::from_anyhow)
 }
 
