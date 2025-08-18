@@ -119,7 +119,7 @@ pub async fn save_presets(presets: &HashMap<String, RenderConfig>) -> Result<()>
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase", default)]
-pub struct Config {
+pub struct AppConfig {
     pub rpe_dir: Option<PathBuf>,
     pub output_dir: Option<PathBuf>,
     pub encoder_avc: Option<String>,
@@ -127,7 +127,7 @@ pub struct Config {
     pub print_stderr: bool,
 }
 
-impl Default for Config {
+impl Default for AppConfig {
     fn default() -> Self {
         Self {
             rpe_dir: None,
@@ -147,17 +147,17 @@ pub fn get_config_file() -> Result<PathBuf> {
     Ok(file)
 }
 
-pub fn read_config() -> Result<Config> {
+pub fn read_config() -> Result<AppConfig> {
     let file = get_config_file()?;
     if file.exists() {
-        let config: Config = toml::from_str(&std::fs::read_to_string(file)?)?;
+        let config: AppConfig = toml::from_str(&std::fs::read_to_string(file)?)?;
         Ok(config)
     } else {
-        Ok(Config::default())
+        Ok(AppConfig::default())
     }
 }
 
-pub fn save_config(config: Config) -> Result<()> {
+pub fn save_config(config: AppConfig) -> Result<()> {
     let file = get_config_file()?;
     let string = toml::to_string(&config)?;
     std::fs::write(file, string)?;

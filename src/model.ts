@@ -204,7 +204,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   alphaTint: false,
 };
 
-export interface Config {
+export interface AppConfig {
   rpeDir: string | null;
   outputDir: string | null;
   encoderAvc: string | null;
@@ -212,7 +212,7 @@ export interface Config {
   printStderr: boolean;
 }
 
-export const DEFAULT_CONFIG: Config = {
+export const DEFAULT_APP_CONFIG: AppConfig = {
   rpeDir: null,
   outputDir: null,
   encoderAvc: null,

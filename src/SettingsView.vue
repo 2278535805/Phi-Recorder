@@ -5,7 +5,7 @@ const { t } = useI18n();
 
 import { computed, nextTick, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
-import { DEFAULT_CONFIG, type Config } from './model';
+import { DEFAULT_APP_CONFIG, type AppConfig } from './model';
 import { open } from '@tauri-apps/plugin-dialog';
 import { toast, toastError, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
@@ -19,10 +19,10 @@ import { useStorage } from '@vueuse/core';
 const form = ref<VForm>();
 const loadingSave = ref(false);
 
-const config = ref(DEFAULT_CONFIG);
+const config = ref(DEFAULT_APP_CONFIG);
 
 async function updateConfig() {
-  config.value = await invoke('read_config') as Config;
+  config.value = await invoke('read_config') as AppConfig;
 }
 updateConfig();
 
@@ -43,8 +43,8 @@ async function saveConfig() {
     }
   }
   for (const key in config.value) {
-    if (typeof config.value[key as keyof Config] === 'string') {
-      const val = config.value[key as keyof Config] as string;
+    if (typeof config.value[key as keyof AppConfig] === 'string') {
+      const val = config.value[key as keyof AppConfig] as string;
       if (val.trim() === "") {
         (config.value as any)[key] = null;
       }
@@ -63,7 +63,7 @@ async function saveConfig() {
 
 const resetDialog = ref(false);
 async function resetConfig(all: boolean) {
-  config.value = DEFAULT_CONFIG;
+  config.value = DEFAULT_APP_CONFIG;
   nextTick(() => {
     form.value?.resetValidation();
   });
