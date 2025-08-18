@@ -172,6 +172,7 @@ impl Task {
                 stderr_result = stderr_lines.next_line() => {
                     let line = stderr_result?;
                     let Some(line) = line else { break };
+                    eprintln!("{}", line);
                     output_stderr.push_str(&line);
                     output_stderr.push('\n');
                 },
