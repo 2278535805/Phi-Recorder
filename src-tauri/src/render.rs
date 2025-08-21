@@ -519,7 +519,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     info!("Encoder: {}", ffmpeg_encoder);
 
-    info!("Loading Time:{:.2?}", loading_time.elapsed());
+    info!("Loading Time: {:.2?}", loading_time.elapsed());
     info!("video length: {:.2}s", video_length);
 
     let render_start_time = Instant::now();
@@ -550,7 +550,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let clip = music.slice(s![position_read..position_read + len]);
         let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + len]);
         slice += &clip;
-        info!("Process Music Time:{:.2?}", music_time.elapsed());
+        info!("Process Music Time: {:.2?}", music_time.elapsed());
     }
 
     type HitSoundMap = HashMap<String, Array1<f32>>;
@@ -582,7 +582,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         });
 
         let elapsed = sfx_time.elapsed();
-        info!("Process Hit Effects Time:{:.2?} Speed: {:.2} notes/sec", elapsed, count as f32 / elapsed.as_secs_f32())
+        info!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, count as f32 / elapsed.as_secs_f32())
     }
 
     let output_music_temp = NamedTempFile::new()?;
@@ -639,7 +639,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         drop(writer);
         proc.wait()?;
 
-        info!("Output Audio Time:{:.2?}", output_audio_time.elapsed());
+        info!("Output Audio Time: {:.2?}", output_audio_time.elapsed());
     }
 
     if ipc {
@@ -819,7 +819,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     info!(
-        "Preparing Render Time:{:.2?}",
+        "Preparing Render Time: {:.2?}",
         preparing_render_time.elapsed()
     );
 
@@ -945,7 +945,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         frames as f64 / render_time.elapsed().as_secs_f64()
     );
     proc.wait()?;
-    info!("Task done in {:.2?}", render_start_time.elapsed());
     if ipc {
         send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
     }
