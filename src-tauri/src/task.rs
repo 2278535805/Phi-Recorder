@@ -23,6 +23,7 @@ use tokio::{
     sync::{mpsc, Mutex, Semaphore},
     task::JoinHandle, time::sleep,
 };
+use humantime::format_duration;
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "snake_case", tag = "type")]
@@ -158,24 +159,11 @@ impl Task {
 
         loop {
             tokio::select! {
-                _ = async {
-                    while !self.request_cancel.load(Ordering::Relaxed) {
-                        sleep(Duration::from_millis(50)).await;
-                    }
-                } => {
-                    info!("Task #{} cancelled", self.id);
-                    child.kill().await?;
-                    *self.status.lock().await = TaskStatus::Canceled {
-                        output: output_stderr,
-                    };
-                    return Ok(());
-                },
-
                 stderr_result = stderr_lines.next_line() => {
                     let line = stderr_result?;
                     let Some(line) = line else { break };
                     if config.print_stderr {
-                        println!("{}", line);
+                        eprintln!("{}", line);
                     }
                     output_stderr.push_str(&line);
                     output_stderr.push('\n');
@@ -223,8 +211,9 @@ impl Task {
                             };
                         },
                         IPCEvent::Done(duration) => {
-                            info!("Task #{} completed", self.id);
+                            info!("Task #{} completed in {}", self.id, format_duration(Duration::from_secs_f64(duration)));
                             child.wait().await?;
+
                             *self.status.lock().await = TaskStatus::Done {
                                 duration,
                                 output: output_stderr,
@@ -232,7 +221,20 @@ impl Task {
                             return Ok(());
                         }
                     }
-                }
+                },
+
+                _ = async {
+                    while !self.request_cancel.load(Ordering::Relaxed) {
+                        sleep(Duration::from_millis(50)).await;
+                    }
+                } => {
+                    info!("Task #{} cancelled", self.id);
+                    child.kill().await?;
+                    *self.status.lock().await = TaskStatus::Canceled {
+                        output: output_stderr,
+                    };
+                    return Ok(());
+                },
             }
         }
 

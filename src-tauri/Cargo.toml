@@ -47,6 +47,7 @@ zip = "4.3.0"
 serde_yaml = "0.9.21"
 tauri-plugin-prevent-default = "2.0.0"
 ndarray = "0.16.1"
+humantime = "2.2.0"
 # sysinfo = "0.29.0"
 
 [features]
