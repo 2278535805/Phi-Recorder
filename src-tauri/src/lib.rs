@@ -96,7 +96,6 @@ pub async fn run() -> Result<()> {
         )
         .manage(TaskQueue::new())
         .invoke_handler(tauri::generate_handler![
-            is_the_only_instance,
             exit_program,
             open_output_folder,
             open_in_folder,
@@ -240,26 +239,9 @@ pub async fn run() -> Result<()> {
         hide_cmd();
     }
 
-    let lock_file = tokio::fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(cache_dir.join("app.lock"))
-        .await?;
-    if lock_file.try_lock_exclusive().is_ok() {
-        LOCK_FILE.set(lock_file).unwrap();
-    } else {
-        error!("Lock app.lock failed");
-    }
-
     app.run(|_, _| {});
 
     Ok(())
-}
-
-#[tauri::command]
-fn is_the_only_instance() -> bool {
-    LOCK_FILE.get().is_some()
 }
 
 #[tauri::command]
