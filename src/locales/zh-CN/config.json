@@ -74,7 +74,7 @@
     "expand": "拓展内容",
     "expand-list": "激进优化,罗马模式,中文模式",
     "audio-expand": "音频拓展内容",
-    "audio-list": "音效强制限幅,无损音频,音乐响度均衡 (-16 LUFS)",
+    "audio-list": "音效强制限幅,无损音频,音乐响度均衡 (-16 LUFS),混音优化",
     "others": "更多",
     "selects": "已选中",
     "ffmpeg-preset-list": "非常快,更快,快,中等,好,更好,非常好",

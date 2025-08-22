@@ -113,6 +113,7 @@ export interface RenderConfig {
   forceLimit: boolean;
   limitThreshold: number;
   loudnessEqualization: boolean;
+  audioMixOptimization: boolean;
   simpleFileName: boolean;
 
   renderLine: boolean;
@@ -174,6 +175,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   forceLimit: true,
   limitThreshold: 0.5,
   loudnessEqualization: false,
+  audioMixOptimization: true,
   watermark: '',
   roman: false,
   chinese: false,
