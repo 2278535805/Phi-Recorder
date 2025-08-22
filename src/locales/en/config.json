@@ -74,7 +74,7 @@
     "expand": "Expand",
     "expand-list": "Aggressive Optimization,Roman Mode,Chinese Mode",
     "audio-expand": "Audio Expand",
-    "audio-list": "SFX Force Limit,Lossless Audio,Music Loudness Equalization (-16 LUFS)",
+    "audio-list": "SFX Force Limit,Lossless Audio,Music Loudness Equalization (-16 LUFS),Audio Mix Optimization",
     "others": "More",
     "selects": "Selected",
     "ffmpeg-preset-list": "VeryFast,Faster,Fast,Medium,Slow,Slower,VerySlow",

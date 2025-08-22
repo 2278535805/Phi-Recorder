@@ -65,7 +65,7 @@ const expandList = ref(t('expand-list').split(','))
 const expand = ref<string[]>([])
 
 const audioList = ref(t('audio-list').split(','))
-const audio = ref([audioList.value[0]])
+const audio = ref([audioList.value[0], audioList.value[3]])
 
 const
   combo = ref(DEFAULT_RENDER_CONFIG.combo),
@@ -278,6 +278,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     forceLimit: audio.value.includes(audioList.value[0]),
     hires: audio.value.includes(audioList.value[1]),
     loudnessEqualization: audio.value.includes(audioList.value[2]),
+    audioMixOptimization: audio.value.includes(audioList.value[3]),
 
     maxParticles: maxParticles.value,
     renderStartTime: parseFloat(renderStartTime.value),
@@ -384,6 +385,7 @@ function applyConfig(config: RenderConfig) {
   if (config.forceLimit) audio.value.push(audioList.value[0]);
   if (config.hires) audio.value.push(audioList.value[1]);
   if (config.loudnessEqualization) audio.value.push(audioList.value[2]);
+  if (config.audioMixOptimization) audio.value.push(audioList.value[3]);
 
   maxParticles.value = config.maxParticles;
   const index = maxParticlesList.indexOf(maxParticles.value);

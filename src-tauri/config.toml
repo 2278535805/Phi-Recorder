@@ -58,6 +58,7 @@ maxParticles = 5000 # 5000 25000 200000
 forceLimit = true
 hires = true
 loudnessEqualization = false
+AudioMixOptimization = true
 
 volumeMusic = 0.5
 volumeSfx = 0.4
