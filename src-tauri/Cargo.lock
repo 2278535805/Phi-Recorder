@@ -3833,6 +3833,7 @@ dependencies = [
  "ndarray",
  "open",
  "phire",
+ "rand 0.9.1",
  "regex",
  "sasa",
  "serde",

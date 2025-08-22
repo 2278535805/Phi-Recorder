@@ -22,12 +22,13 @@ use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
     collections::HashMap,
+    cmp::Ordering,
     io::{BufRead, BufWriter, Write},
     ops::DerefMut,
     path::PathBuf,
     process::{Command, Stdio},
     rc::Rc,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::atomic::{AtomicBool, Ordering as AtomicOrdering},
     time::Instant,
 };
 use std::{ffi::OsStr, fmt::Write as _};
@@ -73,6 +74,7 @@ pub struct RenderConfig {
     pub force_limit: bool,
     pub limit_threshold: f32,
     pub loudness_equalization: bool,
+    pub audio_mix_optimization: bool,
     pub watermark: String,
     pub roman: bool,
     pub chinese: bool,
@@ -190,6 +192,7 @@ impl Default for RenderConfig {
             force_limit: true,
             limit_threshold: 0.5,
             loudness_equalization: false,
+            audio_mix_optimization: true,
             chart_debug_line: 0.0,
             chart_debug_note: 0.0,
             chart_ratio: 1.0,
@@ -572,17 +575,76 @@ pub async fn main(cmd: bool) -> Result<()> {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
         let length = chart_length as f32;
-        let mut count: u64 = 0;
+        let mut hit_fx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
 
-        chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < length).for_each(|note| {
-            if let Some(sfx) = get_hitsound(&note) {
-                place_fx(before_time + note.time as f64 + judge_offset, sfx);
-                count += 1;
+        if config.audio_mix_optimization {
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < length).for_each(|note| {
+                if let Some(sfx) = get_hitsound(&note) {
+                    hit_fx_list.push((before_time + note.time as f64 + judge_offset, sfx));
+                }
+            });
+            let len = hit_fx_list.len();
+
+            hit_fx_list.sort_by(|(a1, b1), (a2, b2)| {
+                match a1.partial_cmp(a2).unwrap_or(Ordering::Equal) {
+                    Ordering::Less  => Ordering::Less,
+                    Ordering::Greater => Ordering::Greater,
+                    Ordering::Equal => {
+                        let p1 = b1.as_ptr() as usize;
+                        let p2 = b2.as_ptr() as usize;
+                        p1.cmp(&p2)
+                    }
+                }
+            });
+
+            let mut kept = Vec::with_capacity(hit_fx_list.len());
+            let mut last_arr: Option<&Array1<f32>> = None;
+            let mut last_t = 0.0;
+            let mut count = 0;
+            let mut offset = 0.0;
+
+            for &(pos, clip) in &hit_fx_list {
+                let is_new_group = match last_arr {
+                    None => true,
+                    Some(prev) => {
+                        !std::ptr::eq(prev, clip) || (pos - last_t).abs() > 0.005
+                    }
+                };
+
+                if is_new_group {
+                    last_arr = Some(clip);
+                    last_t = pos;
+                    count = 1;
+                    offset = rand::gen_range(0.000, 0.002);
+                    kept.push((pos + offset, clip));
+                } else {
+                    count += 1;
+                    if count <= 3 {
+                        kept.push((pos + offset, clip));
+                    }
+                }
             }
-        });
 
-        let elapsed = sfx_time.elapsed();
-        info!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, count as f32 / elapsed.as_secs_f32())
+            hit_fx_list = kept;
+            let num = hit_fx_list.len();
+            for (pos, sfx) in hit_fx_list {
+                place_fx(pos, sfx);
+            }
+
+            let elapsed = sfx_time.elapsed();
+            info!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
+        } else {
+            let mut num = 0;
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < length).for_each(|note| {
+                if let Some(sfx) = get_hitsound(&note) {
+                    place_fx(before_time + note.time as f64 + judge_offset, sfx);
+                    num += 1;
+                }
+            });
+
+            let elapsed = sfx_time.elapsed();
+            info!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
+        }
     }
 
     let output_music_temp = NamedTempFile::new()?;
@@ -677,10 +739,10 @@ pub async fn main(cmd: bool) -> Result<()> {
             move || {
                 cnt += 1;
                 if cnt == 1 || cnt == 3 {
-                    MSAA.store(true, Ordering::SeqCst);
+                    MSAA.store(true, AtomicOrdering::SeqCst);
                     Some(mst.input())
                 } else {
-                    MSAA.store(false, Ordering::SeqCst);
+                    MSAA.store(false, AtomicOrdering::SeqCst);
                     Some(mst.output())
                 }
             }
@@ -900,7 +962,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
         gl.flush();
 
-        if MSAA.load(Ordering::SeqCst) {
+        if MSAA.load(AtomicOrdering::SeqCst) {
             mst.blit();
         }
 
