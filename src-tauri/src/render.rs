@@ -619,7 +619,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                     kept.push((pos + offset, clip));
                 } else {
                     count += 1;
-                    if count <= 2 {
+                    if count <= 3 {
                         kept.push((pos + offset, clip));
                     }
                 }
