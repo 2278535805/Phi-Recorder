@@ -371,6 +371,10 @@ pub fn test_encoder(ffmpeg: &String, encoder: &str) -> bool {
     output.status.success()
 }
 
+fn round_to_step(v: f64, step: f64) -> f64 {
+    (v / step).round() * step
+}
+
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
 
@@ -601,9 +605,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             let mut last_arr: Option<&Array1<f32>> = None;
             let mut last_t = 0.0;
             let mut count = 0;
-            let mut offset = 0.0;
 
             for &(pos, clip) in &hit_fx_list {
+                let pos = round_to_step(pos, 0.005);
                 let is_new_group = match last_arr {
                     None => true,
                     Some(prev) => {
@@ -615,12 +619,11 @@ pub async fn main(cmd: bool) -> Result<()> {
                     last_arr = Some(clip);
                     last_t = pos;
                     count = 1;
-                    offset = rand::gen_range(0.000, 0.002);
-                    kept.push((pos + offset, clip));
+                    kept.push((pos, clip));
                 } else {
                     count += 1;
                     if count <= 3 {
-                        kept.push((pos + offset, clip));
+                        kept.push((pos, clip));
                     }
                 }
             }
