@@ -24,11 +24,6 @@ import { message, save, open } from '@tauri-apps/plugin-dialog';
 import { useTheme } from 'vuetify';
 const theme = useTheme();
 
-if (!(await invoke('is_the_only_instance'))) {
-  await dialog.message(t('already-running'));
-  await invoke('exit_program', { code: 0 });
-}
-
 const router = useRouter();
 
 const steps = ['choose', 'config', 'options', 'render'];
