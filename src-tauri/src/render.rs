@@ -598,12 +598,13 @@ pub async fn main(cmd: bool) -> Result<()> {
         let mut last_arr: Option<&Array1<f32>> = None;
         let mut last_t = 0.0;
         let mut count = 0;
+        let mut offset = 0.0;
 
         for &(pos, clip) in &hit_fx_list {
             let is_new_group = match last_arr {
                 None => true,
                 Some(prev) => {
-                    !std::ptr::eq(prev, clip) || (pos - last_t).abs() > 0.01
+                    !std::ptr::eq(prev, clip) || (pos - last_t).abs() > 0.005
                 }
             };
 
@@ -611,11 +612,12 @@ pub async fn main(cmd: bool) -> Result<()> {
                 last_arr = Some(clip);
                 last_t = pos;
                 count = 1;
-                kept.push((pos, clip));
+                offset = rand::gen_range(0.000, 0.002);
+                kept.push((pos + offset, clip));
             } else {
                 count += 1;
                 if count <= 2 {
-                    kept.push((pos, clip));
+                    kept.push((pos + offset, clip));
                 }
             }
         }
