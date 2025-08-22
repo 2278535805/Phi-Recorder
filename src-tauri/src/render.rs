@@ -607,24 +607,22 @@ pub async fn main(cmd: bool) -> Result<()> {
             let mut count = 0;
 
             for &(pos, clip) in &hit_fx_list {
+                let pos = round_to_step(pos, 0.005);
                 let is_new_group = match last_arr {
                     None => true,
                     Some(prev) => {
-                        let pos = round_to_step(pos, 0.005);
                         !std::ptr::eq(prev, clip) || (pos - last_t).abs() > 0.005
                     }
                 };
 
                 if is_new_group {
                     last_arr = Some(clip);
-                    let pos = round_to_step(pos, 0.005);
                     last_t = pos;
                     count = 1;
                     kept.push((pos, clip));
                 } else {
                     count += 1;
                     if count <= 3 {
-                        let pos = round_to_step(pos, 0.005);
                         kept.push((pos, clip));
                     }
                 }
