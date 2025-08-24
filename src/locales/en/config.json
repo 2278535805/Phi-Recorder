@@ -69,6 +69,8 @@
     "difficulty": "Custom Difficulty",
     "offset": "Offset",
     "judgeOffset": "Judge Offset",
+    "file-name-format": "File Name Format",
+    "file-name-format-tip": "supports variables:\n %date% \n %time% \n %info.*% \n %config.*%",
     "renders": "Render",
     "render-list": "Loading Screen,Judge Line,Other Judge Line,Note,Pause Button,Name,Difficulty,Score,Combo Number,Progress Bar,Background,Background Dim,Hit Effects,Extra (Shader),Double Hint",
     "expand": "Expand",
