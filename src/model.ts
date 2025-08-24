@@ -114,7 +114,7 @@ export interface RenderConfig {
   limitThreshold: number;
   loudnessEqualization: boolean;
   audioMixOptimization: boolean;
-  simpleFileName: boolean;
+  fileNameFormat: string;
 
   renderLine: boolean;
   renderLineExtra: boolean;
@@ -182,7 +182,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   combo: 'AUTOPLAY',
   difficulty: '',
   judgeOffset: 0,
-  simpleFileName: false,
+  fileNameFormat: '%date% %time% %info.name%_%info.difficulty%',
   renderLine: true,
   renderLineExtra: true,
   renderNote: true,

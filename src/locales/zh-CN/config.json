@@ -69,6 +69,8 @@
     "difficulty": "自定义难度",
     "offset": "延时",
     "judgeOffset": "判定偏移",
+    "file-name-format": "文件名格式",
+    "file-name-format-tip": "支持以下变量:\n %date% \n %time% \n %info.*% \n %config.*%",
     "renders": "渲染内容",
     "render-list": "加载画面,判定线,其他判定线,音符,暂停按钮,曲目名称,谱面难度,分数,连击数,进度条,背景,背景压暗,打击特效,额外内容 (着色器),双押提示",
     "expand": "拓展内容",

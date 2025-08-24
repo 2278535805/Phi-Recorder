@@ -8,6 +8,7 @@ use crate::{
 use anyhow::Result;
 use chrono::Local;
 use phire::{fs, info::ChartInfo};
+use regex::Regex;
 use serde::Serialize;
 use tracing::{error, info};
 use std::{
@@ -53,6 +54,132 @@ pub enum TaskStatus {
 }
 
 pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
+    let re = Regex::new(r"%([^%]+)%").unwrap();
+    let input = config.file_name_format.as_str();
+    let mut output = input.to_string();
+
+    let match_config = |key: &str| -> String {
+        match key {
+            "resolution"                 => format!("{}x{}", config.resolution.0, config.resolution.1),
+            "ffmpeg_preset"              => config.ffmpeg_preset.clone(),
+            "ending_length"              => config.ending_length.to_string(),
+            "disable_loading"            => config.disable_loading.to_string(),
+            "hires"                      => config.hires.to_string(),
+            "chart_debug_line"           => config.chart_debug_line.to_string(),
+            "chart_debug_note"           => config.chart_debug_note.to_string(),
+            "chart_ratio"                => config.chart_ratio.to_string(),
+            "all_good"                   => config.all_good.to_string(),
+            "all_bad"                    => config.all_bad.to_string(),
+            "fps"                        => config.fps.to_string(),
+            "hardware_accel"             => config.hardware_accel.to_string(),
+            "hevc"                       => config.hevc.to_string(),
+            "mpeg4"                      => config.mpeg4.to_string(),
+            "custom_encoder"             => config.custom_encoder.clone().unwrap_or_default(),
+            "dynamic_bitrate_control"    => config.dynamic_bitrate_control.to_string(),
+            "bitrate"                    => config.bitrate.clone(),
+            "aggressive"                 => config.aggressive.to_string(),
+            "challenge_color"            => config.challenge_color.to_string(),
+            "challenge_rank"             => config.challenge_rank.to_string(),
+            "fxaa"                       => config.fxaa.to_string(),
+            "note_scale"                 => config.note_scale.to_string(),
+            "particle"                   => config.particle.to_string(),
+            "player_avatar"              => config.player_avatar.clone().unwrap_or_default(),
+            "player_name"                => config.player_name.clone(),
+            "player_rks"                 => config.player_rks.to_string(),
+            "sample_count"               => config.sample_count.to_string(),
+            "res_pack_path"              => config.res_pack_path.clone().unwrap_or_default(),
+            "speed"                      => config.speed.to_string(),
+            "volume_music"               => config.volume_music.to_string(),
+            "volume_sfx"                 => config.volume_sfx.to_string(),
+            "compression_ratio"          => config.compression_ratio.to_string(),
+            "force_limit"                => config.force_limit.to_string(),
+            "limit_threshold"            => config.limit_threshold.to_string(),
+            "loudness_equalization"      => config.loudness_equalization.to_string(),
+            "audio_mix_optimization"     => config.audio_mix_optimization.to_string(),
+            "watermark"                  => config.watermark.clone(),
+            "roman"                      => config.roman.to_string(),
+            "chinese"                    => config.chinese.to_string(),
+            "combo"                      => config.combo.clone(),
+            "difficulty"                 => config.difficulty.clone(),
+            "judge_offset"               => config.judge_offset.to_string(),
+            "file_name_format"           => config.file_name_format.clone(),
+            "render_line"                => config.render_line.to_string(),
+            "render_line_extra"          => config.render_line_extra.to_string(),
+            "render_note"                => config.render_note.to_string(),
+            "render_double_hint"         => config.render_double_hint.to_string(),
+            "render_ui_pause"            => config.render_ui_pause.to_string(),
+            "render_ui_name"             => config.render_ui_name.to_string(),
+            "render_ui_level"            => config.render_ui_level.to_string(),
+            "render_ui_score"            => config.render_ui_score.to_string(),
+            "render_ui_combo"            => config.render_ui_combo.to_string(),
+            "render_ui_bar"              => config.render_ui_bar.to_string(),
+            "render_bg"                  => config.render_bg.to_string(),
+            "render_bg_dim"              => config.render_bg_dim.to_string(),
+            "render_extra"               => config.render_extra.to_string(),
+            "bg_blurriness"              => config.bg_blurriness.to_string(),
+            "max_particles"              => config.max_particles.to_string(),
+            "render_start_time"          => config.render_start_time.to_string(),
+            "render_end_time"            => config.render_end_time.map_or_else(String::new, |v| v.to_string()),
+            "fade"                       => config.fade.to_string(),
+            "alpha_tint"                 => config.alpha_tint.to_string(),
+            _                            => key.to_string(),
+        }
+    };
+
+
+    let match_info = |key: &str| -> String {
+        match key {
+            "id"                 => info.id.map_or_else(String::new, |v| v.to_string()),
+            "uploader"           => info.uploader.map_or_else(String::new, |v| v.to_string()),
+            "name"               => info.name.clone(),
+            "difficulty"         => info.difficulty.to_string(),
+            "level"              => info.level.clone(),
+            "charter"            => info.charter.clone(),
+            "composer"           => info.composer.clone(),
+            "illustrator"        => info.illustrator.clone(),
+            "chart"              => info.chart.clone(),
+            "music"              => info.music.clone(),
+            "illustration"       => info.illustration.clone(),
+            "preview_start"      => info.preview_start.to_string(),
+            "preview_end"        => info.preview_end.map_or_else(String::new, |v| v.to_string()),
+            "aspect_ratio"       => info.aspect_ratio.to_string(),
+            "force_aspect_ratio" => info.force_aspect_ratio.to_string(),
+            "background_dim"     => info.background_dim.to_string(),
+            "line_length"        => info.line_length.to_string(),
+            "offset"             => info.offset.to_string(),
+            "tip"                => info.tip.clone().unwrap_or_default(),
+            "tags"               => info.tags.join(","),
+            "intro"              => info.intro.clone(),
+            "hold_partial_cover" => info.hold_partial_cover.to_string(),
+            "note_uniform_scale" => info.note_uniform_scale.to_string(),
+            "score_total"        => info.score_total.to_string(),
+            "created"            => info.created.map(|dt| dt.to_rfc3339()).unwrap_or_default(),
+            "updated"            => info.updated.map(|dt| dt.to_rfc3339()).unwrap_or_default(),
+            "chart_updated"      => info.chart_updated.map(|dt| dt.to_rfc3339()).unwrap_or_default(),
+            _                    => key.to_string(),
+        }
+    };
+
+
+    for caps in re.captures_iter(input) {
+        let whole = caps.get(0).unwrap().as_str();
+        let key   = caps.get(1).unwrap().as_str();
+
+        let replacement =
+            if let Some(key) = key.strip_prefix("config.") {
+                match_config(key)
+            } else if let Some(key) = key.strip_prefix("info.") {
+                match_info(key)
+            } else {
+                match key {
+                    "date" => Local::now().format("%Y-%m-%d").to_string(),
+                    "time" => Local::now().format("%H-%M-%S").to_string(),
+                    _ => whole.to_string(),
+                }
+            };
+        output = output.replace(whole, &replacement);
+    }
+
     fn safe_filename(name: String) -> String {
         name
             .trim()
@@ -61,26 +188,9 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
             .collect()
     }
 
-    let safe_level = safe_filename(
-            info
-            .level
-            .split_whitespace()
-            .next()
-            .unwrap_or("UK")
-            .to_string()
-        );
-    let safe_name = safe_filename(info.name.clone());
     let format = if config.hires { "mov" } else { "mp4" };
 
-    if config.simple_file_name {
-        let safe_composer = safe_filename(info.composer.clone());
-        format!("{safe_name}.{safe_composer}_{safe_level}.{format}",)
-    } else {
-        format!(
-            "{} {safe_name}_{safe_level}.{format}",
-            Local::now().format("%Y-%m-%d %H-%M-%S")
-        )
-    }
+    format!("{}.{}", safe_filename(output), format)
 }
 
 pub struct Task {
