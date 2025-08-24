@@ -1,5 +1,9 @@
 use crate::{
-    cmd_hidden, common::{output_dir, read_config}, ipc::IPCEvent, render::{RenderConfig, RenderParams}, ASSET_PATH
+    cmd_hidden,
+    common::{get_output_dir, read_config},
+    ipc::IPCEvent,
+    render::{RenderConfig, RenderParams},
+    ASSET_PATH
 };
 use anyhow::Result;
 use chrono::Local;
@@ -99,11 +103,7 @@ impl Task {
 
         let file_name = generate_filename(&info, &params.config);
 
-        let output = if let Some(set_output_dir) = read_config()?.output_dir {
-            set_output_dir.join(file_name)
-        } else {
-            output_dir()?.join(file_name)
-        };
+        let output = get_output_dir()?.join(file_name);
 
         Ok(Self {
             id,

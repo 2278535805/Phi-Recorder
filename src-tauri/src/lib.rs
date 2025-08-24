@@ -11,7 +11,7 @@ mod task;
 
 use anyhow::{bail, Context, Result};
 use common::{
-    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, output_dir, respack_dir, save_presets, AppConfig, Extra, CONFIG_DIR, DATA_DIR
+    collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, get_output_dir, respack_dir, save_presets, AppConfig, Extra, CONFIG_DIR, DATA_DIR
 };
 use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
@@ -37,7 +37,10 @@ use std::{
 };
 use task::{TaskQueue, TaskView};
 use tauri::{ipc::InvokeError, Manager, State, WindowEvent};
-use tokio::{io::AsyncWriteExt, process::Command};
+use tokio::{
+    io::{AsyncWriteExt, AsyncBufReadExt},
+    process::Command
+};
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
 static LOCK_FILE: OnceLock<tokio::fs::File> = OnceLock::new();
@@ -190,10 +193,13 @@ pub async fn run() -> Result<()> {
     if std::env::args().len() > 1 {
         match std::env::args().nth(1).as_deref().unwrap_or_default() {
             "help" | "--help" | "-help" | "/help" | "-h" | "?" | "--?" | "-?" | "/?" => {
-                println!("Usage: phi-recorder --render <input file> [options]");
+                println!("Usage: phi-recorder --render --input <input file> [options]");
+                println!("Usage: phi-recorder --preview --input <input file> [options]");
                 println!("Options:");
-                println!("  --output <file/path>    Output file");
-                println!("  --config <file/json>    Config");
+                println!("  --input   -i    <file/path>    Chart file");
+                println!("  --output  -o    <file/path>    Output file");
+                println!("  --config  -c    <file/json>    Config");
+                println!("  --info    -ci   </json>        Chart Info");
                 exit_program(0);
             }
             "render" => {
@@ -208,16 +214,16 @@ pub async fn run() -> Result<()> {
             "tweakoffset" => {
                 run_wrapped(preview::main(false, true, true)).await;
             }
-            "--render" => {
+            "--render" | "-r" => {
                 run_wrapped(render::main(true)).await;
             }
             "--play" => {
                 run_wrapped(preview::main(true, false, false)).await;
             }
-            "--preview" => {
+            "--preview" | "-p" => {
                 run_wrapped(preview::main(true, false, true)).await;
             }
-            "--tweakoffset" => {
+            "--tweakoffset" | "-t" => {
                 run_wrapped(preview::main(true, true, true)).await;
             }
             cmd => {
@@ -268,7 +274,7 @@ fn exit_program(code: i32) {
 #[tauri::command]
 fn open_output_folder() -> Result<(), InvokeError> {
     (|| {
-        let path = output_dir().unwrap();
+        let path = get_output_dir()?;
         info!("Opening output folder: {}", path.display());
         open::that_detached(path)?;
         Ok(())
@@ -405,31 +411,17 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, Invoke
 
         // Read and process stdout to get the offset value
         let stdout = child.stdout.take().unwrap();
-        let mut reader = tokio::io::BufReader::new(stdout);
-        let mut line = String::new();
+        let mut stdout_lines = tokio::io::BufReader::new(stdout).lines();
         let mut offset = None;
 
-        while let Ok(bytes) = tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await {
-            if bytes == 0 {
+        loop {
+            if let Some(stdout_result) = stdout_lines.next_line().await? {
+                if let Ok(result) = serde_json::from_str::<f32>(&stdout_result) {
+                    offset = Some(result)
+                }
+            } else {
                 break;
             }
-
-            if line.contains("{update offset:") {
-                // Extract the offset value using regex
-                if let Some(offset_str) = line
-                    .trim()
-                    .strip_prefix("{update offset:")
-                    .and_then(|s| s.strip_suffix("}"))
-                {
-                    if let Ok(new_offset) = offset_str.trim().parse::<f32>() {
-                        println!("update offset:{}", new_offset);
-                        offset = Some(new_offset);
-                        break;
-                    }
-                }
-            }
-
-            line.clear();
         }
 
         let status = child.wait().await?;

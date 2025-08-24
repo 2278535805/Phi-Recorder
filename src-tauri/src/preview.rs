@@ -57,7 +57,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
     let (fs, config, info) = if cmd {
         init_assets();
 
-        let (args_input, _, args_config) = parse_args(std::env::args().collect());
+        let (args_input, _, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
             match serde_json::from_str(config) {
@@ -66,7 +66,8 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
                     config_json
                 }
                 Err(error) => {
-                    info!("Failed to parse json: {}. Using config from toml file", error);
+                    info!("Failed to parse json. Using config from toml file");
+                    info!("{}", error);
                     toml::from_str(&std::fs::read_to_string(config)?)?
                 }
             }
@@ -77,7 +78,12 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         let path = args_input.unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
-        let info = fs::load_info(fs.deref_mut()).await?;
+        
+        let info = if let Some(info) = args_info {
+            serde_json::from_str(&info)?
+        } else {
+            fs::load_info(fs.deref_mut()).await?
+        };
 
         (fs, config, info)
     } else {
@@ -175,7 +181,8 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
 
     if tweak_offset {
         if let Some(result_offset) = *offset.borrow() {
-            println!("{{update offset:{}}}", result_offset);
+            let result_json = serde_json::to_string(&result_offset)?;
+            println!("{}", result_json);
         }
     }
 

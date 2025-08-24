@@ -2,7 +2,10 @@
 phire::tl_file!("render");
 
 use crate::{
-    common::{output_dir, parse_args, read_config, test_output_dir}, ipc::IPCEvent, task::generate_filename, ASSET_PATH
+    common::{get_output_dir, parse_args, read_config, test_output_dir},
+    ipc::IPCEvent,
+    task::generate_filename,
+    ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::GLuint, prelude::*};
@@ -381,7 +384,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let (mut fs, output_path, mut config, info) = if cmd {
         init_assets();
 
-        let (args_input, args_output, args_config) = parse_args(std::env::args().collect());
+        let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
             match serde_json::from_str(config) {
@@ -390,7 +393,8 @@ pub async fn main(cmd: bool) -> Result<()> {
                     config_json
                 }
                 Err(error) => {
-                    info!("Failed to parse json: {}. Using config from toml file", error);
+                    info!("Failed to parse json. Using config from toml file");
+                    info!("{}", error);
                     toml::from_str(&std::fs::read_to_string(config)?)?
                 }
             }
@@ -401,20 +405,25 @@ pub async fn main(cmd: bool) -> Result<()> {
         let path = args_input.unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
-        let info = fs::load_info(fs.deref_mut()).await?;
+
+        let info = if let Some(info) = args_info {
+            serde_json::from_str(&info)?
+        } else {
+            fs::load_info(fs.deref_mut()).await?
+        };
 
         let file_name = generate_filename(&info, &config);
 
         let output_path = if let Some(output_string) = args_output {
             let output_dir = PathBuf::from(output_string);
-            test_output_dir(output_dir.clone())?;
-            output_dir.join(file_name)
-        } else {
-            if let Some(set_output_dir) = read_config()?.output_dir {
-                set_output_dir.join(file_name)
+            if output_dir.extension().is_some() {
+                output_dir
             } else {
-                output_dir()?.join(file_name)
+                test_output_dir(output_dir.clone())?;
+                output_dir.join(file_name)
             }
+        } else {
+            get_output_dir()?.join(file_name) 
         };
         info!("output file: {:?}", output_path);
 
