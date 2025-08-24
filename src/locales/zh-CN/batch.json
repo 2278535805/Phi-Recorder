@@ -9,7 +9,6 @@
     "remove-after-render": "渲染完成后移除",
     "post-select-render": "渲染",
     "auto-change-aspect-ratio": "自动调整宽高比",
-    "simple-file-name": "简单文件名",
     "chart-info": "谱面信息",
     "edit": "编辑",
     "sort-tip": "点击排序 右键反转",
