@@ -15,32 +15,41 @@ use crate::render::RenderConfig;
 pub static CONFIG_DIR: OnceLock<PathBuf> = OnceLock::new();
 pub static DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
 
-pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<String>) {
+pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<String>, Option<String>) {
     let mut args_input = None;
     let mut args_output = None;
     let mut args_config = None;
+    let mut args_info = None;
     let mut args_now = 1;
     while args_now < args.len() {
         match args[args_now].as_str() {
-            "--output" => {
+            "--input" | "-i" => {
+                args_input = args.get(args_now + 1).cloned();
+                args_now += 2;
+            }
+            "--output" | "-o" => {
                 args_output = args.get(args_now + 1).cloned();
                 args_now += 2;
             }
-            "--config" => {
+            "--config" | "-c" => {
                 args_config = args.get(args_now + 1).cloned();
+                args_now += 2;
+            }
+            "--info" | "ci" => {
+                args_info = args.get(args_now + 1).cloned();
                 args_now += 2;
             }
             arg => {
                 if !arg.starts_with("--") && args_input.is_none() {
                     args_input = Some(arg.to_string());
                 } else {
-                    println!("Unknown argument: {}", arg);
+                    eprintln!("Unknown argument: {}", arg);
                 }
                 args_now += 1;
             }
         }
     }
-    return (args_input, args_output, args_config);
+    return (args_input, args_output, args_config, args_info);
 }
 
 pub fn ensure_dir(path: PathBuf) -> PathBuf {
@@ -54,7 +63,7 @@ pub fn ensure_dir(path: PathBuf) -> PathBuf {
     path
 }
 
-pub fn output_dir() -> Result<PathBuf> {
+pub fn default_output_dir() -> Result<PathBuf> {
     let dir = if let Some(set_output_dir) = read_config()?.output_dir {
         set_output_dir
     } else {
@@ -68,6 +77,14 @@ pub fn output_dir() -> Result<PathBuf> {
         std::fs::create_dir(&dir)?;
     }
     Ok(dir)
+}
+
+pub fn get_output_dir() -> Result<PathBuf> {
+    if let Some(output_dir) = read_config()?.output_dir {
+        Ok(output_dir)
+    } else {
+        Ok(default_output_dir()?)
+    }
 }
 
 pub fn test_output_dir(dir: PathBuf) -> Result<()> {
