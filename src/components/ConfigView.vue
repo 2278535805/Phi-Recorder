@@ -18,6 +18,7 @@ import TooltipIcon from './TooltipIcon.vue';
 
 const form = ref<VForm>();
 const page = ref(0);
+const fileNameFormatDialog = ref(false);
 
 const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160']
 const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
@@ -71,7 +72,7 @@ const
   combo = ref(DEFAULT_RENDER_CONFIG.combo),
   difficulty = ref(DEFAULT_RENDER_CONFIG.difficulty),
   judgeOffset = ref(String(DEFAULT_RENDER_CONFIG.judgeOffset)),
-  simpleFileName = ref(DEFAULT_RENDER_CONFIG.simpleFileName),
+  fileNameFormat = ref(DEFAULT_RENDER_CONFIG.fileNameFormat),
   bgBlurriness = ref(String(DEFAULT_RENDER_CONFIG.bgBlurriness)),
   watermark = ref(DEFAULT_RENDER_CONFIG.watermark)
 
@@ -252,7 +253,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     combo: combo.value,
     difficulty: difficulty.value,
     judgeOffset: parseInt(judgeOffset.value) / 1000,
-    simpleFileName: simpleFileName.value,
+    fileNameFormat: fileNameFormat.value,
     bgBlurriness: parseFloat(bgBlurriness.value),
     
     disableLoading: !render.value.includes(renderList.value[0]),
@@ -657,10 +658,10 @@ async function replacePreset() {
           <v-combobox class="mr-1" :label="t('respack')" :rues="[RULES.notEmpty]" :items="respacks" item-title="name" v-model="respack"></v-combobox>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" color="btn-large" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
+          <v-btn class="config-btn pa-1 text-caption" color="btn-large" size="large" @click="updateRespacks" v-t="'respack-refresh'" style="flex: .9;"></v-btn>
         </v-col>
         <v-col cols="2" class="d-flex justify-center">
-          <v-btn class="pa-1 text-caption" color="btn-large" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
+          <v-btn class="config-btn pa-1 text-caption" color="btn-large" size="large" @click="openRespackFolder" v-t="'respack-open'" style="flex: .9;"></v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center">
@@ -757,13 +758,30 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="9">
+          <v-text-field class="mx-2" :label="t('file-name-format')" v-model="fileNameFormat" type="text" :rules="[RULES.notEmpty, RULES.notNull]" append-inner-icon="mdi-help-circle-outline" @click:append-inner="fileNameFormatDialog = true"></v-text-field>
+        </v-col>
         <v-col cols="3">
-          <v-switch class="mx-4" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
+          <v-switch class="text-center justify-center mr-2 d-flex" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
     </div>
   </v-form>
+
+  <v-dialog v-model="fileNameFormatDialog" width="850px" class="log-card-bg">
+    <v-card class="log-card-only-window" style="background: rgba(var(--v-theme-dialog), 0.4) !important;">
+      <v-card-title v-t="'file-name-format'"> </v-card-title>
+      <v-card-text>
+        <v-text-field class="" :label="t('file-name-format')" v-model="fileNameFormat" type="text" :rules="[RULES.notEmpty, RULES.notNull]"></v-text-field>
+        <pre class="mx-2">{{ t('file-name-format-tip') }}</pre>
+
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn class="hover-scale" variant="text" @click="fileNameFormatDialog = false" v-t="'close'"></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
@@ -789,7 +807,7 @@ async function replacePreset() {
   /* box-shadow: 0 !important; */
 }
 
-.v-btn {
+.config-btn {
   background: rgba(54, 50, 98, 1);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

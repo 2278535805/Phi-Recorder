@@ -84,7 +84,7 @@ pub struct RenderConfig {
     pub combo: String,
     pub difficulty: String,
     pub judge_offset: f32,
-    pub simple_file_name: bool,
+    pub file_name_format: String,
 
     pub render_line: bool,
     pub render_line_extra: bool,
@@ -208,7 +208,7 @@ impl Default for RenderConfig {
             difficulty: "".to_string(),
             player_avatar: None,
             judge_offset: 0.,
-            simple_file_name: false,
+            file_name_format: "%date% %time% %info.name%_%info.difficulty%".to_string(),
 
             render_line: true,
             render_line_extra: true,

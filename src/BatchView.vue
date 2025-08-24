@@ -58,7 +58,6 @@ const disSelectStartRender = useStorage<boolean>('BatchView.disSelectStartRender
 const removeStartRender = useStorage<boolean>('BatchView.removeStartRender', false);
 const removeAfterRender = useStorage<boolean>('BatchView.removeAfterRender', false);
 const autoChangeAspectRatio = useStorage<boolean>('BatchView.autoChangeAspectRatio', false);
-const simpleFileName = useStorage<boolean>('BatchView.simpleFileName', false);
 
 
 async function chooseChart(folder?: boolean) {
@@ -138,7 +137,6 @@ async function buildParams(chartPath: string, chartInfo: ChartInfo, config: Rend
 async function postRender(chart: RenderChart) {
   let config = preset.value.config;
   if (autoChangeAspectRatio.value) { applyAspectRatio(config.resolution, chart.chartInfo.aspectRatio); }
-  if (simpleFileName.value) { preset.value.config.simpleFileName = true; } else { preset.value.config.simpleFileName = false; }
   let params = await buildParams(chart.path, chart.chartInfo, config);
   if (!params) return false;
   try {
@@ -379,9 +377,6 @@ const outputDialog = ref(false),
             </v-row>
             <v-row no-gutters>
               <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
-            </v-row>
-            <v-row no-gutters>
-              <v-checkbox :label="t('choose.simple-file-name')" v-model="simpleFileName"></v-checkbox>
             </v-row>
           </v-list-item>
         </v-list>
