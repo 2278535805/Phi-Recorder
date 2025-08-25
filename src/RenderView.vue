@@ -518,8 +518,11 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               </v-row>
 
               <v-row class="my-n2">
-                <v-col cols="12">
+                <v-col cols="9">
                   <v-text-field type="text" class="" :label="t('info.intro')" v-model="chartInfo.intro"></v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="chartInfo.holdParticleIntervalRatio" @update:modelValue="chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
                 </v-col>
               </v-row>
 

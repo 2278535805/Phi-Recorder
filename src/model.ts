@@ -25,6 +25,7 @@ export interface ChartInfo {
   holdPartialCover: boolean;
   noteUniformScale: boolean;
   scoreTotal: number;
+  holdParticleIntervalRatio: number;
 }
 
 export type TaskStatus =
