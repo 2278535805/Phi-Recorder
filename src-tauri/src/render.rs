@@ -13,6 +13,7 @@ use ndarray::{s, Array1};
 use phire::{
     config::{ChallengeModeColor, Config, Mods},
     core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
+    ext::NotNanExt,
     fs,
     info::ChartInfo,
     scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
@@ -481,6 +482,11 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
+    let sfx_protect_time = if let Some(v) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
+        v.length()
+    } else {
+        sfx_drag.length()
+    };
 
     fn check_sample_rate(expected: u32, actual: u32, name: &str) -> Result<()> {
         if expected != actual {
@@ -544,8 +550,11 @@ pub async fn main(cmd: bool) -> Result<()> {
         send(IPCEvent::StartMixing);
     }
 
-    let output_music_len = ((video_length + video_cut_time) * music_sample_rate as f64).ceil() as usize * 2;
-    let output_fx_len = ((video_length + video_cut_time + 1.0) * sample_rate_f64).ceil() as usize * 2;
+    let output_music_time = video_length + video_cut_time;
+    let output_music_len = (output_music_time * music_sample_rate as f64).ceil() as usize * 2;
+
+    let output_fx_time = video_length + video_cut_time + sfx_protect_time;
+    let output_fx_len = (output_fx_time * sample_rate_f64).ceil() as usize * 2;
 
     let mut output_music = Array1::from_vec(vec![0.0_f32; output_music_len]);
     let mut output_fx = Array1::from_vec(vec![0.0_f32; output_fx_len]);
@@ -553,7 +562,11 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut place_fx = |pos: f64, clip: &Array1<f32>| {
         let position = (pos * sample_rate_f64).ceil() as usize * 2;
         let len = clip.len();
-        let mut slice = output_fx.slice_mut(s![position..position + len]);
+        let end = position + len;
+        if end > output_fx_len {
+            return;
+        }
+        let mut slice = output_fx.slice_mut(s![position..end]);
         slice += clip;
     };
 
@@ -587,7 +600,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        let length = chart_length as f32;
+        let length = output_fx_time as f32;
         let mut hit_fx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
 
         if config.audio_mix_optimization {
