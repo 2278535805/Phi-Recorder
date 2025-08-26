@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, type Ref } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -74,9 +74,50 @@ function describeStatus(status: TaskStatus): string {
   }
 }
 
-const outputDialog = ref(false),
-  outputDialogMessage = ref('');
+const outputDialog = ref(false);
+const outputDialogMessage = ref('');
+const filteredOutputDialogMessage = ref('');
 
+const filterItems: string[] = ["INFO", "DEBUG", "WARN", "ERROR", "! INFO", "! DEBUG", "! WARN", "! ERROR"];
+const filter: Ref<string[]> = ref([]);
+
+function filterText(
+  rawText: string,
+  filters: string[]
+): string {
+  const include: string[] = [];
+  const exclude: string[] = [];
+
+  for (let f of filters) {
+    f = f.trim();
+    if (!f) continue;
+    if (f.startsWith('!')) {
+      const kw = f.slice(1).trim();
+      if (kw) exclude.push(kw);
+    } else {
+      include.push(f);
+    }
+  }
+
+  if (include.length === 0 && exclude.length === 0) {
+    return rawText;
+  }
+
+  const resultLines = rawText
+    .split(/\r?\n/)
+    .filter(line => {
+      if (include.length > 0) {
+        const hitInclude = include.some(kw => line.includes(kw));
+        if (!hitInclude) return false;
+      }
+      const hitExclude = exclude.some(kw => line.includes(kw));
+      if (hitExclude) return false;
+
+      return true;
+    });
+
+  return resultLines.join('\n');
+}
 async function showInFolder(path: string) {
   try {
     await invoke('show_in_folder', { path });
@@ -179,6 +220,8 @@ function removeTask(index: number) {
                   @click="() => {
                       if (task.status.type === 'failed' || task.status.type === 'canceled') {
                         outputDialogMessage = ansi.ansi_to_html(task.status.output);
+                        filteredOutputDialogMessage = outputDialogMessage;
+                        filter = [];
                         outputDialog = true;
                       }
                     }"
@@ -200,7 +243,9 @@ function removeTask(index: number) {
                   @click="
                     () => {
                       if (task.status.type === 'done') {
-                        outputDialogMessage = task.status.output;
+                        outputDialogMessage = ansi.ansi_to_html(task.status.output);
+                        filteredOutputDialogMessage = outputDialogMessage;
+                        filter = [];
                         outputDialog = true;
                       }
                     }
@@ -216,15 +261,27 @@ function removeTask(index: number) {
 
     <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
       <v-card class="log-card-window">
-        <v-card-title v-t="'output'"> </v-card-title>
+        <v-card-title style="margin-bottom: -16px;" v-t="'output'"></v-card-title>
         <v-card-text>
           <div
             class="block whitespace-pre overflow-auto log-card-msg user-select"
             style="max-height: 60vh;"
-            v-html="outputDialogMessage"
+            v-html="filteredOutputDialogMessage"
           ></div>
         </v-card-text>
         <v-card-actions class="justify-end">
+          <v-combobox
+            class="ml-4"
+            variant="outlined"
+            v-model="filter"
+            :items="filterItems"
+            clearable
+            multiple
+            placeholder="Filter (comma separated)"
+            @update:model-value="(val) => {
+              filteredOutputDialogMessage = filterText(outputDialogMessage, val);
+            }"
+          </v-combobox>
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
         </v-card-actions>
       </v-card>
