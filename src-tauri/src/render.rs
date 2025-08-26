@@ -515,7 +515,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
     };
     let video_cut_time: f64 = if config.disable_loading {
-        config.render_start_time
+        config.render_start_time.min(music_length)
     } else {
         0.0
     };
