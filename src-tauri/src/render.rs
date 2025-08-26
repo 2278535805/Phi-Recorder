@@ -524,7 +524,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let offset = chart.offset + info.offset;
     let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64;
     let video_length = chart_length + config.ending_length - video_cut_time;
-    let frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
+    let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
         ENCODER_LIST_HEVC
@@ -542,7 +542,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("Encoder: {}", ffmpeg_encoder);
 
     info!("Loading Time: {:.2?}", loading_time.elapsed());
-    info!("video length: {:.2}s", video_length);
+    info!("video length: {:.2}s frame: {}", video_length, video_frames);
 
     let render_start_time = Instant::now();
 
@@ -960,16 +960,17 @@ pub async fn main(cmd: bool) -> Result<()> {
     }
 
     if ipc {
-        send(IPCEvent::StartRender(frames));
+        send(IPCEvent::StartRender(video_frames));
     }
     let render_time = Instant::now();
 
     let fps = fps as f64;
-    let frames10 = frames / 10;
+    let frames10 = (video_frames / 10).max(1);
+    let skip_frames = ((video_cut_time + GameScene::BEFORE_DURATION as f64) * fps) as u64;
     let frames = if config.disable_loading {
-        frames + ((video_cut_time + GameScene::BEFORE_DURATION as f64) * fps) as u64
+        video_frames + skip_frames
     } else {
-        frames
+        video_frames
     };
     let mut step_time = Instant::now();
     let mut writed_frames: u64 = 0;
@@ -978,7 +979,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         *my_time.borrow_mut() = now.max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
-        if config.disable_loading && now < video_cut_time + GameScene::BEFORE_DURATION as f64 {
+        if config.disable_loading && frame < skip_frames {
             continue;
         }
         main.render(&mut painter)?;
@@ -991,10 +992,10 @@ pub async fn main(cmd: bool) -> Result<()> {
             mst.blit();
         }
 
-        if frame % frames10 == 0 {
-            let progress = (frame as f32 / frames as f32 * 100.).ceil() as u8;
-            info!("Render progress: {}% Time elapsed: {:.2}s", progress, 
-                std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
+        if writed_frames % frames10 == 0 {
+            let progress = round_to_step((writed_frames as f64 / video_frames as f64 * 100.).ceil(), 10.0);
+            info!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
+                progress, writed_frames, video_frames, std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
         }
 
         unsafe {
