@@ -13,6 +13,8 @@ import moment from 'moment';
 import { toastError } from './common';
 
 import router from './router';
+import { AnsiUp } from 'ansi_up';
+const ansi = new AnsiUp()
 
 const tasks = ref<Task[]>();
 
@@ -176,7 +178,7 @@ function removeTask(index: number) {
                   prepend-icon="mdi-alert-circle-outline"
                   @click="() => {
                       if (task.status.type === 'failed' || task.status.type === 'canceled') {
-                        outputDialogMessage = task.status.output;
+                        outputDialogMessage = ansi.ansi_to_html(task.status.output);
                         outputDialog = true;
                       }
                     }"
@@ -216,7 +218,11 @@ function removeTask(index: number) {
       <v-card class="log-card-window">
         <v-card-title v-t="'output'"> </v-card-title>
         <v-card-text>
-          <div class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</div>
+          <div
+            class="block whitespace-pre overflow-auto log-card-msg user-select"
+            style="max-height: 60vh;"
+            v-html="outputDialogMessage"
+          ></div>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
@@ -276,13 +282,6 @@ function removeTask(index: number) {
   color: transparent;
 }
 
-pre {
-  background: rgba(0, 0, 0, 0.3) !important;
-  padding: 16px !important;
-  border-radius: 8px;
-  font-family: 'Fira Code', monospace;
-}
-
 .animated-form {
   transition: opacity 0.1s ease, transform 0.1s ease;
 }
@@ -303,6 +302,10 @@ pre {
 
 .icon {
   font-size: 250%;
+}
+
+:deep(span) {
+  user-select: text;
 }
 
 @media (max-width: 600px) {

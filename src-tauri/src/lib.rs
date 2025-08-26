@@ -187,7 +187,7 @@ pub async fn run() -> Result<()> {
 
     let config = common::read_config()?;
     if config.show_detailed_log {
-        log::register();
+        log::register_with_colorize(true);
     }
 
     if std::env::args().len() > 1 {
