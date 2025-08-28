@@ -230,9 +230,7 @@ pub async fn run() -> Result<()> {
                 info!("Command: {cmd:?}");
                 let args = std::env::args().nth(1).unwrap_or_default();
                 let path = Path::new(&args);
-                if path.is_file() && (args.contains(".pez") || args.contains(".zip"))
-                    || path.is_dir()
-                {
+                if path.is_file() || path.is_dir() {
                     info!("Find a valid path, start preview");
                     run_wrapped(preview::main(true, false, true)).await;
                     exit_program(0);
