@@ -168,7 +168,7 @@ impl Default for RenderConfig {
     fn default() -> Self {
         Self {
             resolution: (1920, 1080),
-            ffmpeg_preset: "medium".to_string(),
+            ffmpeg_preset: "medium p4 balanced".to_string(),
             ending_length: 0.0,
             disable_loading: true,
             hires: false,
