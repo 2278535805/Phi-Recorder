@@ -386,6 +386,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         <v-btn v-if="step === 'options'" :loading="loadingPlay" variant="text" @click="previewPlay" class="mr-2">{{ t('play') }}</v-btn>
         <v-btn v-if="step === 'options'" :loading="loadingPreview" variant="text" @click="previewChart" class="mr-2">{{ t('preview') }}</v-btn>
         <v-btn v-if="step !== 'render'" :loading="loadingNext" variant="tonal" @click="moveNext" class="gradient-primary">{{ step === 'options' ? t('render') : t('next-step') }}</v-btn>
+        <v-btn v-if="step === 'render'" variant="text" @click="stepIndex = 1" v-t="'back-home'"></v-btn>
       </div>
 
       <template v-slot:item.1>
@@ -575,7 +576,6 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <span style="font-size: 84px; margin-left: 0.14em;">🎉</span>
           <h2>{{ t('render-started') }}</h2>
           <v-btn class="gradient-primary" @click="router.push({ name: 'tasks' })" v-t="'see-tasks'"></v-btn>
-          <v-btn class="" @click="stepIndex = 1" v-t="'back-home'"></v-btn>
         </div>
       </template>
     </v-stepper>
