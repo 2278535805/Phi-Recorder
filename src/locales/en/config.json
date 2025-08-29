@@ -45,7 +45,7 @@
     "volume-music": "Music Volume",
     "volume-sfx": "SFX Volume",
     "compression-ratio": "SFX Comp Ratio",
-    "limit-threshold": "Max SFX Volume",
+    "limit-threshold": "SFX Limiter",
     "force-limit": "SFX Force Limit",
     "ending-length": "Result Scene Duration",
     "disable-loading": "Remove Loading Scene",

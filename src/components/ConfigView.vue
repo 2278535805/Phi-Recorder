@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, h } from 'vue';
+import { ref, h, watch } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -48,10 +48,30 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
   playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks)),
   sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount))
 
-const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic),
-  volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx),
-  compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio),
-  limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold)
+const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic);
+const volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx);
+const compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio);
+const limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold);
+const forceLimit = ref(DEFAULT_RENDER_CONFIG.forceLimit);
+const hires = ref(DEFAULT_RENDER_CONFIG.hires);
+const loudnessEqualization = ref(DEFAULT_RENDER_CONFIG.loudnessEqualization);
+const audioMixOptimization = ref(DEFAULT_RENDER_CONFIG.audioMixOptimization);
+
+watch(() => volumeSfx.value, (volume) => {
+  if (forceLimit.value && volume > limitThreshold.value) {
+    limitThreshold.value = volumeSfx.value;
+  }
+})
+watch(() => limitThreshold.value, (limit) => {
+  if (forceLimit.value && limit < volumeSfx.value) {
+    volumeSfx.value = limitThreshold.value;
+  }
+})
+watch(() => loudnessEqualization.value, (loudnessEq) => {
+  if (loudnessEq) {
+    volumeMusic.value = 1.0;
+  }
+})
 
 const
   combo = ref(DEFAULT_RENDER_CONFIG.combo),
@@ -93,11 +113,6 @@ const renderDoubleHint = ref(DEFAULT_RENDER_CONFIG.renderDoubleHint);
 const aggressive = ref(DEFAULT_RENDER_CONFIG.aggressive);
 const roman = ref(DEFAULT_RENDER_CONFIG.roman);
 const chinese = ref(DEFAULT_RENDER_CONFIG.chinese);
-
-const forceLimit = ref(DEFAULT_RENDER_CONFIG.forceLimit);
-const hires = ref(DEFAULT_RENDER_CONFIG.hires);
-const loudnessEqualization = ref(DEFAULT_RENDER_CONFIG.loudnessEqualization);
-const audioMixOptimization = ref(DEFAULT_RENDER_CONFIG.audioMixOptimization);
 
 
 function parseResolution(resolution: string): [number, number] | null {
