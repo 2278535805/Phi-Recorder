@@ -363,39 +363,39 @@ const outputDialog = ref(false),
               <v-btn variant="text" @click="showOutputFolder">{{ t('task.show-folder') }}</v-btn>
             </v-row>
             <v-row no-gutters class="justify-center">
-              <v-btn variant="text" @click="clearTasks">{{ t('choose.clear-tasks') }}</v-btn>
+              <v-btn variant="text" @click="clearTasks">{{ t('clear-tasks') }}</v-btn>
             </v-row>
             <VDivider class="my-2"></VDivider>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
+              <v-checkbox :label="t('dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
             </v-row>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.remove-start-render')" v-model="removeStartRender"></v-checkbox>
+              <v-checkbox :label="t('remove-start-render')" v-model="removeStartRender"></v-checkbox>
             </v-row>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
+              <v-checkbox :label="t('remove-after-render')" v-model="removeAfterRender"></v-checkbox>
             </v-row>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
+              <v-checkbox :label="t('auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
             </v-row>
           </v-list-item>
         </v-list>
       </v-menu>
       <div v-if="charts.length === 0" class="d-flex align-center" style="flex: 1; margin-left: -70px;">
         <v-spacer />
-        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('choose.select-or-drop')" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
-        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('choose.select-or-drop')" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
+        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('select-or-drop')" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
+        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('select-or-drop')" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
         <v-spacer />
       </div>
       <div v-else class="d-flex align-center" style="flex: 1">
         <v-combobox class="mx-2 mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset"></v-combobox>
         <v-btn class="" :title="t('edit-preset')" icon="mdi-pencil" @click="editPreset"></v-btn>
         <v-spacer />
-        <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('choose.post-select-render') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('select-all') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('select-invert') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('remove-select') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('cancel-select') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('post-select-render') }}</v-btn>
       </div>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto" style="font-size: 0.9em;">
@@ -499,8 +499,11 @@ const outputDialog = ref(false),
           </v-row>
 
           <v-row>
-            <v-col cols="6">
+            <v-col cols="3">
               <v-text-field type="text" class="" :label="t('info.tip')" v-model="charts[chartInfoSelect].chartInfo.tip"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="charts[chartInfoSelect].chartInfo.holdParticleIntervalRatio" @update:modelValue="charts[chartInfoSelect].chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="charts[chartInfoSelect].chartInfo.backgroundDim"> </v-slider>
@@ -508,15 +511,18 @@ const outputDialog = ref(false),
           </v-row>
 
           <v-row>
-            <v-col cols="6">
+            <v-col cols="3">
               <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000]"
               v-model="charts[chartInfoSelect].chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect].chartInfo.scoreTotal = parseInt($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="charts[chartInfoSelect].chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+              <v-switch class="d-flex justify-center ml-n2" :label="t('info.force-aspect-ratio')" color="btn" v-model="charts[chartInfoSelect].chartInfo.forceAspectRatio"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="charts[chartInfoSelect].chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
+              <v-switch class="" v-model="charts[chartInfoSelect].chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+            </v-col>
+            <v-col cols="3">
+              <v-switch class="" v-model="charts[chartInfoSelect].chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
             </v-col>
           </v-row>
 
