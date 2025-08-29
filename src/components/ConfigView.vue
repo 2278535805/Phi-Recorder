@@ -567,17 +567,31 @@ function setConfigForSocial() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">
-        <v-col cols="3" class="pr-2">
-          <TipSwitch :label="t('disable-loading')" color="btn" v-model="disableLoading"></TipSwitch>
+        <v-col cols="3" class="px-2">
+          <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
+          <v-autocomplete class="mx-2" :label="t('challenge-color')" :rules="[RULES.notEmpty]" :items="t('challenge-colors').split(',')" v-model="challengeColor"></v-autocomplete>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positiveOrZero]" type="number" v-model="playerRks"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.int, RULES.positiveOrZero]" type="number" v-model="challengeRank"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mx-n2 my-2">
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positiveOrZero]" v-show="disableLoading"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveOrNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch class="ml-n1" :label="t('disable-loading')" color="btn" v-model="disableLoading"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
