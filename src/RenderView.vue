@@ -465,7 +465,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
 
       <v-dialog v-model="moreInfo" width="auto" class="log-card-bg">
         <v-card class="log-card-only-window">
-          <v-card-title v-t="'phira-info'"> </v-card-title>
+          <v-card-title v-t="'chart-info'"> </v-card-title>
           <v-card-text>
 
             <v-form v-if="chartInfo" validateOn="eager">
