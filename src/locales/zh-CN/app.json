@@ -1,8 +1,8 @@
 {
     "render": "渲染",
-    "rpe": "RPE",
-    "batch": "批量渲染",
-    "tasks": "任务列表",
+    "bind": "绑定",
+    "batch": "批量",
+    "tasks": "任务",
     "settings": "设置",
     "about": "关于",
     "ffmpeg-check": "FFmpeg 检查",

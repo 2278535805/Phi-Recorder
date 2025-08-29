@@ -19,7 +19,7 @@
     "has-error": "There are errors in the configuration",
     "any-filter": "All files",
     "theme": {
-        "theme": "Theme",
+        "theme": "Theme (F2)",
         "dark": "Dark - Azure Whisper",
         "light": "Light - Frost Glow",
         "deep-dark": "Dark - Obsidian Glow",

@@ -163,7 +163,7 @@ function removeTask(index: number) {
     <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
       <v-row>
         <v-col cols="12" style="margin: -20px 0px;">
-          <v-btn size="large" class="hover-scale margin-btn" @click="showOutputFolder()" v-t="'show-folder'"></v-btn>
+          <v-btn size="large" class="hover-scale margin-btn btn" @click="showOutputFolder()" v-t="'show-folder'"></v-btn>
         </v-col>
       </v-row>
     </v-form>
@@ -202,7 +202,7 @@ function removeTask(index: number) {
                 ></v-progress-linear>
               </template>
               <div class="pt-4 d-flex justify-end" v-if="['pending','loading', 'mixing', 'rendering'].includes(task.status.type)">
-                <v-btn class="hover-scale"
+                <v-btn class="hover-scale btn"
                   prepend-icon="mdi-cancel"
                   variant="text"
                   @click="invoke('cancel_task', { id: task.id })"
@@ -213,7 +213,7 @@ function removeTask(index: number) {
                   variant="flat"
                   @click="removeDialog = true; removeTaskIndex =index"
                   v-t="'remove-task'"
-                  class="hover-scale"></v-btn>
+                  class="hover-scale btn"></v-btn>
                 <v-btn
                   variant="flat"
                   prepend-icon="mdi-alert-circle-outline"
@@ -227,16 +227,16 @@ function removeTask(index: number) {
                     }"
                   @contextmenu="removeDialog = true; removeTaskIndex = task.id"
                   v-t="'show-output'"
-                  class="hover-scale"></v-btn>
+                  class="hover-scale btn"></v-btn>
               </div>
               <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
-                <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale"></v-btn>
+                <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale btn"></v-btn>
                 <v-btn 
                   variant="flat"
                   prepend-icon="mdi-folder-open-outline" 
                   @click="showInFolder(task.output)"
                   v-t="'show-in-folder'"
-                  class="hover-scale"></v-btn>
+                  class="hover-scale btn"></v-btn>
                 <v-btn
                   variant="flat"
                   prepend-icon="mdi-text-box-outline"
@@ -251,7 +251,7 @@ function removeTask(index: number) {
                     }
                   "
                   v-t="'show-output'"
-                  class="hover-scale"></v-btn>
+                  class="hover-scale btn"></v-btn>
               </div>
             </div>
           </div>
@@ -259,19 +259,17 @@ function removeTask(index: number) {
       </v-card>
     </v-lazy>
 
-    <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
+    <v-dialog v-model="outputDialog" class="log-card-bg">
       <v-card class="log-card-window">
         <v-card-title style="margin-bottom: -16px;" v-t="'output'"></v-card-title>
-        <v-card-text>
+        <v-card-text style="padding-bottom: 0px;">
           <div
             class="block whitespace-pre overflow-auto log-card-msg user-select"
-            style="max-height: 60vh;"
+            style="height: calc(100vh - 240px);"
             v-html="filteredOutputDialogMessage"
           ></div>
-        </v-card-text>
-        <v-card-actions class="justify-end">
           <v-combobox
-            class="ml-4"
+            class="mt-4"
             variant="outlined"
             v-model="filter"
             :items="filterItems"
@@ -282,6 +280,8 @@ function removeTask(index: number) {
               filteredOutputDialogMessage = filterText(outputDialogMessage, val);
             }"
           </v-combobox>
+        </v-card-text>
+        <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
         </v-card-actions>
       </v-card>
@@ -348,7 +348,7 @@ function removeTask(index: number) {
   transform: translateY(-20px);
 }
 
-.v-btn {
+.btn {
   background: rgba(127, 127, 127, 0.10);
   padding: 8px 14px;
   margin: 4px 8px;
