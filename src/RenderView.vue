@@ -575,7 +575,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           <span style="font-size: 84px; margin-left: 0.14em;">🎉</span>
           <h2>{{ t('render-started') }}</h2>
           <v-btn class="gradient-primary" @click="router.push({ name: 'tasks' })" v-t="'see-tasks'"></v-btn>
-          <v-btn class="" @click="stepIndex; stepIndex = 1" v-t="'back-home'"></v-btn>
+          <v-btn class="" @click="stepIndex = 1" v-t="'back-home'"></v-btn>
         </div>
       </template>
     </v-stepper>
