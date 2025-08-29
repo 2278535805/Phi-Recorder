@@ -1,6 +1,6 @@
 {
     "not-binded": "你还没有绑定 RPE",
-    "bind": "绑定 RPE",
+    "bind-rpe": "绑定 RPE",
     "binded": "绑定成功",
     "unbind": "解绑 RPE",
     "unbinded": "解绑成功",

@@ -19,7 +19,7 @@
     "has-error": "配置中有错误",
     "any-filter": "所有文件",
     "theme": {
-        "theme": "主题",
+        "theme": "主题 (F2)",
         "dark": "深色 - 浅澜微蓝",
         "light": "浅色 - 冰雾微光",
         "deep-dark": "深色 - 黑曜光辉",

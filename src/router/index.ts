@@ -17,7 +17,7 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'render', component: RenderView },
     { path: '/batch', name: 'batch', component: BatchView },
-    { path: '/rpe', name: 'rpe', component: RPEView },
+    { path: '/bind', name: 'bind', component: RPEView },
     { path: '/tasks', name: 'tasks', component: TasksView },
     { path: '/settings', name: 'settings', component: SettingsView },
     { path: '/about', name: 'about', component: AboutView },

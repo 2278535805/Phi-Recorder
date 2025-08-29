@@ -1,6 +1,6 @@
 {
     "not-binded": "You have not binded RPE yet",
-    "bind": "Bind RPE",
+    "bind-rpe": "Bind RPE",
     "binded": "Binded successfully",
     "unbind": "Unbind RPE",
     "unbinded": "Unbinded successfully",

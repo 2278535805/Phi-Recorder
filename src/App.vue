@@ -68,7 +68,7 @@ function routerPush(name: string) {
 const icons = ref({
   render: 'mdi-auto-fix',
   batch: 'mdi-filmstrip-box-multiple',
-  rpe: 'mdi-bookshelf',
+  bind: 'mdi-bookshelf',
   tasks: 'mdi-server',
   settings: 'mdi-cog',
   about: 'mdi-information-outline',
@@ -236,7 +236,7 @@ onMounted(async () => {
 <template>
   <v-app id="phi-recorder" :style="{ background: `linear-gradient(45deg, ${theme.current.value.colors.bgLeft}, ${theme.current.value.colors.bgRight}` }">
     <v-sonner position="top-center" />
-    <v-app-bar :elevation="0" class="blur-background">
+    <v-app-bar style="box-shadow: 0px -18px 20px 0px rgba(0, 0, 0, 0.5) !important" class="blur-background" height="60">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
       <div class="gradient-text" style="position: absolute; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
@@ -250,22 +250,23 @@ onMounted(async () => {
         <v-btn class="mr-4" size="small" color="red" icon="mdi-circle" @click="appClose()"></v-btn>
       </div>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
+    <v-navigation-drawer v-model="drawer" width="170" :expand-on-hover="listExpand" rail permanent class="nav-drawer-border blur-background list-item">
       <v-list density="compact" nav class="v-list-none" v-if="listExpand">
         <v-list-item
-          v-for="key in ['render', 'batch', 'rpe', 'tasks', 'settings', 'about']"
+          v-for="key in ['render', 'batch', 'bind', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
           :title="t(key)"
           @click="routerPush(key)"
           @contextmenu="listExpand = !listExpand"
+          slim
           class="list-item-hover"
         ></v-list-item>
       </v-list>
       <v-list density="compact" nav class="v-list-none" v-else>
         <v-list-item
-          v-for="key in ['render', 'batch', 'rpe', 'tasks', 'settings', 'about']"
+          v-for="key in ['render', 'batch', 'bind', 'tasks', 'settings', 'about']"
           :active="route.name === key"
           :key="key"
           :prepend-icon="icons[key as keyof typeof icons]"
