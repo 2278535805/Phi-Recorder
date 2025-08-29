@@ -54,6 +54,7 @@ const appWindow = getCurrentWindow();
 const theme = useTheme();
 
 localStorage.removeItem('BatchView.ChartList')
+localStorage.removeItem('BatchView.Preset')
 
 const { t } = useI18n();
 

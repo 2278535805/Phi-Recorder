@@ -189,7 +189,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
             </div>
             <div class="d-flex flex-column w-100 chart-content">
               <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
-              <v-card-subtitle class="mt-n2 chart-id select">{{ chart.id }}</v-card-subtitle>
+              <v-card-subtitle class="mt-n2 chart-id select" style="cursor: pointer;" @click="openInFolder(chart.path)">{{ chart.id }}</v-card-subtitle>
               <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
               <div class="w-100 mt-2">
                 <div class="pt-4 d-flex justify-end">

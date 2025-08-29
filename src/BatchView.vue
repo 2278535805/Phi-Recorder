@@ -9,6 +9,7 @@ import { invoke } from '@tauri-apps/api/core';
 
 import { toastError, RULES, toast, anyFilter } from './common';
 import { DEFAULT_RENDER_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
+import router from './router';
 
 import { VForm } from 'vuetify/components';
 
@@ -40,10 +41,12 @@ async function getPresets() {
   return result;
 }
 const presets = ref([DEFAULT_PRESET]);
-const preset = ref(DEFAULT_PRESET);
+const preset = useStorage<Preset>('BatchView.Preset', DEFAULT_PRESET);
 async function updatePresets() {
   presets.value = await getPresets();
-  preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
+  if (preset.value.key !== 'temp') {
+    preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
+  }
 }
 updatePresets();
 
@@ -329,6 +332,14 @@ async function openFile(path: string) {
   }
 }
 
+async function showInFolder(path: string) {
+  try {
+    await invoke('show_in_folder', { path });
+  } catch (e) {
+    toastError(e);
+  }
+}
+
 async function clearTasks() {
   loadingPostRender.value = false;
   charts.value = [];
@@ -399,12 +410,12 @@ const outputDialog = ref(false),
       </div>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto" style="font-size: 0.9em;">
-      <v-row no-gutters class="d-flex align-center batch-title" :title="t('sort-tip')" @contextmenu="sortChartsReverse">
-        <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')">({{ charts.length }})</v-col>
-        <v-col cols="3" @click="sortChartsByKey('name')">{{ t('info.name') }}</v-col>
-        <v-col cols="2" @click="sortChartsByKey('level')">{{ t('info.level') }}</v-col>
-        <v-col cols="2" @click="sortChartsByKey('charter')">{{ t('info.charter') }}</v-col>
-        <v-col @click="sortChartsByKey('path')">{{ t('info.chart') }}</v-col>
+      <v-row no-gutters class="d-flex align-center batch-title" @contextmenu="sortChartsReverse">
+        <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')" :title="t('sort-tip')">({{ charts.length }})</v-col>
+        <v-col cols="3" @click="sortChartsByKey('name')" :title="t('sort-tip')">{{ t('info.name') }}</v-col>
+        <v-col cols="2" @click="sortChartsByKey('level')" :title="t('sort-tip')">{{ t('info.level') }}</v-col>
+        <v-col cols="2" @click="sortChartsByKey('charter')" :title="t('sort-tip')">{{ t('info.charter') }}</v-col>
+        <v-col @click="sortChartsByKey('path')" :title="t('sort-tip')">{{ t('info.chart') }}</v-col>
         <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('chart-info') }}</v-col>
         <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('preview') }}</v-col>
       </v-row>
@@ -419,7 +430,11 @@ const outputDialog = ref(false),
         <template v-slot:default="{ item }">
           <v-row no-gutters class="d-flex align-center" style="height: 5em;">
             <v-col cols="1" class="d-flex justify-center" style="max-width: 60px;"><v-checkbox class="mt-2 ml-n1" v-model="item.isSelect"></v-checkbox></v-col>
-            <v-col cols="3" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.chartInfo.name">{{ item.chartInfo.name }}</v-col>
+            <v-col cols="3" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px; cursor: pointer;"
+              :title="`${item.chartInfo.name}\n${t('chart-open-tip')}`"
+              @click="router.push({ name: 'render', query: { chart: item.path, info: JSON.stringify(item.chartInfo), config: JSON.stringify(preset.config) } })"
+              @contextmenu="showInFolder(item.path)"
+            >{{ item.chartInfo.name }}</v-col>
 
             <v-col cols="2" v-if="item.status.type === 'pending'">{{ t('task.pending') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'loading'">{{ t('task.loading') }}</v-col>
@@ -439,14 +454,14 @@ const outputDialog = ref(false),
             <v-col cols="2" v-else-if="item.status.type === 'failed'">-</v-col>
             <v-col cols="2" v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.chartInfo.charter">{{ item.chartInfo.charter }}</v-col>
 
-            <v-col v-if="item.status.type === 'pending'">-</v-col>
-            <v-col v-else-if="item.status.type === 'loading'">-</v-col>
-            <v-col v-else-if="item.status.type === 'mixing'">-</v-col>
-            <v-col v-else-if="item.status.type === 'rendering'">{{ item.status.estimate.toFixed(0) }} s</v-col>
-            <v-col v-else-if="item.status.type === 'done'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
-            <v-col v-else-if="item.status.type === 'canceled'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
-            <v-col v-else-if="item.status.type === 'failed'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
-            <v-col v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.path">{{ item.path }}</v-col>
+            <v-col v-if="item.status.type === 'pending'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'loading'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'mixing'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'rendering'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">{{ item.status.estimate.toFixed(0) }} s</v-col>
+            <v-col v-else-if="item.status.type === 'done'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'canceled'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'failed'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px; cursor: pointer;" @click="showInFolder(item.path)" @contextmenu="showInFolder(item.path)" :title="`${item.path}\n${t('file-open-tip')}`">{{ item.path }}</v-col>
 
             <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" @click="chartInfoSelect = item.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></v-col>
             <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" :loading="loadingPreview" @click="previewChart(item)">{{ t('preview') }}</v-btn></v-col>
