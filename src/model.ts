@@ -74,7 +74,6 @@ export interface Task {
 
 export interface RenderConfig {
   resolution: number[];
-  ffmpegPreset: string;
   endingLength: number;
   disableLoading: boolean;
   hires: boolean;
@@ -142,7 +141,6 @@ export interface RenderConfig {
 
 export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
-  ffmpegPreset: 'medium p4 balanced',
   endingLength: 0.0,
   disableLoading: true,
   hires: false,
