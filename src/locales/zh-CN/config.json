@@ -96,7 +96,7 @@
     "max-particles-list": "低,中,高",
     "max-particles-tip": "最大同时显示多少个打击特效, 低 5000, 中 25000, 高 200000",
     "max-particles-error": "粒子限制无效",
-    "render-start-time": "渲染开始时间",
+    "render-start-time": "渲染起始时间",
     "render-end-time": "渲染结束时间",
     "fade": "上隐/下隐",
     "fade-tip": "1.0 单位大小(半个屏幕)\n正数上隐,\n负数下隐\n",
