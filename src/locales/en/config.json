@@ -48,7 +48,7 @@
     "limit-threshold": "SFX Limiter",
     "force-limit": "SFX Force Limit",
     "ending-length": "Result Scene Duration",
-    "disable-loading": "Remove Loading Scene",
+    "render-loading": "Loading Scene",
     "hires": "Lossless Audio",
     "chart-debug-line": "Chart Debug - Line",
     "chart-debug-line-tip": "Debug text size of judge line",
