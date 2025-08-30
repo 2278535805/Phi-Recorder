@@ -174,6 +174,7 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
                 match key {
                     "date" => Local::now().format("%Y-%m-%d").to_string(),
                     "time" => Local::now().format("%H-%M-%S").to_string(),
+                    "level_prefix" => info.level.split_whitespace().next().unwrap_or("UK").to_string(),
                     _ => whole.to_string(),
                 }
             };

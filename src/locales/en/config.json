@@ -70,7 +70,7 @@
     "offset": "Offset",
     "judgeOffset": "Judge Offset",
     "file-name-format": "File Name Format",
-    "file-name-format-tip": "supports variables:\n %date% \n %time% \n %info.*% \n %config.*%",
+    "file-name-format-tip": "supports variables:\n %date% \n %time% \n %level_prefix% \n %info.*% \n %config.*%",
     "loading-scene": "Loading Screen",
     "render-item": "Render Item",
     "render-line": "Judge Line",
