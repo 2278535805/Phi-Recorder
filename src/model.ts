@@ -181,7 +181,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   combo: 'AUTOPLAY',
   difficulty: '',
   judgeOffset: 0,
-  fileNameFormat: '%date% %time% %info.name%_%info.difficulty%',
+  fileNameFormat: '%date% %time% %info.name%_%level_prefix%',
   renderLine: true,
   renderLineExtra: true,
   renderNote: true,

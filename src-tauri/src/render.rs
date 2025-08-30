@@ -211,7 +211,7 @@ impl Default for RenderConfig {
             difficulty: "".to_string(),
             player_avatar: None,
             judge_offset: 0.,
-            file_name_format: "%date% %time% %info.name%_%info.difficulty%".to_string(),
+            file_name_format: "%date% %time% %info.name%_%level_prefix%".to_string(),
 
             render_line: true,
             render_line_extra: true,
