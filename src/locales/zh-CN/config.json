@@ -47,7 +47,7 @@
     "limit-threshold": "音效限幅",
     "force-limit": "强制限幅",
     "ending-length": "结算场景时长",
-    "disable-loading": "禁用加载场景",
+    "render-loading": "加载场景",
     "hires": "无损音频",
     "chart-debug-line": "谱面调试 - 判定线",
     "chart-debug-line-tip": "判定线的调试文字大小",

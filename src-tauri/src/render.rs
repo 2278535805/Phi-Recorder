@@ -13,10 +13,10 @@ use ndarray::{s, Array1};
 use phire::{
     config::{ChallengeModeColor, Config, Mods},
     core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
-    ext::NotNanExt,
-    fs,
+    ext::{NotNanExt, SafeTexture, BLACK_TEXTURE},
+    fs::{self, FileSystem},
     info::ChartInfo,
-    scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
+    scene::{game::WAIT_TIME, BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
     time::TimeManager,
     ui::{FontArc, TextPainter},
     Main,
@@ -44,7 +44,7 @@ pub struct RenderConfig {
     pub resolution: (u32, u32),
     pub ffmpeg_preset: String,
     pub ending_length: f64,
-    pub disable_loading: bool,
+    pub render_loading: bool,
     pub hires: bool,
     pub chart_debug_line: f32,
     pub chart_debug_note: f32,
@@ -103,8 +103,8 @@ pub struct RenderConfig {
     pub bg_blurriness: f32,
 
     pub max_particles: usize,
-    pub render_start_time: f64,
-    pub render_end_time: Option<f64>,
+    pub play_start_time: f64,
+    pub play_end_time: Option<f64>,
 
     pub fade: f32,
     pub alpha_tint: bool,
@@ -116,7 +116,7 @@ impl RenderConfig {
             aggressive: self.aggressive,
             challenge_color: self.challenge_color.clone(),
             challenge_rank: self.challenge_rank,
-            disable_loading: self.disable_loading,
+            enter_animation: self.render_loading,
             fxaa: self.fxaa,
             note_scale: self.note_scale,
             //offset: self.offset,
@@ -138,7 +138,6 @@ impl RenderConfig {
             chinese: self.chinese,
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
-            disable_audio: false,
             judge_offset: self.judge_offset,
 
             render_line: self.render_line,
@@ -157,6 +156,9 @@ impl RenderConfig {
             bg_blurriness: self.bg_blurriness,
 
             max_particles: self.max_particles,
+            play_start_time: self.play_start_time as f32,
+            play_end_time: self.play_end_time.map(|v| v as f32),
+
             fade: self.fade,
             alpha_tint: self.alpha_tint,
             ..Default::default()
@@ -170,7 +172,7 @@ impl Default for RenderConfig {
             resolution: (1920, 1080),
             ffmpeg_preset: "medium p4 balanced".to_string(),
             ending_length: 0.0,
-            disable_loading: true,
+            render_loading: false,
             hires: false,
             fps: 60,
             hardware_accel: true,
@@ -227,8 +229,8 @@ impl Default for RenderConfig {
             bg_blurriness: 80.,
 
             max_particles: 5000,
-            render_start_time: 0.0,
-            render_end_time: None,
+            play_start_time: 0.0,
+            play_end_time: None,
 
             fade: 0.0,
             alpha_tint: false,
@@ -460,7 +462,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let volume_sfx = std::mem::take(&mut config.volume_sfx);
     let mut prpr_config = config.to_config();
     prpr_config.mods = Mods::AUTOPLAY;
-    prpr_config.disable_audio = true;
     let Some(ffmpeg) = find_ffmpeg()? else {
         bail!("FFmpeg not found")
     };
@@ -509,21 +510,15 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut gl = unsafe { get_internal_gl() };
 
-    let before_time: f64 = if config.disable_loading {
-        0.0
-    } else {
+    let before_time: f64 = if config.render_loading {
         LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
-    };
-    let video_cut_time: f64 = if config.disable_loading {
-        config.render_start_time.min(music_length)
     } else {
         0.0
     };
-
     let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = before_time + config.render_end_time.unwrap_or(music_length).min(music_length) - offset as f64;
-    let video_length = chart_length + config.ending_length - video_cut_time;
+    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let video_length = chart_length + config.ending_length;
     let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
@@ -550,11 +545,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         send(IPCEvent::StartMixing);
     }
 
-    let output_music_time = video_length + video_cut_time;
-    let output_music_len = (output_music_time * music_sample_rate as f64).ceil() as usize * 2;
+    let output_music_len = (video_length * music_sample_rate as f64).ceil() as usize * 2;
 
-    let output_fx_time = video_length + video_cut_time + sfx_protect_time;
-    let output_fx_len = (output_fx_time * sample_rate_f64).ceil() as usize * 2;
+    let output_fx_len = ((chart_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
 
     let mut output_music = Array1::from_vec(vec![0.0_f32; output_music_len]);
     let mut output_fx = Array1::from_vec(vec![0.0_f32; output_fx_len]);
@@ -574,8 +567,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         let music_time = Instant::now();
         let pos = before_time - offset.min(0.) as f64;
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
-        let position_read = (offset.max(0.) as f64 * music_sample_rate as f64).ceil() as usize * 2;
-        let len = (music.len() - position_read).min(output_music_len - position_wrtie);
+        let position_read = ((offset.max(0.) as f64 + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
+        let music_len = (chart_length * music_sample_rate as f64).ceil() as usize * 2;
+        let len = (music.len() - position_read).min(music_len - position_wrtie);
         let clip = music.slice(s![position_read..position_read + len]);
         let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + len]);
         slice += &clip;
@@ -600,13 +594,14 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        let length = output_fx_time as f32;
+        let play_start_time = config.play_start_time as f32 - config.judge_offset;
+        let length = play_start_time + chart_length as f32;
         let mut hit_fx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
 
         if config.audio_mix_optimization {
-            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < length).for_each(|note| {
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    hit_fx_list.push((before_time + note.time as f64 + judge_offset, sfx));
+                    hit_fx_list.push((before_time + note.time as f64 + judge_offset - config.play_start_time, sfx));
                 }
             });
             let len = hit_fx_list.len();
@@ -660,9 +655,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             info!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
         } else {
             let mut num = 0;
-            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time < length).for_each(|note| {
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    place_fx(before_time + note.time as f64 + judge_offset, sfx);
+                    place_fx(before_time + note.time as f64 + judge_offset - config.play_start_time, sfx);
                     num += 1;
                 }
             });
@@ -681,8 +676,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         let mut proc = cmd_hidden(&ffmpeg)
             .args(
                 format!(
-                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -ss {} -c:a pcm_f32le -f wav",
-                    music_sample_rate, video_cut_time
+                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
+                    music_sample_rate
                 )
                 .split_whitespace(),
             )
@@ -705,8 +700,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         let mut proc = cmd_hidden(&ffmpeg)
             .args(
                 format!(
-                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -ss {} -c:a pcm_f32le -f wav",
-                    sample_rate, video_cut_time
+                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
+                    sample_rate
                 )
                 .split_whitespace(),
             )
@@ -743,37 +738,80 @@ pub async fn main(cmd: bool) -> Result<()> {
     }));
     static MSAA: AtomicBool = AtomicBool::new(false);
     let player = build_player(&config).await?;
-    let mut main = Main::new(
-        Box::new(
-            LoadingScene::new(
-                Some((chart, format)),
-                GameMode::Normal,
-                info,
-                &prpr_config,
-                fs,
-                Some(player),
-                None,
-                None,
-            )
-            .await?,
-        ),
-        tm,
-        {
-            let mut cnt = 0;
-            let mst = Rc::clone(&mst);
-            move || {
-                cnt += 1;
-                if cnt == 1 || cnt == 3 {
-                    MSAA.store(true, AtomicOrdering::SeqCst);
-                    Some(mst.input())
-                } else {
-                    MSAA.store(false, AtomicOrdering::SeqCst);
-                    Some(mst.output())
+    let mut main = if config.render_loading {
+        Main::new(
+            Box::new(
+                LoadingScene::new(
+                    Some((chart, format)),
+                    GameMode::Normal,
+                    info,
+                    &prpr_config,
+                    fs,
+                    Some(player),
+                    None,
+                    None,
+                ).await?
+            ),
+            tm,
+            {
+                let mut cnt = 0;
+                let mst = Rc::clone(&mst);
+                move || {
+                    cnt += 1;
+                    if cnt == 1 || cnt == 3 {
+                        MSAA.store(true, AtomicOrdering::SeqCst);
+                        Some(mst.input())
+                    } else {
+                        MSAA.store(false, AtomicOrdering::SeqCst);
+                        Some(mst.output())
+                    }
                 }
+            },
+        ).await?
+    } else {
+        let mut fs: Box<dyn FileSystem> = fs;
+        let background = match LoadingScene::load_background(&mut fs, &prpr_config, &info.illustration).await {
+            Ok((ill, bg)) => Some((ill, bg)),
+            Err(err) => {
+                warn!("failed to load background: {err:?}");
+                None
             }
-        },
-    )
-    .await?;
+        };
+        let (illustration, background): (SafeTexture, SafeTexture) = background
+            .map(|(ill, back)| (ill.into(), back.into()))
+            .unwrap_or_else(|| (BLACK_TEXTURE.clone(), BLACK_TEXTURE.clone()));
+        Main::new(
+            Box::new(
+                GameScene::new(
+                    Some((chart, format)),
+                    GameMode::Normal,
+                    info,
+                    prpr_config,
+                    fs,
+                    Some(player),
+                    background,
+                    illustration,
+                    None,
+                    None,
+                ).await?
+            ),
+            tm,
+            {
+                let mut cnt = 0;
+                let mst = Rc::clone(&mst);
+                move || {
+                    cnt += 1;
+                    if cnt == 1 || cnt == 3 {
+                        MSAA.store(true, AtomicOrdering::SeqCst);
+                        Some(mst.input())
+                    } else {
+                        MSAA.store(false, AtomicOrdering::SeqCst);
+                        Some(mst.output())
+                    }
+                }
+            },
+        ).await?
+    };
     main.top_level = false;
     main.viewport = Some((0, 0, vw as _, vh as _));
 
@@ -844,8 +882,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
     )?;
 
-    let delay_ending =
-        (chart_length + 0.5 + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME - video_cut_time) * 1000.;
+    let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
@@ -966,12 +1003,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let fps = fps as f64;
     let frames10 = (video_frames / 10).max(1);
-    let skip_frames = ((video_cut_time + GameScene::BEFORE_DURATION as f64) * fps) as u64;
-    let frames = if config.disable_loading {
-        video_frames + skip_frames
-    } else {
-        video_frames
-    };
+    let frames = video_frames;
     let mut step_time = Instant::now();
     let mut writed_frames: u64 = 0;
     for frame in 0..frames {
@@ -979,11 +1011,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         *my_time.borrow_mut() = now.max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
-        if config.disable_loading && frame < skip_frames {
-            continue;
-        }
         main.render(&mut painter)?;
-        if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && !config.disable_loading {
+        if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && config.render_loading {
             draw_rectangle(0., 0., 0., 0., Color::default());
         }
         gl.flush();

@@ -86,15 +86,14 @@ const maxParticles = ref(DEFAULT_RENDER_CONFIG.maxParticles)
 const maxParticlesTextList = t('max-particles-list').split(',')
 const maxParticlesList = [5000, 25000, 200000];
 
-const
-  renderStartTime = ref(String(DEFAULT_RENDER_CONFIG.renderStartTime)),
-  renderEndTime = ref('');
+const playStartTime = ref(String(DEFAULT_RENDER_CONFIG.playStartTime)),
+  playEndTime = ref('');
 
 const judgeMode = ref(t('judge-modes').split(',')[0])
 const fade = ref(String(DEFAULT_RENDER_CONFIG.fade))
 const alphaTint = ref(DEFAULT_RENDER_CONFIG.alphaTint)
 
-const disableLoading = ref(DEFAULT_RENDER_CONFIG.disableLoading);
+const renderLoading = ref(DEFAULT_RENDER_CONFIG.renderLoading);
 const renderLine = ref(DEFAULT_RENDER_CONFIG.renderLine);
 const renderLineExtra = ref(DEFAULT_RENDER_CONFIG.renderLineExtra);
 const renderNote = ref(DEFAULT_RENDER_CONFIG.renderNote);
@@ -280,13 +279,13 @@ async function buildConfig(): Promise<RenderConfig | null> {
     bgBlurriness: parseFloat(bgBlurriness.value),
 
     maxParticles: maxParticles.value,
-    renderStartTime: parseFloat(renderStartTime.value),
-    renderEndTime: parseFloat(renderEndTime.value),
+    playStartTime: parseFloat(playStartTime.value),
+    playEndTime: parseFloat(playEndTime.value),
 
     fade: parseFloat(fade.value),
     alphaTint: alphaTint.value,
 
-    disableLoading: disableLoading.value,
+    renderLoading: renderLoading.value,
     renderLine: renderLine.value,
     renderLineExtra: renderLineExtra.value,
     renderNote: renderNote.value,
@@ -409,7 +408,7 @@ function applyConfig(config: RenderConfig) {
   fade.value = String(config.fade);
   alphaTint.value = config.alphaTint;
 
-  disableLoading.value = config.disableLoading;
+  renderLoading.value = config.renderLoading;
   renderLine.value = config.renderLine;
   renderLineExtra.value = config.renderLineExtra;
   renderNote.value = config.renderNote;
@@ -597,16 +596,16 @@ function setConfigForSocial() {
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positiveOrZero]" v-show="disableLoading"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveOrNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <TipSwitch class="ml-n1" :label="t('disable-loading')" color="btn" v-model="disableLoading"></TipSwitch>
+          <TipSwitch class="ml-n1" :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
@@ -649,16 +648,16 @@ function setConfigForSocial() {
       </v-row>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positiveOrZero]" v-show="disableLoading"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveOrNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <TipSwitch :label="t('disable-loading')" color="btn" v-model="disableLoading"></TipSwitch>
+          <TipSwitch :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2">
