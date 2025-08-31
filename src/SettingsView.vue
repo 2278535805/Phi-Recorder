@@ -225,18 +225,18 @@ const SUPPORTED_THEME_NAME = computed(() => [
       </v-row>
       <v-row no-gutters class="mt-5 mx-0">
         <v-col cols="6">
-          <v-text-field clearable class="mx-2" :label="t('rpe-dir')" v-model="config.rpeDir" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir" @contextmenu="openInFolder(config.rpeDir)"></v-text-field>
+          <v-text-field clearable class="mx-2" :label="t('rpe-dir')" v-model="config.rpeDir" :title="t('folder-tip')" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir" @contextmenu="openInFolder(config.rpeDir)"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field clearable class="mx-2" :label="t('output-dir')" v-model="config.outputDir" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir" @contextmenu="openInFolder(config.outputDir, true)"></v-text-field>
+          <v-text-field clearable class="mx-2" :label="t('output-dir')" v-model="config.outputDir" :title="t('folder-tip')" placeholder="/output/" append-inner-icon="mdi-folder-open" @click:append-inner="selectOutputDir" @contextmenu="openInFolder(config.outputDir, true)"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-3 mx-0">
         <v-col cols="6">
-          <v-text-field clearable class="mx-2" :label="t('encoder-avc')" v-model="config.encoderAvc" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(false)" @contextmenu="testEncoderAvc"></v-text-field>
+          <v-text-field clearable class="mx-2" :label="t('encoder-avc')" v-model="config.encoderAvc" :title="t('encoder-tip')" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(false)" @contextmenu="testEncoderAvc"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field clearable class="mx-2" :label="t('encoder-hevc')" v-model="config.encoderHevc" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(true)" @contextmenu="testEncoderHevc"></v-text-field>
+          <v-text-field clearable class="mx-2" :label="t('encoder-hevc')" v-model="config.encoderHevc" :title="t('encoder-tip')" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(true)" @contextmenu="testEncoderHevc"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-0">

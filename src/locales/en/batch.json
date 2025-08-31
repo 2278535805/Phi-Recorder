@@ -12,6 +12,8 @@
     "chart-info": "Chart Info",
     "edit": "Edit",
     "sort-tip": "Click to sort, right-click to reverse",
+    "chart-open-tip": "Click to enter the render page, right-click to open the file location",
+    "file-open-tip": "Right-click to open the file location",
     "presets": "Presets",
     "default-preset": "Default",
     "edit-preset": "Edit Preset",

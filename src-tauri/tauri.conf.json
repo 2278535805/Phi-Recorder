@@ -56,10 +56,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 690,
+        "width": 950,
+        "height": 750,
         "resizable": true,
         "title": "Phi Recorder",
-        "width": 900,
         "dragDropEnabled": true,
         "useHttpsScheme": true,
         "decorations": false

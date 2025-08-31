@@ -6,12 +6,14 @@ hardwareAccel = true
 hevc = false
 mpeg4 = false
 # customEncoder = ""
+fileNameFormat = "%date% %time% %info.name%_%level_prefix%"
 ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf" or "any"
 dynamicBitrateControl = true
 bitrate = "26"
 endingLength = 0.0
 renderStartTime = 0.0
 # renderEndTime = 
+renderLoading = true
 
 
 # Player 玩家
@@ -29,10 +31,10 @@ chartDebugNote = 0.0
 chartRatio = 1.0
 noteScale = 1.0
 
-disableLoading = true
 renderLine = true
 renderLineExtra = true
 renderNote = true
+doubleHint = true
 renderUiPause = true
 renderUiName = true
 renderUiLevel = true
@@ -41,9 +43,8 @@ renderUiCombo = true
 renderUiBar = true
 renderBg = true
 renderBgDim = true
-renderExtra = true
 particle = true
-doubleHint = true
+renderExtra = true
 
 aggressive = false
 roman = false
@@ -56,14 +57,14 @@ maxParticles = 5000 # 5000 25000 200000
 
 # Audio 音频
 forceLimit = true
-hires = true
+hires = false
 loudnessEqualization = false
 AudioMixOptimization = true
 
 volumeMusic = 0.5
 volumeSfx = 0.4
-compressionRatio = 20.0
-limitThreshold = 0.5
+limitThreshold = 0.5 # if forceLimit
+compressionRatio = 20.0 # else
 
 
 # Other 其他
@@ -72,7 +73,7 @@ allBad = false
 judgeOffset = 0.0
 difficulty = ""
 fade = 0.0
+alphaTint = false
 
-simpleFileName = false # {date} {name}_{level} -> {name}.{composer}_{level}
 fxaa = false
 speed = 1.0
