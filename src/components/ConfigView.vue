@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, h } from 'vue';
+import { ref, h, watch } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -20,11 +20,11 @@ const form = ref<VForm>();
 const page = ref(0);
 const fileNameFormatDialog = ref(false);
 
-const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160']
-const ffmpegPresetPresetTextList = t('ffmpeg-preset-list').split(','),
-  ffmpegPresetPresetList = ['veryfast p1 veryfast speed', 'faster p2 faster speed','fast p3 fast speed', 'medium p4 medium balanced', 'slow p5 slow quality', 'slower p6 slower quality', 'veryslow p7 veryslow quality'],
-  ffmpegPresetText = ref(ffmpegPresetPresetTextList[3]),
-  ffmpegPreset = ref(ffmpegPresetPresetList[3])
+const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160'],
+  fpsList = ['30', '60', '120'],
+  bitrateList = ['2M', '5M', '7M'],
+  bitrateCrfList = ['24', '28', '35', '40'],
+  encoderList = ref(t('encoder-list').split(','))
 
 const
   endingLength = ref(String(DEFAULT_RENDER_CONFIG.endingLength)),
@@ -33,15 +33,11 @@ const
   chartRatio = ref(DEFAULT_RENDER_CONFIG.chartRatio),
   allGood = ref(DEFAULT_RENDER_CONFIG.allGood),
   allBad = ref(DEFAULT_RENDER_CONFIG.allBad),
-  fpsList = ['30', '60', '120'],
   fps = ref(String(DEFAULT_RENDER_CONFIG.fps)),
   hwAccel = ref(DEFAULT_RENDER_CONFIG.hardwareAccel),
   dynamicBitrateControl = ref(true),
   bitrate = ref('28'),
-  bitrateList = ['2M', '5M', '7M'],
-  bitrateCrfList = ['24', '28', '35', '40'],
-  resolution = ref('1920x1080')
-const encoderList = ref(t('encoder-list').split(','))
+  resolution = ref('1920x1080');
 const encoder = ref(t('encoder-list').split(',')[0])
 
 const challengeColor = ref(t('challenge-colors').split(',')[5]),
@@ -52,21 +48,30 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
   playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks)),
   sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount))
 
-const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic),
-  volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx),
-  compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio),
-  limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold)
+const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic);
+const volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx);
+const compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio);
+const limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold);
+const forceLimit = ref(DEFAULT_RENDER_CONFIG.forceLimit);
+const hires = ref(DEFAULT_RENDER_CONFIG.hires);
+const loudnessEqualization = ref(DEFAULT_RENDER_CONFIG.loudnessEqualization);
+const audioMixOptimization = ref(DEFAULT_RENDER_CONFIG.audioMixOptimization);
 
-
-const renderList = ref(t('render-list').split(','))
-const render = ref<string[]>([])
-render.value.push(...renderList.value.slice(1, 15))
-
-const expandList = ref(t('expand-list').split(','))
-const expand = ref<string[]>([])
-
-const audioList = ref(t('audio-list').split(','))
-const audio = ref([audioList.value[0], audioList.value[3]])
+watch(() => volumeSfx.value, (volume) => {
+  if (forceLimit.value && volume > limitThreshold.value) {
+    limitThreshold.value = volumeSfx.value;
+  }
+})
+watch(() => limitThreshold.value, (limit) => {
+  if (forceLimit.value && limit < volumeSfx.value) {
+    volumeSfx.value = limitThreshold.value;
+  }
+})
+watch(() => loudnessEqualization.value, (loudnessEq) => {
+  if (loudnessEq) {
+    volumeMusic.value = 1.0;
+  }
+})
 
 const
   combo = ref(DEFAULT_RENDER_CONFIG.combo),
@@ -81,13 +86,32 @@ const maxParticles = ref(DEFAULT_RENDER_CONFIG.maxParticles)
 const maxParticlesTextList = t('max-particles-list').split(',')
 const maxParticlesList = [5000, 25000, 200000];
 
-const
-  renderStartTime = ref(String(DEFAULT_RENDER_CONFIG.renderStartTime)),
-  renderEndTime = ref('');
+const playStartTime = ref(String(DEFAULT_RENDER_CONFIG.playStartTime)),
+  playEndTime = ref('');
 
 const judgeMode = ref(t('judge-modes').split(',')[0])
 const fade = ref(String(DEFAULT_RENDER_CONFIG.fade))
 const alphaTint = ref(DEFAULT_RENDER_CONFIG.alphaTint)
+
+const renderLoading = ref(DEFAULT_RENDER_CONFIG.renderLoading);
+const renderLine = ref(DEFAULT_RENDER_CONFIG.renderLine);
+const renderLineExtra = ref(DEFAULT_RENDER_CONFIG.renderLineExtra);
+const renderNote = ref(DEFAULT_RENDER_CONFIG.renderNote);
+const renderUiPause = ref(DEFAULT_RENDER_CONFIG.renderUiPause);
+const renderUiName = ref(DEFAULT_RENDER_CONFIG.renderUiName);
+const renderUiLevel = ref(DEFAULT_RENDER_CONFIG.renderUiLevel);
+const renderUiScore = ref(DEFAULT_RENDER_CONFIG.renderUiScore);
+const renderUiCombo = ref(DEFAULT_RENDER_CONFIG.renderUiCombo);
+const renderUiBar = ref(DEFAULT_RENDER_CONFIG.renderUiBar);
+const renderBg = ref(DEFAULT_RENDER_CONFIG.renderBg);
+const renderBgDim = ref(DEFAULT_RENDER_CONFIG.renderBgDim);
+const particle = ref(DEFAULT_RENDER_CONFIG.particle);
+const renderExtra = ref(DEFAULT_RENDER_CONFIG.renderExtra);
+const renderDoubleHint = ref(DEFAULT_RENDER_CONFIG.renderDoubleHint);
+
+const aggressive = ref(DEFAULT_RENDER_CONFIG.aggressive);
+const roman = ref(DEFAULT_RENDER_CONFIG.roman);
+const chinese = ref(DEFAULT_RENDER_CONFIG.chinese);
 
 
 function parseResolution(resolution: string): [number, number] | null {
@@ -214,14 +238,12 @@ async function buildConfig(): Promise<RenderConfig | null> {
   if (!updateMaxParticles()) {
     return null;
   }
-  updateList(ffmpegPreset, ffmpegPresetText, ffmpegPresetPresetList, ffmpegPresetPresetTextList);
 
   return {
     resolution: (() => {
       let parts = resolution.value.split('x');
       return [parseInt(parts[0]), parseInt(parts[1])];
     })(),
-    ffmpegPreset: ffmpegPreset.value,
     endingLength: parseFloat(endingLength.value),
     chartDebugLine: chartDebugLine.value,
     chartDebugNote: chartDebugNote.value,
@@ -255,44 +277,42 @@ async function buildConfig(): Promise<RenderConfig | null> {
     judgeOffset: parseInt(judgeOffset.value) / 1000,
     fileNameFormat: fileNameFormat.value,
     bgBlurriness: parseFloat(bgBlurriness.value),
-    
-    disableLoading: !render.value.includes(renderList.value[0]),
-    renderLine: render.value.includes(renderList.value[1]),
-    renderLineExtra: render.value.includes(renderList.value[2]),
-    renderNote: render.value.includes(renderList.value[3]),
-    renderUiPause: render.value.includes(renderList.value[4]),
-    renderUiName: render.value.includes(renderList.value[5]),
-    renderUiLevel: render.value.includes(renderList.value[6]),
-    renderUiScore: render.value.includes(renderList.value[7]),
-    renderUiCombo: render.value.includes(renderList.value[8]),
-    renderUiBar: render.value.includes(renderList.value[9]),
-    renderBg: render.value.includes(renderList.value[10]),
-    renderBgDim: render.value.includes(renderList.value[11]),
-    particle: render.value.includes(renderList.value[12]),
-    renderExtra: render.value.includes(renderList.value[13]),
-    renderDoubleHint: render.value.includes(renderList.value[14]),
-
-    aggressive: expand.value.includes(expandList.value[0]),
-    roman: expand.value.includes(expandList.value[1]),
-    chinese: expand.value.includes(expandList.value[2]),
-
-    forceLimit: audio.value.includes(audioList.value[0]),
-    hires: audio.value.includes(audioList.value[1]),
-    loudnessEqualization: audio.value.includes(audioList.value[2]),
-    audioMixOptimization: audio.value.includes(audioList.value[3]),
 
     maxParticles: maxParticles.value,
-    renderStartTime: parseFloat(renderStartTime.value),
-    renderEndTime: parseFloat(renderEndTime.value),
+    playStartTime: parseFloat(playStartTime.value),
+    playEndTime: parseFloat(playEndTime.value),
 
     fade: parseFloat(fade.value),
     alphaTint: alphaTint.value,
+
+    renderLoading: renderLoading.value,
+    renderLine: renderLine.value,
+    renderLineExtra: renderLineExtra.value,
+    renderNote: renderNote.value,
+    renderUiPause: renderUiPause.value,
+    renderUiName: renderUiName.value,
+    renderUiLevel: renderUiLevel.value,
+    renderUiScore: renderUiScore.value,
+    renderUiCombo: renderUiCombo.value,
+    renderUiBar: renderUiBar.value,
+    renderBg: renderBg.value,
+    renderBgDim: renderBgDim.value,
+    particle: particle.value,
+    renderExtra: renderExtra.value,
+    renderDoubleHint: renderDoubleHint.value,
+    
+    aggressive: aggressive.value,
+    roman: roman.value,
+    chinese: chinese.value,
+
+    forceLimit: forceLimit.value,
+    hires: hires.value,
+    loudnessEqualization: loudnessEqualization.value,
+    audioMixOptimization: audioMixOptimization.value,
   };
 }
 
 function applyAspectRatio(aspectRatio: number) {
-  if (preset.value.key !== 'default') return;
-
   let h = parseInt(resolution.value.split('x')[1]);
 
   if (aspectRatio <= 1.0) {
@@ -302,6 +322,24 @@ function applyAspectRatio(aspectRatio: number) {
     resolution.value = `${ w }x${ h }`
   }
 }
+
+function applyResolution(w?: number, h?: number) {
+  if (w) {
+    let width = parseInt(resolution.value.split('x')[0]);
+    let ratio = w / width;
+    let height = Math.floor(parseInt(resolution.value.split('x')[1]) * ratio);
+    
+    resolution.value = `${ w }x${ height }`
+  }
+  if (h) {
+    let height = parseInt(resolution.value.split('x')[1]);
+    let ratio = h / height;
+    let width = Math.floor(parseInt(resolution.value.split('x')[0]) * ratio);
+
+    resolution.value = `${ width }x${ h }`
+  }
+}
+
 
 defineExpose({ buildConfig, applyAspectRatio, applyConfig });
 
@@ -319,8 +357,6 @@ function StickyLabel(props: { title: string }) {
 
 function applyConfig(config: RenderConfig) {
   resolution.value = config.resolution.join('x');
-  setList(config.ffmpegPreset, ffmpegPresetText, ffmpegPresetPresetTextList);
-  //ffmpegPresetText.value = ffmpegPresetPresetTextList[ffmpegPresetPresetList.indexOf(config.ffmpegPreset)];
   endingLength.value = String(config.endingLength);
   chartDebugLine.value = config.chartDebugLine;
   chartDebugNote.value = config.chartDebugNote;
@@ -329,9 +365,12 @@ function applyConfig(config: RenderConfig) {
   hwAccel.value = config.hardwareAccel;
   if (config.hevc) {
     encoder.value = encoderList.value[1];
-  }
-  if (config.mpeg4) {
+  } else if (config.mpeg4) {
     encoder.value = encoderList.value[2];
+  } else if (config.customEncoder) {
+    encoder.value = config.customEncoder;
+  } else {
+    encoder.value = encoderList.value[0];
   }
   dynamicBitrateControl.value = config.mpeg4 || config.dynamicBitrateControl;
   bitrate.value = config.bitrate;
@@ -359,35 +398,6 @@ function applyConfig(config: RenderConfig) {
   else if (config.allBad) judgeMode.value = t('judge-modes').split(',')[2]
   else judgeMode.value = t('judge-modes').split(',')[0];
 
-  render.value = [];
-  if (!config.disableLoading) render.value.push(renderList.value[0]);
-  if (config.renderLine) render.value.push(renderList.value[1]);
-  if (config.renderLineExtra) render.value.push(renderList.value[2]);
-  if (config.renderNote) render.value.push(renderList.value[3]);
-  if (config.renderUiPause) render.value.push(renderList.value[4]);
-  if (config.renderUiName) render.value.push(renderList.value[5]);
-  if (config.renderUiLevel) render.value.push(renderList.value[6]);
-  if (config.renderUiScore) render.value.push(renderList.value[7]);
-  if (config.renderUiCombo) render.value.push(renderList.value[8]);
-  if (config.renderUiBar) render.value.push(renderList.value[9]);
-  if (config.renderBg) render.value.push(renderList.value[10]);
-  if (config.renderBgDim) render.value.push(renderList.value[11]);
-  if (config.particle) render.value.push(renderList.value[12]);
-  if (config.renderExtra) render.value.push(renderList.value[13]);
-  if (config.renderDoubleHint) render.value.push(renderList.value[14]);
-  
-
-  expand.value = [];
-  if (config.aggressive) expand.value.push(expandList.value[0]);
-  if (config.roman) expand.value.push(expandList.value[1]);
-  if (config.chinese) expand.value.push(expandList.value[2]);
-
-  audio.value = [];
-  if (config.forceLimit) audio.value.push(audioList.value[0]);
-  if (config.hires) audio.value.push(audioList.value[1]);
-  if (config.loudnessEqualization) audio.value.push(audioList.value[2]);
-  if (config.audioMixOptimization) audio.value.push(audioList.value[3]);
-
   maxParticles.value = config.maxParticles;
   const index = maxParticlesList.indexOf(maxParticles.value);
   if (index >= 0 && index < maxParticlesTextList.length) {
@@ -397,6 +407,22 @@ function applyConfig(config: RenderConfig) {
   }
   fade.value = String(config.fade);
   alphaTint.value = config.alphaTint;
+
+  renderLoading.value = config.renderLoading;
+  renderLine.value = config.renderLine;
+  renderLineExtra.value = config.renderLineExtra;
+  renderNote.value = config.renderNote;
+  renderUiPause.value = config.renderUiPause;
+  renderUiName.value = config.renderUiName;
+  renderUiLevel.value = config.renderUiLevel;
+  renderUiScore.value = config.renderUiScore;
+  renderUiCombo.value = config.renderUiCombo;
+  renderUiBar.value = config.renderUiBar;
+  renderBg.value = config.renderBg;
+  renderBgDim.value = config.renderBgDim;
+  particle.value = config.particle;
+  renderExtra.value = config.renderExtra;
+  renderDoubleHint.value = config.renderDoubleHint;
 }
 
 const DEFAULT_PRESET: Preset = {
@@ -472,6 +498,13 @@ async function replacePreset() {
     toastError(e);
   }
 }
+
+function setConfigForSocial() {
+  applyResolution(undefined, 720);
+  encoder.value = encoderList.value[1];
+  dynamicBitrateControl.value = true;
+  bitrate.value = '40';
+}
 </script>
 
 <template>
@@ -509,7 +542,7 @@ async function replacePreset() {
   </v-layout>
   <VDivider />
 
-  <v-form ref="form" validateOn="eager" class="scroll-mask" style="max-height: 48vh; overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
+  <v-form ref="form" validateOn="eager" class="scroll-mask" style="max-height: calc(100vh - 320px); overflow-x: hidden; overflow-y: auto; margin-top: 0px;">
     <div v-show="page === 0 || page === undefined"
       style="padding: 10px 0; display: flex; flex-direction: row; align-items: center; gap: 8px;">
       <v-combobox @update:model-value="(val: Preset) => applyConfig(val.config)" :label="t('presets')" :items="presets"
@@ -549,16 +582,10 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3" class="px-2">
-          <v-select v-model="render" :items="renderList" :label="t('render')" multiple>
-            <template v-slot:selection="{ index }">
-              <span v-if="index === 0" class="text-caption">
-                ({{ render.length }} {{ t('selects') }})
-              </span>
-            </template>
-          </v-select>
+          <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
+          <v-autocomplete class="mx-2" :label="t('challenge-color')" :rules="[RULES.notEmpty]" :items="t('challenge-colors').split(',')" v-model="challengeColor"></v-autocomplete>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('player-rks')" :rules="[RULES.positiveOrZero]" type="number" v-model="playerRks"></v-text-field>
@@ -567,11 +594,29 @@ async function replacePreset() {
           <v-text-field class="mx-2" :label="t('challenge-rank')" :rules="[RULES.int, RULES.positiveOrZero]" type="number" v-model="challengeRank"></v-text-field>
         </v-col>
       </v-row>
+      <v-row no-gutters class="mx-n2 my-2">
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull]"></v-text-field>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch class="ml-n1" :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
+        </v-col>
+      </v-row>
       <v-row no-gutters class="mt-2" />
     </div>
 
     <div v-show="page === 1 || page === undefined">
-      <StickyLabel :title="t('title.output')"></StickyLabel>
+      <div class="mb-4 bg-surface sticky-label" style="z-index: 2"> <!--StickyLabel-->
+        <h3 class="pa-1" :title="t('output-tip')" @click="setConfigForSocial">{{ t('title.output') }}</h3>
+        <v-divider></v-divider>
+      </div>
+
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
           <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
@@ -590,8 +635,8 @@ async function replacePreset() {
         <v-col cols="3" class="px-2">
           <v-combobox v-model="encoder" :items="encoderList" :label="t('encoder')"></v-combobox>
         </v-col>
-        <v-col cols="3" v-show="encoder !== encoderList[2]">
-          <v-combobox class="mx-2" :label="t('ffmpeg-preset')" :items="ffmpegPresetPresetTextList" :rules="[RULES.nonSpaces, RULES.notEmpty]" v-model="ffmpegPresetText"></v-combobox>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('file-name-format')" v-model="fileNameFormat" type="text" :rules="[RULES.notEmpty, RULES.notNull]" append-inner-icon="mdi-help-circle-outline" @click:append-inner="fileNameFormatDialog = true"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-combobox class="mx-2" v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" type="number" :rules="[isCrf]" v-model="bitrate"></v-combobox>
@@ -603,17 +648,16 @@ async function replacePreset() {
       </v-row>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]" v-show="renderEndTime === null || renderEndTime === ''"></v-text-field>
+          <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="renderStartTime" type="number" :rules="[RULES.positiveOrZero]" v-show="!render.includes(renderList[0])"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="renderEndTime" type="number" :rules="[RULES.positiveOrNull]" v-show="parseFloat(endingLength) === 0.0"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull]"></v-text-field>
         </v-col>
-        <v-col></v-col>
-        <v-col cols="1" class="mx-2 justify-right" @click="dynamicBitrateControl = true; encoder = encoderList[1]; bitrate = '40'">
-          <TooltipIcon :tooltip="t('output-tip')"></TooltipIcon>
+        <v-col cols="3">
+          <TipSwitch :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2">
@@ -680,31 +724,83 @@ async function replacePreset() {
           <TipSlider :label="t('note-scale')" :tooltip="t('note-scale-tip')" color="btn" thumb-label="always" :min="0" :max="5" :step="0.01" v-model="noteScale"> </TipSlider>
         </v-col>
       </v-row>
-      <v-row no-gutters class="mx-n2 mt-6">
-        <v-col cols="6" class="px-2">
-          <v-select v-model="render" :items="renderList" :label="t('renders')" multiple>
-            <template v-slot:selection="{ item, index }">
-              <v-chip size="small" v-if="index < 1" :text="item.title"></v-chip>
-              <span v-if="index === 1" class="text-grey text-caption align-self-center">
-                (+{{ render.length - 1 }} {{ t('others') }})
-              </span>
-            </template>
-          </v-select>
-        </v-col>
-        <v-col cols="6" class="px-2">
-          <v-select v-model="expand" :items="expandList" :label="t('expand')" multiple>
-            <template v-slot:selection="{ item, index }">
-              <v-chip size="small" v-if="index < 1" :text="item.title"></v-chip>
-              <span v-if="index === 1" class="text-grey text-caption align-self-center">
-                (+{{ expand.length - 1 }} {{ t('others') }})
-              </span>
-            </template>
-          </v-select>
+
+      <v-row no-gutters class="px-n2 mt-2">
+        <v-col cols="12" class="px-1">
+          <v-expansion-panels>
+            <v-expansion-panel :title="t('render-item')">
+              <v-expansion-panel-text>
+                <v-row no-gutters class="mx-n2 mt-2">
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-line')" color="btn" v-model="renderLine"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-line-extra')" color="btn" v-model="renderLineExtra"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-note')" color="btn" v-model="renderNote"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-double-hint')" color="btn" v-model="renderDoubleHint"></v-checkbox>
+                  </v-col>
+                </v-row>
+                <v-row no-gutters class="mx-n2 mt-2">
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-ui-pause')" color="btn" v-model="renderUiPause"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-ui-name')" color="btn" v-model="renderUiName"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-ui-level')" color="btn" v-model="renderUiLevel"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-ui-score')" color="btn" v-model="renderUiScore"></v-checkbox>
+                  </v-col>
+                </v-row>
+                <v-row no-gutters class="mx-n2 mt-2">
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-ui-combo')" color="btn" v-model="renderUiCombo"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-ui-bar')" color="btn" v-model="renderUiBar"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-background')" color="btn" v-model="renderBg"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-background-dim')" color="btn" v-model="renderBgDim"></v-checkbox>
+                  </v-col>
+                </v-row>
+                <v-row no-gutters class="mx-n2 mt-2">
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-particle')" color="btn" v-model="particle"></v-checkbox>
+                  </v-col>
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('render-extra')" color="btn" v-model="renderExtra"></v-checkbox>
+                  </v-col>
+                </v-row>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-col>
       </v-row>
+
+      <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="4" class="px-2">
+          <TipSwitch :label="t('aggressive')" color="btn" v-model="aggressive"></TipSwitch>
+        </v-col>
+        <v-col cols="4" class="px-2">
+          <TipSwitch :label="t('roman')" color="btn" v-model="roman"></TipSwitch>
+        </v-col>
+        <v-col cols="4" class="px-2">
+          <TipSwitch :label="t('chinese')" color="btn" v-model="chinese"></TipSwitch>
+        </v-col>
+      </v-row>
+
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positive, RULES.less10000]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positiveOrZero, RULES.less10000]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
@@ -721,9 +817,18 @@ async function replacePreset() {
 
     <div v-show="page === 4 || page === undefined">
       <StickyLabel :title="t('title.audio')"></StickyLabel>
-      <v-row no-gutters class="mt-2 align-center">
-        <v-col cols="12" class="">
-          <v-select v-model="audio" :items="audioList" :label="t('audio-expand')" chips multiple></v-select>
+      <v-row no-gutters class="mx-n2 mt-2">
+        <v-col cols="3" class="px-2">
+          <TipSwitch :label="t('force-limit')" color="btn" v-model="forceLimit"></TipSwitch>
+        </v-col>
+        <v-col cols="3" class="px-2">
+          <TipSwitch :label="t('hires')" color="btn" v-model="hires"></TipSwitch>
+        </v-col>
+        <v-col cols="3" class="px-2">
+          <TipSwitch :label="t('loudness-equalization')" color="btn" v-model="loudnessEqualization"></TipSwitch>
+        </v-col>
+        <v-col cols="3" class="px-2">
+          <TipSwitch :label="t('audio-mix-optimization')" color="btn" v-model="audioMixOptimization"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center px-6">
@@ -734,8 +839,8 @@ async function replacePreset() {
           <v-slider :label="t('volume-sfx')" color="btn" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider v-if="!audio.includes(audioList[0])" :label="t('compression-ratio')" color="btn" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
-          <v-slider v-if="audio.includes(audioList[0])" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.01" v-model="limitThreshold"> </v-slider>
+          <v-slider v-if="!forceLimit" :label="t('compression-ratio')" color="btn" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
+          <v-slider v-if="forceLimit" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.01" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
@@ -758,9 +863,6 @@ async function replacePreset() {
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
-        <v-col cols="9">
-          <v-text-field class="mx-2" :label="t('file-name-format')" v-model="fileNameFormat" type="text" :rules="[RULES.notEmpty, RULES.notNull]" append-inner-icon="mdi-help-circle-outline" @click:append-inner="fileNameFormatDialog = true"></v-text-field>
-        </v-col>
         <v-col cols="3">
           <v-switch class="text-center justify-center mr-2 d-flex" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
         </v-col>

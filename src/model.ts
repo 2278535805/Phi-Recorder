@@ -74,9 +74,8 @@ export interface Task {
 
 export interface RenderConfig {
   resolution: number[];
-  ffmpegPreset: string;
   endingLength: number;
-  disableLoading: boolean;
+  renderLoading: boolean;
   hires: boolean;
   chartDebugLine: number;
   chartDebugNote: number;
@@ -133,8 +132,8 @@ export interface RenderConfig {
   bgBlurriness: number;
 
   maxParticles: number;
-  renderStartTime: number;
-  renderEndTime: number | null;
+  playStartTime: number;
+  playEndTime: number | null;
 
   fade: number;
   alphaTint: boolean;
@@ -142,9 +141,8 @@ export interface RenderConfig {
 
 export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   resolution: [1920, 1080],
-  ffmpegPreset: 'medium p4 balanced',
   endingLength: 0.0,
-  disableLoading: true,
+  renderLoading: false,
   hires: false,
   chartDebugLine: 0.,
   chartDebugNote: 0.,
@@ -183,7 +181,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   combo: 'AUTOPLAY',
   difficulty: '',
   judgeOffset: 0,
-  fileNameFormat: '%date% %time% %info.name%_%info.difficulty%',
+  fileNameFormat: '%date% %time% %info.name%_%level_prefix%',
   renderLine: true,
   renderLineExtra: true,
   renderNote: true,
@@ -200,8 +198,8 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   bgBlurriness: 80,
 
   maxParticles: 5000,
-  renderStartTime: 0.0,
-  renderEndTime: null,
+  playStartTime: 0.0,
+  playEndTime: null,
 
   fade: 0.0,
   alphaTint: false,

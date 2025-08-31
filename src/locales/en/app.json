@@ -1,7 +1,7 @@
 {
     "render": "Render",
-    "rpe": "RPE",
-    "batch": "Batch Render",
+    "bind": "Bind",
+    "batch": "Batch",
     "tasks": "Tasks",
     "settings": "Settings",
     "about": "About",

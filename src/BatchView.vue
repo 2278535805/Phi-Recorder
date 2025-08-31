@@ -9,6 +9,7 @@ import { invoke } from '@tauri-apps/api/core';
 
 import { toastError, RULES, toast, anyFilter } from './common';
 import { DEFAULT_RENDER_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
+import router from './router';
 
 import { VForm } from 'vuetify/components';
 
@@ -40,10 +41,12 @@ async function getPresets() {
   return result;
 }
 const presets = ref([DEFAULT_PRESET]);
-const preset = ref(DEFAULT_PRESET);
+const preset = useStorage<Preset>('BatchView.Preset', DEFAULT_PRESET);
 async function updatePresets() {
   presets.value = await getPresets();
-  preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
+  if (preset.value.key !== 'temp') {
+    preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
+  }
 }
 updatePresets();
 
@@ -329,6 +332,14 @@ async function openFile(path: string) {
   }
 }
 
+async function showInFolder(path: string) {
+  try {
+    await invoke('show_in_folder', { path });
+  } catch (e) {
+    toastError(e);
+  }
+}
+
 async function clearTasks() {
   loadingPostRender.value = false;
   charts.value = [];
@@ -363,48 +374,48 @@ const outputDialog = ref(false),
               <v-btn variant="text" @click="showOutputFolder">{{ t('task.show-folder') }}</v-btn>
             </v-row>
             <v-row no-gutters class="justify-center">
-              <v-btn variant="text" @click="clearTasks">{{ t('choose.clear-tasks') }}</v-btn>
+              <v-btn variant="text" @click="clearTasks">{{ t('clear-tasks') }}</v-btn>
             </v-row>
             <VDivider class="my-2"></VDivider>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
+              <v-checkbox :label="t('dis-select-start-render')" v-model="disSelectStartRender" ></v-checkbox>
             </v-row>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.remove-start-render')" v-model="removeStartRender"></v-checkbox>
+              <v-checkbox :label="t('remove-start-render')" v-model="removeStartRender"></v-checkbox>
             </v-row>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.remove-after-render')" v-model="removeAfterRender"></v-checkbox>
+              <v-checkbox :label="t('remove-after-render')" v-model="removeAfterRender"></v-checkbox>
             </v-row>
             <v-row no-gutters>
-              <v-checkbox :label="t('choose.auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
+              <v-checkbox :label="t('auto-change-aspect-ratio')" v-model="autoChangeAspectRatio"></v-checkbox>
             </v-row>
           </v-list-item>
         </v-list>
       </v-menu>
       <div v-if="charts.length === 0" class="d-flex align-center" style="flex: 1; margin-left: -70px;">
         <v-spacer />
-        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('choose.select-or-drop')" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
-        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('choose.select-or-drop')" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
+        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('select-or-drop')" @click="chooseChart(false)" prepend-icon="mdi-folder-zip">{{ t('choose.archive') }}</v-btn>
+        <v-btn class="mx-8" variant="tonal" style="width: 15em;" :title="t('select-or-drop')" @click="chooseChart(true)" prepend-icon="mdi-folder">{{ t('choose.folder') }}</v-btn>
         <v-spacer />
       </div>
       <div v-else class="d-flex align-center" style="flex: 1">
         <v-combobox class="mx-2 mt-2" style="flex: 4;" :label="t('presets')" :items="presets" item-title="name" item-value="config" v-model="preset"></v-combobox>
         <v-btn class="" :title="t('edit-preset')" icon="mdi-pencil" @click="editPreset"></v-btn>
         <v-spacer />
-        <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('choose.select-all') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('choose.select-invert') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('choose.remove-select') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('choose.cancel-select') }}</v-btn>
-        <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('choose.post-select-render') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="selectAll" >{{ t('select-all') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="selectInvert" >{{ t('select-invert') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="removeSelectChart" >{{ t('remove-select') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="cancelSelectTask" >{{ t('cancel-select') }}</v-btn>
+        <v-btn class="mx-2" variant="tonal" @click="postSelectRender" :loading="loadingPostRender">{{ t('post-select-render') }}</v-btn>
       </div>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto" style="font-size: 0.9em;">
-      <v-row no-gutters class="d-flex align-center batch-title" :title="t('sort-tip')" @contextmenu="sortChartsReverse">
-        <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')">({{ charts.length }})</v-col>
-        <v-col cols="3" @click="sortChartsByKey('name')">{{ t('info.name') }}</v-col>
-        <v-col cols="2" @click="sortChartsByKey('level')">{{ t('info.level') }}</v-col>
-        <v-col cols="2" @click="sortChartsByKey('charter')">{{ t('info.charter') }}</v-col>
-        <v-col @click="sortChartsByKey('path')">{{ t('info.chart') }}</v-col>
+      <v-row no-gutters class="d-flex align-center batch-title" @contextmenu="sortChartsReverse">
+        <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')" :title="t('sort-tip')">({{ charts.length }})</v-col>
+        <v-col cols="3" @click="sortChartsByKey('name')" :title="t('sort-tip')">{{ t('info.name') }}</v-col>
+        <v-col cols="2" @click="sortChartsByKey('level')" :title="t('sort-tip')">{{ t('info.level') }}</v-col>
+        <v-col cols="2" @click="sortChartsByKey('charter')" :title="t('sort-tip')">{{ t('info.charter') }}</v-col>
+        <v-col @click="sortChartsByKey('path')" :title="t('sort-tip')">{{ t('info.chart') }}</v-col>
         <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('chart-info') }}</v-col>
         <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('preview') }}</v-col>
       </v-row>
@@ -419,7 +430,11 @@ const outputDialog = ref(false),
         <template v-slot:default="{ item }">
           <v-row no-gutters class="d-flex align-center" style="height: 5em;">
             <v-col cols="1" class="d-flex justify-center" style="max-width: 60px;"><v-checkbox class="mt-2 ml-n1" v-model="item.isSelect"></v-checkbox></v-col>
-            <v-col cols="3" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.chartInfo.name">{{ item.chartInfo.name }}</v-col>
+            <v-col cols="3" style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px; cursor: pointer;"
+              :title="`${item.chartInfo.name}\n${t('chart-open-tip')}`"
+              @click="router.push({ name: 'render', query: { chart: item.path, info: JSON.stringify(item.chartInfo), config: JSON.stringify(preset.config) } })"
+              @contextmenu="showInFolder(item.path)"
+            >{{ item.chartInfo.name }}</v-col>
 
             <v-col cols="2" v-if="item.status.type === 'pending'">{{ t('task.pending') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'loading'">{{ t('task.loading') }}</v-col>
@@ -439,14 +454,14 @@ const outputDialog = ref(false),
             <v-col cols="2" v-else-if="item.status.type === 'failed'">-</v-col>
             <v-col cols="2" v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.chartInfo.charter">{{ item.chartInfo.charter }}</v-col>
 
-            <v-col v-if="item.status.type === 'pending'">-</v-col>
-            <v-col v-else-if="item.status.type === 'loading'">-</v-col>
-            <v-col v-else-if="item.status.type === 'mixing'">-</v-col>
-            <v-col v-else-if="item.status.type === 'rendering'">{{ item.status.estimate.toFixed(0) }} s</v-col>
-            <v-col v-else-if="item.status.type === 'done'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
-            <v-col v-else-if="item.status.type === 'canceled'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
-            <v-col v-else-if="item.status.type === 'failed'" @click="outputDialogMessage = item.status.output; outputDialog = true;">{{ t('task.show-output') }}</v-col>
-            <v-col v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.path">{{ item.path }}</v-col>
+            <v-col v-if="item.status.type === 'pending'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'loading'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'mixing'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'rendering'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">{{ item.status.estimate.toFixed(0) }} s</v-col>
+            <v-col v-else-if="item.status.type === 'done'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'canceled'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'failed'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px; cursor: pointer;" @click="showInFolder(item.path)" @contextmenu="showInFolder(item.path)" :title="`${item.path}\n${t('file-open-tip')}`">{{ item.path }}</v-col>
 
             <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" @click="chartInfoSelect = item.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></v-col>
             <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" :loading="loadingPreview" @click="previewChart(item)">{{ t('preview') }}</v-btn></v-col>
@@ -499,8 +514,11 @@ const outputDialog = ref(false),
           </v-row>
 
           <v-row>
-            <v-col cols="6">
+            <v-col cols="3">
               <v-text-field type="text" class="" :label="t('info.tip')" v-model="charts[chartInfoSelect].chartInfo.tip"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="charts[chartInfoSelect].chartInfo.holdParticleIntervalRatio" @update:modelValue="charts[chartInfoSelect].chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="charts[chartInfoSelect].chartInfo.backgroundDim"> </v-slider>
@@ -508,15 +526,18 @@ const outputDialog = ref(false),
           </v-row>
 
           <v-row>
-            <v-col cols="6">
+            <v-col cols="3">
               <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000]"
               v-model="charts[chartInfoSelect].chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect].chartInfo.scoreTotal = parseInt($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="charts[chartInfoSelect].chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+              <v-switch class="d-flex justify-center ml-n2" :label="t('info.force-aspect-ratio')" color="btn" v-model="charts[chartInfoSelect].chartInfo.forceAspectRatio"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="charts[chartInfoSelect].chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
+              <v-switch class="" v-model="charts[chartInfoSelect].chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+            </v-col>
+            <v-col cols="3">
+              <v-switch class="" v-model="charts[chartInfoSelect].chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
             </v-col>
           </v-row>
 

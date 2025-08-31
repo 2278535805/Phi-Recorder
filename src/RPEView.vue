@@ -152,7 +152,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
         <v-row>
           <v-col cols="12" style="margin: -20px 0px;">
-            <v-btn size="large" class="italic mt-2 v-btn hover-scale" @click="bindRPE" style="width: fit-content" v-t="'bind'"></v-btn>
+            <v-btn size="large" class="italic mt-2 v-btn hover-scale" @click="bindRPE" style="width: fit-content" v-t="'bind-rpe'"></v-btn>
           </v-col>
         </v-row>
       </v-form>
@@ -189,7 +189,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
             </div>
             <div class="d-flex flex-column w-100 chart-content">
               <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
-              <v-card-subtitle class="mt-n2 chart-id select">{{ chart.id }}</v-card-subtitle>
+              <v-card-subtitle class="mt-n2 chart-id select" style="cursor: pointer;" @click="openInFolder(chart.path)">{{ chart.id }}</v-card-subtitle>
               <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
               <div class="w-100 mt-2">
                 <div class="pt-4 d-flex justify-end">

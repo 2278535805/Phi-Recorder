@@ -63,7 +63,7 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
             "resolution"                 => format!("{}x{}", config.resolution.0, config.resolution.1),
             "ffmpeg_preset"              => config.ffmpeg_preset.clone(),
             "ending_length"              => config.ending_length.to_string(),
-            "disable_loading"            => config.disable_loading.to_string(),
+            "render_loading"             => config.render_loading.to_string(),
             "hires"                      => config.hires.to_string(),
             "chart_debug_line"           => config.chart_debug_line.to_string(),
             "chart_debug_note"           => config.chart_debug_note.to_string(),
@@ -118,8 +118,8 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
             "render_extra"               => config.render_extra.to_string(),
             "bg_blurriness"              => config.bg_blurriness.to_string(),
             "max_particles"              => config.max_particles.to_string(),
-            "render_start_time"          => config.render_start_time.to_string(),
-            "render_end_time"            => config.render_end_time.map_or_else(String::new, |v| v.to_string()),
+            "play_start_time"            => config.play_start_time.to_string(),
+            "play_end_time"              => config.play_end_time.map_or_else(String::new, |v| v.to_string()),
             "fade"                       => config.fade.to_string(),
             "alpha_tint"                 => config.alpha_tint.to_string(),
             _                            => key.to_string(),
@@ -174,6 +174,7 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
                 match key {
                     "date" => Local::now().format("%Y-%m-%d").to_string(),
                     "time" => Local::now().format("%H-%M-%S").to_string(),
+                    "level_prefix" => info.level.split_whitespace().next().unwrap_or("UK").to_string(),
                     _ => whole.to_string(),
                 }
             };

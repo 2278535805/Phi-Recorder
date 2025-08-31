@@ -12,6 +12,8 @@
     "chart-info": "谱面信息",
     "edit": "编辑",
     "sort-tip": "点击排序 右键反转",
+    "chart-open-tip": "点击进入渲染页 右键打开文件所在位置",
+    "file-open-tip": "右键打开文件所在位置",
     "presets": "预设配置",
     "default-preset": "默认",
     "edit-preset": "编辑预设",
