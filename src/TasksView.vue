@@ -152,10 +152,10 @@ function fromBackIndex(length: number, indexFromBack: number): number | null {
     if (indexFromBack >= length) return null;
     return length - indexFromBack - 1;
 }
-function removeTask(index: number) {
+function removeTask(index: number, removeFile: boolean = false) {
   removeDialog.value = false;
   let realIndex = fromBackIndex(tasks.value!.length, index);
-  invoke('remove_task', { index: realIndex })
+  invoke('remove_task', { index: realIndex, removeFile: removeFile })
     .catch((e) => {
       toastError(e);
     });
@@ -298,7 +298,8 @@ function removeTask(index: number) {
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>
-          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex)" v-t="'confirm'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex)" v-t="'remove-task-only'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex)" v-t="'remove-task-and-file'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -13,6 +13,8 @@
     "output": "输出",
     "remove-task": "删除任务",
     "remove-task-confirm": "确认删除任务?",
+    "remove-task-only": "仅删除任务",
+    "remove-task-and-file": "删除任务及文件",
     "show-output": "查看输出",
     "show-in-folder": "在文件夹中显示",
     "open-file": "打开文件",
