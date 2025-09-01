@@ -12,7 +12,7 @@ use macroquad::{miniquad::gl::GLuint, prelude::*};
 use ndarray::{s, Array1};
 use phire::{
     config::{ChallengeModeColor, Config, Mods},
-    core::{init_assets, internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
+    core::{internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
     ext::{NotNanExt, SafeTexture, BLACK_TEXTURE},
     fs::{self, FileSystem},
     info::ChartInfo,
@@ -383,10 +383,9 @@ fn round_to_step(v: f64, step: f64) -> f64 {
 
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
-
+    let asset_dir = ASSET_PATH.get().unwrap();
+    set_pc_assets_folder(&asset_dir.display().to_string());
     let (mut fs, output_path, mut config, info) = if cmd {
-        init_assets();
-
         let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
@@ -403,7 +402,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         } else {
             info!("Using config from config.toml");
-            toml::from_str(&std::fs::read_to_string("config.toml")?)?
+            toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
         };
         let path = args_input.unwrap();
 
@@ -432,8 +431,6 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         (fs, output_path, config, info)
     } else {
-        set_pc_assets_folder(&std::env::args().nth(2).unwrap());
-
         let mut stdin = std::io::stdin().lock();
         let stdin = &mut stdin;
 

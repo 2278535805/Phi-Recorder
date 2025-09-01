@@ -1,12 +1,11 @@
 use crate::{
     common::parse_args,
-    render::{build_player, RenderConfig, RenderParams}
+    render::{build_player, RenderConfig, RenderParams}, ASSET_PATH
 };
 use anyhow::{Result};
 use macroquad::prelude::*;
 use phire::{
     config::{Config, Mods},
-    core::init_assets,
     fs,
     scene::{show_error, GameMode, LoadingScene, NextScene, Scene},
     time::TimeManager,
@@ -54,9 +53,9 @@ impl Scene for BaseScene {
 }
 
 pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
+    let asset_dir = ASSET_PATH.get().unwrap();
+    set_pc_assets_folder(&asset_dir.display().to_string());
     let (fs, config, info) = if cmd {
-        init_assets();
-
         let (args_input, _, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
@@ -73,7 +72,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
             }
         } else {
             info!("Using config from config.toml");
-            toml::from_str(&std::fs::read_to_string("config.toml")?)?
+            toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
         };
         let path = args_input.unwrap();
 
@@ -87,8 +86,6 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
 
         (fs, config, info)
     } else {
-        set_pc_assets_folder(&std::env::args().nth(2).unwrap());
-
         let mut stdin = std::io::stdin().lock();
         let stdin = &mut stdin;
 
