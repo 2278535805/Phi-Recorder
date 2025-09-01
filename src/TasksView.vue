@@ -283,7 +283,7 @@ function removeTask(index: number) {
             @update:model-value="(val) => {
               filteredOutputDialogMessage = filterText(outputDialogMessage, val);
             }"
-          </v-combobox>
+          ></v-combobox>
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
