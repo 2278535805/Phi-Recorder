@@ -13,7 +13,6 @@ use anyhow::{bail, Context, Result};
 use common::{
     collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, get_output_dir, respack_dir, save_presets, AppConfig, Extra, CONFIG_DIR, DATA_DIR
 };
-use fs4::tokio::AsyncFileExt;
 use macroquad::prelude::set_pc_assets_folder;
 use phire::{
     log,
@@ -43,7 +42,6 @@ use tokio::{
 };
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
-static LOCK_FILE: OnceLock<tokio::fs::File> = OnceLock::new();
 
 #[inline]
 async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeError> {
@@ -159,11 +157,6 @@ pub async fn run() -> Result<()> {
     let exe = std::env::current_exe()?;
     let exe_dir = exe.parent().unwrap();
 
-    let cache_dir = ensure_dir(
-        resolver
-            .app_cache_dir()
-            .unwrap_or_else(|_| exe_dir.to_owned()),
-    );
 
     CONFIG_DIR
         .set(ensure_dir(
