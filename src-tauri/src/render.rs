@@ -542,7 +542,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let render_start_time = Instant::now();
 
     if ipc {
-        send(IPCEvent::StartMixing);
+        send(IPCEvent::Mixing);
     }
 
     let output_music_len = (video_length * music_sample_rate as f64).ceil() as usize * 2;
@@ -648,7 +648,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             hit_fx_list = kept;
             let num = hit_fx_list.len();
             if ipc {
-                send(IPCEvent::StartMixingSfx(num as u64));
+                send(IPCEvent::MixingSfx(num as u64));
             }
             for (pos, sfx) in hit_fx_list {
                 place_fx(pos, sfx);
@@ -673,6 +673,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     }
 
+    if ipc {
+        send(IPCEvent::Mixing);
+    }
     let output_music_temp = NamedTempFile::new()?;
     let output_fx_temp = NamedTempFile::new()?;
 
@@ -1003,7 +1006,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     }
 
     if ipc {
-        send(IPCEvent::StartRender(video_frames));
+        send(IPCEvent::RenderFrame(video_frames));
     }
     let render_time = Instant::now();
 
