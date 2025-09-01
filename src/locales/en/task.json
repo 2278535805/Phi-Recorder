@@ -13,6 +13,8 @@
     "output": "Output",
     "remove-task": "Remove Task",
     "remove-task-confirm": "Confirm to remove task?",
+    "remove-task-only": "Remove only task",
+    "remove-task-and-file": "Remove with file",
     "show-output": "Show Output",
     "show-in-folder": "Show in Folder",
     "open-file": "Open File",
