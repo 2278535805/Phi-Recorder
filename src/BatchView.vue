@@ -439,6 +439,7 @@ const outputDialog = ref(false),
             <v-col cols="2" v-if="item.status.type === 'pending'">{{ t('task.pending') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'loading'">{{ t('task.loading') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'mixing'">{{ t('task.mixing') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'mixing_sfx'">{{ t('task.mixing') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'rendering'">{{ (item.status.progress * 100).toFixed(2) }}%</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'done'">{{ t('task.done') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'canceled'">{{ t('task.canceled') }}</v-col>
@@ -448,6 +449,7 @@ const outputDialog = ref(false),
             <v-col cols="2" v-if="item.status.type === 'pending'">-</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'loading'">-</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'mixing'">-</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'mixing_sfx'">-</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'rendering'">{{ item.status.fps }} FPS</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'done'" @click="openFile(item.output)">{{ t('task.open-file') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'canceled'">-</v-col>
@@ -457,6 +459,7 @@ const outputDialog = ref(false),
             <v-col v-if="item.status.type === 'pending'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
             <v-col v-else-if="item.status.type === 'loading'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
             <v-col v-else-if="item.status.type === 'mixing'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
+            <v-col v-else-if="item.status.type === 'mixing_sfx'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
             <v-col v-else-if="item.status.type === 'rendering'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">{{ item.status.estimate.toFixed(0) }} s</v-col>
             <v-col v-else-if="item.status.type === 'done'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
             <v-col v-else-if="item.status.type === 'canceled'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>

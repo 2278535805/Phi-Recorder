@@ -42,6 +42,10 @@ export type TaskStatus =
       type: 'mixing';
     }
   | {
+      type: 'mixing_sfx';
+      progress: number;
+    }
+  | {
       type: 'rendering';
       progress: number;
       fps: number;

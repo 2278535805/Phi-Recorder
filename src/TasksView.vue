@@ -57,6 +57,10 @@ function describeStatus(status: TaskStatus): string {
       return t('status.loading');
     case 'mixing':
       return t('status.mixing');
+    case 'mixing_sfx':
+      return t('status.mixing', {
+        progress: (status.progress * 100).toFixed(2),
+      });
     case 'rendering':
       return t('status.rendering', {
         progress: (status.progress * 100).toFixed(2),
@@ -189,19 +193,19 @@ function removeTask(index: number) {
             <v-card-subtitle class="mt-n2 select" style="cursor: pointer;" @click="showInFolder(task.path)">{{ task.path }}</v-card-subtitle>
             <div class="w-100 pa-4 pb-2 pr-2 mt-2">
               <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
-              <template v-if="['loading', 'mixing', 'rendering'].includes(task.status.type)">
+              <template v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)">
                 <v-progress-linear
-                  v-if="task.status.type !== 'rendering'"
-                  :indeterminate="true"
-                  class="glow-spinner"
-                ></v-progress-linear>
-                <v-progress-linear
-                  v-else
+                  v-if="task.status.type === 'rendering' || task.status.type === 'mixing_sfx'"
                   :model-value="task.status.progress * 100"
                   rounded
                 ></v-progress-linear>
+                <v-progress-linear
+                  v-else
+                  :indeterminate="true"
+                  class="glow-spinner"
+                ></v-progress-linear>
               </template>
-              <div class="pt-4 d-flex justify-end" v-if="['pending','loading', 'mixing', 'rendering'].includes(task.status.type)">
+              <div class="pt-4 d-flex justify-end" v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)">
                 <v-btn class="hover-scale btn"
                   prepend-icon="mdi-cancel"
                   variant="text"

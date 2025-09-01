@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 pub enum IPCEvent {
     Loading,
     StartMixing,
+    StartMixingSfx(u64),
+    Sfx,
     StartRender(u64),
     Frame,
     Done(f64),
