@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub enum IPCEvent {
     Loading,
-    StartMixing,
-    StartMixingSfx(u64),
+    Mixing,
+    MixingSfx(u64),
     Sfx,
-    StartRender(u64),
+    RenderFrame(u64),
     Frame,
     Done(f64),
 }

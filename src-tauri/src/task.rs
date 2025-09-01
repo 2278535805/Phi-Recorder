@@ -296,10 +296,10 @@ impl Task {
                         IPCEvent::Loading => {
                             *self.status.lock().await = TaskStatus::Loading;
                         },
-                        IPCEvent::StartMixing => {
+                        IPCEvent::Mixing => {
                             *self.status.lock().await = TaskStatus::Mixing;
                         },
-                        IPCEvent::StartMixingSfx(total) => {
+                        IPCEvent::MixingSfx(total) => {
                             *self.status.lock().await = TaskStatus::MixingSfx {
                                 progress: 0.0,
                             };
@@ -311,7 +311,7 @@ impl Task {
                                 progress: mixing_count as f64 / total_mixing as f64,
                             };
                         },
-                        IPCEvent::StartRender(total) => {
+                        IPCEvent::RenderFrame(total) => {
                             *self.status.lock().await = TaskStatus::Rendering {
                                 progress: 0.0,
                                 fps: 0,
