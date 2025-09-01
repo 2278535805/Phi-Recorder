@@ -368,7 +368,6 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("preview")
-            .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
@@ -389,7 +388,6 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, Invoke
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("tweakoffset")
-            .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit())
@@ -430,7 +428,6 @@ async fn preview_play(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("play")
-            .arg(ASSET_PATH.get().unwrap())
             .stdin(Stdio::piped())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
