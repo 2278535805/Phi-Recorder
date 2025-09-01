@@ -189,8 +189,8 @@ function removeTask(index: number) {
             </div>
           </div>
           <div class="d-flex flex-column w-100 name-cover">
-            <v-card-title class="select">{{ task.name }}</v-card-title>
-            <v-card-subtitle class="mt-n2 select" style="cursor: pointer;" @click="showInFolder(task.path)">{{ task.path }}</v-card-subtitle>
+            <v-card-title class="select" :title="task.name">{{ task.name }}</v-card-title>
+            <v-card-subtitle class="mt-n2 select" :title="task.path" style="cursor: pointer;" @click="showInFolder(task.path)">{{ task.path }}</v-card-subtitle>
             <div class="w-100 pa-4 pb-2 pr-2 mt-2">
               <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
               <template v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)">
