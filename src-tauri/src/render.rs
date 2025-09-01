@@ -647,8 +647,14 @@ pub async fn main(cmd: bool) -> Result<()> {
 
             hit_fx_list = kept;
             let num = hit_fx_list.len();
+            if ipc {
+                send(IPCEvent::StartMixingSfx(num as u64));
+            }
             for (pos, sfx) in hit_fx_list {
                 place_fx(pos, sfx);
+                if ipc {
+                    send(IPCEvent::Sfx);
+                }
             }
 
             let elapsed = sfx_time.elapsed();

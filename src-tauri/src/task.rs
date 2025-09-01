@@ -36,6 +36,9 @@ pub enum TaskStatus {
     Pending,
     Loading,
     Mixing,
+    MixingSfx {
+        progress: f64,
+    },
     Rendering {
         progress: f64,
         fps: u64,
@@ -259,7 +262,9 @@ impl Task {
         let mut stdout_lines = BufReader::new(stdout).lines();
         let mut stderr_lines = BufReader::new(stderr).lines();
         let mut output_stderr = String::new();
-        let mut total: u64 = 0;
+        let mut total_mixing: u64 = 0;
+        let mut mixing_count: u64 = 0;
+        let mut total_frame: u64 = 0;
         let mut frame_count: u64 = 0;
         let start = Instant::now();
         let mut frame_times = VecDeque::new();
@@ -294,13 +299,25 @@ impl Task {
                         IPCEvent::StartMixing => {
                             *self.status.lock().await = TaskStatus::Mixing;
                         },
-                        IPCEvent::StartRender(total_frame) => {
+                        IPCEvent::StartMixingSfx(total) => {
+                            *self.status.lock().await = TaskStatus::MixingSfx {
+                                progress: 0.0,
+                            };
+                            total_mixing = total;
+                        },
+                        IPCEvent::Sfx => {
+                            mixing_count += 1;
+                            *self.status.lock().await = TaskStatus::MixingSfx {
+                                progress: mixing_count as f64 / total_mixing as f64,
+                            };
+                        },
+                        IPCEvent::StartRender(total) => {
                             *self.status.lock().await = TaskStatus::Rendering {
                                 progress: 0.0,
                                 fps: 0,
                                 estimate: 0.0,
                             };
-                            total = total_frame;
+                            total_frame = total;
                         },
                         IPCEvent::Frame => {
                             frame_count += 1;
@@ -314,9 +331,9 @@ impl Task {
                                 last_fps = frame_times.len();
                                 last_update_fps_sec = sec;
                             }
-                            let estimate = total.saturating_sub(frame_count).max(1) as f64 / last_fps as f64;
+                            let estimate = total_frame.saturating_sub(frame_count).max(1) as f64 / last_fps as f64;
                             *self.status.lock().await = TaskStatus::Rendering {
-                                progress: frame_count as f64 / total as f64,
+                                progress: frame_count as f64 / total_frame as f64,
                                 fps: last_fps as u64,
                                 estimate,
                             };
