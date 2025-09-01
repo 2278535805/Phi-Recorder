@@ -657,13 +657,21 @@ pub async fn main(cmd: bool) -> Result<()> {
             let elapsed = sfx_time.elapsed();
             info!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
         } else {
-            let mut num = 0;
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    place_fx(before_time + note.time as f64 + judge_offset - config.play_start_time, sfx);
-                    num += 1;
+                    hit_fx_list.push((before_time + note.time as f64 + judge_offset - config.play_start_time, sfx));
                 }
             });
+            let num = hit_fx_list.len();
+            if ipc {
+                send(IPCEvent::MixingSfx(num as u64));
+            }
+            for (pos, sfx) in hit_fx_list {
+                place_fx(pos, sfx);
+                if ipc {
+                    send(IPCEvent::Sfx);
+                }
+            }
 
             let elapsed = sfx_time.elapsed();
             info!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
