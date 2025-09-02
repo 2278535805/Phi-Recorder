@@ -117,8 +117,8 @@ const chinese = ref(DEFAULT_RENDER_CONFIG.chinese);
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);
   if (parts.length !== 2) return null;
-  let ws = parts[0].trim(),
-    hs = parts[1].trim();
+  let ws = parts[0]!.trim(),
+    hs = parts[1]!.trim();
   if (!isNumeric(ws) || !isNumeric(hs)) return null;
   let w = parseInt(ws),
     h = parseInt(hs);
@@ -137,7 +137,7 @@ const isBitrate = (value: string) => {
     if (!match) return t('rules.bitrate');
     
     const number = Number(match[1]);
-    const unit = match[2].toLowerCase();
+    const unit = match[2]!.toLowerCase();
   
     if ((unit === 'kbps' || unit === 'k') && number > 0 && number <= 1000000) return true;
     if ((unit === 'mbps' || unit === 'm') && number > 0 && number <= 1000) return true;
@@ -182,25 +182,25 @@ const respacks = ref([DEFAULT_RESPACK]);
 const respack = ref(DEFAULT_RESPACK);
 async function updateRespacks() {
   respacks.value = await getRespacks();
-  respack.value = respacks.value.find((x) => x.name === respack.value.name) || respacks.value[0];
+  respack.value = respacks.value.find((x) => x.name === respack.value.name) || respacks.value[0]!;
 }
 updateRespacks();
 
 function updateBitrate() {
   if (dynamicBitrateControl.value) {
-    bitrate.value = bitrateCrfList[0];
+    bitrate.value = bitrateCrfList[0]!;
   } else {
-    bitrate.value = bitrateList[0];
+    bitrate.value = bitrateList[0]!;
   }
 }
 
 function updateMaxParticles() {
-  const index = maxParticlesTextList.indexOf(maxParticlesText.value);
+  const index = maxParticlesTextList.indexOf(maxParticlesText.value!);
   const textNum = Number(maxParticlesText.value);
   if (index >= 0 && index < maxParticlesTextList.length) {
-    maxParticles.value = maxParticlesList[index];
+    maxParticles.value = maxParticlesList[index]!;
   } else if (Number.isInteger(textNum) && textNum > 0) {
-    maxParticles.value = parseInt(maxParticlesText.value);
+    maxParticles.value = parseInt(maxParticlesText.value!);
   } else {
     toast(t('max-particles-error'), 'error');
     maxParticles.value = 100000;
@@ -242,7 +242,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
   return {
     resolution: (() => {
       let parts = resolution.value.split('x');
-      return [parseInt(parts[0]), parseInt(parts[1])];
+      return [parseInt(parts[0]!), parseInt(parts[1]!)];
     })(),
     endingLength: parseFloat(endingLength.value),
     chartDebugLine: chartDebugLine.value,
@@ -252,11 +252,11 @@ async function buildConfig(): Promise<RenderConfig | null> {
     hardwareAccel: hwAccel.value,
     hevc: encoder.value === encoderList.value[1],
     mpeg4: encoder.value === encoderList.value[2],
-    customEncoder: encoderList.value.includes(encoder.value) ? null : encoder.value,
+    customEncoder: encoderList.value.includes(encoder.value!) ? null : encoder.value!,
     dynamicBitrateControl: encoder.value === encoderList.value[2] || dynamicBitrateControl.value,
     bitrate: encoder.value === encoderList.value[2] ? '7' : bitrate.value,
 
-    challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value)],
+    challengeColor: STD_CHALLENGE_COLORS[t('challenge-colors').split(',').indexOf(challengeColor.value!)]!,
     challengeRank: parseInt(challengeRank.value),
     noteScale: noteScale.value,
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
@@ -313,7 +313,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
 }
 
 function applyAspectRatio(aspectRatio: number) {
-  let h = parseInt(resolution.value.split('x')[1]);
+  let h = parseInt(resolution.value.split('x')[1]!);
 
   if (aspectRatio <= 1.0) {
     resolution.value = `${ h }x${ h }`
@@ -325,16 +325,16 @@ function applyAspectRatio(aspectRatio: number) {
 
 function applyResolution(w?: number, h?: number) {
   if (w) {
-    let width = parseInt(resolution.value.split('x')[0]);
+    let width = parseInt(resolution.value.split('x')[0]!);
     let ratio = w / width;
-    let height = Math.floor(parseInt(resolution.value.split('x')[1]) * ratio);
+    let height = Math.floor(parseInt(resolution.value.split('x')[1]!) * ratio);
     
     resolution.value = `${ w }x${ height }`
   }
   if (h) {
-    let height = parseInt(resolution.value.split('x')[1]);
+    let height = parseInt(resolution.value.split('x')[1]!);
     let ratio = h / height;
-    let width = Math.floor(parseInt(resolution.value.split('x')[0]) * ratio);
+    let width = Math.floor(parseInt(resolution.value.split('x')[0]!) * ratio);
 
     resolution.value = `${ width }x${ h }`
   }
@@ -382,7 +382,7 @@ function applyConfig(config: RenderConfig) {
   playerName.value = config.playerName;
   playerRks.value = String(config.playerRks);
   sampleCount.value = String(config.sampleCount);
-  respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0];
+  respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0]!;
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
@@ -438,7 +438,7 @@ async function getPresets() {
     result.push({
       name: key,
       key,
-      config: pairs[key],
+      config: pairs[key]!,
     });
   }
   return result;
@@ -447,7 +447,7 @@ const presets = ref([DEFAULT_PRESET]);
 const preset = ref(DEFAULT_PRESET);
 async function updatePresets() {
   presets.value = await getPresets();
-  preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0];
+  preset.value = presets.value.find((x) => x.key === preset.value.key) || presets.value[0]!;
 }
 updatePresets();
 
@@ -471,7 +471,7 @@ async function createPreset() {
   try {
     await invoke('add_preset', { name, config });
     await updatePresets();
-    preset.value = presets.value.find((x) => x.key === name) || presets.value[0];
+    preset.value = presets.value.find((x) => x.key === name) || presets.value[0]!;
     toast(t('preset-created'), 'success');
   } catch (e) {
     toastError(e);
