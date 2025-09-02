@@ -82,6 +82,13 @@ const outputDialog = ref(false);
 const outputDialogMessage = ref('');
 const filteredOutputDialogMessage = ref('');
 
+function openOutputDialog(output: string) {
+  outputDialogMessage.value = ansi.ansi_to_html(output);
+  filteredOutputDialogMessage.value = outputDialogMessage.value;
+  filter.value = [];
+  outputDialog.value = true;
+}
+
 const filterItems: string[] = ["INFO", "DEBUG", "WARN", "ERROR", "! INFO", "! DEBUG", "! WARN", "! ERROR"];
 const filter: Ref<string[]> = ref([]);
 
@@ -247,10 +254,7 @@ function removeTask(index: number, removeFile: boolean = false) {
                   @click="
                     () => {
                       if (task.status.type === 'done') {
-                        outputDialogMessage = ansi.ansi_to_html(task.status.output);
-                        filteredOutputDialogMessage = outputDialogMessage;
-                        filter = [];
-                        outputDialog = true;
+                        openOutputDialog(task.status.output);
                       }
                     }
                   "

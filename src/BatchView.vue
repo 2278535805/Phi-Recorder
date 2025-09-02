@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, onUnmounted } from 'vue';
+import { ref, nextTick, onUnmounted, type Ref } from 'vue';
 import { useStorage } from '@vueuse/core';
 
 import { useI18n } from 'vue-i18n';
@@ -10,6 +10,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { toastError, RULES, toast, anyFilter } from './common';
 import { DEFAULT_RENDER_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
 import router from './router';
+import { AnsiUp } from 'ansi_up';
+const ansi = new AnsiUp();
 
 import { VForm } from 'vuetify/components';
 
@@ -356,8 +358,58 @@ await updateList();
 const updateTask = setInterval(updateList, 700);
 onUnmounted(() => clearInterval(updateTask));
 
-const outputDialog = ref(false),
-  outputDialogMessage = ref('');
+const outputDialog = ref(false);
+const outputDialogMessage = ref('');
+
+function openOutputDialog(output: string) {
+  outputDialogMessage.value = ansi.ansi_to_html(output);
+  filteredOutputDialogMessage.value = outputDialogMessage.value;
+  filter.value = [];
+  outputDialog.value = true;
+}
+
+const filteredOutputDialogMessage = ref('');
+
+const filterItems: string[] = ["INFO", "DEBUG", "WARN", "ERROR", "! INFO", "! DEBUG", "! WARN", "! ERROR"];
+const filter: Ref<string[]> = ref([]);
+
+function filterText(
+  rawText: string,
+  filters: string[]
+): string {
+  const include: string[] = [];
+  const exclude: string[] = [];
+
+  for (let f of filters) {
+    f = f.trim();
+    if (!f) continue;
+    if (f.startsWith('!')) {
+      const kw = f.slice(1).trim();
+      if (kw) exclude.push(kw);
+    } else {
+      include.push(f);
+    }
+  }
+
+  if (include.length === 0 && exclude.length === 0) {
+    return rawText;
+  }
+
+  const resultLines = rawText
+    .split(/\r?\n/)
+    .filter(line => {
+      if (include.length > 0) {
+        const hitInclude = include.some(kw => line.includes(kw));
+        if (!hitInclude) return false;
+      }
+      const hitExclude = exclude.some(kw => line.includes(kw));
+      if (hitExclude) return false;
+
+      return true;
+    });
+
+  return resultLines.join('\n');
+}
 
 </script>
 
@@ -461,9 +513,9 @@ const outputDialog = ref(false),
             <v-col v-else-if="item.status.type === 'mixing'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
             <v-col v-else-if="item.status.type === 'mixing_sfx'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">-</v-col>
             <v-col v-else-if="item.status.type === 'rendering'" style="cursor: pointer;" @contextmenu="showInFolder(item.path)">{{ item.status.estimate.toFixed(0) }} s</v-col>
-            <v-col v-else-if="item.status.type === 'done'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
-            <v-col v-else-if="item.status.type === 'canceled'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
-            <v-col v-else-if="item.status.type === 'failed'" style="cursor: pointer;" @click="outputDialogMessage = item.status.output; outputDialog = true;" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'done'" style="cursor: pointer;" @click="openOutputDialog(item.status.output)" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'canceled'" style="cursor: pointer;" @click="openOutputDialog(item.status.output)" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
+            <v-col v-else-if="item.status.type === 'failed'" style="cursor: pointer;" @click="openOutputDialog(item.status.output)" @contextmenu="showInFolder(item.path)">{{ t('task.show-output') }}</v-col>
             <v-col v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px; cursor: pointer;" @click="showInFolder(item.path)" @contextmenu="showInFolder(item.path)" :title="`${item.path}\n${t('file-open-tip')}`">{{ item.path }}</v-col>
 
             <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;"><v-btn variant="tonal" @click="chartInfoSelect = item.id; chartInfoDialog = true">{{ t('edit') }}</v-btn></v-col>
@@ -566,11 +618,27 @@ const outputDialog = ref(false),
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="outputDialog" width="auto" min-width="400px" class="log-card-bg">
+  <v-dialog v-model="outputDialog" class="log-card-bg">
     <v-card class="log-card-window">
-      <v-card-title v-t="'task.output'"> </v-card-title>
-      <v-card-text>
-        <div class="block whitespace-pre overflow-auto log-card-msg" style="max-height: 60vh">{{ outputDialogMessage }}</div>
+      <v-card-title style="margin-bottom: -16px;" v-t="'output'"></v-card-title>
+      <v-card-text style="padding-bottom: 0px;">
+        <div
+          class="block whitespace-pre overflow-auto log-card-msg user-select"
+          style="height: calc(100vh - 240px);"
+          v-html="filteredOutputDialogMessage"
+        ></div>
+        <v-combobox
+          class="mt-4"
+          variant="outlined"
+          v-model="filter"
+          :items="filterItems"
+          clearable
+          multiple
+          placeholder="Filter (comma separated)"
+          @update:model-value="(val) => {
+            filteredOutputDialogMessage = filterText(outputDialogMessage, val);
+          }"
+        ></v-combobox>
       </v-card-text>
       <v-card-actions class="justify-end">
         <v-btn class="hover-scale" variant="text" @click="outputDialog = false" v-t="'close'"></v-btn>
@@ -610,6 +678,10 @@ h2 {
   background: linear-gradient(45deg, #3b82f6, #6366f1);
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+:deep(span) {
+  user-select: text;
 }
 
 :deep(.v-stepper-header__item) .v-stepper-header__title {
