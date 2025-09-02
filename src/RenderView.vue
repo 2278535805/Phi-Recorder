@@ -72,7 +72,7 @@ function updateAspectRatio() {
       [5, 4],
       [7, 5],
     ]) {
-      if (Math.abs(asp[0] / asp[1] - chartInfo.value!.aspectRatio) < 1e-4) {
+      if (Math.abs(asp[0]! / asp[1]! - chartInfo.value!.aspectRatio) < 1e-4) {
         aspectWidth.value = String(asp[0]);
         aspectHeight.value = String(asp[1]);
         break;
@@ -114,11 +114,11 @@ listen('tauri://drag-drop', async (event) => {
   
   if (step.value === 'choose') {
     fileHovering.value = false;
-    await loadChart(files[0]);
+    await loadChart(files[0] as string);
   } else if (step.value === 'config' || step.value === 'options' || step.value === 'render') {
     fileHovering.value = false;
     stepIndex.value = 1;
-    await loadChart(files[0]);
+    await loadChart(files[0] as string);
   }
 });
 
