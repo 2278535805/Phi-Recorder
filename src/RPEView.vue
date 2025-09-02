@@ -15,7 +15,7 @@ import router from './router';
 async function getRPECharts() {
   return (await invoke('get_rpe_charts')) as RPEChart[] | null;
 }
-const charts = ref(await getRPECharts());
+const charts = ref<RPEChart[] | null>(await getRPECharts());
 const searchQuery = ref('');
 const sortOptionList = t('sort-option-list').split(',');
 const sortOption = ref(sortOptionList[0]);

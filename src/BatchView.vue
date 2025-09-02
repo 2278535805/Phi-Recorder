@@ -37,7 +37,7 @@ async function getPresets() {
     result.push({
       name: key,
       key,
-      config: pairs[key],
+      config: pairs[key]!,
     });
   }
   return result;
@@ -147,8 +147,8 @@ async function postRender(chart: RenderChart) {
   try {
     await invoke('post_render', { params });
     let tasks = await invoke<Task[]>('get_tasks');
-    chart.taskId = tasks[0].id;
-    chart.output = tasks[0].output;
+    chart.taskId = tasks[0]!.id;
+    chart.output = tasks[0]!.output;
   } catch (e) {
     toastError(e);
     return false;
@@ -162,8 +162,8 @@ async function postSelectRender() {
   if (removeStartRender.value) {
     for (let i = charts.value.length - 1; i >= 0; i--) {
       if (!loadingPostRender.value) break;
-      if (charts.value[i].isSelect) {
-        await postRender(charts.value[i]);
+      if (charts.value[i]!.isSelect) {
+        await postRender(charts.value[i]!);
         charts.value.splice(i, 1);
       }
     }
@@ -181,7 +181,7 @@ async function postSelectRender() {
 function applyAspectRatio(resolution: number[], aspectRatio: number) {
   if (preset.value.key !== 'default') return;
 
-  let h = resolution[1];
+  let h = resolution[1]!;
 
   if (aspectRatio < 1.0) {
     resolution = [h, h]
@@ -193,7 +193,7 @@ function applyAspectRatio(resolution: number[], aspectRatio: number) {
 
 function removeSelectChart() {
   for (let i = charts.value.length - 1; i >= 0; i--) {
-    if (charts.value[i].isSelect) {
+    if (charts.value[i]!.isSelect) {
       charts.value.splice(i, 1)
     }
   }
@@ -294,7 +294,7 @@ async function updateList() {
   tasks.value = await invoke<Task[]>('get_tasks');
   // console.log(tasks.value);
   for (let i = charts.value.length - 1; i >= 0; i--) {
-    let chart = charts.value[i];
+    let chart = charts.value[i]!;
     let task = tasks.value.find((x) => x.id === chart.taskId);
     if (task) {
       chart.status = task.status;
@@ -537,62 +537,62 @@ function filterText(
         <v-form v-if="charts[chartInfoSelect]" validateOn="eager">
           <v-row>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.name')" v-model="charts[chartInfoSelect].chartInfo.name"></v-text-field>
+              <v-text-field type="text" class="" :label="t('info.name')" v-model="charts[chartInfoSelect]!.chartInfo.name"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.charter')" v-model="charts[chartInfoSelect].chartInfo.charter"></v-text-field>
+              <v-text-field type="text" class="" :label="t('info.charter')" v-model="charts[chartInfoSelect]!.chartInfo.charter"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.composer')" v-model="charts[chartInfoSelect].chartInfo.composer"></v-text-field>
+              <v-text-field type="text" class="" :label="t('info.composer')" v-model="charts[chartInfoSelect]!.chartInfo.composer"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.illustrator')" v-model="charts[chartInfoSelect].chartInfo.illustrator"></v-text-field>
+              <v-text-field type="text" class="" :label="t('info.illustrator')" v-model="charts[chartInfoSelect]!.chartInfo.illustrator"></v-text-field>
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="3">
               <v-text-field type="number" class="" :rules="[RULES.positiveOrZero, RULES.notZero]" :label="t('info.aspectRatio')"
-              v-model="charts[chartInfoSelect].chartInfo.aspectRatio" @update:modelValue="charts[chartInfoSelect].chartInfo.aspectRatio = parseFloat($event)"></v-text-field>
+              v-model="charts[chartInfoSelect]!.chartInfo.aspectRatio" @update:modelValue="charts[chartInfoSelect]!.chartInfo.aspectRatio = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.level')" v-model="charts[chartInfoSelect].chartInfo.level"></v-text-field>
+              <v-text-field type="text" class="" :label="t('info.level')" v-model="charts[chartInfoSelect]!.chartInfo.level"></v-text-field>
             </v-col>
             <v-col cols="3">
               <v-text-field type="number" class="" :rules="[RULES.notEmpty]" :label="t('info.offset')"
-              v-model="charts[chartInfoSelect].chartInfo.offset" @update:modelValue="charts[chartInfoSelect].chartInfo.offset = parseFloat($event)"></v-text-field>
+              v-model="charts[chartInfoSelect]!.chartInfo.offset" @update:modelValue="charts[chartInfoSelect]!.chartInfo.offset = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
               <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.notEmpty]" :label="t('info.lineLength')"
-              v-model="charts[chartInfoSelect].chartInfo.lineLength" @update:modelValue="charts[chartInfoSelect].chartInfo.lineLength = parseFloat($event)"></v-text-field>
+              v-model="charts[chartInfoSelect]!.chartInfo.lineLength" @update:modelValue="charts[chartInfoSelect]!.chartInfo.lineLength = parseFloat($event)"></v-text-field>
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.tip')" v-model="charts[chartInfoSelect].chartInfo.tip"></v-text-field>
+              <v-text-field type="text" class="" :label="t('info.tip')" v-model="charts[chartInfoSelect]!.chartInfo.tip"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="charts[chartInfoSelect].chartInfo.holdParticleIntervalRatio" @update:modelValue="charts[chartInfoSelect].chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
+              <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="charts[chartInfoSelect]!.chartInfo.holdParticleIntervalRatio" @update:modelValue="charts[chartInfoSelect]!.chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="charts[chartInfoSelect].chartInfo.backgroundDim"> </v-slider>
+              <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="charts[chartInfoSelect]!.chartInfo.backgroundDim"> </v-slider>
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="3">
               <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000]"
-              v-model="charts[chartInfoSelect].chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect].chartInfo.scoreTotal = parseInt($event)"></v-text-field>
+              v-model="charts[chartInfoSelect]!.chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect]!.chartInfo.scoreTotal = parseInt($event)"></v-text-field>
             </v-col>
             <v-col cols="3">
-              <v-switch class="d-flex justify-center ml-n2" :label="t('info.force-aspect-ratio')" color="btn" v-model="charts[chartInfoSelect].chartInfo.forceAspectRatio"></v-switch>
+              <v-switch class="d-flex justify-center ml-n2" :label="t('info.force-aspect-ratio')" color="btn" v-model="charts[chartInfoSelect]!.chartInfo.forceAspectRatio"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="" v-model="charts[chartInfoSelect].chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+              <v-switch class="" v-model="charts[chartInfoSelect]!.chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="" v-model="charts[chartInfoSelect].chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
+              <v-switch class="" v-model="charts[chartInfoSelect]!.chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
             </v-col>
           </v-row>
 
@@ -635,7 +635,7 @@ function filterText(
           clearable
           multiple
           placeholder="Filter (comma separated)"
-          @update:model-value="(val) => {
+          @update:model-value="(val: string[]) => {
             filteredOutputDialogMessage = filterText(outputDialogMessage, val);
           }"
         ></v-combobox>
