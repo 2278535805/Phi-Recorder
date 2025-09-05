@@ -25,7 +25,7 @@
     "bitrate": "码率",
     "bitrate-crf": "质量参数",
     "bitrate-crf-tip": "范围 1-51, 数值越小质量越高",
-    "output-tip": "参考值:\n-看看谱:\n  分辨率: 720P\n  编码器: HEVC, 质量参数: 40\n  (点击以应用)\n",
+    "output-tip": "参考值:\n-QQ群看看谱:\n  分辨率: 720P\n  编码器: HEVC, 质量参数: 40\n  (点击以应用)\n",
     "player-avatar": "玩家头像",
     "player-name": "玩家名",
     "player-rks": "玩家 RKS",
