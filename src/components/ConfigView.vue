@@ -612,10 +612,7 @@ function setConfigForSocial() {
     </div>
 
     <div v-show="page === 1 || page === undefined">
-      <div class="mb-4 bg-surface sticky-label" style="z-index: 2"> <!--StickyLabel-->
-        <h3 class="pa-1" :title="t('output-tip')" @click="setConfigForSocial">{{ t('title.output') }}</h3>
-        <v-divider></v-divider>
-      </div>
+      <StickyLabel :title="t('title.output')"></StickyLabel>
 
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
@@ -658,6 +655,11 @@ function setConfigForSocial() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mt-2">
+        <v-col cols="1" class="mx-2" @click="setConfigForSocial">
+          <TooltipIcon :tooltip="t('output-tip')"></TooltipIcon>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2">
