@@ -505,6 +505,13 @@ function setConfigForSocial() {
   dynamicBitrateControl.value = true;
   bitrate.value = '40';
 }
+function setConfigForQuality() {
+  applyResolution(undefined, 1600);
+  encoder.value = encoderList.value[1];
+  dynamicBitrateControl.value = true;
+  bitrate.value = '24';
+  hires.value = true;
+}
 </script>
 
 <template>
@@ -608,6 +615,14 @@ function setConfigForSocial() {
           <TipSwitch class="ml-n1" :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
         </v-col>
       </v-row>
+      <v-row no-gutters class="mt-2">
+        <v-col cols="1" class="mx-2" @click="setConfigForSocial">
+          <TooltipIcon :tooltip="t('output-ref-0')"></TooltipIcon>
+        </v-col>
+        <v-col cols="1" class="mx-2" @click="setConfigForQuality">
+          <TooltipIcon :tooltip="t('output-ref-1')"></TooltipIcon>
+        </v-col>
+      </v-row>
       <v-row no-gutters class="mt-2" />
     </div>
 
@@ -655,11 +670,6 @@ function setConfigForSocial() {
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
-        </v-col>
-      </v-row>
-      <v-row no-gutters class="mt-2">
-        <v-col cols="1" class="mx-2" @click="setConfigForSocial">
-          <TooltipIcon :tooltip="t('output-tip')"></TooltipIcon>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2">
