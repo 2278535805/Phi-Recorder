@@ -815,10 +815,10 @@ function setConfigForQuality() {
           <v-text-field class="mx-2" :label="t('bg-blurriness')" v-model="bgBlurriness" type="number" :rules="[RULES.positiveOrZero, RULES.less10000]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('watermark')" v-model="watermark"></v-text-field>
+          <v-textarea rows="1" auto-grow class="mx-2" :label="t('watermark')" v-model="watermark"></v-textarea>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('combo')" :rules="[RULES.notCOMBO]" v-model="combo"></v-text-field>
+          <v-textarea rows="1" auto-grow class="mx-2" :label="t('combo')" :rules="[RULES.notCOMBO]" v-model="combo"></v-textarea>
         </v-col>
         <v-col cols="3">
           <v-combobox class="mx-2" :label="t('max-particles')" :rules="[RULES.notEmpty]" :title="t('max-particles-tip')" :items="maxParticlesTextList" v-model="maxParticlesText"></v-combobox>
@@ -868,7 +868,7 @@ function setConfigForQuality() {
           <v-text-field class="mx-2" :label="t('judgeOffset')" v-model="judgeOffset" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-text-field>
+          <v-textarea rows="1" auto-grow class="mx-2" :label="t('difficulty')" v-model="difficulty"></v-textarea>
         </v-col>
         <v-col cols="3">
           <v-text-field class="mx-2" :label="t('fade')" :title="t('fade-tip')" v-model="fade" type="number" :rules="[RULES.notEmpty]"></v-text-field>
