@@ -123,10 +123,10 @@ listen('tauri://drag-drop', async (event) => {
 });
 
 document.addEventListener('keydown', async (event) => {
-  if (document.hasFocus() && event.key === 'Enter' && stepIndex && !moreInfo.value) {
+  if (document.hasFocus() && event.key === 'PageDown' && stepIndex && !moreInfo.value) {
     await moveNext();
   }
-  if (document.hasFocus() && event.key === 'Escape' && stepIndex && !moreInfo.value) {
+  if (document.hasFocus() && event.key === 'PageUp' && stepIndex && !moreInfo.value) {
     stepIndex.value--;
   }
 });
@@ -409,25 +409,25 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
         <v-form ref="form" validateOn="eager" v-if="chartInfo">
           <v-row no-gutters class="my-2">
             <v-col cols="6">
-              <v-text-field class="mx-2" :label="t('info.name')" v-model="chartInfo.name"></v-text-field>
+              <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.name')" v-model="chartInfo.name"></v-textarea>
             </v-col>
             <v-col cols="2">
               <v-text-field class="mx-2" :label="t('info.offset')" type="number" :rules="[RULES.notEmpty]" :disabled="loadingTweakoffset" v-model="offset_text"></v-text-field>
             </v-col>
             <v-col cols="4">
-              <v-text-field class="mx-2" :label="t('info.level')" v-model="chartInfo.level"></v-text-field>
+              <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.level')" v-model="chartInfo.level"></v-textarea>
             </v-col>
           </v-row>
 
           <v-row no-gutters class="mt-1 my-2 pt-2">
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('info.charter')" v-model="chartInfo.charter"></v-text-field>
+              <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.charter')" v-model="chartInfo.charter"></v-textarea>
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('info.composer')" v-model="chartInfo.composer"></v-text-field>
+              <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.composer')" v-model="chartInfo.composer"></v-textarea>
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field class="mx-2" :label="t('info.illustrator')" v-model="chartInfo.illustrator"></v-text-field>
+              <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.illustrator')" v-model="chartInfo.illustrator"></v-textarea>
             </v-col>
           </v-row>
 
@@ -443,7 +443,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               </div>
             </v-col>
             <v-col cols="8">
-              <v-text-field class="mx-2" :label="t('info.tip')" :placeholder="t('info.tip-placeholder')" v-model="chartInfo.tip"></v-text-field>
+              <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.tip')" :placeholder="t('info.tip-placeholder')" v-model="chartInfo.tip"></v-textarea>
             </v-col>
           </v-row>
 
