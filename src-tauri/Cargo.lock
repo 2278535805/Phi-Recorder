@@ -4035,7 +4035,7 @@ dependencies = [
 
 [[package]]
 name = "phi-recorder"
-version = "1.4.2"
+version = "1.5.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -4071,7 +4071,7 @@ dependencies = [
 [[package]]
 name = "phire"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/phire#159c09bc3b35736960a250c586970498d2f78012"
+source = "git+https://github.com/2278535805/phire#d6a81bb1ad7d06fedb53780b3772cc36ed891b2c"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4304,7 +4304,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/phire#159c09bc3b35736960a250c586970498d2f78012"
+source = "git+https://github.com/2278535805/phire#d6a81bb1ad7d06fedb53780b3772cc36ed891b2c"
 dependencies = [
  "anyhow",
  "tracing",
