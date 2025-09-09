@@ -49,6 +49,7 @@ tauri-plugin-prevent-default = "2.0.0"
 ndarray = "0.16.1"
 humantime = "2.2.0"
 rand = "0.9.1"
+tauri-plugin-drag = "2.1.0"
 # sysinfo = "0.29.0"
 
 [features]
