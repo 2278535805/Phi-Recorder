@@ -90,6 +90,7 @@ pub async fn run() -> Result<()> {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_drag::init())
         .plugin(
             tauri_plugin_prevent_default::Builder::new()
                 .with_flags(Flags::all().difference(Flags::FIND | Flags::RELOAD))

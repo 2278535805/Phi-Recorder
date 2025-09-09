@@ -16,6 +16,8 @@ import router from './router';
 import { AnsiUp } from 'ansi_up';
 const ansi = new AnsiUp()
 
+import { startDrag } from "@crabnebula/tauri-plugin-drag";
+
 const tasks = ref<Task[]>();
 
 async function updateList() {
@@ -167,6 +169,11 @@ function removeTask(index: number, removeFile: boolean = false) {
       toastError(e);
     });
 }
+
+function dragOutput(event: DragEvent, task: Task) {
+  event.preventDefault();
+  startDrag({ item: [task.output], icon: task.cover })
+}
 </script>
 
 <template>
@@ -190,6 +197,8 @@ function removeTask(index: number, removeFile: boolean = false) {
               <div 
                 class="overlay"
                 @click="router.push({ name: 'render', query: { chart: task.path, info: JSON.stringify(task.info), config: JSON.stringify(task.config) } })"
+                draggable="true"
+                @dragstart="dragOutput($event, task)"
               >
                 <i class="mdi mdi-reload icon"></i>
               </div>
