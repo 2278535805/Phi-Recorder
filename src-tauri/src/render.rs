@@ -1019,7 +1019,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let frames10 = (video_frames / 10).max(1);
     let frames = video_frames;
     let mut step_time = Instant::now();
-    let mut writed_frames: u64 = 0;
     for frame in 0..frames {
         let now = (frame as f64) / fps;
         *my_time.borrow_mut() = now.max(0.);
@@ -1035,16 +1034,16 @@ pub async fn main(cmd: bool) -> Result<()> {
             mst.blit();
         }
 
-        if writed_frames % frames10 == 0 {
-            let progress = round_to_step((writed_frames as f64 / video_frames as f64 * 100.).ceil(), 10.0);
+        if frame % frames10 == 0 {
+            let progress = round_to_step((frame as f64 / video_frames as f64 * 100.).ceil(), 10.0);
             info!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
-                progress, writed_frames, video_frames, std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
+                progress, frame, video_frames, std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
         }
 
         unsafe {
             use miniquad::gl::*;
             glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
-            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[writed_frames as usize % N]);
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
             glReadPixels(
                 0,
                 0,
@@ -1054,9 +1053,8 @@ pub async fn main(cmd: bool) -> Result<()> {
                 GL_UNSIGNED_BYTE,
                 std::ptr::null_mut(),
             );
-            writed_frames += 1;
-            if writed_frames >= N as u64 {
-                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(writed_frames) as usize % N]);
+            if frame >= N as u64 {
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame) as usize % N]);
                 let src: *const u8 = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
                 if !src.is_null() {
                     input.write_all(&std::slice::from_raw_parts(src, byte_size))?;
