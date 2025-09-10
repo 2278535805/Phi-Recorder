@@ -112,7 +112,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
-  now_theme.value = event.matches ? "Dark" : "Light";
+  now_theme.value = event.matches ? "DeepDark" : "LightBlue";
 });
 
 
