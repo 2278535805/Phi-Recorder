@@ -90,8 +90,7 @@ const i18n = createI18n({
 });
 changeLocale(locale);
 
-const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
-const savedTheme = localStorage.getItem("theme") || systemTheme;
+const savedTheme = localStorage.getItem("theme") || window.matchMedia('(prefers-color-scheme: dark)').matches ? 'DeepDark' : 'LightBlue';
 
 const vuetify = createVuetify({
   components,
