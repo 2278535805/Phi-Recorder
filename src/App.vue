@@ -273,6 +273,7 @@ onMounted(async () => {
           :title="t(key)"
           @click="routerPush(key)"
           @contextmenu="listExpand = !listExpand"
+          slim
           class="list-item-hover-rail"
         ></v-list-item>
       </v-list>
