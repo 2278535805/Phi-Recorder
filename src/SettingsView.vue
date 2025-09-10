@@ -6,7 +6,8 @@ const { t } = useI18n();
 import { computed, nextTick, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { DEFAULT_APP_CONFIG, type AppConfig } from './model';
-import { open } from '@tauri-apps/plugin-dialog';
+import * as dialog from '@tauri-apps/plugin-dialog';
+import { openPath } from '@tauri-apps/plugin-opener';
 import { toast, toastError, changeLocale } from './common';
 import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
@@ -77,7 +78,7 @@ async function resetConfig(all: boolean) {
 }
 
 async function selectDir(title: string) {
-  let file = await open({
+  let file = await dialog.open({
     directory: true,
     title
   });
@@ -116,7 +117,7 @@ async function openInFolder(path: string | null, isOutput: boolean = false) {
   }
   try {
     await invoke('test_output_dir', { dir: path });
-    await invoke('open_in_folder', { path });
+    await openPath(path!);
   } catch (e) {
     toastError(e);
   }

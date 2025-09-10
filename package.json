@@ -20,6 +20,7 @@
     "@tauri-apps/plugin-dialog": "~2.2.2",
     "@tauri-apps/plugin-fs": "~2.2.1",
     "@tauri-apps/plugin-http": "~2.4.4",
+    "@tauri-apps/plugin-opener": "~2.5.0",
     "@tauri-apps/plugin-os": "~2.2.2",
     "@tauri-apps/plugin-shell": "~2.2.2",
     "@vueuse/core": "^13.9.0",

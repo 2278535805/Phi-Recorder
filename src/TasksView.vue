@@ -7,6 +7,7 @@ const { t } = useI18n();
 import type { Task, TaskStatus } from './model';
 
 import { invoke } from '@tauri-apps/api/core';
+import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 import { convertFileSrc } from '@tauri-apps/api/core';
 
 import moment from 'moment';
@@ -133,7 +134,7 @@ function filterText(
 }
 async function showInFolder(path: string) {
   try {
-    await invoke('show_in_folder', { path });
+    await revealItemInDir(path);
   } catch (e) {
     toastError(e);
   }
@@ -141,7 +142,7 @@ async function showInFolder(path: string) {
 
 async function openFile(path: string) {
   try {
-    await invoke('open_file', { path });
+    await openPath(path);
   } catch (e) {
     toastError(e);
   }

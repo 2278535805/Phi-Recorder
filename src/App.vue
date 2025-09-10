@@ -9,7 +9,7 @@ import { invoke,   } from '@tauri-apps/api/core';
 import semver from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
 import * as os from "@tauri-apps/plugin-os"
-import * as shell from "@tauri-apps/plugin-shell"
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { useStorage } from '@vueuse/core';
 
 const onLoaded = ref<() => void>();
@@ -157,11 +157,11 @@ async function getNewVersion() {
 
     const link = (asset as Assets).browser_download_url;
     console.log(link);
-    await open(link);
+    await openUrl(link);
     
   } catch (error) {
     console.error('Error fetching tags:', error);
-    await open("https://github.com/BtbN/FFmpeg-Builds/releases");
+    await openUrl("https://github.com/BtbN/FFmpeg-Builds/releases");
   } finally {
     ffmpegGetNewVersionLoding.value = false;
   }
@@ -169,10 +169,6 @@ async function getNewVersion() {
 
 async function openAppFolder() {
   await invoke('open_app_folder');
-}
-
-async function openDownload() {
-  await shell.open('https://github.com/BtbN/FFmpeg-Builds/releases');
 }
 
 async function checkFFmpegFilter() {
@@ -301,7 +297,7 @@ onMounted(async () => {
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn variant="text" @click="getNewVersion" :loading="ffmpegGetNewVersionLoding" v-t="t('try-download')"></v-btn>
-          <v-btn variant="text" @click="openDownload" v-t="t('open-download')"></v-btn>
+          <v-btn variant="text" @click="openUrl('https://github.com/BtbN/FFmpeg-Builds/releases')" v-t="t('open-download')"></v-btn>
           <v-btn variant="text" @click="openAppFolder" v-t="t('open-app-folder')"></v-btn>
           <v-btn color="btn" class="hover-scale" variant="text" @click="ffmpegDialog = false" v-t="t('confirm')"></v-btn>
         </v-card-actions>

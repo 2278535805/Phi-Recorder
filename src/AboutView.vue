@@ -4,7 +4,8 @@ useI18n();
 const { t } = useI18n();
 
 import { getVersion } from '@tauri-apps/api/app';
-import { open } from '@tauri-apps/plugin-shell';
+import * as shell from '@tauri-apps/plugin-shell';
+import { openUrl } from '@tauri-apps/plugin-opener';
 //import { random } from 'mathjs';
 //import { download as tauriDownload } from '@tauri-apps/plugin-upload';
 
@@ -84,7 +85,7 @@ const clamp = (num: number, lower: number, upper: number) => {
 };
 
 async function download(url: string) {
-  await open(url);
+  await shell.open(url);
   //dialog_download.value = false;
   return;
 }
@@ -128,7 +129,7 @@ async function getNewVersion() {
     
   } catch (error) {
     console.error('Error fetching tags:', error);
-    await open("https://github.com/2278535805/Phi-Recorder/releases/latest");
+    await openUrl("https://github.com/2278535805/Phi-Recorder/releases/latest");
   }
 }
 
@@ -155,7 +156,7 @@ onMounted(() => {
     <div class="about-container container fade-in">
       <h1 class="app-title gradient-text text-glow" v-t="'app'"></h1>
       <h4 class="mt-n2 version-label text-glow">v{{ appVersion }}</h4>
-      <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="open('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
+      <v-btn class="github-btn hover-scale" prepend-icon="mdi-github" @click="openUrl('https://github.com/2278535805/Phi-Recorder/releases')">GitHub</v-btn>
       <v-btn class="github-btn hover-scale" prepend-icon="mdi-update" :loading="checking" @click="checkForUpdates">{{ t('check') }}</v-btn>
       <p class="license-text license-text-gradient">Licensed by GPLv3</p>
     </div>
