@@ -182,7 +182,7 @@ function dragOutput(event: DragEvent, task: Task) {
     <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
       <v-row>
         <v-col cols="12" style="margin: -20px 0px;">
-          <v-btn size="large" class="hover-scale margin-btn btn" @click="showOutputFolder()" v-t="'show-folder'"></v-btn>
+          <v-btn size="large" color="btn-large" class="hover-scale margin-btn btn" @click="showOutputFolder()" v-t="'show-folder'"></v-btn>
         </v-col>
       </v-row>
     </v-form>

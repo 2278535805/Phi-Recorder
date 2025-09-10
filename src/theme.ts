@@ -90,7 +90,7 @@ export const LightBlue: ThemeDefinition = {
     'back': 'hsl(220 100% 97%)',
     'scrollbar': 'rgb(173, 173, 173)',
     'btn': 'hsl(220 10% 60%)',
-    'btn-large': 'hsl(218, 100%, 98%)',
+    'btn-large': 'hsla(217, 94%, 97%, 1.00)',
     'bgLeft': 'oklch(0.96 0.025 264)',
     'bgRight': 'oklch(0.96 0.025 264)',
     'topLeft': 'oklch(0.92 0.025 264)',

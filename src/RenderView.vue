@@ -498,7 +498,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                   <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"></v-slider>
                 </v-col>
                 <v-col cols="3" class="d-flex align-center justify-center">
-                  <v-btn class="mt-n2" color="#414047" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
+                  <v-btn class="mt-n2" color="btn-large" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
                 </v-col>
               </v-row>
               
