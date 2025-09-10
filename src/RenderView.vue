@@ -107,7 +107,7 @@ const offset_text = ref('0');
 
 const fileHovering = ref(false);
 
-listen('tauri://drag-over', () => (fileHovering.value = step.value === 'choose'));
+listen('tauri://drag-over', () => (fileHovering.value = true)); // fileHovering.value = step.value === 'choose'
 listen('tauri://drag-leave', () => (fileHovering.value = false));
 listen('tauri://drag-drop', async (event) => {
   const files = (event.payload as FileDropEvent).paths;
