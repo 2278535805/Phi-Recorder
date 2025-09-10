@@ -172,6 +172,7 @@ function removeTask(index: number, removeFile: boolean = false) {
 
 function dragOutput(event: DragEvent, task: Task) {
   event.preventDefault();
+  if (task.status.type !== 'done') return;
   startDrag({ item: [task.output], icon: task.cover })
 }
 </script>
@@ -223,39 +224,44 @@ function dragOutput(event: DragEvent, task: Task) {
               </template>
               <div class="pt-4 d-flex justify-end" v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)">
                 <v-btn class="hover-scale btn"
-                  prepend-icon="mdi-cancel"
                   variant="text"
                   @click="invoke('cancel_task', { id: task.id })"
-                  v-t="'cancel'"></v-btn>
+                  :title="t('cancel')"
+                  icon="mdi-cancel"></v-btn>
               </div>
               <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
                 <v-btn
                   variant="flat"
                   @click="removeDialog = true; removeTaskIndex =index"
-                  v-t="'remove-task'"
+                  :title="t('remove-task')"
+                  icon="mdi-delete"
                   class="hover-scale btn"></v-btn>
                 <v-btn
                   variant="flat"
                   prepend-icon="mdi-alert-circle-outline"
                   @click="() => {
                       if (task.status.type === 'failed' || task.status.type === 'canceled') {
-                        outputDialogMessage = ansi.ansi_to_html(task.status.output);
-                        filteredOutputDialogMessage = outputDialogMessage;
-                        filter = [];
-                        outputDialog = true;
+                        openOutputDialog(task.status.output);
                       }
                     }"
                   @contextmenu="removeDialog = true; removeTaskIndex = task.id"
-                  v-t="'show-output'"
+                  :title="t('show-output')"
+                  icon="mdi-bug"
                   class="hover-scale btn"></v-btn>
               </div>
               <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
-                <v-btn variant="text" @click="openFile(task.output)" v-t="'open-file'" class="hover-scale btn"></v-btn>
+                <v-btn
+                  variant="text"
+                  @click="openFile(task.output)"
+                  :title="t('open-file')"
+                  icon="mdi-open-in-new"
+                  class="hover-scale btn"></v-btn>
                 <v-btn 
                   variant="flat"
                   prepend-icon="mdi-folder-open-outline" 
                   @click="showInFolder(task.output)"
-                  v-t="'show-in-folder'"
+                  :title="t('show-in-folder')"
+                  icon="mdi-folder-open"
                   class="hover-scale btn"></v-btn>
                 <v-btn
                   variant="flat"
@@ -267,7 +273,8 @@ function dragOutput(event: DragEvent, task: Task) {
                       }
                     }
                   "
-                  v-t="'show-output'"
+                  :title="t('show-output')"
+                  icon="mdi-bug"
                   class="hover-scale btn"></v-btn>
               </div>
             </div>
