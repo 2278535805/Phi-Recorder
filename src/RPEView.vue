@@ -195,9 +195,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                 <div class="pt-4 d-flex justify-end">
                   <v-menu>
                     <template v-slot:activator="{ props }">
-                      <v-btn class="open-btn hover-scale mx-2" v-bind="props" :loading="moreLoading">
-                        <i class="mdi mdi-cog" />
-                      </v-btn>
+                      <v-btn class="open-btn hover-scale mx-2" v-bind="props" :loading="moreLoading" icon="mdi-menu"></v-btn>
                     </template>
                     <v-list>
                       <v-list-item @click="exportPez(chart.path, chart.name, false)" v-t="'export'" />
@@ -207,7 +205,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                       <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
                     </v-list>
                   </v-menu>
-                  <v-btn class="render-btn hover-scale mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" v-t="'render'" />
+                  <v-btn class="render-btn hover-scale mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" :title="t('render')" icon="mdi-open-in-app" />
                 </div>
               </div>
             </div>
