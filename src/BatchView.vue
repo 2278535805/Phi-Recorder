@@ -463,12 +463,12 @@ function filterText(
       </div>
     </v-toolbar>
     <div class="flex-grow-1 overflow-y-auto" style="font-size: 0.9em;">
-      <v-row no-gutters class="d-flex align-center batch-title" @contextmenu="sortChartsReverse">
-        <v-col cols="1" class="justify-center text-center" style="max-width: 60px;" @click="sortChartsByKey('id')" :title="t('sort-tip')">({{ charts.length }})</v-col>
-        <v-col cols="3" @click="sortChartsByKey('name')" :title="t('sort-tip')">{{ t('info.name') }}</v-col>
-        <v-col cols="2" @click="sortChartsByKey('level')" :title="t('sort-tip')">{{ t('info.level') }}</v-col>
-        <v-col cols="2" @click="sortChartsByKey('charter')" :title="t('sort-tip')">{{ t('info.charter') }}</v-col>
-        <v-col @click="sortChartsByKey('path')" :title="t('sort-tip')">{{ t('info.chart') }}</v-col>
+      <v-row no-gutters class="d-flex align-center batch-title">
+        <v-col cols="1" class="justify-center text-center" style="cursor: pointer; max-width: 60px;" @click="sortChartsByKey('id')" @contextmenu="sortChartsReverse" :title="t('sort-tip')">({{ charts.length }})</v-col>
+        <v-col cols="3" style="cursor: pointer;" @click="sortChartsByKey('name')" @contextmenu="sortChartsReverse" :title="t('sort-tip')">{{ t('info.name') }}</v-col>
+        <v-col cols="2" style="cursor: pointer;" @click="sortChartsByKey('level')" @contextmenu="sortChartsReverse" :title="t('sort-tip')">{{ t('info.level') }}</v-col>
+        <v-col cols="2" style="cursor: pointer;" @click="sortChartsByKey('charter')" @contextmenu="sortChartsReverse" :title="t('sort-tip')">{{ t('info.charter') }}</v-col>
+        <v-col style="cursor: pointer;" @click="sortChartsByKey('path')" @contextmenu="sortChartsReverse" :title="t('sort-tip')">{{ t('info.chart') }}</v-col>
         <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('chart-info') }}</v-col>
         <v-col cols="1" class="d-flex justify-center" style="min-width: 80px; max-width: 100px;">{{ t('preview') }}</v-col>
       </v-row>
@@ -504,7 +504,7 @@ function filterText(
             <v-col cols="2" v-else-if="item.status.type === 'mixing'">-</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'mixing_sfx'">-</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'rendering'">{{ item.status.fps }} FPS</v-col>
-            <v-col cols="2" v-else-if="item.status.type === 'done'" @click="openFile(item.output)">{{ t('task.open-file') }}</v-col>
+            <v-col cols="2" v-else-if="item.status.type === 'done'" style="cursor: pointer;" @click="openFile(item.output)">{{ t('task.open-file') }}</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'canceled'">-</v-col>
             <v-col cols="2" v-else-if="item.status.type === 'failed'">-</v-col>
             <v-col cols="2" v-else style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden; padding-right: 10px;" :title="item.chartInfo.charter">{{ item.chartInfo.charter }}</v-col>
