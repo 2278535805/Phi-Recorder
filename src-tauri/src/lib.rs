@@ -133,7 +133,6 @@ pub async fn run() -> Result<()> {
             delete_autosave,
             save_info,
             read_info,
-            restart_app,
         ])
         .on_window_event(|_, event| match event {
             //WindowEvent::CloseRequested { api, .. } => {
@@ -934,15 +933,5 @@ async fn read_info(path: String) -> Result<ChartInfo, InvokeError> {
         info!("read: {}", file.display());
         let info = serde_yaml::from_reader(BufReader::new(std::fs::File::open(file)?))?;
         Ok(info)
-    }).await
-}
-
-#[tauri::command]
-async fn restart_app() -> Result<(), InvokeError> {
-    wrap_async(async move {
-        std::process::Command::new(std::env::current_exe()?)
-            .spawn()?;
-        exit_program(0);
-        Ok(())
     }).await
 }
