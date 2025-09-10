@@ -70,7 +70,7 @@
     "offset": "延时",
     "judgeOffset": "判定偏移",
     "file-name-format": "文件名格式",
-    "file-name-format-tip": "支持以下变量:\n %date% \n %time% \n %info.*% \n %config.*%",
+    "file-name-format-tip": "支持以下变量:\n %date% \n %time%\n %level_prefix% \n %info.*% \n %config.*%",
     "loading-scene": "加载画面",
     "render-item": "渲染项目",
     "render-line": "判定线",
