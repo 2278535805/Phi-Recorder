@@ -6,7 +6,8 @@ const { t } = useI18n();
 
 import { invoke } from '@tauri-apps/api/core';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { open, save, confirm, message } from '@tauri-apps/plugin-dialog';
+import * as dialog from '@tauri-apps/plugin-dialog';
+import { openPath } from '@tauri-apps/plugin-opener';
 
 import { anyFilter, toast, toastError } from './common';
 import type { RPEChart } from './model';
@@ -51,7 +52,7 @@ watch(sortOption, () => {
 
 
 async function bindRPE() {
-  let file = await open({
+  let file = await dialog.open({
     directory: true,
     title: t('rpe-folder')
   });
@@ -76,7 +77,7 @@ async function unbindRPE() {
 
 async function openInFolder(path: string) {
   try {
-    await invoke('open_in_folder', { path });
+    await openPath(path);
   } catch (e) {
     toastError(e);
   }
@@ -87,7 +88,7 @@ async function exportPez(chartPath: string, chartName: string, minify: boolean =
   moreLoading.value = true;
   try {
     const outputName = chartName.replace(/[\\/:*?"<>|]/g, "_") + '.pez';
-    const outputPath = await save({
+    const outputPath = await dialog.save({
       title: t('output-folder'),
       filters: [
         { name: 'RPE Chart File', extensions: ['pez', 'zip'] },
@@ -97,7 +98,7 @@ async function exportPez(chartPath: string, chartName: string, minify: boolean =
     });
     if (!outputPath) return;
     await invoke('export_pez', { chartPath, outputPath, minify });
-    message(t('export-success'), { title: t('export') })
+    dialog.message(t('export-success'), { title: t('export') })
   } catch (e) {
     toastError(e);
   } finally {
@@ -106,13 +107,13 @@ async function exportPez(chartPath: string, chartName: string, minify: boolean =
 }
 
 async function deleteChart(chartName: string, chartPath: string) {
-  confirm(`"${chartName}" ${t('delete-confirm-info')}`, { title: t('delete-confirm'), kind: 'warning' })
+  dialog.confirm(`"${chartName}" ${t('delete-confirm-info')}`, { title: t('delete-confirm'), kind: 'warning' })
     .then(async (result) => {
       if (!result) return;
       try {
         moreLoading.value = true;
         await invoke('delete_path', { path: chartPath });
-        message(t('delete-success'), { title: t('delete-chart') })
+        dialog.message(t('delete-success'), { title: t('delete-chart') })
       } catch (e) {
         toastError(e);
       } finally {
@@ -126,13 +127,13 @@ async function deleteChart(chartName: string, chartPath: string) {
 }
 
 async function deleteAutoSave(chartName: string, chartPath: string) {
-  confirm(`"${chartName}" ${t('delete-autosave-confirm')}`, { title: t('delete-autosave'), kind: 'warning' })
+  dialog.confirm(`"${chartName}" ${t('delete-autosave-confirm')}`, { title: t('delete-autosave'), kind: 'warning' })
     .then(async (result) => {
       if (!result) return;
       try {
         moreLoading.value = true;
         await invoke('delete_autosave', { path: chartPath });
-        message(t('delete-success'), { title: t('delete-chart') })
+        dialog.message(t('delete-success'), { title: t('delete-chart') })
       } catch (e) {
         toastError(e);
       } finally {

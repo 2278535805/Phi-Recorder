@@ -19,7 +19,6 @@ import moment from 'moment';
 import * as dialog from "@tauri-apps/plugin-dialog"
 
 import { listen } from "@tauri-apps/api/event";
-import { message, save, open } from '@tauri-apps/plugin-dialog';
 
 import { useTheme } from 'vuetify';
 const theme = useTheme();
@@ -309,7 +308,7 @@ async function checkInfo() {
 async function saveInfo() {
   let check = checkInfo();
   if (!check) return;
-  let outputPath = await save({
+  let outputPath = await dialog.save({
     title: t('phira-chart-info'),
     filters: [
       { name: 'Phira Chart Info File', extensions: ['yml'] },
@@ -320,14 +319,14 @@ async function saveInfo() {
   if (!outputPath) return;
   try {
     await invoke('save_info', { path: outputPath, info: chartInfo.value });
-    message(t('save-success'), { title: t('save-info') })
+    dialog.message(t('save-success'), { title: t('save-info') })
 } catch (e) {
     toastError(e);
   }
 }
 
 async function readInfo() {
-  let inputPath = await open({
+  let inputPath = await dialog.open({
     title: t('phira-chart-info'),
     filters: [
       { name: 'Phira Chart Info File', extensions: ['yml'] },
@@ -338,7 +337,7 @@ async function readInfo() {
   try {
     chartInfo.value = await invoke('read_info', { path: inputPath }) as ChartInfo;
     updateAspectRatio();
-    message(t('read-success'), { title: t('read-info') })
+    dialog.message(t('read-success'), { title: t('read-info') })
 } catch (e) {
     toastError(e);
   }

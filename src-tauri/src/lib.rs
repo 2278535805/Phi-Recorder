@@ -91,6 +91,7 @@ pub async fn run() -> Result<()> {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_drag::init())
+        .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_prevent_default::Builder::new()
                 .with_flags(Flags::all().difference(Flags::FIND | Flags::RELOAD))
@@ -100,9 +101,6 @@ pub async fn run() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             exit_program,
             open_output_folder,
-            open_in_folder,
-            show_in_folder,
-            open_file,
             preview_chart,
             preview_tweakoffset,
             preview_play,
@@ -271,68 +269,6 @@ fn open_output_folder() -> Result<(), InvokeError> {
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
-}
-
-#[tauri::command]
-fn open_in_folder(path: &Path) -> Result<(), InvokeError> {
-    (move || {
-        info!("Open in folder: {}", path.display());
-        open::that_detached(path)?;
-        Ok(())
-    })()
-    .map_err(InvokeError::from_anyhow)
-}
-
-#[tauri::command]
-fn show_in_folder(path: &Path) -> Result<(), InvokeError> {
-    (move || {
-        info!("Show in folder: {}", path.display());
-        #[cfg(target_os = "windows")]
-        {
-            Command::new("explorer")
-                .args(["/select,", &path.display().to_string()]) // The comma after select is not a typo
-                .spawn()?;
-        }
-
-        #[cfg(target_os = "linux")]
-        {
-            Command::new("gdbus")
-                .args([
-                    "call",
-                    "--session",
-                    "--dest",
-                    "org.freedesktop.FileManager1",
-                    "--object-path",
-                    "/org/freedesktop/FileManager1",
-                    "--method",
-                    "org.freedesktop.FileManager1.ShowItems",
-                    &format!("['file://{}']", path.canonicalize()?.display()),
-                    "",
-                ])
-                .spawn()?;
-        }
-
-        #[cfg(target_os = "macos")]
-        {
-            Command::new("open")
-                .args(["-R", &path.display().to_string()])
-                .spawn()?;
-        }
-
-        Ok(())
-    })()
-    .map_err(InvokeError::from_anyhow)
-}
-
-#[tauri::command]
-fn open_file(path: &Path) -> Result<(), InvokeError> {
-    let result = (move || {
-        info!("Opening file: {}", path.display());
-        open::that_detached(path)?;
-        Ok(())
-    })();
-
-    result.map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]

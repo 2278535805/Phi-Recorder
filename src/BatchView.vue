@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { invoke } from '@tauri-apps/api/core';
+import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
 
 import { toastError, RULES, toast, anyFilter } from './common';
 import { DEFAULT_RENDER_CONFIG, type ChartInfo, type RenderConfig, type RenderChart, type Preset, type FileDropEvent, type Task } from './model';
@@ -328,7 +329,7 @@ async function showOutputFolder() {
 
 async function openFile(path: string) {
   try {
-    await invoke('open_file', { path });
+    await openPath(path);
   } catch (e) {
     toastError(e);
   }
@@ -336,7 +337,7 @@ async function openFile(path: string) {
 
 async function showInFolder(path: string) {
   try {
-    await invoke('show_in_folder', { path });
+    await revealItemInDir(path);
   } catch (e) {
     toastError(e);
   }

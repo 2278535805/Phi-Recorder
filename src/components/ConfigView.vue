@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { invoke } from '@tauri-apps/api/core';
-import { open } from '@tauri-apps/plugin-dialog';
+import * as dialog from '@tauri-apps/plugin-dialog';
 
 import { VDivider, VForm } from 'vuetify/components';
 
@@ -147,7 +147,7 @@ const isBitrate = (value: string) => {
 
 
 async function chooseAvatar() {
-  let file = await open({
+  let file = await dialog.open({
     filters: [
       {
         name: t('image-filter'),
