@@ -208,9 +208,9 @@ function dragOutput(event: DragEvent, task: Task) {
           <div class="d-flex flex-column w-100 name-cover">
             <v-card-title class="select" :title="task.name">{{ task.name }}</v-card-title>
             <v-card-subtitle class="mt-n2 select" :title="task.path" style="cursor: pointer;" @click="showInFolder(task.path)">{{ task.path }}</v-card-subtitle>
-            <div class="w-100 pa-4 pb-2 pr-2 mt-2">
+            <div class="w-100 pa-4 pb-3 pr-2">
               <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
-              <template v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)">
+              <div v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)" class="pb-2">
                 <v-progress-linear
                   v-if="task.status.type === 'rendering' || task.status.type === 'mixing_sfx'"
                   :model-value="task.status.progress * 100"
@@ -221,15 +221,16 @@ function dragOutput(event: DragEvent, task: Task) {
                   :indeterminate="true"
                   class="glow-spinner"
                 ></v-progress-linear>
-              </template>
-              <div class="pt-4 d-flex justify-end" v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)">
+              </div>
+              <div v-else style="height: 12px"></div>
+              <div v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)" class="d-flex justify-end">
                 <v-btn class="hover-scale btn"
                   variant="text"
                   @click="invoke('cancel_task', { id: task.id })"
                   :title="t('cancel')"
                   icon="mdi-cancel"></v-btn>
               </div>
-              <div v-if="task.status.type === 'failed' || task.status.type === 'canceled'" class="pt-4 d-flex justify-end">
+              <div v-if="['failed', 'canceled'].includes(task.status.type)" class="d-flex justify-end">
                 <v-btn
                   variant="flat"
                   @click="removeDialog = true; removeTaskIndex =index"
@@ -249,7 +250,7 @@ function dragOutput(event: DragEvent, task: Task) {
                   icon="mdi-bug"
                   class="hover-scale btn"></v-btn>
               </div>
-              <div v-if="task.status.type === 'done'" class="pt-4 d-flex justify-end">
+              <div v-if="['done'].includes(task.status.type)" class="d-flex justify-end">
                 <v-btn
                   variant="text"
                   @click="openFile(task.output)"

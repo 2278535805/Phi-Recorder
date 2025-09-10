@@ -191,7 +191,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
               <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
               <v-card-subtitle class="mt-n2 chart-id select" style="cursor: pointer;" @click="openInFolder(chart.path)">{{ chart.id }}</v-card-subtitle>
               <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
-              <div class="w-100 mt-2">
+              <div class="w-100">
                 <div class="pt-4 d-flex justify-end">
                   <v-menu>
                     <template v-slot:activator="{ props }">
@@ -205,7 +205,7 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
                       <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
                     </v-list>
                   </v-menu>
-                  <v-btn class="render-btn hover-scale mx-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" :title="t('render')" icon="mdi-open-in-app" />
+                  <v-btn class="render-btn hover-scale ml-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" :title="t('render')" icon="mdi-open-in-app" />
                 </div>
               </div>
             </div>
@@ -238,7 +238,6 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
   background: rgba(127, 127, 127, 0.1);
   font-weight: 600;
   padding: 12px 24px;
-  margin-bottom: 12px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

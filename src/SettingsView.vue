@@ -20,7 +20,6 @@ const form = ref<VForm>();
 const loadingSave = ref(false);
 
 const config = ref(DEFAULT_APP_CONFIG);
-const needRestart = ref(false);
 
 async function updateConfig() {
   config.value = await invoke('read_config') as AppConfig;
@@ -56,10 +55,6 @@ async function saveConfig() {
     await invoke('save_config', { config: config.value });
   } catch (e) {
     toastError(e);
-  }
-
-  if (needRestart.value) {
-    await invoke('restart_app');
   }
 
   updateConfig();
@@ -218,12 +213,20 @@ const SUPPORTED_THEME_NAME = computed(() => [
 </script>
 
 <template>
-  <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px; gap: 1rem" :style="{ background: `${theme.current.value.colors.container}` }">
-    <v-form ref="form" validateOn="eager" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto; width: 100%;">
-      <v-row>
-        <h2 class="mt-1 mx-5">{{ t('setting') }}</h2>
+  <div class="pa-8 w-100 h-90 d-flex flex-column align-center container fade-in" style="max-width: 1280px" :style="{ background: `${theme.current.value.colors.container}` }">
+    <v-form ref="form" validateOn="eager" style="overflow-x: hidden; overflow-y: auto; width: 100%;">
+      <v-row no-gutters>
+        <v-col class="mx-2 align-self-end">
+          <h2 class="mt-1 mx-3">{{ t('setting') }}</h2>
+        </v-col>
+        <v-col cols="auto" class="mx-2 align-self-end">
+          <v-btn @click="resetDialog = true" v-t="'reset'"></v-btn>
+        </v-col>
+        <v-col cols="auto" class="mx-2 align-self-end">
+          <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'"></v-btn>
+        </v-col>
       </v-row>
-      <v-row no-gutters class="mt-5 mx-0">
+      <v-row no-gutters class="mt-4 mx-0">
         <v-col cols="6">
           <v-text-field clearable class="mx-2" :label="t('rpe-dir')" v-model="config.rpeDir" :title="t('folder-tip')" append-inner-icon="mdi-folder-open" @click:append-inner="selectRpeDir" @contextmenu="openInFolder(config.rpeDir)"></v-text-field>
         </v-col>
@@ -244,7 +247,7 @@ const SUPPORTED_THEME_NAME = computed(() => [
           <TipSwitch class="mx-4" :tooltip="t('print-stderr-tip')" :label="t('print-stderr')" v-model="config.printStderr"></TipSwitch>
         </v-col>
         <v-col cols="6">
-          <TipSwitch class="mx-4" :tooltip="t('show-detailed-log-tip')" :label="t('show-detailed-log')" v-model="config.showDetailedLog" @update:model-value="needRestart = true"></TipSwitch>
+          <TipSwitch class="mx-4" :tooltip="t('show-detailed-log-tip')" :label="t('show-detailed-log')" v-model="config.showDetailedLog"></TipSwitch>
         </v-col>
       </v-row>
 
@@ -267,11 +270,6 @@ const SUPPORTED_THEME_NAME = computed(() => [
       </v-row>
       <v-row class="my-2" />
     </v-form>
-    <div no-gutters class="mt-auto mx-2 d-flex flex-row" style="width: 100%">
-      <v-btn @click="resetDialog = true" v-t="'reset'" color="btn-large" size="large"></v-btn>
-      <div class="flex-grow-1"></div>
-      <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'" color="btn-large" size="large"></v-btn>
-    </div>
   </div>
 
   <v-dialog v-model="resetDialog" width="auto" min-width="300px" class="log-card-bg">
