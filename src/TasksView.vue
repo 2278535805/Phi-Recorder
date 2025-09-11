@@ -179,111 +179,106 @@ function dragOutput(event: DragEvent, task: Task) {
 </script>
 
 <template>
-  <div class="pa-8 w-100 h-100 d-flex flex-column" style="max-width: 1280px; gap: 1rem">
-    <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
-      <v-row>
-        <v-col cols="12" style="margin: -20px 0px;">
-          <v-btn size="large" color="btn-large" class="hover-scale margin-btn btn" @click="showOutputFolder()" v-t="'show-folder'"></v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
-    <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in" v-t="'empty'"></h1>
-    <v-lazy v-for="(task, index) in tasks" :key="task.id" :min-height="150" transition="fade-transition">
-      <v-card class="task-card">
-        <div class="d-flex flex-row align-stretch">
-          <div class="d-flex flex-row align-center img-cover" style="width: 30%">
-            <div
-              style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-              :style="{ 'background-image': 'url(' + convertFileSrc(task.cover) + ')' }"
-            >
-              <div 
-                class="overlay"
-                @click="router.push({ name: 'render', query: { chart: task.path, info: JSON.stringify(task.info), config: JSON.stringify(task.config) } })"
-                draggable="true"
-                @dragstart="dragOutput($event, task)"
+  <div class="w-100 h-100 d-flex flex-column" style="max-width: 1280px; gap: 1rem">
+    <h1 v-if="!tasks || !tasks.length" class="text-center font-italic text-disabled fade-in mt-6" v-t="'empty'"></h1>
+    <v-virtual-scroll class="scroll-mask px-8" style="scrollbar-width: none; padding-top: 30px" :items="tasks" item-key="id" item-height="300" height="calc(100vh - 160px)" transition="fade-transition">
+      <template v-slot:default="{ item, index }">
+        <v-card class="task-card mb-8">
+          <div class="d-flex flex-row align-stretch">
+            <div class="d-flex flex-row align-center img-cover" style="width: 30%">
+              <div
+                style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
+                :style="{ 'background-image': 'url(' + convertFileSrc(item.cover) + ')' }"
               >
-                <i class="mdi mdi-reload icon"></i>
+                <div 
+                  class="overlay"
+                  @click="router.push({ name: 'render', query: { chart: item.path, info: JSON.stringify(item.info), config: JSON.stringify(item.config) } })"
+                  draggable="true"
+                  @dragstart="dragOutput($event, item)"
+                >
+                  <i class="mdi mdi-reload icon"></i>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-column w-100 name-cover">
+              <v-card-title class="select" :title="item.name">{{ item.name }}</v-card-title>
+              <v-card-subtitle class="mt-n2 select" :title="item.path" style="cursor: pointer;" @click="showInFolder(item.path)">{{ item.path }}</v-card-subtitle>
+              <div class="w-100 pa-4 pb-3 pr-2">
+                <p class="mb-2 text-medium-emphasis">{{ describeStatus(item.status) }}</p>
+                <div v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(item.status.type)" class="pb-2">
+                  <v-progress-linear
+                    v-if="item.status.type === 'rendering' || item.status.type === 'mixing_sfx'"
+                    :model-value="item.status.progress * 100"
+                    rounded
+                  ></v-progress-linear>
+                  <v-progress-linear
+                    v-else
+                    :indeterminate="true"
+                    class="glow-spinner"
+                  ></v-progress-linear>
+                </div>
+                <div v-else style="height: 12px"></div>
+                <div v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(item.status.type)" class="d-flex justify-end">
+                  <v-btn class="hover-scale btn"
+                    variant="text"
+                    @click="invoke('cancel_task', { id: item.id })"
+                    :title="t('cancel')"
+                    icon="mdi-cancel"></v-btn>
+                </div>
+                <div v-if="['failed', 'canceled'].includes(item.status.type)" class="d-flex justify-end">
+                  <v-btn
+                    variant="flat"
+                    @click="removeDialog = true; removeTaskIndex =index"
+                    :title="t('remove-task')"
+                    icon="mdi-delete"
+                    class="hover-scale btn"></v-btn>
+                  <v-btn
+                    variant="flat"
+                    prepend-icon="mdi-alert-circle-outline"
+                    @click="() => {
+                        if (item.status.type === 'failed' || item.status.type === 'canceled') {
+                          openOutputDialog(item.status.output);
+                        }
+                      }"
+                    @contextmenu="removeDialog = true; removeTaskIndex = item.id"
+                    :title="t('show-output')"
+                    icon="mdi-bug"
+                    class="hover-scale btn"></v-btn>
+                </div>
+                <div v-if="['done'].includes(item.status.type)" class="d-flex justify-end">
+                  <v-btn
+                    variant="text"
+                    @click="openFile(item.output)"
+                    :title="t('open-file')"
+                    icon="mdi-open-in-new"
+                    class="hover-scale btn"></v-btn>
+                  <v-btn 
+                    variant="flat"
+                    prepend-icon="mdi-folder-open-outline" 
+                    @click="showInFolder(item.output)"
+                    :title="t('show-in-folder')"
+                    icon="mdi-folder-open"
+                    class="hover-scale btn"></v-btn>
+                  <v-btn
+                    variant="flat"
+                    prepend-icon="mdi-text-box-outline"
+                    @click="
+                      () => {
+                        if (item.status.type === 'done') {
+                          openOutputDialog(item.status.output);
+                        }
+                      }
+                    "
+                    :title="t('show-output')"
+                    icon="mdi-bug"
+                    class="hover-scale btn"></v-btn>
+                </div>
               </div>
             </div>
           </div>
-          <div class="d-flex flex-column w-100 name-cover">
-            <v-card-title class="select" :title="task.name">{{ task.name }}</v-card-title>
-            <v-card-subtitle class="mt-n2 select" :title="task.path" style="cursor: pointer;" @click="showInFolder(task.path)">{{ task.path }}</v-card-subtitle>
-            <div class="w-100 pa-4 pb-3 pr-2">
-              <p class="mb-2 text-medium-emphasis">{{ describeStatus(task.status) }}</p>
-              <div v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)" class="pb-2">
-                <v-progress-linear
-                  v-if="task.status.type === 'rendering' || task.status.type === 'mixing_sfx'"
-                  :model-value="task.status.progress * 100"
-                  rounded
-                ></v-progress-linear>
-                <v-progress-linear
-                  v-else
-                  :indeterminate="true"
-                  class="glow-spinner"
-                ></v-progress-linear>
-              </div>
-              <div v-else style="height: 12px"></div>
-              <div v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(task.status.type)" class="d-flex justify-end">
-                <v-btn class="hover-scale btn"
-                  variant="text"
-                  @click="invoke('cancel_task', { id: task.id })"
-                  :title="t('cancel')"
-                  icon="mdi-cancel"></v-btn>
-              </div>
-              <div v-if="['failed', 'canceled'].includes(task.status.type)" class="d-flex justify-end">
-                <v-btn
-                  variant="flat"
-                  @click="removeDialog = true; removeTaskIndex =index"
-                  :title="t('remove-task')"
-                  icon="mdi-delete"
-                  class="hover-scale btn"></v-btn>
-                <v-btn
-                  variant="flat"
-                  prepend-icon="mdi-alert-circle-outline"
-                  @click="() => {
-                      if (task.status.type === 'failed' || task.status.type === 'canceled') {
-                        openOutputDialog(task.status.output);
-                      }
-                    }"
-                  @contextmenu="removeDialog = true; removeTaskIndex = task.id"
-                  :title="t('show-output')"
-                  icon="mdi-bug"
-                  class="hover-scale btn"></v-btn>
-              </div>
-              <div v-if="['done'].includes(task.status.type)" class="d-flex justify-end">
-                <v-btn
-                  variant="text"
-                  @click="openFile(task.output)"
-                  :title="t('open-file')"
-                  icon="mdi-open-in-new"
-                  class="hover-scale btn"></v-btn>
-                <v-btn 
-                  variant="flat"
-                  prepend-icon="mdi-folder-open-outline" 
-                  @click="showInFolder(task.output)"
-                  :title="t('show-in-folder')"
-                  icon="mdi-folder-open"
-                  class="hover-scale btn"></v-btn>
-                <v-btn
-                  variant="flat"
-                  prepend-icon="mdi-text-box-outline"
-                  @click="
-                    () => {
-                      if (task.status.type === 'done') {
-                        openOutputDialog(task.status.output);
-                      }
-                    }
-                  "
-                  :title="t('show-output')"
-                  icon="mdi-bug"
-                  class="hover-scale btn"></v-btn>
-              </div>
-            </div>
-          </div>
-        </div>
-      </v-card>
-    </v-lazy>
+        </v-card>
+      </template>
+    </v-virtual-scroll>
 
     <v-dialog v-model="outputDialog" class="log-card-bg">
       <v-card class="log-card-window">
