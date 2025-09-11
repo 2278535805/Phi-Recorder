@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, type ComputedRef } from 'vue';
 
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
@@ -20,7 +20,7 @@ const charts = ref<RPEChart[] | null>(await getRPECharts());
 const searchQuery = ref('');
 const sortOptionList = t('sort-option-list').split(',');
 const sortOption = ref(sortOptionList[0]);
-const filteredCharts = computed(() => {
+const filteredCharts: ComputedRef<RPEChart[] | null | undefined> = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
   if (!query) return charts.value;
 
@@ -147,9 +147,9 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
 </script>
 
 <template>
-  <div class="pa-8 w-100 h-100 d-flex flex-column" style="max-width: 1280px; gap: 1rem">
+  <div class="w-100 h-100 d-flex flex-column" style="max-width: 1280px; padding-bottom: 0 !important;">
     <template v-if="!charts">
-      <h1 class="text-center font-italic text-disabled unbinded-title text-gradient fade-in" v-t="'not-binded'"></h1>
+      <h1 class="pa-8 text-center font-italic text-disabled unbinded-title text-gradient fade-in" v-t="'not-binded'"></h1>
       <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
         <v-row>
           <v-col cols="12" style="margin: -20px 0px;">
@@ -159,60 +159,70 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
       </v-form>
     </template>
     <template v-if="charts">
-      <v-form class="text-center fade-in" ref="form" style="max-height: 48vh;">
-        <v-row>
-          <v-col cols="8" style="margin: -10px 0px 5px 0px;">
+      <v-form
+        class="px-8 pt-4 text-center fade-in hover-display"
+        ref="form"
+        style="
+          height: 80px;
+          width: calc(100% - 64px);
+          max-width: 1270px;
+          position: absolute;
+          z-index: 1;">
+        <v-row class="hover-display">
+          <v-col cols="8">
             <v-text-field clearable class="ml-2 justify-center hover-scale-text" prepend-inner-icon="mdi-magnify" :label="t('search')" v-model="searchQuery"></v-text-field>
             <!-- <v-btn size="large" class="italic v-btn hover-scale" @click="unbindRPE" style="width: fit-content" v-t="'unbind'"></v-btn> -->
           </v-col>
-          <v-col cols="4" style="margin: -10px 0px 5px 0px;">
+          <v-col cols="4">
             <v-select class="mr-2 hover-scale-text" :items="sortOptionList" v-model="sortOption" :label="t('sort')" append-icon="mdi-sort" @click:append="reverseCharts"></v-select>
           </v-col>
         </v-row>
       </v-form>
 
-      <v-lazy v-for="(chart, index) in filteredCharts" :key="chart.id" :min-height="150"> <!--transition="fade-transition"-->
-        <v-card class="chart-card">
-          <div class="d-flex flex-row align-stretch">
-            <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
-              <div
-                class="cover-image"
-                style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
-                :style="{ 'background-image': 'url(' + convertFileSrc(chart.illustration) + ')' }"
-              >
-                <div 
-                  class="overlay"
-                  @click="router.push({ name: 'render', query: { chart: chart.path } })"
+      <v-virtual-scroll class="scroll-mask px-8" style="scrollbar-width: none; padding-top: 30px" :items="filteredCharts ?? undefined" item-key="id" height="calc(100vh - 160px)" item-height="300"> <!--transition="fade-transition"-->
+        <template v-slot:default="{ item, index }">
+          <v-card class="chart-card mb-8">
+            <div class="d-flex flex-row align-stretch">
+              <div class="d-flex flex-row align-center chart-cover" style="width: 35%">
+                <div
+                  class="cover-image"
+                  style="width: 100%; height: 100%; max-height: 240px; background-position: center; background-repeat: no-repeat; background-size: cover"
+                  :style="{ 'background-image': 'url(' + convertFileSrc(item.illustration) + ')' }"
                 >
-                  <i class="mdi mdi-play icon"></i>
+                  <div 
+                    class="overlay"
+                    @click="router.push({ name: 'render', query: { chart: item.path } })"
+                  >
+                    <i class="mdi mdi-play icon"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex flex-column w-100 chart-content">
+                <v-card-title class="chart-name select">{{ item.name }}</v-card-title>
+                <v-card-subtitle class="mt-n2 chart-id select" style="cursor: pointer;" @click="openInFolder(item.path)">{{ item.id }}</v-card-subtitle>
+                <v-card-subtitle class="chart-id select">{{ item.charter }}</v-card-subtitle>
+                <div class="w-100">
+                  <div class="pt-4 d-flex justify-end">
+                    <v-menu>
+                      <template v-slot:activator="{ props }">
+                        <v-btn class="open-btn hover-scale mx-2" v-bind="props" :loading="moreLoading" icon="mdi-menu"></v-btn>
+                      </template>
+                      <v-list>
+                        <v-list-item @click="exportPez(item.path, item.name, false)" v-t="'export'" />
+                        <v-list-item @click="exportPez(item.path, item.name, true)" v-t="'export-minify'" />
+                        <v-list-item @click="openInFolder(item.path)" v-t="'show-folder'" />
+                        <v-list-item @click="deleteChart(item.name, item.path)" v-t="'delete-chart'" />
+                        <v-list-item @click="deleteAutoSave(item.name, item.path)" v-t="'delete-autosave'" />
+                      </v-list>
+                    </v-menu>
+                    <v-btn class="render-btn hover-scale ml-2" @click="router.push({ name: 'render', query: { chart: item.path } })" :title="t('render')" icon="mdi-open-in-app" />
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="d-flex flex-column w-100 chart-content">
-              <v-card-title class="chart-name select">{{ chart.name }}</v-card-title>
-              <v-card-subtitle class="mt-n2 chart-id select" style="cursor: pointer;" @click="openInFolder(chart.path)">{{ chart.id }}</v-card-subtitle>
-              <v-card-subtitle class="chart-id select">{{ chart.charter }}</v-card-subtitle>
-              <div class="w-100">
-                <div class="pt-4 d-flex justify-end">
-                  <v-menu>
-                    <template v-slot:activator="{ props }">
-                      <v-btn class="open-btn hover-scale mx-2" v-bind="props" :loading="moreLoading" icon="mdi-menu"></v-btn>
-                    </template>
-                    <v-list>
-                      <v-list-item @click="exportPez(chart.path, chart.name, false)" v-t="'export'" />
-                      <v-list-item @click="exportPez(chart.path, chart.name, true)" v-t="'export-minify'" />
-                      <v-list-item @click="openInFolder(chart.path)" v-t="'show-folder'" />
-                      <v-list-item @click="deleteChart(chart.name, chart.path)" v-t="'delete-chart'" />
-                      <v-list-item @click="deleteAutoSave(chart.name, chart.path)" v-t="'delete-autosave'" />
-                    </v-list>
-                  </v-menu>
-                  <v-btn class="render-btn hover-scale ml-2" @click="router.push({ name: 'render', query: { chart: chart.path } })" :title="t('render')" icon="mdi-open-in-app" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </v-card>
-      </v-lazy>
+          </v-card>
+        </template>
+      </v-virtual-scroll>
     </template>
   </div>
 </template>
@@ -241,6 +251,18 @@ async function deleteAutoSave(chartName: string, chartPath: string) {
   padding: 12px 24px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hover-display {
+  transition: all 0.3s ease;
+  opacity: 0;
+  mask-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%,  rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 90%,  transparent 100%)
+}
+
+.hover-display:hover {
+  opacity: 1;
+
+  backdrop-filter: blur(8px) grayscale(0.5);
 }
 
 .chart-card {

@@ -127,7 +127,7 @@
   from {
     opacity: 0;
     scale: 0.8;
-    transform: translateY(100px);
+    transform: translateY(0px);
   }
   to {
     opacity: 1;
