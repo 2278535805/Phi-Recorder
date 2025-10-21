@@ -391,6 +391,8 @@ function applyConfig(config: RenderConfig) {
   combo.value = config.combo;
   difficulty.value = config.difficulty;
   judgeOffset.value = String(config.judgeOffset * 1000);
+  fileNameFormat.value = config.fileNameFormat;
+  bgBlurriness.value = String(config.bgBlurriness);
 
   allGood.value = judgeMode.value === t('judge-modes').split(',')[1] ? true : false;
   allBad.value = false;
