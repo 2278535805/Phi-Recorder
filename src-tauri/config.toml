@@ -1,16 +1,16 @@
 # Output 输出
-resolution = [1920, 1080]
-fps = 60
+resolution = [2560, 1600]
+fps = 120
 sampleCount = 8
-hardwareAccel = true
-hevc = false
+hardwareAccel = false
+hevc = true
 mpeg4 = false
 # customEncoder = ""
 fileNameFormat = "%date% %time% %info.name%_%level_prefix%"
 ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf" or "any"
 dynamicBitrateControl = true
 bitrate = "26"
-endingLength = 0.0
+endingLength = 10.0
 renderStartTime = 0.0
 # renderEndTime = 
 renderLoading = true
@@ -18,10 +18,10 @@ renderLoading = true
 
 # Player 玩家
 # playerAvatar = ""
-playerName = "HLMC"
-playerRks = 16.0
+playerName = "Phi Recorder"
+playerRks = 16.94
 challengeColor = "rainbow" # white green blue red golden rainbow
-challengeRank = 3
+challengeRank = 51
 
 
 # Graphics 图像
@@ -51,8 +51,8 @@ roman = false
 chinese = false
 
 bgBlurriness = 80.0
-watermark = ""
-combo = "AUTOPLAY"
+watermark = "PRLite [AUTO] - Recorded by 9RayAlkalin"
+combo = "RECORD"
 maxParticles = 5000 # 5000 25000 200000
 
 # Audio 音频
