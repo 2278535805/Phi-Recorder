@@ -25,7 +25,7 @@ tauri = { version = "2.5.1", features = [ "protocol-asset", "tray-icon"] }
 
 anyhow = { version = "1.0.95", features = ["backtrace"] }
 macroquad = { git = "https://github.com/2278535805/prpr-macroquad", default-features = false }
-phire = { git = "https://github.com/2278535805/phire", package = "phire", default-features = false, features = ["log", "video"] }
+phire = { git = "https://github.com/9RayAlkalin/phire", package = "phire", default-features = false, features = ["log", "video"] }
 # phire = { path = "../../phire/phire", default-features = false, features = ["log", "video"] }
 
 sasa = { git = "https://github.com/2278535805/sasa" }
