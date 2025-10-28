@@ -27,7 +27,7 @@ export const RULES = {
   positiveOrNull: (value: string | null) => (value == null || value == '' || (isNumeric(value) && Number(value) > 0)) || i18n.global.t('rules.positive'),
   less10000: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) > 100000) return i18n.global.t('rules.big');
+      if (Number(value) > 10000) return i18n.global.t('rules.big');
     }
     return true;
   },
