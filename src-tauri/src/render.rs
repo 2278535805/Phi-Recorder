@@ -514,8 +514,11 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
     let fps = config.fps;
     let offset = chart.offset + info.offset;
-    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let speed_time_ratio = 1.0 / config.speed as f64;
+    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time - offset as f64 + WAIT_TIME as f64;
     let video_length = chart_length + config.ending_length;
+    let chart_length_original = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let video_length_original = chart_length_original + config.ending_length; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
     let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
@@ -542,7 +545,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         send(IPCEvent::Mixing);
     }
 
-    let output_music_len = (video_length * music_sample_rate as f64).ceil() as usize * 2;
+    let output_music_len = (video_length_original * music_sample_rate as f64).ceil() as usize * 2;
 
     let output_fx_len = ((chart_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
 
@@ -565,7 +568,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let pos = before_time - offset.min(0.) as f64;
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
         let position_read = ((offset.max(0.) as f64 + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
-        let music_len = (chart_length * music_sample_rate as f64).ceil() as usize * 2;
+        let music_len = (chart_length_original * music_sample_rate as f64).ceil() as usize * 2;
         let len = (music.len() - position_read).min(music_len - position_wrtie);
         let clip = music.slice(s![position_read..position_read + len]);
         let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + len]);
@@ -592,13 +595,13 @@ pub async fn main(cmd: bool) -> Result<()> {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
         let play_start_time = config.play_start_time as f32 - config.judge_offset;
-        let length = play_start_time + chart_length as f32;
+        let length = play_start_time + chart_length_original as f32;
         let mut hit_fx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
 
         if config.audio_mix_optimization {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    hit_fx_list.push((before_time + note.time as f64 + judge_offset - config.play_start_time, sfx));
+                    hit_fx_list.push((before_time + note.time as f64 * speed_time_ratio + judge_offset - config.play_start_time, sfx));
                 }
             });
             let len = hit_fx_list.len();
@@ -659,7 +662,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         } else {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    hit_fx_list.push((before_time + note.time as f64 + judge_offset - config.play_start_time, sfx));
+                    hit_fx_list.push((before_time + note.time as f64 * speed_time_ratio + judge_offset - config.play_start_time, sfx));
                 }
             });
             let num = hit_fx_list.len();
@@ -899,25 +902,47 @@ pub async fn main(cmd: bool) -> Result<()> {
     let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
-    let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
-        "[1:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr,volume={}[a1];", sample_rate, volume_music,
+    let mut ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
+        "[1:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr", sample_rate,
     )} else { format!(
-        "[1:a]aresample={}:resampler=swr,volume={}[a1];", sample_rate, volume_music,
+        "[1:a]aresample={}:resampler=swr", sample_rate,
     )};
 
-    let ffmpeg_audio_filter_fx = if config.force_limit {
+    let ffmpeg_audio_filter_music_volume = format!(",volume={}", volume_music);
+    ffmpeg_audio_filter_music += &ffmpeg_audio_filter_music_volume;
+
+    let ffmpeg_audio_filter_music_speed = if config.speed != 1.0 {
         format!(
-            "[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];",
-            volume_sfx, config.limit_threshold
+            ",rubberband=tempo={}",
+            config.speed
+        )
+    } else {
+        String::new()
+    };
+    ffmpeg_audio_filter_music += &ffmpeg_audio_filter_music_speed;
+    ffmpeg_audio_filter_music += "[a1];";
+
+    let mut ffmpeg_audio_filter_fx = format!(
+            "[2:a]volume={}",
+            volume_sfx
+        );
+
+    let ffmpeg_audio_filter_fx_limit = if config.force_limit {
+        format!(
+            ",alimiter=limit={}:level=false:attack=0.1:release=1",
+            config.limit_threshold
         )
     } else if config.compression_ratio > 1. {
         format!(
-            "[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];",
-            volume_sfx, config.compression_ratio
+            ",acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01",
+            config.compression_ratio
         )
     } else {
-        format!("[2:a]volume={}[a2];", volume_sfx)
+        String::new()
     };
+
+    ffmpeg_audio_filter_fx += &ffmpeg_audio_filter_fx_limit;
+    ffmpeg_audio_filter_fx += "[a2];";
 
     let ffmpeg_audio_filter_ending =
         format!("[3:a]volume={},adelay={}[a3];", volume_music, delay_ending);

@@ -31,6 +31,12 @@ export const RULES = {
     }
     return true;
   },
+  less100: (value: string) => {
+    if (isNumeric(value)) {
+      if (Number(value) > 100) return i18n.global.t('rules.big');
+    }
+    return true;
+  },
   less4000000000: (value: string) => {
     if (isNumeric(value)) {
       if (Number(value) > 4000000000) return i18n.global.t('rules.big');

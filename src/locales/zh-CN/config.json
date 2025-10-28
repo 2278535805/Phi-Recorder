@@ -42,6 +42,7 @@
     "aggressive": "激进优化",
     "aggressive-tips": "剔除屏幕外音符, 提升渲染速度, 但可能导致部分音符消失",
     "disable-effect": "禁用特效",
+    "speed": "速度",
     "volume-music": "音乐音量",
     "volume-sfx": "音效音量",
     "compression-ratio": "音效压缩比",

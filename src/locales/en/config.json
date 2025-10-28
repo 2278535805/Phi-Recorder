@@ -43,6 +43,7 @@
     "aggressive-tips": "Hide off-screen note, Improve rendering speed, but may cause some notes to disappear",
     "disable-particle": "Disable Particle",
     "disable-effect": "Disable Effect",
+    "speed": "Speed",
     "volume-music": "Music Volume",
     "volume-sfx": "SFX Volume",
     "compression-ratio": "SFX Comp Ratio",
