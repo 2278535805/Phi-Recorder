@@ -48,6 +48,7 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
   playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks)),
   sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount))
 
+const speed = ref(String(DEFAULT_RENDER_CONFIG.speed));
 const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic);
 const volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx);
 const compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio);
@@ -264,7 +265,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     playerRks: parseFloat(playerRks.value),
     sampleCount: parseInt(sampleCount.value),
     resPackPath: respack.value.path,
-    speed: 1,
+    speed: parseFloat(speed.value),
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     compressionRatio: compressionRatio.value,
@@ -383,6 +384,7 @@ function applyConfig(config: RenderConfig) {
   playerRks.value = String(config.playerRks);
   sampleCount.value = String(config.sampleCount);
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0]!;
+  speed.value = String(config.speed);
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
@@ -879,6 +881,9 @@ function setConfigForQuality() {
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
           <v-switch class="text-center justify-center mr-2 d-flex" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
+        </v-col>
+        <v-col cols="3">
+          <v-text-field class="mx-2" :label="t('speed')" v-model="speed" type="number" :rules="[RULES.notEmpty, RULES.positive, RULES.less100]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
