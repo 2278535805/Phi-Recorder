@@ -883,7 +883,7 @@ function setConfigForQuality() {
           <v-switch class="text-center justify-center mr-2 d-flex" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('speed')" v-model="speed" type="number" :rules="[RULES.notEmpty, RULES.positive, RULES.less100]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('speed')" v-model="speed" type="number" :rules="[RULES.notEmpty, RULES.positive, RULES.less100, RULES.greater0_01]"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
