@@ -50,11 +50,40 @@ import type { Release, Assets } from './model';
 import { open } from '@tauri-apps/plugin-shell';
 import { useTheme } from 'vuetify';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { toast } from './common';
 const appWindow = getCurrentWindow();
 const theme = useTheme();
 
 localStorage.removeItem('BatchView.ChartList')
 localStorage.removeItem('BatchView.Preset')
+
+let count = 0;
+let timer: number | null = null;
+
+document.addEventListener('contextmenu', (e) => {
+  count++;
+  if (timer) {
+    window.clearTimeout(timer);
+  }
+
+  timer = window.setTimeout(() => {
+    count = 0;
+    timer = null;
+  }, 2000);
+
+  if (count >= 7) {
+    count = 0;
+    const rand = Math.floor(Math.random() * 101);
+    toast(`${t('luck-value')}: ${rand}`, 'info');
+    const zoomValue = 300 - rand * 2;
+    const blurValue = (100 - rand) * 0.02;
+    const hueValue = 270 - rand * 2.70;
+    const saturateValue = rand;
+    const contrastValue = 150 - rand * 0.5;
+    document.body.style.zoom = `${zoomValue}%`;
+    document.body.style.filter = `blur(${blurValue}px) hue-rotate(${hueValue}deg) saturate(${saturateValue}%) contrast(${contrastValue}%`;
+  }
+}, { passive: true });
 
 const { t } = useI18n();
 
