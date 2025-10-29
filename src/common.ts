@@ -43,6 +43,12 @@ export const RULES = {
     }
     return true;
   },
+  greater0_01: (value: string) => {
+    if (isNumeric(value)) {
+      if (Number(value) < 0.01) return i18n.global.t('rules.small');
+    }
+    return true;
+  },
   nonSpaces: (value: string) => !/\s/.test(value) || i18n.global.t('rules.non-spaces'),
   notZero: (value: string) => (Number(value) != 0) || i18n.global.t('rules.not-zero'),
   notCOMBO: (value: string) => {
