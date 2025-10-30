@@ -507,18 +507,26 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut gl = unsafe { get_internal_gl() };
 
+    let fps = config.fps;
+    let offset = chart.offset + info.offset;
+    let speed = config.speed as f64;
+    let speed_time_ratio = 1.0 / config.speed as f64;
+
     let before_time: f64 = if config.render_loading {
-        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
+        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64 * speed_time_ratio
     } else {
         0.0
     };
-    let fps = config.fps;
-    let offset = chart.offset + info.offset;
-    let speed_time_ratio = 1.0 / config.speed as f64;
-    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let before_time_original: f64 = if config.render_loading {
+        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64 * speed
+    } else {
+        0.0
+    };
+
+    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time - offset as f64 + WAIT_TIME as f64 * speed_time_ratio;
     let video_length = chart_length + config.ending_length;
-    let chart_length_original = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
-    let video_length_original = chart_length_original + config.ending_length; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
+    let chart_length_original = before_time_original + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let video_length_original = chart_length_original + config.ending_length * speed; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
     let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
@@ -547,7 +555,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let output_music_len = (video_length_original * music_sample_rate as f64).ceil() as usize * 2;
 
-    let output_fx_len = ((chart_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
+    let output_fx_len = ((video_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
 
     let mut output_music = Array1::from_vec(vec![0.0_f32; output_music_len]);
     let mut output_fx = Array1::from_vec(vec![0.0_f32; output_fx_len]);
@@ -565,7 +573,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = before_time - offset.min(0.) as f64;
+        let pos = (before_time - offset.min(0.) as f64) * speed; // TODO: use ffmpeg to delay music
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
         let position_read = ((offset.max(0.) as f64 + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
         let music_len = (chart_length_original * music_sample_rate as f64).ceil() as usize * 2;
@@ -899,13 +907,13 @@ pub async fn main(cmd: bool) -> Result<()> {
         " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
     )?;
 
-    let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
+    let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 * speed_time_ratio + EndingScene::BPM_WAIT_TIME) * 1000.;
     let delay_ending = format!("{}|{}", delay_ending, delay_ending);
 
     let mut ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
-        "[1:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr", sample_rate,
+        "[2:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr", sample_rate,
     )} else { format!(
-        "[1:a]aresample={}:resampler=swr", sample_rate,
+        "[2:a]aresample={}:resampler=swr", sample_rate,
     )};
 
     let ffmpeg_audio_filter_music_volume = format!(",volume={}", volume_music);
@@ -920,10 +928,10 @@ pub async fn main(cmd: bool) -> Result<()> {
         String::new()
     };
     ffmpeg_audio_filter_music += &ffmpeg_audio_filter_music_speed;
-    ffmpeg_audio_filter_music += "[a1];";
+    ffmpeg_audio_filter_music += "[a2];";
 
     let mut ffmpeg_audio_filter_fx = format!(
-            "[2:a]volume={}",
+            "[1:a]volume={}",
             volume_sfx
         );
 
@@ -942,7 +950,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
 
     ffmpeg_audio_filter_fx += &ffmpeg_audio_filter_fx_limit;
-    ffmpeg_audio_filter_fx += "[a2];";
+    ffmpeg_audio_filter_fx += "[a1];";
 
     let ffmpeg_audio_filter_ending =
         format!("[3:a]volume={},adelay={}[a3];", volume_music, delay_ending);
@@ -989,9 +997,8 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("Command: {} {} {} {} {} {} {} {} {} {}",
         &ffmpeg,
         args,
-        "-i",
-        output_music_temp.path().display(),
         "-i", output_fx_temp.path().display(),
+        "-i", output_music_temp.path().display(),
         "-i", ASSET_PATH.get().unwrap().join("ending.ogg").display(),
         args2,
         output_path.display()
@@ -1000,9 +1007,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
         .arg("-i")
-        .arg(output_music_temp.path())
-        .arg("-i")
         .arg(output_fx_temp.path())
+        .arg("-i")
+        .arg(output_music_temp.path())
         .arg("-i")
         .arg(ASSET_PATH.get().unwrap().join("ending.ogg"))
         .args(args2.split_whitespace())
