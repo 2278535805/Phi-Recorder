@@ -573,7 +573,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = (before_time - offset.min(0.) as f64) * speed; // TODO: use ffmpeg to delay music
+        let pos = (before_time - offset.min(0.) as f64) * speed;
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
         let position_read = ((offset.max(0.) as f64 + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
         let music_len = (chart_length_original * music_sample_rate as f64).ceil() as usize * 2;
