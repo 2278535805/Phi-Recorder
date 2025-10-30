@@ -528,7 +528,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time * speed_time_ratio - offset as f64 + WAIT_TIME as f64 * speed_time_ratio;
     let video_length = chart_length + config.ending_length;
     let chart_length_music = before_time_original + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
-    let chart_length_fx = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let chart_length_fx = config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
     let video_length_music = chart_length_music + config.ending_length; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
     let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
