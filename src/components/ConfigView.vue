@@ -20,7 +20,7 @@ const form = ref<VForm>();
 const page = ref(0);
 const fileNameFormatDialog = ref(false);
 
-const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160'],
+const resolutionList = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160'],
   fpsList = ['30', '60', '120'],
   bitrateList = ['2M', '5M', '7M'],
   bitrateCrfList = ['24', '28', '35', '40'],
@@ -571,7 +571,7 @@ function setConfigForQuality() {
       <StickyLabel :title="t('title.common')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
-          <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
+          <v-combobox :label="t('resolution')" :items="resolutionList" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[isCrf]" v-model="bitrate"></v-combobox>
@@ -636,7 +636,7 @@ function setConfigForQuality() {
 
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
-          <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
+          <v-combobox :label="t('resolution')" :items="resolutionList" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.int, RULES.positive]" v-model="fps"></v-combobox>
