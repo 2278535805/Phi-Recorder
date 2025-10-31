@@ -353,21 +353,8 @@ pub fn get_encoder(
 pub fn test_encoder(ffmpeg: &String, encoder: &str) -> bool {
     info!("Testing encoder: {}", encoder);
     let output = Command::new(ffmpeg)
-        .args([
-            "-f",
-            "lavfi",
-            "-i",
-            "testsrc=size=1920x1080:rate=5:duration=1",
-            "-pix_fmt",
-            "yuv420p",
-            "-c:v",
-            encoder,
-            "-f",
-            "null",
-            "-",
-        ])
-        .arg("-loglevel")
-        .arg("warning")
+        .args(["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
+        .args(["-loglevel", "warning"])
         // .arg("-hide_banner")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -481,8 +468,8 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
-    let sfx_protect_time = if let Some(v) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
-        v.length()
+    let sfx_protect_time = if let Some(sfx_longest) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
+        sfx_longest.length()
     } else {
         sfx_drag.length()
     };
@@ -723,14 +710,12 @@ pub async fn main(cmd: bool) -> Result<()> {
             let mut proc = cmd_hidden(&ffmpeg)
                 .args(
                     format!(
-                        "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
-                        sample_rate
+                        "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav", sample_rate
                     )
                     .split_whitespace(),
                 )
                 .arg(output)
-                .arg("-loglevel")
-                .arg("warning")
+                .args(["-loglevel", "warning"])
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::inherit())
@@ -842,7 +827,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         ).await?
     };
     main.top_level = false;
-    main.viewport = Some((0, 0, vw as _, vh as _));
+    main.viewport = Some((0, 0, vw as i32, vh as i32));
 
     let ffmpeg_preset = "-preset";
     let ffmpeg_preset_name_list: Vec<String> = config
@@ -956,7 +941,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let ffmpeg_audio_filter_ending =
         format!("[3:a]volume={},adelay={}[a3];", volume_music, output_ending_music_delay_string);
 
-    let ffmpeg_audio_effect_mix = if config.hires {
+    let ffmpeg_audio_filter_mix = if config.hires {
         format!(
             "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
         )
@@ -971,7 +956,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         ffmpeg_audio_filter_music,
         ffmpeg_audio_filter_sfx,
         ffmpeg_audio_filter_ending,
-        ffmpeg_audio_effect_mix
+        ffmpeg_audio_filter_mix
     );
 
     let args2 = format!(
@@ -1007,16 +992,12 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
-        .arg("-i")
-        .arg(output_sfx_temp.path())
-        .arg("-i")
-        .arg(output_music_temp.path())
-        .arg("-i")
-        .arg(output_ending_temp.path())
+        .arg("-i").arg(output_sfx_temp.path())
+        .arg("-i").arg(output_music_temp.path())
+        .arg("-i").arg(output_ending_temp.path())
         .args(args2.split_whitespace())
         .arg(output_path)
-        .arg("-loglevel")
-        .arg("warning")
+        .args(["-loglevel", "warning"])
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -1049,7 +1030,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let render_time = Instant::now();
 
     let fps = fps as f64;
-    let frames10 = (video_frames / 10).max(1);
+    let frames_per_10 = (video_frames / 10).max(1);
     let frames = video_frames;
     let mut step_time = Instant::now();
     for frame in 0..frames {
@@ -1067,7 +1048,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             mst.blit();
         }
 
-        if frame % frames10 == 0 {
+        if frame % frames_per_10 == 0 {
             let progress = round_to_step((frame as f64 / video_frames as f64 * 100.).ceil(), 10.0);
             info!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
                 progress, frame, video_frames, std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
