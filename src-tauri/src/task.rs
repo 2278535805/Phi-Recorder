@@ -64,7 +64,6 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
     let match_config = |key: &str| -> String {
         match key {
             "resolution"                 => format!("{}x{}", config.resolution.0, config.resolution.1),
-            "ffmpeg_preset"              => config.ffmpeg_preset.clone(),
             "ending_length"              => config.ending_length.to_string(),
             "render_loading"             => config.render_loading.to_string(),
             "hires"                      => config.hires.to_string(),

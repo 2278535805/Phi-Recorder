@@ -42,7 +42,6 @@ use tempfile::NamedTempFile;
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
     pub resolution: (u32, u32),
-    pub ffmpeg_preset: String,
     pub ending_length: f64,
     pub render_loading: bool,
     pub hires: bool,
@@ -170,7 +169,6 @@ impl Default for RenderConfig {
     fn default() -> Self {
         Self {
             resolution: (1920, 1080),
-            ffmpeg_preset: "medium p4 balanced".to_string(),
             ending_length: 0.0,
             render_loading: false,
             hires: false,
@@ -829,45 +827,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     main.top_level = false;
     main.viewport = Some((0, 0, vw as i32, vh as i32));
 
-    let ffmpeg_preset = "-preset";
-    let ffmpeg_preset_name_list: Vec<String> = config
-        .ffmpeg_preset
-        .split_whitespace()
-        .map(|s| s.to_string())
-        .collect();
-
-    let ffmpeg_preset_name = if ffmpeg_encoder == encoder_list[0] {
-        if let Some(i) = ffmpeg_preset_name_list.get(1) {
-            i.as_str()
-        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "p4"
-        }
-    } else if ffmpeg_encoder == encoder_list[1] {
-        if let Some(i) = ffmpeg_preset_name_list.get(2) {
-            i.as_str()
-        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "medium"
-        }
-    } else if ffmpeg_encoder == encoder_list[2] {
-        if let Some(i) = ffmpeg_preset_name_list.get(3) {
-            i.as_str()
-        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "balanced"
-        }
-    } else {
-        if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "medium"
-        }
-    };
-
     let bitrate_control = if config.dynamic_bitrate_control {
         if ffmpeg_encoder == encoder_list[0] && !config.mpeg4 {
             "-cq"
@@ -960,7 +919,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let args2 = format!(
-        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] -vf vflip -f {}",
+        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} -filter_complex {} -map 0:v:0 -map [a] -vf vflip -f {}",
         if config.hires {
             "pcm_f32le"
         } else {
@@ -969,8 +928,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         ffmpeg_encoder,
         bitrate_control,
         config.bitrate,
-        ffmpeg_preset,
-        ffmpeg_preset_name,
         ffmpeg_audio_filter,
         if config.hires { "mov" } else { "mp4" }
     );
