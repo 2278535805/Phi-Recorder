@@ -210,6 +210,8 @@ const SUPPORTED_THEME_NAME = computed(() => [
   { name: t("theme.light-blue"), code: "LightBlue" },
 ]);
 
+const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
+
 
 </script>
 
@@ -265,6 +267,9 @@ const SUPPORTED_THEME_NAME = computed(() => [
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2 mx-0">
+        <v-col cols="6">
+          <TipSwitch class="mx-4" :label="t('use-system-theme')" v-model="useSystemTheme"></TipSwitch>
+        </v-col>
         <v-col cols="6">
           <TipSwitch class="mx-4" :tooltip="t('list-expand-tip')" :label="t('list-expand')" v-model="listExpand"></TipSwitch>
         </v-col>

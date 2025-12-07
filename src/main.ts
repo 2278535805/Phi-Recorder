@@ -90,7 +90,11 @@ const i18n = createI18n({
 });
 changeLocale(locale);
 
-const savedTheme = localStorage.getItem("theme") || window.matchMedia('(prefers-color-scheme: dark)').matches ? 'DeepDark' : 'LightBlue';
+const useSystemTheme = localStorage.getItem('useSystemTheme') === 'true';
+const savedTheme = useSystemTheme
+  ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'DeepDark' : 'LightBlue')
+  : (localStorage.getItem('theme') ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'DeepDark' : 'LightBlue'));
+localStorage.setItem('theme', savedTheme);
 
 const vuetify = createVuetify({
   components,

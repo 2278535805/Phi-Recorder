@@ -56,6 +56,7 @@ const theme = useTheme();
 
 localStorage.removeItem('BatchView.ChartList')
 localStorage.removeItem('BatchView.Preset')
+const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
 
 let count = 0;
 let timer: number | null = null;
@@ -141,7 +142,9 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
-  now_theme.value = event.matches ? "DeepDark" : "LightBlue";
+  if (useSystemTheme.value) {
+    now_theme.value = event.matches ? "DeepDark" : "LightBlue";
+  }
 });
 
 
