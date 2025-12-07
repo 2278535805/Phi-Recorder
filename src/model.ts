@@ -103,6 +103,7 @@ export interface RenderConfig {
   playerName: string;
   playerRks: number;
   sampleCount: number;
+  fxaa: boolean;
   resPackPath: string | null;
   speed: number;
   volumeMusic: number;

@@ -45,8 +45,17 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
   noteScale = ref(DEFAULT_RENDER_CONFIG.noteScale),
   playerAvatar = ref<string>(),
   playerName = ref(DEFAULT_RENDER_CONFIG.playerName),
-  playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks)),
-  sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount))
+  playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks));
+
+const sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount)),
+  antiAliasingList = [
+    { title: t('off'), value: '1' },
+    { title: t('fxaa'), value: '-1' },
+    { title: `2x${t('msaa')}`, value: '2' },
+    { title: `4x${t('msaa')}`, value: '4' },
+    { title: `8x${t('msaa')}`, value: '8' },
+    { title: `16x${t('msaa')}`, value: '16' },
+  ];
 
 const speedList = ['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75', '2.0'];
 const speed = ref(String(DEFAULT_RENDER_CONFIG.speed));
@@ -264,7 +273,8 @@ async function buildConfig(): Promise<RenderConfig | null> {
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
     playerRks: parseFloat(playerRks.value),
-    sampleCount: parseInt(sampleCount.value),
+    sampleCount: parseInt(sampleCount.value) >= 1 ? parseInt(sampleCount.value) : 1,
+    fxaa: parseInt(sampleCount.value) === -1 ? true : false,
     resPackPath: respack.value.path,
     speed: parseFloat(speed.value),
     volumeMusic: volumeMusic.value,
@@ -383,7 +393,7 @@ function applyConfig(config: RenderConfig) {
   playerAvatar.value = config.playerAvatar || undefined;
   playerName.value = config.playerName;
   playerRks.value = String(config.playerRks);
-  sampleCount.value = String(config.sampleCount);
+  sampleCount.value = config.fxaa ? '-1' : String(config.sampleCount);
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0]!;
   speed.value = String(config.speed);
   volumeMusic.value = config.volumeMusic;
@@ -642,7 +652,7 @@ function setConfigForQuality() {
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.int, RULES.positive]" v-model="fps"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-text-field :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :title="t('sample-count-tips')"></v-text-field>
+          <v-autocomplete :label="t('anti-aliasing')" class="mx-2" v-model="sampleCount" :items="antiAliasingList" item-title="title" item-value="value"></v-autocomplete>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
           <TipSwitch :label="t('hw-accel')" color="btn" v-model="hwAccel" :title="t('hw-accel-tips')"></TipSwitch>
