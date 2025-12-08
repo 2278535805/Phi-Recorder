@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 
 import { VSonner } from 'vuetify-sonner';
 import { invoke,   } from '@tauri-apps/api/core';
-import semver from 'semver';
+import { gt } from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
 import * as os from "@tauri-apps/plugin-os"
 import { openUrl } from '@tauri-apps/plugin-opener';
@@ -236,7 +236,7 @@ async function checkForUpdates(dialog = true): Promise<boolean> {
     const latestVersion = release.tag_name;
     //const latestVersion = '0.4.0';
     console.log(latestVersion);
-    const updates = semver.gt(latestVersion, await getVersion());
+    const updates = gt(latestVersion, await getVersion());
     if (updates) {
       return true;
     }
