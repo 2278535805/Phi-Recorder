@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 
 import { VSonner } from 'vuetify-sonner';
 import { invoke,   } from '@tauri-apps/api/core';
-import semver from 'semver';
+import { gt } from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
 import * as os from "@tauri-apps/plugin-os"
 import { openUrl } from '@tauri-apps/plugin-opener';
@@ -50,11 +50,41 @@ import type { Release, Assets } from './model';
 import { open } from '@tauri-apps/plugin-shell';
 import { useTheme } from 'vuetify';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { toast } from './common';
 const appWindow = getCurrentWindow();
 const theme = useTheme();
 
 localStorage.removeItem('BatchView.ChartList')
 localStorage.removeItem('BatchView.Preset')
+const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
+
+let count = 0;
+let timer: number | null = null;
+
+document.addEventListener('contextmenu', (e) => {
+  count++;
+  if (timer) {
+    window.clearTimeout(timer);
+  }
+
+  timer = window.setTimeout(() => {
+    count = 0;
+    timer = null;
+  }, 2000);
+
+  if (count >= 7) {
+    count = 0;
+    const rand = Math.floor(Math.random() * 101);
+    toast(`${t('luck-value')}: ${rand}`, 'info');
+    const zoomValue = 300 - rand * 2;
+    const blurValue = (100 - rand) * 0.02;
+    const hueValue = 270 - rand * 2.70;
+    const saturateValue = rand;
+    const contrastValue = 150 - rand * 0.5;
+    document.body.style.zoom = `${zoomValue}%`;
+    document.body.style.filter = `blur(${blurValue}px) hue-rotate(${hueValue}deg) saturate(${saturateValue}%) contrast(${contrastValue}%`;
+  }
+}, { passive: true });
 
 const { t } = useI18n();
 
@@ -112,7 +142,9 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
-  now_theme.value = event.matches ? "DeepDark" : "LightBlue";
+  if (useSystemTheme.value) {
+    now_theme.value = event.matches ? "DeepDark" : "LightBlue";
+  }
 });
 
 
@@ -204,7 +236,7 @@ async function checkForUpdates(dialog = true): Promise<boolean> {
     const latestVersion = release.tag_name;
     //const latestVersion = '0.4.0';
     console.log(latestVersion);
-    const updates = semver.gt(latestVersion, await getVersion());
+    const updates = gt(latestVersion, await getVersion());
     if (updates) {
       return true;
     }

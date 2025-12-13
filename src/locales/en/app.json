@@ -15,5 +15,7 @@
     "ffmpeg-not-found-detail": "Please download ffmpeg, Windows users usually only need to download \"ffmpeg-master-latest-win64-gpl.zip\"\nPlace all files in the bin folder in the program folder or configure the ffmpeg environment variables",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "off": "Off",
+    "luck-value": "Luck Value"
 }

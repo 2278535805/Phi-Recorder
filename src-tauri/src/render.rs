@@ -29,7 +29,7 @@ use std::{
     cmp::Ordering,
     io::{BufRead, BufWriter, Write},
     ops::DerefMut,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::{Command, Stdio},
     rc::Rc,
     sync::atomic::{AtomicBool, Ordering as AtomicOrdering},
@@ -42,7 +42,6 @@ use tempfile::NamedTempFile;
 #[serde(rename_all = "camelCase", default)]
 pub struct RenderConfig {
     pub resolution: (u32, u32),
-    pub ffmpeg_preset: String,
     pub ending_length: f64,
     pub render_loading: bool,
     pub hires: bool,
@@ -62,7 +61,6 @@ pub struct RenderConfig {
     pub aggressive: bool,
     pub challenge_color: ChallengeModeColor,
     pub challenge_rank: u32,
-    pub fxaa: bool,
     pub note_scale: f32,
     //pub offset: f32,
     pub particle: bool,
@@ -70,6 +68,7 @@ pub struct RenderConfig {
     pub player_name: String,
     pub player_rks: f32,
     pub sample_count: u32,
+    pub fxaa: bool,
     pub res_pack_path: Option<String>,
     pub speed: f32,
     pub volume_music: f32,
@@ -170,7 +169,6 @@ impl Default for RenderConfig {
     fn default() -> Self {
         Self {
             resolution: (1920, 1080),
-            ffmpeg_preset: "medium p4 balanced".to_string(),
             ending_length: 0.0,
             render_loading: false,
             hires: false,
@@ -353,21 +351,8 @@ pub fn get_encoder(
 pub fn test_encoder(ffmpeg: &String, encoder: &str) -> bool {
     info!("Testing encoder: {}", encoder);
     let output = Command::new(ffmpeg)
-        .args([
-            "-f",
-            "lavfi",
-            "-i",
-            "testsrc=size=1920x1080:rate=5:duration=1",
-            "-pix_fmt",
-            "yuv420p",
-            "-c:v",
-            encoder,
-            "-f",
-            "null",
-            "-",
-        ])
-        .arg("-loglevel")
-        .arg("warning")
+        .args(["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
+        .args(["-loglevel", "warning"])
         // .arg("-hide_banner")
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -474,14 +459,15 @@ pub async fn main(cmd: bool) -> Result<()> {
     let music_length = music.length();
     let music_sample_rate = music.sample_rate();
     let ending_music = res_pack.endings[0].clone();
+    let ending_music_sample_rate = ending_music.sample_rate();
     let sfx_click = res_pack.sfx_click;
     let sfx_drag = res_pack.sfx_drag;
     let sfx_flick = res_pack.sfx_flick;
 
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
-    let sfx_protect_time = if let Some(v) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
-        v.length()
+    let sfx_protect_time = if let Some(sfx_longest) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
+        sfx_longest.length()
     } else {
         sfx_drag.length()
     };
@@ -501,21 +487,34 @@ pub async fn main(cmd: bool) -> Result<()> {
     check_sample_rate(sample_rate, sfx_flick.sample_rate(), "sfx_flick")?;
 
     let music = Array1::from_vec(music.to_vec());
+    let ending_music = Array1::from_vec(ending_music.to_vec());
     let sfx_click = Array1::from_vec(sfx_click.to_vec());
     let sfx_drag = Array1::from_vec(sfx_drag.to_vec());
     let sfx_flick = Array1::from_vec(sfx_flick.to_vec());
 
     let mut gl = unsafe { get_internal_gl() };
 
+    let fps = config.fps;
+    let offset = chart.offset + info.offset;
+    let speed = config.speed as f64;
+    let speed_time_ratio = 1.0 / config.speed as f64;
+
     let before_time: f64 = if config.render_loading {
-        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64
+        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64 * speed_time_ratio
     } else {
         0.0
     };
-    let fps = config.fps;
-    let offset = chart.offset + info.offset;
-    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let before_time_music: f64 = if config.render_loading {
+        LoadingScene::TOTAL_TIME as f64 * speed + GameScene::BEFORE_DURATION as f64
+    } else {
+        0.0
+    };
+
+    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time * speed_time_ratio - offset as f64 + WAIT_TIME as f64 * speed_time_ratio;
+    let chart_length_music = before_time_music + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let chart_length_sfx = config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
     let video_length = chart_length + config.ending_length;
+    let video_length_music = chart_length_music + config.ending_length; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
     let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
 
     let encoder_list = if config.hevc {
@@ -542,31 +541,35 @@ pub async fn main(cmd: bool) -> Result<()> {
         send(IPCEvent::Mixing);
     }
 
-    let output_music_len = (video_length * music_sample_rate as f64).ceil() as usize * 2;
-
-    let output_fx_len = ((chart_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
+    let output_music_len = (video_length_music * music_sample_rate as f64).ceil() as usize * 2;
+    let output_sfx_len = ((video_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
+    let output_ending_music_delay = chart_length + GameScene::WAIT_AFTER_TIME as f64 * speed_time_ratio + EndingScene::BPM_WAIT_TIME;
+    let output_ending_music_len = ((video_length - output_ending_music_delay).max(0.) * sample_rate_f64).ceil() as usize * 2;
+    let output_ending_music_delay_string = output_ending_music_delay * 1000.;
+    let output_ending_music_delay_string = format!("{}|{}", output_ending_music_delay_string, output_ending_music_delay_string);
 
     let mut output_music = Array1::from_vec(vec![0.0_f32; output_music_len]);
-    let mut output_fx = Array1::from_vec(vec![0.0_f32; output_fx_len]);
+    let mut output_sfx = Array1::from_vec(vec![0.0_f32; output_sfx_len]);
+    let mut output_ending_music = Array1::from_vec(vec![0.0_f32; output_ending_music_len]);
 
-    let mut place_fx = |pos: f64, clip: &Array1<f32>| {
+    let mut place_sfx = |pos: f64, clip: &Array1<f32>| {
         let position = (pos * sample_rate_f64).ceil() as usize * 2;
         let len = clip.len();
         let end = position + len;
-        if end > output_fx_len {
+        if end > output_sfx_len {
             return;
         }
-        let mut slice = output_fx.slice_mut(s![position..end]);
+        let mut slice = output_sfx.slice_mut(s![position..end]);
         slice += clip;
     };
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = before_time - offset.min(0.) as f64;
+        let pos = (before_time - offset.min(0.) as f64) * speed;
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
         let position_read = ((offset.max(0.) as f64 + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
-        let music_len = (chart_length * music_sample_rate as f64).ceil() as usize * 2;
-        let len = (music.len() - position_read).min(music_len - position_wrtie);
+        let music_len = (chart_length_music * music_sample_rate as f64).ceil() as usize * 2;
+        let len = (music.len() - position_read).min(output_music_len - position_wrtie).min(music_len - position_wrtie);
         let clip = music.slice(s![position_read..position_read + len]);
         let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + len]);
         slice += &clip;
@@ -591,19 +594,19 @@ pub async fn main(cmd: bool) -> Result<()> {
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
         let judge_offset = config.judge_offset as f64;
-        let play_start_time = config.play_start_time as f32 - config.judge_offset;
-        let length = play_start_time + chart_length as f32;
-        let mut hit_fx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
+        let sfx_start_time = config.play_start_time as f32 - config.judge_offset;
+        let sfx_end_time = sfx_start_time + chart_length_sfx as f32;
+        let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
 
         if config.audio_mix_optimization {
-            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    hit_fx_list.push((before_time + note.time as f64 + judge_offset - config.play_start_time, sfx));
+                    sfx_list.push((before_time + note.time as f64 * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
                 }
             });
-            let len = hit_fx_list.len();
+            let len = sfx_list.len();
 
-            hit_fx_list.sort_by(|(a1, b1), (a2, b2)| {
+            sfx_list.sort_by(|(a1, b1), (a2, b2)| {
                 match a1.partial_cmp(a2).unwrap_or(Ordering::Equal) {
                     Ordering::Less  => Ordering::Less,
                     Ordering::Greater => Ordering::Greater,
@@ -615,12 +618,12 @@ pub async fn main(cmd: bool) -> Result<()> {
                 }
             });
 
-            let mut kept = Vec::with_capacity(hit_fx_list.len());
+            let mut kept = Vec::with_capacity(sfx_list.len());
             let mut last_arr: Option<&Array1<f32>> = None;
             let mut last_t = 0.0;
             let mut count = 0;
 
-            for &(pos, clip) in &hit_fx_list {
+            for &(pos, clip) in &sfx_list {
                 let pos = round_to_step(pos, 0.005);
                 let is_new_group = match last_arr {
                     None => true,
@@ -642,13 +645,13 @@ pub async fn main(cmd: bool) -> Result<()> {
                 }
             }
 
-            hit_fx_list = kept;
-            let num = hit_fx_list.len();
+            sfx_list = kept;
+            let num = sfx_list.len();
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
-            for (pos, sfx) in hit_fx_list {
-                place_fx(pos, sfx);
+            for (pos, sfx) in sfx_list {
+                place_sfx(pos, sfx);
                 if ipc {
                     send(IPCEvent::Sfx);
                 }
@@ -657,17 +660,17 @@ pub async fn main(cmd: bool) -> Result<()> {
             let elapsed = sfx_time.elapsed();
             info!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
         } else {
-            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > play_start_time && note.time < length).for_each(|note| {
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    hit_fx_list.push((before_time + note.time as f64 + judge_offset - config.play_start_time, sfx));
+                    sfx_list.push((before_time + note.time as f64 * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
                 }
             });
-            let num = hit_fx_list.len();
+            let num = sfx_list.len();
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
-            for (pos, sfx) in hit_fx_list {
-                place_fx(pos, sfx);
+            for (pos, sfx) in sfx_list {
+                place_sfx(pos, sfx);
                 if ipc {
                     send(IPCEvent::Sfx);
                 }
@@ -678,62 +681,57 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     }
 
+    if volume_music != 0.0 && output_ending_music_len > 0 {
+        let ending_time = Instant::now();
+        let mut position_wrtie = 0;
+        while position_wrtie < output_ending_music_len {
+            let len = (ending_music.len()).min(output_ending_music_len - position_wrtie);
+            let clip = ending_music.slice(s![..len]);
+            let mut slice = output_ending_music.slice_mut(s![position_wrtie..position_wrtie + len]);
+            slice += &clip;
+            position_wrtie += len;
+        }
+        info!("Process Ending Music Time: {:.2?}", ending_time.elapsed());
+    }
+
     if ipc {
         send(IPCEvent::Mixing);
     }
     let output_music_temp = NamedTempFile::new()?;
-    let output_fx_temp = NamedTempFile::new()?;
+    let output_sfx_temp = NamedTempFile::new()?;
+    let output_ending_temp = NamedTempFile::new()?;
 
     {
         let output_audio_time = Instant::now();
 
-        let mut proc = cmd_hidden(&ffmpeg)
-            .args(
-                format!(
-                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
-                    music_sample_rate
+        let output_audio = |output: &Path, sample_rate: u32, samples: ndarray::Array1<f32>| -> Result<()> {
+            let mut proc = cmd_hidden(&ffmpeg)
+                .args(
+                    format!(
+                        "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav", sample_rate
+                    )
+                    .split_whitespace(),
                 )
-                .split_whitespace(),
-            )
-            .arg(output_music_temp.path())
-            .arg("-loglevel")
-            .arg("warning")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn()
-            .with_context(|| tl!("run-ffmpeg-failed"))?;
-        let input = proc.stdin.as_mut().unwrap();
-        let mut writer = BufWriter::new(input);
-        for sample in output_music.into_iter() {
-            writer.write_all(&sample.to_le_bytes())?;
-        }
-        drop(writer);
-        proc.wait()?;
+                .arg(output)
+                .args(["-loglevel", "warning"])
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .with_context(|| tl!("run-ffmpeg-failed"))?;
+            let input = proc.stdin.as_mut().unwrap();
+            let mut writer = BufWriter::new(input);
+            for sample in samples {
+                writer.write_all(&sample.to_le_bytes())?;
+            }
+            drop(writer);
+            proc.wait()?;
+            Ok(())
+        };
 
-        let mut proc = cmd_hidden(&ffmpeg)
-            .args(
-                format!(
-                    "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav",
-                    sample_rate
-                )
-                .split_whitespace(),
-            )
-            .arg(output_fx_temp.path())
-            .arg("-loglevel")
-            .arg("warning")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn()
-            .with_context(|| tl!("run-ffmpeg-failed"))?;
-        let input = proc.stdin.as_mut().unwrap();
-        let mut writer = BufWriter::new(input);
-        for sample in output_fx.into_iter() {
-            writer.write_all(&sample.to_le_bytes())?;
-        }
-        drop(writer);
-        proc.wait()?;
+        output_audio(output_music_temp.path(), music_sample_rate, output_music)?;
+        output_audio(output_sfx_temp.path(), sample_rate, output_sfx)?;
+        output_audio(output_ending_temp.path(), ending_music_sample_rate, output_ending_music)?;
 
         info!("Output Audio Time: {:.2?}", output_audio_time.elapsed());
     }
@@ -827,46 +825,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         ).await?
     };
     main.top_level = false;
-    main.viewport = Some((0, 0, vw as _, vh as _));
-
-    let ffmpeg_preset = "-preset";
-    let ffmpeg_preset_name_list: Vec<String> = config
-        .ffmpeg_preset
-        .split_whitespace()
-        .map(|s| s.to_string())
-        .collect();
-
-    let ffmpeg_preset_name = if ffmpeg_encoder == encoder_list[0] {
-        if let Some(i) = ffmpeg_preset_name_list.get(1) {
-            i.as_str()
-        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "p4"
-        }
-    } else if ffmpeg_encoder == encoder_list[1] {
-        if let Some(i) = ffmpeg_preset_name_list.get(2) {
-            i.as_str()
-        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "medium"
-        }
-    } else if ffmpeg_encoder == encoder_list[2] {
-        if let Some(i) = ffmpeg_preset_name_list.get(3) {
-            i.as_str()
-        } else if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "balanced"
-        }
-    } else {
-        if let Some(i) = ffmpeg_preset_name_list.get(0) {
-            i.as_str()
-        } else {
-            "medium"
-        }
-    };
+    main.viewport = Some((0, 0, vw as i32, vh as i32));
 
     let bitrate_control = if config.dynamic_bitrate_control {
         if ffmpeg_encoder == encoder_list[0] && !config.mpeg4 {
@@ -896,33 +855,52 @@ pub async fn main(cmd: bool) -> Result<()> {
         " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
     )?;
 
-    let delay_ending = (chart_length + GameScene::WAIT_AFTER_TIME as f64 + EndingScene::BPM_WAIT_TIME) * 1000.;
-    let delay_ending = format!("{}|{}", delay_ending, delay_ending);
-
-    let ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
-        "[1:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr,volume={}[a1];", sample_rate, volume_music,
+    let mut ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
+        "[2:a]loudnorm=I=-16:LRA=24:TP=-1,aresample={}:resampler=swr", sample_rate,
     )} else { format!(
-        "[1:a]aresample={}:resampler=swr,volume={}[a1];", sample_rate, volume_music,
+        "[2:a]aresample={}:resampler=swr", sample_rate,
     )};
 
-    let ffmpeg_audio_filter_fx = if config.force_limit {
+    let ffmpeg_audio_filter_music_volume = format!(",volume={}", volume_music);
+    ffmpeg_audio_filter_music += &ffmpeg_audio_filter_music_volume;
+
+    let ffmpeg_audio_filter_music_speed = if config.speed != 1.0 {
         format!(
-            "[2:a]volume={},alimiter=limit={}:level=false:attack=0.1:release=1[a2];",
-            volume_sfx, config.limit_threshold
+            ",rubberband=tempo={}",
+            config.speed
+        )
+    } else {
+        String::new()
+    };
+    ffmpeg_audio_filter_music += &ffmpeg_audio_filter_music_speed;
+    ffmpeg_audio_filter_music += "[a2];";
+
+    let mut ffmpeg_audio_filter_sfx = format!(
+            "[1:a]volume={}",
+            volume_sfx
+        );
+
+    let ffmpeg_audio_filter_sfx_limit = if config.force_limit {
+        format!(
+            ",alimiter=limit={}:level=false:attack=0.1:release=1",
+            config.limit_threshold
         )
     } else if config.compression_ratio > 1. {
         format!(
-            "[2:a]volume={},acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01[a2];",
-            volume_sfx, config.compression_ratio
+            ",acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01",
+            config.compression_ratio
         )
     } else {
-        format!("[2:a]volume={}[a2];", volume_sfx)
+        String::new()
     };
 
-    let ffmpeg_audio_filter_ending =
-        format!("[3:a]volume={},adelay={}[a3];", volume_music, delay_ending);
+    ffmpeg_audio_filter_sfx += &ffmpeg_audio_filter_sfx_limit;
+    ffmpeg_audio_filter_sfx += "[a1];";
 
-    let ffmpeg_audio_effect_mix = if config.hires {
+    let ffmpeg_audio_filter_ending =
+        format!("[3:a]volume={},adelay={}[a3];", volume_music, output_ending_music_delay_string);
+
+    let ffmpeg_audio_filter_mix = if config.hires {
         format!(
             "[a1][a2][a3]amix=inputs=3:duration=first:normalize=0[a]"
         )
@@ -935,13 +913,13 @@ pub async fn main(cmd: bool) -> Result<()> {
     let ffmpeg_audio_filter = format!(
         "{}{}{}{}",
         ffmpeg_audio_filter_music,
-        ffmpeg_audio_filter_fx,
+        ffmpeg_audio_filter_sfx,
         ffmpeg_audio_filter_ending,
-        ffmpeg_audio_effect_mix
+        ffmpeg_audio_filter_mix
     );
 
     let args2 = format!(
-        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} {} {} -filter_complex {} -map 0:v:0 -map [a] -vf vflip -f {}",
+        "-c:a {} -c:v {} -pix_fmt yuv420p {} {} -filter_complex {} -map 0:v:0 -map [a] -vf vflip -f {}",
         if config.hires {
             "pcm_f32le"
         } else {
@@ -950,8 +928,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         ffmpeg_encoder,
         bitrate_control,
         config.bitrate,
-        ffmpeg_preset,
-        ffmpeg_preset_name,
         ffmpeg_audio_filter,
         if config.hires { "mov" } else { "mp4" }
     );
@@ -964,9 +940,8 @@ pub async fn main(cmd: bool) -> Result<()> {
     info!("Command: {} {} {} {} {} {} {} {} {} {}",
         &ffmpeg,
         args,
-        "-i",
-        output_music_temp.path().display(),
-        "-i", output_fx_temp.path().display(),
+        "-i", output_sfx_temp.path().display(),
+        "-i", output_music_temp.path().display(),
         "-i", ASSET_PATH.get().unwrap().join("ending.ogg").display(),
         args2,
         output_path.display()
@@ -974,16 +949,12 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
-        .arg("-i")
-        .arg(output_music_temp.path())
-        .arg("-i")
-        .arg(output_fx_temp.path())
-        .arg("-i")
-        .arg(ASSET_PATH.get().unwrap().join("ending.ogg"))
+        .arg("-i").arg(output_sfx_temp.path())
+        .arg("-i").arg(output_music_temp.path())
+        .arg("-i").arg(output_ending_temp.path())
         .args(args2.split_whitespace())
         .arg(output_path)
-        .arg("-loglevel")
-        .arg("warning")
+        .args(["-loglevel", "warning"])
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -1016,7 +987,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let render_time = Instant::now();
 
     let fps = fps as f64;
-    let frames10 = (video_frames / 10).max(1);
+    let frames_per_10 = (video_frames / 10).max(1);
     let frames = video_frames;
     let mut step_time = Instant::now();
     for frame in 0..frames {
@@ -1034,7 +1005,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             mst.blit();
         }
 
-        if frame % frames10 == 0 {
+        if frame % frames_per_10 == 0 {
             let progress = round_to_step((frame as f64 / video_frames as f64 * 100.).ceil(), 10.0);
             info!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
                 progress, frame, video_frames, std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
@@ -1054,7 +1025,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 std::ptr::null_mut(),
             );
             if frame >= N as u64 {
-                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame) as usize % N]);
+                glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1) as usize % N]);
                 let src: *const u8 = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
                 if !src.is_null() {
                     input.write_all(&std::slice::from_raw_parts(src, byte_size))?;

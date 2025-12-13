@@ -20,7 +20,7 @@ const form = ref<VForm>();
 const page = ref(0);
 const fileNameFormatDialog = ref(false);
 
-const RESOLUTIONS = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160'],
+const resolutionList = [ '1280x720', '1920x1080', '1620x1080', '1440x1080', '2560x1440', '2844x1600', '2388x1668', '3840x2160'],
   fpsList = ['30', '60', '120'],
   bitrateList = ['2M', '5M', '7M'],
   bitrateCrfList = ['24', '28', '35', '40'],
@@ -45,9 +45,20 @@ const challengeColor = ref(t('challenge-colors').split(',')[5]),
   noteScale = ref(DEFAULT_RENDER_CONFIG.noteScale),
   playerAvatar = ref<string>(),
   playerName = ref(DEFAULT_RENDER_CONFIG.playerName),
-  playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks)),
-  sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount))
+  playerRks = ref(String(DEFAULT_RENDER_CONFIG.playerRks));
 
+const sampleCount = ref(String(DEFAULT_RENDER_CONFIG.sampleCount)),
+  antiAliasingList = [
+    { title: t('off'), value: '1' },
+    { title: t('fxaa'), value: '-1' },
+    { title: `2x${t('msaa')}`, value: '2' },
+    { title: `4x${t('msaa')}`, value: '4' },
+    { title: `8x${t('msaa')}`, value: '8' },
+    { title: `16x${t('msaa')}`, value: '16' },
+  ];
+
+const speedList = ['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75', '2.0'];
+const speed = ref(String(DEFAULT_RENDER_CONFIG.speed));
 const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic);
 const volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx);
 const compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio);
@@ -262,9 +273,10 @@ async function buildConfig(): Promise<RenderConfig | null> {
     playerAvatar: playerAvatar.value ? (playerAvatar.value.length ? playerAvatar.value : null) : null,
     playerName: playerName.value,
     playerRks: parseFloat(playerRks.value),
-    sampleCount: parseInt(sampleCount.value),
+    sampleCount: parseInt(sampleCount.value) >= 1 ? parseInt(sampleCount.value) : 1,
+    fxaa: parseInt(sampleCount.value) === -1 ? true : false,
     resPackPath: respack.value.path,
-    speed: 1,
+    speed: parseFloat(speed.value),
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
     compressionRatio: compressionRatio.value,
@@ -381,8 +393,9 @@ function applyConfig(config: RenderConfig) {
   playerAvatar.value = config.playerAvatar || undefined;
   playerName.value = config.playerName;
   playerRks.value = String(config.playerRks);
-  sampleCount.value = String(config.sampleCount);
+  sampleCount.value = config.fxaa ? '-1' : String(config.sampleCount);
   respack.value = respacks.value.find((x) => x.path === config.resPackPath) || respacks.value[0]!;
+  speed.value = String(config.speed);
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
   compressionRatio.value = config.compressionRatio;
@@ -568,7 +581,7 @@ function setConfigForQuality() {
       <StickyLabel :title="t('title.common')"></StickyLabel>
       <v-row no-gutters class="mx-n2">
         <v-col cols="3">
-          <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
+          <v-combobox :label="t('resolution')" :items="resolutionList" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-combobox v-if="dynamicBitrateControl && encoder !== encoderList[2]" :label="t('bitrate-crf')" :items="bitrateCrfList" :title="t('bitrate-crf-tip')" class="mx-2" type="number" :rules="[isCrf]" v-model="bitrate"></v-combobox>
@@ -633,13 +646,13 @@ function setConfigForQuality() {
 
       <v-row no-gutters class="mx-n2 my-2">
         <v-col cols="3">
-          <v-combobox :label="t('resolution')" :items="RESOLUTIONS" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
+          <v-combobox :label="t('resolution')" :items="resolutionList" class="mx-2" :rules="[resolutionRule]" v-model="resolution"></v-combobox>
         </v-col>
         <v-col cols="3">
           <v-combobox :label="t('fps')" :items="fpsList" class="mx-2" type="number" :rules="[RULES.int, RULES.positive]" v-model="fps"></v-combobox>
         </v-col>
         <v-col cols="3">
-          <v-text-field :label="t('sample-count')" class="mx-2" type="number" :rules="[sampleCountRule]" v-model="sampleCount" :title="t('sample-count-tips')"></v-text-field>
+          <v-autocomplete :label="t('anti-aliasing')" class="mx-2" v-model="sampleCount" :items="antiAliasingList" item-title="title" item-value="value"></v-autocomplete>
         </v-col>
         <v-col cols="3" v-if="encoder !== encoderList[2]">
           <TipSwitch :label="t('hw-accel')" color="btn" v-model="hwAccel" :title="t('hw-accel-tips')"></TipSwitch>
@@ -879,6 +892,9 @@ function setConfigForQuality() {
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
           <v-switch class="text-center justify-center mr-2 d-flex" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
+        </v-col>
+        <v-col cols="3">
+          <v-combobox class="mx-2" :label="t('speed')" v-model="speed" type="number" :items="speedList" :rules="[RULES.notEmpty, RULES.positive, RULES.less100, RULES.greater0_01]"></v-combobox>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />

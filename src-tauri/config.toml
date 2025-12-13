@@ -7,7 +7,6 @@ hevc = true
 mpeg4 = false
 # customEncoder = ""
 fileNameFormat = "%date% %time% %info.name%_%level_prefix%"
-ffmpegPreset = "medium p4 medium balanced" # "cpu nvenc qsv amf" or "any"
 dynamicBitrateControl = true
 bitrate = "26"
 endingLength = 10.0

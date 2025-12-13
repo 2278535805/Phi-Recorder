@@ -103,6 +103,7 @@ export interface RenderConfig {
   playerName: string;
   playerRks: number;
   sampleCount: number;
+  fxaa: boolean;
   resPackPath: string | null;
   speed: number;
   volumeMusic: number;
@@ -170,6 +171,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   playerName: '',
   playerRks: 16.00,
   sampleCount: 8,
+  fxaa: false,
   resPackPath: null,
   speed: 1,
   volumeMusic: 0.5,
