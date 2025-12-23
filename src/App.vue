@@ -205,7 +205,7 @@ async function openAppFolder() {
 
 async function checkFFmpegFilter() {
   try {
-    if (!(await invoke('test_ffmpeg'))) {
+    if (!(await invoke('check_ffmpeg'))) {
       ffmpegDialog.value = true;
       return false;
     }

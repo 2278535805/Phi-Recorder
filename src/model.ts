@@ -216,6 +216,7 @@ export interface AppConfig {
   outputDir: string | null;
   encoderAvc: string | null;
   encoderHevc: string | null;
+  ffmpegPath: string | null;
   printStderr: boolean;
   showDetailedLog: boolean;
 }
@@ -225,6 +226,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   outputDir: null,
   encoderAvc: null,
   encoderHevc: null,
+  ffmpegPath: null,
   printStderr: false,
   showDetailedLog: true,
 }

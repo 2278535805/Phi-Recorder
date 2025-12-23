@@ -132,6 +132,7 @@ function filterText(
 
   return resultLines.join('\n');
 }
+
 async function showInFolder(path: string) {
   try {
     await revealItemInDir(path);

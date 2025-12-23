@@ -13,7 +13,8 @@
         "can-also-drop": "可拖放谱面至此处",
         "select-or-drop": "选择或拖放谱面",
         "drop": "拖放谱面至此处",
-        "filter-name": "谱面文件"
+        "chart-file": "谱面文件",
+        "program": "应用程序"
     },
     "info": {
         "name": "谱面名",

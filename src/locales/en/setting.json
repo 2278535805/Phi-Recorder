@@ -16,6 +16,8 @@
     "folder-tip": "Click the icon to select, Right-click the icon to open",
     "encoder-avc": "Specify AVC Encoder",
     "encoder-hevc": "Specify HEVC Encoder",
+    "ffmpeg-path": "FFmpeg Path",
+    "auto-detect": "Auto Detect",
     "print-stderr": "Output logs to main terminal",
     "print-stderr-tip": "Display rendering output in the main terminal",
     "show-detailed-log": "Show Detailed Log",
