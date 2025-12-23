@@ -19,7 +19,7 @@ use phire::{
     fs::{self, FileSystem},
     info::ChartInfo,
 };
-use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
+use render::{RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
 use serde::Serialize;
 use tauri_plugin_prevent_default::Flags;
 use tracing::{error, info, warn};
@@ -122,6 +122,7 @@ pub async fn run() -> Result<()> {
             unset_rpe_dir,
             get_rpe_charts,
             open_app_folder,
+            check_ffmpeg,
             test_ffmpeg,
             check_ffmpeg_filter,
             get_encoder,
@@ -690,13 +691,18 @@ fn open_app_folder() -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-fn test_ffmpeg() -> Result<bool, InvokeError> {
-    (|| Ok(find_ffmpeg()?.is_some()))().map_err(InvokeError::from_anyhow)
+fn check_ffmpeg() -> Result<bool, InvokeError> {
+    (|| Ok(render::find_ffmpeg()?.is_some()))().map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+fn test_ffmpeg(ffmpeg: String) -> Result<bool, InvokeError> {
+    Ok(render::test_ffmpeg(ffmpeg))
 }
 
 #[tauri::command]
 async fn check_ffmpeg_filter() -> bool {
-    let Ok(Some(ffmpeg)) = find_ffmpeg() else {
+    let Ok(Some(ffmpeg)) = render::find_ffmpeg() else {
         return false;
     };
     info!("ffmpeg: {}", &ffmpeg);
@@ -722,7 +728,7 @@ async fn check_ffmpeg_filter() -> bool {
 #[tauri::command]
 async fn get_encoder(hevc: bool) -> Result<Option<String>, InvokeError> {
     (|| {
-        let Some(ffmpeg) = find_ffmpeg()? else {
+        let Some(ffmpeg) = render::find_ffmpeg()? else {
             bail!("FFmpeg not found")
         };
         let config = RenderConfig {
@@ -742,7 +748,7 @@ async fn get_encoder(hevc: bool) -> Result<Option<String>, InvokeError> {
 #[tauri::command]
 async fn test_encoder(encoder: &str) -> Result<bool, InvokeError> {
     (|| {
-        let Some(ffmpeg) = find_ffmpeg()? else {
+        let Some(ffmpeg) = render::find_ffmpeg()? else {
             bail!("FFmpeg not found")
         };
         Ok(render::test_encoder(&ffmpeg, encoder))

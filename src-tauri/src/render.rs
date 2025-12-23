@@ -277,11 +277,17 @@ fn cmd_hidden(program: impl AsRef<OsStr>) -> Command {
     cmd
 }
 
+pub fn test_ffmpeg(path: impl AsRef<OsStr>) -> bool {
+    matches!(cmd_hidden(path).arg("-version").output(), Ok(_))
+}
+
 pub fn find_ffmpeg() -> Result<Option<String>> {
-    fn test(path: impl AsRef<OsStr>) -> bool {
-        matches!(cmd_hidden(path).arg("-version").output(), Ok(_))
+    if let Some(ffmpeg_path) = read_config()?.ffmpeg_path {
+        if test_ffmpeg(&ffmpeg_path) {
+            return Ok(Some(ffmpeg_path));
+        }
     }
-    if test("ffmpeg") {
+    if test_ffmpeg("ffmpeg") {
         return Ok(Some("ffmpeg".to_owned()));
     }
     let exe_dir = std::env::current_exe()?.parent().unwrap().to_owned();
@@ -291,7 +297,7 @@ pub fn find_ffmpeg() -> Result<Option<String>> {
         "ffmpeg"
     };
     let ffmpeg = exe_dir.join(ffmpeg);
-    Ok(if test(&ffmpeg) {
+    Ok(if test_ffmpeg(&ffmpeg) {
         Some(ffmpeg.display().to_string())
     } else {
         None

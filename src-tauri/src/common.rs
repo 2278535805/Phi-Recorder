@@ -141,6 +141,7 @@ pub struct AppConfig {
     pub output_dir: Option<PathBuf>,
     pub encoder_avc: Option<String>,
     pub encoder_hevc: Option<String>,
+    pub ffmpeg_path: Option<String>,
     pub print_stderr: bool,
     pub show_detailed_log: bool,
 }
@@ -152,6 +153,7 @@ impl Default for AppConfig {
             output_dir: None,
             encoder_avc: None,
             encoder_hevc: None,
+            ffmpeg_path: None,
             print_stderr: false,
             show_detailed_log: true,
         }
