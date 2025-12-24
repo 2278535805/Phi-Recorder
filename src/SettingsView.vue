@@ -142,7 +142,7 @@ async function selectFFmpegFile() {
   let path = await selectFile(t('ffmpeg-path'));
   if (path) {
     try {
-      if (!(await invoke('test_ffmpeg', { ffmpeg: path }))) {
+      if (!(await invoke('check_ffmpeg_filter', { ffmpeg: path }))) {
         toast(t('ffmpeg-not-found'), 'error');
         return;
       }

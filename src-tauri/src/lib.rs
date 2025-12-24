@@ -124,7 +124,6 @@ pub async fn run() -> Result<()> {
             get_rpe_charts,
             open_app_folder,
             check_ffmpeg,
-            test_ffmpeg,
             check_ffmpeg_filter,
             get_encoder,
             test_encoder,
@@ -697,28 +696,38 @@ fn check_ffmpeg() -> Result<bool, InvokeError> {
 }
 
 #[tauri::command]
-fn test_ffmpeg(ffmpeg: String) -> Result<bool, InvokeError> {
-    Ok(render::test_ffmpeg(ffmpeg))
-}
-
-#[tauri::command]
-async fn check_ffmpeg_filter() -> bool {
-    let Ok(Some(ffmpeg)) = render::find_ffmpeg() else {
+async fn check_ffmpeg_filter(ffmpeg: Option<String>) -> bool {
+    let ffmpeg = if let Some(ffmpeg) = ffmpeg {
+        ffmpeg
+    } else if let Ok(Some(ffmpeg)) = render::find_ffmpeg() {
+        ffmpeg
+    } else {
         return false;
     };
+
     info!("ffmpeg: {}", &ffmpeg);
+
+    if !render::test_ffmpeg(&ffmpeg) {
+        return false;
+    }
 
     let output = Command::new(&ffmpeg)
         .arg("-filters")
         .output()
         .await
-        .expect("failed get filters");
+        .expect("failed get output");
 
-    let filter = String::from_utf8(output.stdout).unwrap_or_default();
+    let stderr = String::from_utf8(output.stderr).unwrap_or_default();
+    if !stderr.contains("ffmpeg") {
+        error!("Missing ffmpeg");
+        return false;
+    }
+
+    let stdout = String::from_utf8(output.stdout).unwrap_or_default();
     let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
     let mut complete = true;
     for i in filter_required {
-        if !filter.contains(i) {
+        if !stdout.contains(i) {
             error!("Missing lib: {}, Please check FFmpeg availability", i);
             complete = false;
         }
