@@ -25,5 +25,6 @@
     "list-expand": "Default Expand Sidebar",
     "list-expand-tip": "Right-click the sidebar to switch at any time",
     "use-system-theme": "Follow System Theme",
-    "lang": "Language"
+    "lang": "Language",
+    "not-valid-rpe": "Not a valid RPE directory"
 }

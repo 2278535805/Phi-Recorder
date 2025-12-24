@@ -115,8 +115,12 @@ async function selectRpeDir() {
   let path = await selectDir(t('rpe-dir'));
   if (path) {
     try {
-      await invoke('set_rpe_dir', { path: path, save: false });
-      config.value.rpeDir = path;
+      let valid = await invoke('check_rpe_dir', { path: path });
+      if (valid) {
+        config.value.rpeDir = path;
+      } else {
+        toast(t('not-valid-rpe'), 'error');
+      }
     } catch (e) {
       toastError(e);
     }

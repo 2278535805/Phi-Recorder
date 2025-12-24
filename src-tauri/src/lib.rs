@@ -118,6 +118,7 @@ pub async fn run() -> Result<()> {
             read_config,
             save_config,
             test_output_dir,
+            check_rpe_dir,
             set_rpe_dir,
             unset_rpe_dir,
             get_rpe_charts,
@@ -534,18 +535,18 @@ pub struct RPEChartInfo {
 }
 
 #[tauri::command]
-fn set_rpe_dir(path: PathBuf, save: bool) -> Result<(), InvokeError> {
+fn check_rpe_dir(path: PathBuf) -> Result<bool, InvokeError> {
     (|| {
-        if !path.is_dir()
-            || ["PhiEdit.exe", "Resources"]
-                .iter()
-                .any(|it| !path.join(*it).exists())
-        {
-            bail!(mtl!("not-valid-rpe"));
-        }
-        if save {
-            common::set_rpe_dir(Some(path))?;
-        }
+        let valid = common::check_rpe_dir(path);
+        Ok(valid)
+    })()
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
+    (|| {
+        common::set_rpe_dir(Some(path))?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
