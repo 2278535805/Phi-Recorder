@@ -25,5 +25,6 @@
     "list-expand": "默认展开侧边栏",
     "list-expand-tip": "右键侧边栏可随时切换",
     "use-system-theme": "跟随系统主题",
-    "lang": "语言"
+    "lang": "语言",
+    "not-valid-rpe": "不是有效的 RPE 目录"
 }

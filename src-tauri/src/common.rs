@@ -204,6 +204,18 @@ pub fn set_rpe_dir(set_dir: Option<PathBuf>) -> Result<()> {
     Ok(())
 }
 
+pub fn check_rpe_dir(dir: PathBuf) -> bool {
+    if !dir.is_dir()
+        || ["PhiEdit.exe", "Resources"]
+            .iter()
+            .any(|it| !dir.join(*it).exists())
+    {
+        false
+    } else {
+        true
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Effect {
     pub shader: String,
