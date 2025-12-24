@@ -209,7 +209,7 @@ async function checkFFmpegFilter() {
       ffmpegDialog.value = true;
       return false;
     }
-    ffmpegDialogFilter.value = !(await invoke("check_ffmpeg_filter"));
+    ffmpegDialogFilter.value = !(await invoke("check_ffmpeg_filter", { path: null }));
     } catch (error) {
       console.error('Error running check_ffmpeg_filter:', error);
     }
