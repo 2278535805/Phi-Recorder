@@ -496,8 +496,8 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 <v-col cols="6">
                   <v-slider class="my-3" :label="t('info.difficulty')" thumb-label="always" :min="0" :max="20" :step="0.1" v-model="chartInfo.difficulty"></v-slider>
                 </v-col>
-                <v-col cols="3" class="d-flex align-center justify-center">
-                  <v-btn class="mt-n2" color="btn-large" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
+                <v-col cols="3">
+                  <v-switch class="d-flex justify-center ml-n2" :label="t('info.fold-animation')" color="btn" v-model="chartInfo.foldAnimation"></v-switch>
                 </v-col>
               </v-row>
               
@@ -518,11 +518,14 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               </v-row>
 
               <v-row class="my-n2">
-                <v-col cols="9">
+                <v-col cols="6">
                   <v-text-field type="text" class="" :label="t('info.intro')" v-model="chartInfo.intro"></v-text-field>
                 </v-col>
                 <v-col cols="3">
                   <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="chartInfo.holdParticleIntervalRatio" @update:modelValue="chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
+                </v-col>
+                <v-col cols="3" class="d-flex align-center justify-center">
+                  <v-btn class="mt-n2" color="btn-large" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
                 </v-col>
               </v-row>
 

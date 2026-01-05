@@ -44,7 +44,8 @@
         "note-uniform-scale": "Note Uniform Scale",
         "note-uniform-scale-tip": "Default only scales X axis, enable to scale Note uniformly",
         "score-total": "Total Score",
-        "hold-particle-interval-ratio": "Hold Particle Interval Ratio"
+        "hold-particle-interval-ratio": "Hold Particle Interval Ratio",
+        "fold-animation": "Folded Entry Animation"
     },
     "error": {
         "preview-start-end-15s": "Preview time cannot be greater than 15 seconds"
