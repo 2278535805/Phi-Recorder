@@ -26,6 +26,7 @@ export interface ChartInfo {
   noteUniformScale: boolean;
   scoreTotal: number;
   holdParticleIntervalRatio: number;
+  foldAnimation: boolean;
 }
 
 export type TaskStatus =
