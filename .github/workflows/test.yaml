@@ -75,19 +75,6 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
-      - name: Get macOS signing identity
-        if: startsWith(matrix.platform, 'macos-')
-        id: get-signing-identity
-        run: |
-          SIGNING_IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep "Developer ID Application" | head -1 | awk -F'"' '{print $2}')
-          if [ -z "$SIGNING_IDENTITY" ]; then
-            echo "Error: No Developer ID Application certificate found"
-            security find-identity -v -p codesigning build.keychain
-            exit 1
-          fi
-          echo "signing_identity=$SIGNING_IDENTITY" >> $GITHUB_OUTPUT
-          echo "Found signing identity: $SIGNING_IDENTITY"
-
       - name: Build Tauri application
         uses: tauri-apps/tauri-action@v0
         env:
