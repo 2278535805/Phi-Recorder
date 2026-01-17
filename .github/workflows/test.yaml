@@ -53,7 +53,7 @@ jobs:
       - name: Install dependencies (macOS only)
         if: startsWith(matrix.platform, 'macos-')
         run: |
-          brew install libsoup webkit2gtk openssl
+          brew install libsoup openssl
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
