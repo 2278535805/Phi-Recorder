@@ -118,24 +118,6 @@ jobs:
           echo "signing_identity=$SIGNING_IDENTITY" >> $GITHUB_OUTPUT
           echo "Found signing identity: $SIGNING_IDENTITY"
 
-      # Windows 代码签名设置
-      - name: Setup Windows code signing
-        if: matrix.platform == 'windows-latest'
-        env:
-          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-        run: |
-          # 导入PFX证书到Windows证书存储
-          $certBytes = [System.Convert]::FromBase64String("$env:WINDOWS_CERTIFICATE")
-          $certPath = "$env:TEMP\certificate.pfx"
-          [System.IO.File]::WriteAllBytes($certPath, $certBytes)
-          
-          # 导入证书到当前用户的个人存储
-          Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
-          
-          # 清理临时文件
-          Remove-Item $certPath -Force
-
       - name: Build Tauri application
         uses: tauri-apps/tauri-action@v0
         env:
@@ -144,9 +126,6 @@ jobs:
           APPLE_SIGNING_IDENTITY: ${{ startsWith(matrix.platform, 'macos-') && steps.get-signing-identity.outputs.signing_identity || '' }}
           APPLE_CERTIFICATE: ${{ startsWith(matrix.platform, 'macos-') && secrets.APPLE_CERTIFICATE || '' }}
           APPLE_CERTIFICATE_PASSWORD: ${{ startsWith(matrix.platform, 'macos-') && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
-          # Windows 签名环境变量
-          WINDOWS_CERTIFICATE: ${{ matrix.platform == 'windows-latest' && secrets.WINDOWS_CERTIFICATE || '' }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ matrix.platform == 'windows-latest' && secrets.WINDOWS_CERTIFICATE_PASSWORD || '' }}
           # Tauri 配置
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
