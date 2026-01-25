@@ -74,7 +74,7 @@ async function chooseChart(folder?: boolean) {
     : await dialog.open({
         filters: [
           {
-            name: t('choose.filter-name'),
+            name: t('choose.chart-file'),
             extensions: ['zip', 'pez'],
           },
           anyFilter(),

@@ -13,7 +13,8 @@
         "can-also-drop": "可拖放谱面至此处",
         "select-or-drop": "选择或拖放谱面",
         "drop": "拖放谱面至此处",
-        "filter-name": "谱面文件"
+        "chart-file": "谱面文件",
+        "program": "应用程序"
     },
     "info": {
         "name": "谱面名",
@@ -43,7 +44,8 @@
         "note-uniform-scale": "Note 等比缩放",
         "note-uniform-scale-tip": "默认仅缩放 X 轴, 开启后 Note 等比缩放",
         "score-total": "总分",
-        "hold-particle-interval-ratio": "Hold 打击特效间隔倍率"
+        "hold-particle-interval-ratio": "Hold 打击特效间隔倍率",
+        "fold-animation": "折叠式入场"
     },
     "error": {
         "preview-start-end-15s": "预览时间不能大于15秒"

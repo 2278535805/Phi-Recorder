@@ -141,6 +141,7 @@ pub struct AppConfig {
     pub output_dir: Option<PathBuf>,
     pub encoder_avc: Option<String>,
     pub encoder_hevc: Option<String>,
+    pub ffmpeg_path: Option<String>,
     pub print_stderr: bool,
     pub show_detailed_log: bool,
 }
@@ -152,6 +153,7 @@ impl Default for AppConfig {
             output_dir: None,
             encoder_avc: None,
             encoder_hevc: None,
+            ffmpeg_path: None,
             print_stderr: false,
             show_detailed_log: true,
         }
@@ -200,6 +202,18 @@ pub fn set_rpe_dir(set_dir: Option<PathBuf>) -> Result<()> {
     config.rpe_dir = set_dir;
     save_config(config)?;
     Ok(())
+}
+
+pub fn check_rpe_dir(dir: PathBuf) -> bool {
+    if !dir.is_dir()
+        || ["PhiEdit.exe", "Resources"]
+            .iter()
+            .any(|it| !dir.join(*it).exists())
+    {
+        false
+    } else {
+        true
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]

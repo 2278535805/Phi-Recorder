@@ -58,7 +58,7 @@ async function bindRPE() {
   });
   if (!file) return;
   try {
-    await invoke('set_rpe_dir', { path: file, save: true });
+    await invoke('set_rpe_dir', { path: file });
     toast(t('binded'), 'success');
     charts.value = await getRPECharts();
   } catch (e) {

@@ -7,8 +7,8 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { invoke } from '@tauri-apps/api/core';
 import { DEFAULT_APP_CONFIG, type AppConfig } from './model';
 import * as dialog from '@tauri-apps/plugin-dialog';
-import { openPath } from '@tauri-apps/plugin-opener';
-import { toast, toastError, changeLocale } from './common';
+import { openPath, revealItemInDir } from '@tauri-apps/plugin-opener';
+import { toast, toastError, changeLocale, anyFilter } from './common';
 import type { VForm } from 'vuetify/components';
 import { useTheme } from 'vuetify';
 import { SUPPORTED_LOCALES_NAME } from './main';
@@ -91,12 +91,36 @@ async function selectDir(title: string) {
   }
 }
 
+async function selectFile(title: string) {
+  let file = await dialog.open({
+    filters: [
+      {
+        name: t('choose.program'),
+        extensions: ['exe', ''],
+      },
+      anyFilter(),
+    ],
+    multiple: false,
+  });
+  if (!file) {
+    toast(t('no-select'), 'error');
+    return null;
+  } else {
+    //toast(t('select'), 'success');
+    return file;
+  }
+}
+
 async function selectRpeDir() {
-  let file = await selectDir(t('rpe-dir'));
-  if (file) {
+  let path = await selectDir(t('rpe-dir'));
+  if (path) {
     try {
-      await invoke('set_rpe_dir', { path: file, save: false });
-      config.value.rpeDir = file;
+      let valid = await invoke('check_rpe_dir', { path: path });
+      if (valid) {
+        config.value.rpeDir = path;
+      } else {
+        toast(t('not-valid-rpe'), 'error');
+      }
     } catch (e) {
       toastError(e);
     }
@@ -104,20 +128,55 @@ async function selectRpeDir() {
 }
 
 async function selectOutputDir() {
-  config.value.outputDir = await selectDir(t('output-dir'))
+  let path = await selectDir(t('output-dir'));
+  if (path) {
+    try {
+      config.value.outputDir = path;
+    } catch (e) {
+      toastError(e);
+    }
+  }
+}
+
+async function selectFFmpegFile() {
+  let path = await selectFile(t('ffmpeg-path'));
+  if (path) {
+    try {
+      if (!(await invoke('check_ffmpeg_filter', { ffmpeg: path }))) {
+        toast(t('ffmpeg-not-found'), 'error');
+        return;
+      }
+      config.value.ffmpegPath = path;
+    } catch (e) {
+      toastError(e);
+    }
+  }
 }
 
 async function openInFolder(path: string | null, isOutput: boolean = false) {
-  if (!path && !isOutput) {
-    toast(t('no-select'), 'error');
-    return null;
-  } else if (!path && isOutput) {
-    await invoke('open_output_folder', { path });
-    return;
-  }
   try {
+    if (!path && !isOutput) {
+      toast(t('no-select'), 'error');
+      return null;
+    } else if (!path && isOutput) {
+      await invoke('open_output_folder', { path });
+      return;
+    }
+
     await invoke('test_output_dir', { dir: path });
     await openPath(path!);
+  } catch (e) {
+    toastError(e);
+  }
+}
+
+async function showInFolder(path: string | null) {
+  try {
+    if (!path) {
+      toast(t('no-select'), 'error');
+      return null;
+    }
+    await revealItemInDir(path!);
   } catch (e) {
     toastError(e);
   }
@@ -243,6 +302,11 @@ const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
         </v-col>
         <v-col cols="6">
           <v-text-field clearable class="mx-2" :label="t('encoder-hevc')" v-model="config.encoderHevc" :title="t('encoder-tip')" :append-inner-icon="getEncoderIcon" @click:append-inner="getEncoder(true)" @contextmenu="testEncoderHevc"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row no-gutters class="mt-4 mx-0">
+        <v-col cols="6">
+          <v-text-field clearable class="mx-2" :label="t('ffmpeg-path')" v-model="config.ffmpegPath" :placeholder="t('auto-detect')" append-inner-icon="mdi-folder-open" @click:append-inner="selectFFmpegFile" @contextmenu="showInFolder(config.ffmpegPath)"></v-text-field>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-0">

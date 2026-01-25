@@ -13,7 +13,8 @@
         "can-also-drop": "You can also drag and drop the file to here",
         "select-or-drop": "Select or drag and drop files",
         "drop": "DROP CHART HERE",
-        "filter-name": "Chart file"
+        "chart-file": "Chart file",
+        "program": "Program"
     },
     "info": {
         "name": "Chart name",
@@ -43,7 +44,8 @@
         "note-uniform-scale": "Note Uniform Scale",
         "note-uniform-scale-tip": "Default only scales X axis, enable to scale Note uniformly",
         "score-total": "Total Score",
-        "hold-particle-interval-ratio": "Hold Particle Interval Ratio"
+        "hold-particle-interval-ratio": "Hold Particle Interval Ratio",
+        "fold-animation": "Folded Entry Animation"
     },
     "error": {
         "preview-start-end-15s": "Preview time cannot be greater than 15 seconds"

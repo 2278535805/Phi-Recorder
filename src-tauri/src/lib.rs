@@ -19,7 +19,7 @@ use phire::{
     fs::{self, FileSystem},
     info::ChartInfo,
 };
-use render::{find_ffmpeg, RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
+use render::{RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
 use serde::Serialize;
 use tauri_plugin_prevent_default::Flags;
 use tracing::{error, info, warn};
@@ -118,11 +118,12 @@ pub async fn run() -> Result<()> {
             read_config,
             save_config,
             test_output_dir,
+            check_rpe_dir,
             set_rpe_dir,
             unset_rpe_dir,
             get_rpe_charts,
             open_app_folder,
-            test_ffmpeg,
+            check_ffmpeg,
             check_ffmpeg_filter,
             get_encoder,
             test_encoder,
@@ -533,18 +534,18 @@ pub struct RPEChartInfo {
 }
 
 #[tauri::command]
-fn set_rpe_dir(path: PathBuf, save: bool) -> Result<(), InvokeError> {
+fn check_rpe_dir(path: PathBuf) -> Result<bool, InvokeError> {
     (|| {
-        if !path.is_dir()
-            || ["PhiEdit.exe", "Resources"]
-                .iter()
-                .any(|it| !path.join(*it).exists())
-        {
-            bail!(mtl!("not-valid-rpe"));
-        }
-        if save {
-            common::set_rpe_dir(Some(path))?;
-        }
+        let valid = common::check_rpe_dir(path);
+        Ok(valid)
+    })()
+    .map_err(InvokeError::from_anyhow)
+}
+
+#[tauri::command]
+fn set_rpe_dir(path: PathBuf) -> Result<(), InvokeError> {
+    (|| {
+        common::set_rpe_dir(Some(path))?;
         Ok(())
     })()
     .map_err(InvokeError::from_anyhow)
@@ -690,28 +691,43 @@ fn open_app_folder() -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-fn test_ffmpeg() -> Result<bool, InvokeError> {
-    (|| Ok(find_ffmpeg()?.is_some()))().map_err(InvokeError::from_anyhow)
+fn check_ffmpeg() -> Result<bool, InvokeError> {
+    (|| Ok(render::find_ffmpeg()?.is_some()))().map_err(InvokeError::from_anyhow)
 }
 
 #[tauri::command]
-async fn check_ffmpeg_filter() -> bool {
-    let Ok(Some(ffmpeg)) = find_ffmpeg() else {
+async fn check_ffmpeg_filter(ffmpeg: Option<String>) -> bool {
+    let ffmpeg = if let Some(ffmpeg) = ffmpeg {
+        ffmpeg
+    } else if let Ok(Some(ffmpeg)) = render::find_ffmpeg() {
+        ffmpeg
+    } else {
         return false;
     };
+
     info!("ffmpeg: {}", &ffmpeg);
+
+    if !render::test_ffmpeg(&ffmpeg) {
+        return false;
+    }
 
     let output = Command::new(&ffmpeg)
         .arg("-filters")
         .output()
         .await
-        .expect("failed get filters");
+        .expect("failed get output");
 
-    let filter = String::from_utf8(output.stdout).unwrap_or_default();
+    let stderr = String::from_utf8(output.stderr).unwrap_or_default();
+    if !stderr.contains("ffmpeg") {
+        error!("Missing ffmpeg");
+        return false;
+    }
+
+    let stdout = String::from_utf8(output.stdout).unwrap_or_default();
     let filter_required = ["aresample", "alimiter", "acompressor", "volume"];
     let mut complete = true;
     for i in filter_required {
-        if !filter.contains(i) {
+        if !stdout.contains(i) {
             error!("Missing lib: {}, Please check FFmpeg availability", i);
             complete = false;
         }
@@ -722,7 +738,7 @@ async fn check_ffmpeg_filter() -> bool {
 #[tauri::command]
 async fn get_encoder(hevc: bool) -> Result<Option<String>, InvokeError> {
     (|| {
-        let Some(ffmpeg) = find_ffmpeg()? else {
+        let Some(ffmpeg) = render::find_ffmpeg()? else {
             bail!("FFmpeg not found")
         };
         let config = RenderConfig {
@@ -742,7 +758,7 @@ async fn get_encoder(hevc: bool) -> Result<Option<String>, InvokeError> {
 #[tauri::command]
 async fn test_encoder(encoder: &str) -> Result<bool, InvokeError> {
     (|| {
-        let Some(ffmpeg) = find_ffmpeg()? else {
+        let Some(ffmpeg) = render::find_ffmpeg()? else {
             bail!("FFmpeg not found")
         };
         Ok(render::test_encoder(&ffmpeg, encoder))
