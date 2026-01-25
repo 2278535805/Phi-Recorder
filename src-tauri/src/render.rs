@@ -1032,12 +1032,13 @@ pub async fn main(cmd: bool) -> Result<()> {
             );
             if frame >= N as u64 {
                 glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1) as usize % N]);
-                let src: *const u8 = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
+                let src = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
                 if !src.is_null() {
-                    input.write_all(&std::slice::from_raw_parts(src, byte_size))?;
+                    input.write_all(&std::slice::from_raw_parts(src as *const u8, byte_size))?;
                 }
                 glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
             }
+        }
         }
 
         if ipc {
