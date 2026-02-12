@@ -1,0 +1,10 @@
+[target.x86_64-apple-darwin]
+rustflags = [
+    "-C", "link-arg=-L/usr/local/lib",
+    "-C", "link-arg=-lbz2",
+    "-C", "link-arg=-lswresample",
+    "-C", "link-arg=-framework", "-C", "link-arg=VideoToolbox",
+    "-C", "link-arg=-framework", "-C", "link-arg=CoreMedia",
+    "-C", "link-arg=-framework", "-C", "link-arg=CoreVideo",
+    "-C", "link-arg=-framework", "-C", "link-arg=CoreFoundation",
+]

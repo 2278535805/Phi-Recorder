@@ -1039,7 +1039,6 @@ pub async fn main(cmd: bool) -> Result<()> {
                 glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
             }
         }
-        }
 
         if ipc {
             send(IPCEvent::Frame);
