@@ -88,6 +88,7 @@
     "render-ui-bar": "Progress Bar",
     "render-bg": "Background",
     "render-bg-dim": "Background Dim",
+    "preserve-framebuffer": "Preserve Framebuffer",
     "render-hit": "Hit Effects",
     "render-extra": "Extra (Shader)",
     "render-double-hint": "Double Hit Hint",

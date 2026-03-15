@@ -87,6 +87,7 @@
     "render-ui-bar": "进度条",
     "render-background": "背景",
     "render-background-dim": "背景压暗",
+    "preserve-framebuffer": "保留帧缓冲",
     "render-particle": "打击特效",
     "render-extra": "附加 (着色器)",
     "render-double-hint": "双押提示",
