@@ -98,6 +98,7 @@ pub struct RenderConfig {
     pub render_ui_bar: bool,
     pub render_bg: bool,
     pub render_bg_dim: bool,
+    pub preserve_framebuffer: bool,
     pub render_extra: bool,
     pub bg_blurriness: f32,
 
@@ -151,6 +152,7 @@ impl RenderConfig {
             render_ui_bar: self.render_ui_bar,
             render_bg: self.render_bg,
             render_bg_dim: self.render_bg_dim,
+            preserve_framebuffer: self.preserve_framebuffer,
             render_extra: self.render_extra,
             bg_blurriness: self.bg_blurriness,
 
@@ -223,6 +225,7 @@ impl Default for RenderConfig {
             render_ui_bar: true,
             render_bg: true,
             render_bg_dim: true,
+            preserve_framebuffer: false,
             render_extra: true,
             bg_blurriness: 80.,
 

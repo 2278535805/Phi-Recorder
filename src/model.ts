@@ -134,6 +134,7 @@ export interface RenderConfig {
   renderUiBar: boolean;
   renderBg: boolean;
   renderBgDim: boolean;
+  preserveFramebuffer: boolean;
   renderExtra: boolean;
   bgBlurriness: number;
 
@@ -201,6 +202,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   renderUiBar: true,
   renderBg: true,
   renderBgDim: true,
+  preserveFramebuffer: false,
   renderExtra: true,
   bgBlurriness: 80,
 

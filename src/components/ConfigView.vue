@@ -116,6 +116,17 @@ const renderUiCombo = ref(DEFAULT_RENDER_CONFIG.renderUiCombo);
 const renderUiBar = ref(DEFAULT_RENDER_CONFIG.renderUiBar);
 const renderBg = ref(DEFAULT_RENDER_CONFIG.renderBg);
 const renderBgDim = ref(DEFAULT_RENDER_CONFIG.renderBgDim);
+const preserveFramebuffer = ref(DEFAULT_RENDER_CONFIG.preserveFramebuffer);
+watch(renderBg, (value) => {
+  if (value) {
+    preserveFramebuffer.value = false;
+  }
+});
+watch(preserveFramebuffer, (value) => {
+  if (value) {
+    renderBg.value = false;
+  }
+});
 const particle = ref(DEFAULT_RENDER_CONFIG.particle);
 const renderExtra = ref(DEFAULT_RENDER_CONFIG.renderExtra);
 const renderDoubleHint = ref(DEFAULT_RENDER_CONFIG.renderDoubleHint);
@@ -309,6 +320,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     renderUiBar: renderUiBar.value,
     renderBg: renderBg.value,
     renderBgDim: renderBgDim.value,
+    preserveFramebuffer: preserveFramebuffer.value,
     particle: particle.value,
     renderExtra: renderExtra.value,
     renderDoubleHint: renderDoubleHint.value,
@@ -435,6 +447,7 @@ function applyConfig(config: RenderConfig) {
   renderUiBar.value = config.renderUiBar;
   renderBg.value = config.renderBg;
   renderBgDim.value = config.renderBgDim;
+  preserveFramebuffer.value = config.preserveFramebuffer;
   particle.value = config.particle;
   renderExtra.value = config.renderExtra;
   renderDoubleHint.value = config.renderDoubleHint;
@@ -800,6 +813,9 @@ function setConfigForQuality() {
                   </v-col>
                 </v-row>
                 <v-row no-gutters class="mx-n2 mt-2">
+                  <v-col cols="3" class="px-2">
+                    <v-checkbox :label="t('preserve-framebuffer')" color="btn" v-model="preserveFramebuffer"></v-checkbox>
+                  </v-col>
                   <v-col cols="3" class="px-2">
                     <v-checkbox :label="t('render-particle')" color="btn" v-model="particle"></v-checkbox>
                   </v-col>
