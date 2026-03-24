@@ -451,6 +451,15 @@ function applyConfig(config: RenderConfig) {
   particle.value = config.particle;
   renderExtra.value = config.renderExtra;
   renderDoubleHint.value = config.renderDoubleHint;
+
+  aggressive.value = config.aggressive;
+  roman.value = config.roman;
+  chinese.value = config.chinese;
+
+  forceLimit.value = config.forceLimit;
+  hires.value = config.hires;
+  loudnessEqualization.value = config.loudnessEqualization;
+  audioMixOptimization.value = config.audioMixOptimization;
 }
 
 const DEFAULT_PRESET: Preset = {
