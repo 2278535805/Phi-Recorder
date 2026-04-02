@@ -31,6 +31,7 @@
         "aspectRatio": "Aspect Ratio",
         "force-aspect-ratio": "Force Aspect Ratio",
         "backgroundDim": "Background Dim",
+        "line-length-using-y-axis": "Line Length Using Y Axis",
         "lineLength": "Line Length",
         "offset": "Offset",
         "tip": "Tip",

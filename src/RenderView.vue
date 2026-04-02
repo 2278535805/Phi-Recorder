@@ -512,8 +512,7 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                   <v-text-field type="text" class="" :label="t('info.illustration')" v-model="chartInfo.illustration"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.positive]" :label="t('info.lineLength')"
-                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
+                  <v-switch class="d-flex justify-center ml-n2" :label="t('info.line-length-using-y-axis')" color="btn" v-model="chartInfo.lineLengthUsingYAxis"></v-switch>
                 </v-col>
               </v-row>
 
@@ -524,14 +523,17 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 <v-col cols="3">
                   <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="chartInfo.holdParticleIntervalRatio" @update:modelValue="chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
                 </v-col>
-                <v-col cols="3" class="d-flex align-center justify-center">
-                  <v-btn class="mt-n2" color="btn-large" size="large" @click="tagEditor = true">{{ t('info.tag-editor') }}</v-btn>
+                <v-col cols="3">
+                  <v-text-field type="number" class="" :rules="[RULES.less10000, RULES.positive]" :label="t('info.lineLength')"
+                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
                 </v-col>
               </v-row>
 
             </v-form>
           </v-card-text>
-          <v-card-actions class="justify-end">
+          <v-card-actions>
+            <v-btn class="hover-scale px-4" variant="text" @click="tagEditor = true" v-t="'info.tag-editor'"></v-btn>
+            <v-spacer />
             <v-btn class="hover-scale" variant="text" @click="readInfo" v-t="'read-info'"></v-btn>
             <v-btn class="hover-scale" variant="text" @click="saveInfo" v-t="'save-info'"></v-btn>
             <v-btn class="hover-scale" variant="text" @click="moreInfo = false; updateAspectRatio();" v-t="'confirm'"></v-btn>
