@@ -27,25 +27,25 @@ export const RULES = {
   positiveOrNull: (value: string | null) => (value == null || value == '' || (isNumeric(value) && Number(value) > 0)) || i18n.global.t('rules.positive'),
   less10000: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) > 10000) return i18n.global.t('rules.big');
+      if (Number(value) > 10000 && Number(value) < -10000) return i18n.global.t('rules.big');
     }
     return true;
   },
   less100: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) > 100) return i18n.global.t('rules.big');
+      if (Number(value) > 100 && Number(value) < -100) return i18n.global.t('rules.big');
     }
     return true;
   },
   less4000000000: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) > 4000000000) return i18n.global.t('rules.big');
+      if (Number(value) > 4000000000 && Number(value) < -4000000000) return i18n.global.t('rules.big');
     }
     return true;
   },
   greater0_01: (value: string) => {
     if (isNumeric(value)) {
-      if (Number(value) < 0.01) return i18n.global.t('rules.small');
+      if (Number(value) < 0.01 && Number(value) > -0.01) return i18n.global.t('rules.small');
     }
     return true;
   },
