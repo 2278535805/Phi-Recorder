@@ -282,10 +282,10 @@ const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
           <h2 class="mt-1 mx-3">{{ t('setting') }}</h2>
         </v-col>
         <v-col cols="auto" class="mx-2 align-self-end">
-          <v-btn @click="resetDialog = true" v-t="'reset'"></v-btn>
+          <v-btn @click="resetDialog = true">{{ t('reset') }}</v-btn>
         </v-col>
         <v-col cols="auto" class="mx-2 align-self-end">
-          <v-btn @click="saveConfig" :loading="loadingSave" v-t="'save'"></v-btn>
+          <v-btn @click="saveConfig" :loading="loadingSave">{{ t('save') }}</v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-4 mx-0">
