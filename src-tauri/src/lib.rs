@@ -59,7 +59,11 @@ pub fn build_conf() -> macroquad::window::Conf {
             std::env::args().skip(1).next().as_deref(),
             Some("render") | Some("--render")
         ),
-        fullscreen: common::read_config().map(|config| config.fullscreen_mode).unwrap_or(false),
+        fullscreen: if let Ok(fullscreen) = common::read_config().map(|config| config.fullscreen_mode) {
+            fullscreen
+        } else {
+            false
+        },
         ..Default::default()
     }
 }
