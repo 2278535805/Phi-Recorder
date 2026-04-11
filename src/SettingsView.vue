@@ -310,15 +310,13 @@ const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-0">
-        <v-col cols="6">
-          <TipSwitch class="mx-4" :tooltip="t('print-stderr-tip')" :label="t('print-stderr')" v-model="config.printStderr"></TipSwitch>
+        <v-col cols="4">
+          <TipSwitch class="ml-4" :tooltip="t('print-stderr-tip')" :label="t('print-stderr')" v-model="config.printStderr"></TipSwitch>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="4">
           <TipSwitch class="mx-4" :tooltip="t('show-detailed-log-tip')" :label="t('show-detailed-log')" v-model="config.showDetailedLog"></TipSwitch>
         </v-col>
-      </v-row>
-      <v-row no-gutters class="mx-0">
-        <v-col cols="6">
+        <v-col cols="4">
           <TipSwitch class="mx-4" :label="t('fullscreen-mode')" v-model="config.fullscreenMode"></TipSwitch>
         </v-col>
       </v-row>
