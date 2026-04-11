@@ -1,5 +1,5 @@
 use crate::{
-    ASSET_PATH, common::parse_args, render::{RenderConfig, RenderParams, build_player}
+    ASSET_PATH, common::{parse_args, read_config}, render::{RenderConfig, RenderParams, build_player}
 };
 use anyhow::{Result};
 use macroquad::prelude::*;
