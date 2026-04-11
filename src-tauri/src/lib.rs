@@ -8,6 +8,7 @@ mod ipc;
 mod preview;
 mod render;
 mod task;
+mod icon;
 
 use anyhow::{bail, Context, Result};
 use common::{
@@ -40,8 +41,28 @@ use tokio::{
     io::{AsyncWriteExt, AsyncBufReadExt},
     process::Command
 };
+use icon::{BIG_ICON, ICON, SMALL_ICON};
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
+
+pub fn build_conf() -> macroquad::window::Conf {
+    macroquad::window::Conf {
+        window_title: "Phi Recorder".to_string(),
+        window_width: 1280,
+        window_height: 720,
+        icon: Some(macroquad::miniquad::conf::Icon {
+            medium: ICON,
+            big: BIG_ICON,
+            small: SMALL_ICON,
+        }),
+        headless: std::env::args().len() <= 1 || matches!(
+            std::env::args().skip(1).next().as_deref(),
+            Some("render") | Some("--render")
+        ),
+        fullscreen: common::read_config().map(|config| config.fullscreen_mode).unwrap_or(false),
+        ..Default::default()
+    }
+}
 
 #[inline]
 async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeError> {
