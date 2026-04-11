@@ -317,6 +317,11 @@ const useSystemTheme = useStorage<boolean>('useSystemTheme', true);
           <TipSwitch class="mx-4" :tooltip="t('show-detailed-log-tip')" :label="t('show-detailed-log')" v-model="config.showDetailedLog"></TipSwitch>
         </v-col>
       </v-row>
+      <v-row no-gutters class="mx-0">
+        <v-col cols="6">
+          <TipSwitch class="mx-4" :label="t('fullscreen-mode')" v-model="config.fullscreenMode"></TipSwitch>
+        </v-col>
+      </v-row>
 
       <div class="mt-1 mx-2">
         <VDivider />
