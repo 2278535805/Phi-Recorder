@@ -106,6 +106,9 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         prpr_config.mods |= Mods::AUTOPLAY;
     }
     prpr_config.volume_bgm = prpr_config.volume_music;
+    if let Ok(fullscreen_mode) = read_config().map(|config| config.fullscreen_mode) {
+        macroquad::window::set_fullscreen(fullscreen_mode);
+    }
 
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);
