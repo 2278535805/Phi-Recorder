@@ -223,6 +223,7 @@ export interface AppConfig {
   ffmpegPath: string | null;
   printStderr: boolean;
   showDetailedLog: boolean;
+  fullscreenMode: boolean;
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
@@ -233,6 +234,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   ffmpegPath: null,
   printStderr: false,
   showDetailedLog: true,
+  fullscreenMode: false,
 }
 
 export interface RPEChart {

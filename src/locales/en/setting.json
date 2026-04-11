@@ -22,6 +22,7 @@
     "print-stderr-tip": "Display rendering output in the main terminal",
     "show-detailed-log": "Show Detailed Log",
     "show-detailed-log-tip": "Effective after restart",
+    "fullscreen-mode": "Fullscreen Mode",
     "list-expand": "Default Expand Sidebar",
     "list-expand-tip": "Right-click the sidebar to switch at any time",
     "use-system-theme": "Follow System Theme",

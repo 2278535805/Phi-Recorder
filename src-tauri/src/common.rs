@@ -144,6 +144,7 @@ pub struct AppConfig {
     pub ffmpeg_path: Option<String>,
     pub print_stderr: bool,
     pub show_detailed_log: bool,
+    pub fullscreen_mode: bool,
 }
 
 impl Default for AppConfig {
@@ -156,6 +157,7 @@ impl Default for AppConfig {
             ffmpeg_path: None,
             print_stderr: false,
             show_detailed_log: true,
+            fullscreen_mode: false,
         }
     }
 }
