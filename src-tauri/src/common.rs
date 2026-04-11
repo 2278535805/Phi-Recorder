@@ -163,11 +163,15 @@ impl Default for AppConfig {
 }
 
 pub fn get_config_file() -> Result<PathBuf> {
-    let file = CONFIG_DIR.get().unwrap().join("config.toml");
-    if file.exists() && !file.is_file() {
-        bail!("presets.toml is not a file");
+    if let Some(config_dir) = CONFIG_DIR.get() {
+        let file = config_dir.join("config.toml");
+        if file.exists() && !file.is_file() {
+            bail!("config.toml is not a file");
+        }
+        Ok(file)
+    } else {
+        bail!("config directory is not set");
     }
-    Ok(file)
 }
 
 pub fn read_config() -> Result<AppConfig> {
