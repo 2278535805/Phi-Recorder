@@ -131,7 +131,9 @@ const particle = ref(DEFAULT_RENDER_CONFIG.particle);
 const renderExtra = ref(DEFAULT_RENDER_CONFIG.renderExtra);
 const renderDoubleHint = ref(DEFAULT_RENDER_CONFIG.renderDoubleHint);
 
-const aggressive = ref(DEFAULT_RENDER_CONFIG.aggressive);
+const aggressiveChart = ref(DEFAULT_RENDER_CONFIG.aggressiveChart);
+const aggressiveNote = ref(DEFAULT_RENDER_CONFIG.aggressiveNote);
+const aggressiveParticle = ref(DEFAULT_RENDER_CONFIG.aggressiveParticle);
 const roman = ref(DEFAULT_RENDER_CONFIG.roman);
 const chinese = ref(DEFAULT_RENDER_CONFIG.chinese);
 
@@ -325,7 +327,9 @@ async function buildConfig(): Promise<RenderConfig | null> {
     renderExtra: renderExtra.value,
     renderDoubleHint: renderDoubleHint.value,
     
-    aggressive: aggressive.value,
+    aggressiveChart: aggressiveChart.value,
+    aggressiveNote: aggressiveNote.value,
+    aggressiveParticle: aggressiveParticle.value,
     roman: roman.value,
     chinese: chinese.value,
 
@@ -452,7 +456,9 @@ function applyConfig(config: RenderConfig) {
   renderExtra.value = config.renderExtra;
   renderDoubleHint.value = config.renderDoubleHint;
 
-  aggressive.value = config.aggressive;
+  aggressiveChart.value = config.aggressiveChart;
+  aggressiveNote.value = config.aggressiveNote;
+  aggressiveParticle.value = config.aggressiveParticle;
   roman.value = config.roman;
   chinese.value = config.chinese;
 
@@ -840,13 +846,13 @@ function setConfigForQuality() {
 
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="4" class="px-2">
-          <TipSwitch :label="t('aggressive')" color="btn" v-model="aggressive"></TipSwitch>
+          <TipSwitch :label="t('aggressive-chart')" :title="t('aggressive-chart-tips')" color="btn" v-model="aggressiveChart"></TipSwitch>
         </v-col>
         <v-col cols="4" class="px-2">
-          <TipSwitch :label="t('roman')" color="btn" v-model="roman"></TipSwitch>
+          <TipSwitch :label="t('aggressive-note')" :title="t('aggressive-note-tips')" color="btn" v-model="aggressiveNote"></TipSwitch>
         </v-col>
         <v-col cols="4" class="px-2">
-          <TipSwitch :label="t('chinese')" color="btn" v-model="chinese"></TipSwitch>
+          <TipSwitch :label="t('aggressive-particle')" :title="t('aggressive-particle-tips')" color="btn" v-model="aggressiveParticle"></TipSwitch>
         </v-col>
       </v-row>
 
@@ -916,10 +922,16 @@ function setConfigForQuality() {
       </v-row>
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3">
+          <v-combobox class="mx-2" :label="t('speed')" v-model="speed" type="number" :items="speedList" :rules="[RULES.notEmpty, RULES.positive, RULES.less100, RULES.greater0_01]"></v-combobox>
+        </v-col>
+        <v-col cols="3">
           <v-switch class="text-center justify-center mr-2 d-flex" :label="t('alpha-tint')" color="btn" :title="t('alpha-tint-tip')" v-model="alphaTint"></v-switch>
         </v-col>
         <v-col cols="3">
-          <v-combobox class="mx-2" :label="t('speed')" v-model="speed" type="number" :items="speedList" :rules="[RULES.notEmpty, RULES.positive, RULES.less100, RULES.greater0_01]"></v-combobox>
+          <TipSwitch class="mr-2" :label="t('roman')" color="btn" v-model="roman"></TipSwitch>
+        </v-col>
+        <v-col cols="3">
+          <TipSwitch class="mr-2" :label="t('chinese')" color="btn" v-model="chinese"></TipSwitch>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />
