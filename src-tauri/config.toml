@@ -2,6 +2,7 @@
 resolution = [1920, 1080]
 fps = 60
 sampleCount = 8
+fxaa = false
 hardwareAccel = true
 hevc = false
 mpeg4 = false
@@ -41,13 +42,14 @@ renderUiScore = true
 renderUiCombo = true
 renderUiBar = true
 renderBg = true
+preserveFramebuffer = false
 renderBgDim = true
 particle = true
 renderExtra = true
 
-aggressive = false
-roman = false
-chinese = false
+aggressiveChart = false
+aggressiveNote = false
+aggressiveParticle = false
 
 bgBlurriness = 80.0
 watermark = ""
@@ -72,7 +74,7 @@ allBad = false
 judgeOffset = 0.0
 difficulty = ""
 fade = 0.0
-alphaTint = false
-
-fxaa = false
 speed = 1.0
+alphaTint = false
+roman = false
+chinese = false
