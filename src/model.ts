@@ -96,7 +96,9 @@ export interface RenderConfig {
   dynamicBitrateControl: boolean;
   bitrate: string;
 
-  aggressive: boolean;
+  aggressiveChart: boolean;
+  aggressiveNote: boolean;
+  aggressiveParticle: boolean;
   challengeColor: string;
   challengeRank: number;
   noteScale: number;
@@ -165,7 +167,9 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   dynamicBitrateControl: true,
   bitrate: '28',
 
-  aggressive: false,
+  aggressiveChart: false,
+  aggressiveNote: false,
+  aggressiveParticle: false,
   challengeColor: 'rainbow',
   challengeRank: 3,
   noteScale: 1,

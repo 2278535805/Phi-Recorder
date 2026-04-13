@@ -58,7 +58,9 @@ pub struct RenderConfig {
     pub dynamic_bitrate_control: bool,
     pub bitrate: String,
 
-    pub aggressive: bool,
+    pub aggressive_chart: bool,
+    pub aggressive_note: bool,
+    pub aggressive_particle: bool,
     pub challenge_color: ChallengeModeColor,
     pub challenge_rank: u32,
     pub note_scale: f32,
@@ -113,7 +115,9 @@ pub struct RenderConfig {
 impl RenderConfig {
     pub fn to_config(&self) -> Config {
         Config {
-            aggressive: self.aggressive,
+            aggressive_chart: self.aggressive_chart,
+            aggressive_note: self.aggressive_note,
+            aggressive_particle: self.aggressive_particle,
             challenge_color: self.challenge_color.clone(),
             challenge_rank: self.challenge_rank,
             enter_animation: self.render_loading,
@@ -181,7 +185,9 @@ impl Default for RenderConfig {
             custom_encoder: None,
             dynamic_bitrate_control: true,
             bitrate: "28".to_string(),
-            aggressive: false,
+            aggressive_chart: false,
+            aggressive_note: false,
+            aggressive_particle: false,
             challenge_color: ChallengeModeColor::Rainbow,
             challenge_rank: 3,
             fxaa: false,
