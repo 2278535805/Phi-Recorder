@@ -21,11 +21,11 @@ use phire::{
     ui::{FontArc, TextPainter},
     Main,
 };
+use rustc_hash::FxHashMap;
 use sasa::AudioClip;
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
-    collections::HashMap,
     cmp::Ordering,
     io::{BufRead, BufWriter, Write},
     ops::DerefMut,
@@ -591,8 +591,8 @@ pub async fn main(cmd: bool) -> Result<()> {
         info!("Process Music Time: {:.2?}", music_time.elapsed());
     }
 
-    type HitSoundMap = HashMap<String, Array1<f32>>;
-    let mut extra_sfxs: HitSoundMap = HitSoundMap::new();
+    type HitSoundMap = FxHashMap<String, Array1<f32>>;
+    let mut extra_sfxs: HitSoundMap = HitSoundMap::with_capacity_and_hasher(16, Default::default());
 
     chart.hitsounds.iter().for_each(|(name, clip)| {
         extra_sfxs.insert(name.clone(), Array1::from_vec(clip.to_vec()));

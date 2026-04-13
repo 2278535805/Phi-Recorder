@@ -51,6 +51,7 @@ humantime = "2.2.0"
 rand = "0.9.1"
 tauri-plugin-drag = "2.1.0"
 tauri-plugin-opener = "2"
+rustc-hash = "2.1.2"
 # sysinfo = "0.29.0"
 
 [features]
