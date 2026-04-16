@@ -85,7 +85,7 @@ pub struct RenderConfig {
     pub chinese: bool,
     pub combo: String,
     pub difficulty: String,
-    pub judge_offset: f32,
+    pub judge_offset: f64,
     pub file_name_format: String,
 
     pub render_line: bool,
@@ -161,8 +161,8 @@ impl RenderConfig {
             bg_blurriness: self.bg_blurriness,
 
             max_particles: self.max_particles,
-            play_start_time: self.play_start_time as f32,
-            play_end_time: self.play_end_time.map(|v| v as f32),
+            play_start_time: self.play_start_time,
+            play_end_time: self.play_end_time,
 
             fade: self.fade,
             alpha_tint: self.alpha_tint,
@@ -512,22 +512,22 @@ pub async fn main(cmd: bool) -> Result<()> {
     let fps = config.fps;
     let offset = chart.offset + info.offset;
     let speed = config.speed as f64;
-    let speed_time_ratio = 1.0 / config.speed as f64;
+    let speed_time_ratio = 1.0 / speed;
 
     let before_time: f64 = if config.render_loading {
-        LoadingScene::TOTAL_TIME as f64 + GameScene::BEFORE_DURATION as f64 * speed_time_ratio
+        LoadingScene::TOTAL_TIME + GameScene::BEFORE_DURATION * speed_time_ratio
     } else {
         0.0
     };
     let before_time_music: f64 = if config.render_loading {
-        LoadingScene::TOTAL_TIME as f64 * speed + GameScene::BEFORE_DURATION as f64
+        LoadingScene::TOTAL_TIME * speed + GameScene::BEFORE_DURATION
     } else {
         0.0
     };
 
-    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time * speed_time_ratio - offset as f64 + WAIT_TIME as f64 * speed_time_ratio;
-    let chart_length_music = before_time_music + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
-    let chart_length_sfx = config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset as f64 + WAIT_TIME as f64;
+    let chart_length = before_time + config.play_end_time.unwrap_or(music_length).min(music_length) * speed_time_ratio - config.play_start_time * speed_time_ratio - offset + WAIT_TIME * speed_time_ratio;
+    let chart_length_music = before_time_music + config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset + WAIT_TIME;
+    let chart_length_sfx = config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset + WAIT_TIME;
     let video_length = chart_length + config.ending_length;
     let video_length_music = chart_length_music + config.ending_length; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
     let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
@@ -558,7 +558,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let output_music_len = (video_length_music * music_sample_rate as f64).ceil() as usize * 2;
     let output_sfx_len = ((video_length + sfx_protect_time) * sample_rate_f64).ceil() as usize * 2;
-    let output_ending_music_delay = chart_length + GameScene::WAIT_AFTER_TIME as f64 * speed_time_ratio + EndingScene::BPM_WAIT_TIME;
+    let output_ending_music_delay = chart_length + GameScene::WAIT_AFTER_TIME * speed_time_ratio + EndingScene::BPM_WAIT_TIME;
     let output_ending_music_len = ((video_length - output_ending_music_delay).max(0.) * sample_rate_f64).ceil() as usize * 2;
     let output_ending_music_delay_string = output_ending_music_delay * 1000.;
     let output_ending_music_delay_string = format!("{}|{}", output_ending_music_delay_string, output_ending_music_delay_string);
@@ -580,9 +580,9 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_music != 0.0 {
         let music_time = Instant::now();
-        let pos = (before_time - offset.min(0.) as f64) * speed;
+        let pos = (before_time - offset.min(0.)) * speed;
         let position_wrtie = (pos * music_sample_rate as f64).ceil() as usize * 2;
-        let position_read = ((offset.max(0.) as f64 + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
+        let position_read = ((offset.max(0.) + config.play_start_time) * music_sample_rate as f64).ceil() as usize * 2;
         let music_len = (chart_length_music * music_sample_rate as f64).ceil() as usize * 2;
         let len = (music.len() - position_read).min(output_music_len - position_wrtie).min(music_len - position_wrtie);
         let clip = music.slice(s![position_read..position_read + len]);
@@ -608,15 +608,15 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     if volume_sfx != 0.0 {
         let sfx_time = Instant::now();
-        let judge_offset = config.judge_offset as f64;
-        let sfx_start_time = config.play_start_time as f32 - config.judge_offset;
-        let sfx_end_time = sfx_start_time + chart_length_sfx as f32;
+        let judge_offset = config.judge_offset;
+        let sfx_start_time = config.play_start_time - config.judge_offset;
+        let sfx_end_time = sfx_start_time + chart_length_sfx;
         let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
 
         if config.audio_mix_optimization {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    sfx_list.push((before_time + note.time as f64 * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
+                    sfx_list.push((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
                 }
             });
             let len = sfx_list.len();
@@ -677,7 +677,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         } else {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    sfx_list.push((before_time + note.time as f64 * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
+                    sfx_list.push((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
                 }
             });
             let num = sfx_list.len();
@@ -1011,7 +1011,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
         main.update()?;
         main.render(&mut painter)?;
-        if *my_time.borrow() <= LoadingScene::TOTAL_TIME as f64 && config.render_loading {
+        if *my_time.borrow() <= LoadingScene::TOTAL_TIME && config.render_loading {
             draw_rectangle(0., 0., 0., 0., Color::default());
         }
         gl.flush();
