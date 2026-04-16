@@ -622,7 +622,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             let len = sfx_list.len();
 
             sfx_list.sort_by(|(a1, b1), (a2, b2)| {
-                match a1.partial_cmp(a2).unwrap_or(Ordering::Equal) {
+                let a1 = round_to_step(*a1, 0.005);
+                let a2 = round_to_step(*a2, 0.005);
+                match a1.partial_cmp(&a2).unwrap_or(Ordering::Equal) {
                     Ordering::Less  => Ordering::Less,
                     Ordering::Greater => Ordering::Greater,
                     Ordering::Equal => {
@@ -643,7 +645,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 let is_new_group = match last_arr {
                     None => true,
                     Some(prev) => {
-                        !std::ptr::eq(prev, clip) || (pos - last_t).abs() > 0.005
+                        !std::ptr::eq(prev, clip) || pos != last_t
                     }
                 };
 
@@ -653,9 +655,9 @@ pub async fn main(cmd: bool) -> Result<()> {
                     count = 1;
                     kept.push((pos, clip));
                 } else {
-                    count += 1;
-                    if count <= 3 {
+                    if count < 3 {
                         kept.push((pos, clip));
+                        count += 1;
                     }
                 }
             }
@@ -1055,11 +1057,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     }
     drop(input);
     info!("Render Time: {:.2?}", render_time.elapsed());
-    info!(
-        "Average FPS: {:.2}",
-        frames as f64 / render_time.elapsed().as_secs_f64()
-    );
+    info!("Average FPS: {:.2}",frames as f64 / render_time.elapsed().as_secs_f64());
     proc.wait()?;
+    info!("Total Time: {:.2?}", loading_time.elapsed());
     if ipc {
         send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
     }
