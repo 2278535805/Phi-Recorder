@@ -44,7 +44,13 @@ use icon::{BIG_ICON, ICON, SMALL_ICON};
 
 static ASSET_PATH: OnceLock<PathBuf> = OnceLock::new();
 
-pub fn build_conf(headless: bool) -> macroquad::window::Conf {
+pub fn build_conf(headless: bool, vsync: bool) -> macroquad::window::Conf {
+    let mut platform = macroquad::miniquad::conf::Platform::default();
+    if vsync {
+        platform.swap_interval = Some(1);
+    } else {
+        platform.swap_interval = Some(0);
+    }
     macroquad::window::Conf {
         window_title: "Phi Recorder".to_string(),
         window_width: 1280,
@@ -54,6 +60,7 @@ pub fn build_conf(headless: bool) -> macroquad::window::Conf {
             big: BIG_ICON,
             small: SMALL_ICON,
         }),
+        platform,
         headless,
         ..Default::default()
     }
@@ -67,8 +74,8 @@ async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeEr
     })
 }
 
-fn run_wrapped(f: impl Future<Output = Result<()>> + 'static, headless: bool) {
-    macroquad::Window::from_config(build_conf(headless), async {
+fn run_wrapped(f: impl Future<Output = Result<()>> + 'static, headless: bool, vsync: bool) {
+    macroquad::Window::from_config(build_conf(headless, vsync), async {
         if let Err(err) = f.await {
             error!("{err:?}");
             exit_program(1);
@@ -212,28 +219,28 @@ pub fn run() -> Result<()> {
                 exit_program(0);
             }
             "render" => {
-                run_wrapped(render::main(false), true);
+                run_wrapped(render::main(false), false, false);
             }
             "play" => {
-                run_wrapped(preview::main(false, false, false), false);
+                run_wrapped(preview::main(false, false, false), false, true);
             }
             "preview" => {
-                run_wrapped(preview::main(false, false, true), false);
+                run_wrapped(preview::main(false, false, true), false, true);
             }
             "tweakoffset" => {
-                run_wrapped(preview::main(false, true, true), false);
+                run_wrapped(preview::main(false, true, true), false, true);
             }
             "--render" | "-r" => {
-                run_wrapped(render::main(true), true);
+                run_wrapped(render::main(true), false, false);
             }
             "--play" => {
-                run_wrapped(preview::main(true, false, false), false);
+                run_wrapped(preview::main(true, false, false), false, true);
             }
             "--preview" | "-p" => {
-                run_wrapped(preview::main(true, false, true), false);
+                run_wrapped(preview::main(true, false, true), false, true);
             }
             "--tweakoffset" | "-t" => {
-                run_wrapped(preview::main(true, true, true), false);
+                run_wrapped(preview::main(true, true, true), false, true);
             }
             cmd => {
                 info!("Command: {cmd:?}");
@@ -241,7 +248,7 @@ pub fn run() -> Result<()> {
                 let path = Path::new(&args);
                 if path.is_file() || path.is_dir() {
                     info!("Find a valid path, start preview");
-                    run_wrapped(preview::main(true, false, true), false);
+                    run_wrapped(preview::main(true, false, true), false, true);
                     exit_program(0);
                 } else {
                     exit_program(1);
