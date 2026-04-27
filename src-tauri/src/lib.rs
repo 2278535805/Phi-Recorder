@@ -10,7 +10,7 @@ mod render;
 mod task;
 mod icon;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use common::{
     collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, get_output_dir, respack_dir, save_presets, AppConfig, Extra, CONFIG_DIR, DATA_DIR
 };
@@ -19,25 +19,16 @@ use phire::{
     fs::{self, FileSystem},
     info::ChartInfo,
 };
-use render::{RenderConfig, RenderParams, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
+use render::{RenderConfig, RenderParams, generate_params, ENCODER_LIST_AVC, ENCODER_LIST_HEVC};
 use serde::Serialize;
 use tauri_plugin_prevent_default::Flags;
 use tracing::{error, info, warn};
 use std::{
-    collections::HashMap,
-    fs::File,
-    future::Future,
-    io::{BufRead, BufReader},
-    ops::DerefMut,
-    path::{Path, PathBuf},
-    process::Stdio,
-    sync::OnceLock,
-    time::SystemTime,
+    cell::RefCell, collections::HashMap, fs::File, future::Future, io::{BufRead, BufReader}, ops::DerefMut, path::{Path, PathBuf}, rc::Rc, sync::OnceLock, time::SystemTime
 };
 use task::{TaskQueue, TaskView};
 use tauri::{ipc::InvokeError, Manager, State, WindowEvent};
 use tokio::{
-    io::{AsyncWriteExt, AsyncBufReadExt},
     process::Command
 };
 use icon::{BIG_ICON, ICON, SMALL_ICON};
@@ -74,6 +65,44 @@ fn run_wrapped(f: impl Future<Output = Result<()>> + 'static) {
         }
     });
     exit_program(0);
+}
+
+fn run_wrapped_tweak_offset(f: impl Future<Output = Result<Option<f32>>> + 'static) {
+    macroquad::Window::from_config(build_conf(), async {
+        if let Err(err) = f.await {
+            error!("{err:?}");
+            exit_program(1);
+        }
+    });
+    exit_program(0);
+}
+
+fn the_render_main(f: impl Future<Output = Result<()>> + 'static) -> Result<()> {
+    macroquad::Window::from_config(build_conf(), async {
+        if let Err(err) = f.await {
+            error!("{err:?}");
+        }
+    });
+    Ok(())
+}
+
+fn the_tweak_offset_main(f: impl Future<Output = Result<Option<f32>>> + 'static) -> Result<Option<f32>> {
+    let offset = Rc::new(RefCell::new(None));
+    let offset_clone = Rc::clone(&offset);
+    macroquad::Window::from_config(build_conf(), async move {
+        match f.await {
+            std::result::Result::Ok(result) => {
+                if let Some(result) = result {
+                    *offset_clone.borrow_mut() = Some(result);
+                }
+            }
+            Err(err) => {
+                error!("{err:?}");
+            }
+        }
+    });
+    let offset = *offset.borrow();
+    Ok(offset)
 }
 
 fn hide_cmd() {
@@ -199,40 +228,41 @@ pub fn run() -> Result<()> {
     }
 
     if std::env::args().len() > 1 {
+        if matches!(std::env::args().nth(1).as_deref().unwrap_or_default(), "help" | "--help" | "-help" | "/help" | "-h" | "?" | "--?" | "-?" | "/?") {
+            println!("Usage: phi-recorder --render --input <input file> [options]");
+            println!("Usage: phi-recorder --preview --input <input file> [options]");
+            println!("Options:");
+            println!("  --input   -i    <file/path>    Chart file");
+            println!("  --output  -o    <file/path>    Output file");
+            println!("  --config  -c    <file/json>    Config");
+            println!("  --info    -ci   </json>        Chart Info");
+            exit_program(0);
+        }
+        let (params, output) = rt.block_on(generate_params())?;
         match std::env::args().nth(1).as_deref().unwrap_or_default() {
-            "help" | "--help" | "-help" | "/help" | "-h" | "?" | "--?" | "-?" | "/?" => {
-                println!("Usage: phi-recorder --render --input <input file> [options]");
-                println!("Usage: phi-recorder --preview --input <input file> [options]");
-                println!("Options:");
-                println!("  --input   -i    <file/path>    Chart file");
-                println!("  --output  -o    <file/path>    Output file");
-                println!("  --config  -c    <file/json>    Config");
-                println!("  --info    -ci   </json>        Chart Info");
-                exit_program(0);
-            }
             "render" => {
-                run_wrapped(render::main(false));
+                run_wrapped(render::main(params, output, false));
             }
             "play" => {
-                run_wrapped(preview::main(false, false, false));
+                run_wrapped_tweak_offset(preview::main(params, false, false));
             }
             "preview" => {
-                run_wrapped(preview::main(false, false, true));
+                run_wrapped_tweak_offset(preview::main(params, false, true));
             }
             "tweakoffset" => {
-                run_wrapped(preview::main(false, true, true));
+                run_wrapped_tweak_offset(preview::main(params, true, true));
             }
             "--render" | "-r" => {
-                run_wrapped(render::main(true));
+                run_wrapped(render::main(params, output, true));
             }
             "--play" => {
-                run_wrapped(preview::main(true, false, false));
+                run_wrapped_tweak_offset(preview::main(params, false, false));
             }
             "--preview" | "-p" => {
-                run_wrapped(preview::main(true, false, true));
+                run_wrapped_tweak_offset(preview::main(params, false, true));
             }
             "--tweakoffset" | "-t" => {
-                run_wrapped(preview::main(true, true, true));
+                run_wrapped_tweak_offset(preview::main(params, true, true));
             }
             cmd => {
                 info!("Command: {cmd:?}");
@@ -240,7 +270,7 @@ pub fn run() -> Result<()> {
                 let path = Path::new(&args);
                 if path.is_file() || path.is_dir() {
                     info!("Find a valid path, start preview");
-                    run_wrapped(preview::main(true, false, true));
+                    run_wrapped_tweak_offset(preview::main(params, false, true));
                     exit_program(0);
                 } else {
                     exit_program(1);
@@ -319,19 +349,15 @@ pub fn cmd_hidden(program: impl AsRef<std::ffi::OsStr>) -> Command {
 #[tauri::command]
 async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
-        let mut child = cmd_hidden(std::env::current_exe()?)
-            .arg("preview")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .spawn()?;
-
-        let mut stdin = child.stdin.take().unwrap();
-        let info = format!("{}\n", serde_json::to_string(&params)?);
-        info!("preview: {}", info);
-        stdin.write_all(info.as_bytes()).await?;
-
-        Ok(())
+        let result = the_tweak_offset_main(preview::main(params, false, true));
+        match result {
+            Ok(_) => {
+                Ok(())
+            }
+            Err(e) => {
+                Err(e)
+            }
+        }
     })
     .await
 }
@@ -339,39 +365,15 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
 #[tauri::command]
 async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, InvokeError> {
     wrap_async(async move {
-        let mut child = cmd_hidden(std::env::current_exe()?)
-            .arg("tweakoffset")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn()?;
-
-        let mut stdin = child.stdin.take().unwrap();
-        let info = format!("{}\n", serde_json::to_string(&params)?);
-        info!("preview tweakoffset: {}", info);
-        stdin.write_all(info.as_bytes()).await?;
-
-        // Read and process stdout to get the offset value
-        let stdout = child.stdout.take().unwrap();
-        let mut stdout_lines = tokio::io::BufReader::new(stdout).lines();
-        let mut offset = None;
-
-        loop {
-            if let Some(stdout_result) = stdout_lines.next_line().await? {
-                if let Ok(result) = serde_json::from_str::<f32>(&stdout_result) {
-                    offset = Some(result)
-                }
-            } else {
-                break;
+        let result = the_tweak_offset_main(preview::main(params, true, true));
+        match result {
+            Ok(offset) => {
+                Ok(offset)
+            }
+            Err(e) => {
+                Err(e)
             }
         }
-
-        let status = child.wait().await?;
-        if !status.success() {
-            error!("Child process exited with {}", status);
-        }
-
-        Ok(offset)
     })
     .await
 }
@@ -379,18 +381,15 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, Invoke
 #[tauri::command]
 async fn preview_play(params: RenderParams) -> Result<(), InvokeError> {
     wrap_async(async move {
-        let mut child = cmd_hidden(std::env::current_exe()?)
-            .arg("play")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .spawn()?;
-
-        let mut stdin = child.stdin.take().unwrap();
-        let info = format!("{}\n", serde_json::to_string(&params)?);
-        info!("preview play: {}", info);
-        stdin.write_all(info.as_bytes()).await?;
-        Ok(())
+        let result = the_tweak_offset_main(preview::main(params, false, false));
+        match result {
+            Ok(_) => {
+                Ok(())
+            }
+            Err(e) => {
+                Err(e)
+            }
+        }
     })
     .await
 }
