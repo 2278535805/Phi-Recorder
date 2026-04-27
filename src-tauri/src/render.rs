@@ -1042,6 +1042,23 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         }
 
+        gl.quad_gl.render_pass(None);
+        set_camera(&Camera2D {
+            zoom: vec2(1., config.resolution.0 as f32 / config.resolution.1 as f32),
+            ..Default::default()
+        });
+        draw_texture_ex(
+            mst.output().texture,
+            -1.,
+            -1.,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(2., 2.)),
+                ..Default::default()
+            },
+        );
+        next_frame().await;
+
         if ipc {
             send(IPCEvent::Frame);
         }
