@@ -52,54 +52,11 @@ impl Scene for BaseScene {
     }
 }
 
-pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
+pub async fn main(params: RenderParams, tweak_offset: bool, autoplay: bool) -> Result<Option<f32>> {
     init_assets();
-    let (fs, config, info) = if cmd {
-        let (args_input, _, args_config, args_info) = parse_args(std::env::args().collect());
-
-        let config: RenderConfig = if let Some(config) = &args_config {
-            match serde_json::from_str(config) {
-                Ok(config_json) => {
-                    info!("Using config from json");
-                    config_json
-                }
-                Err(error) => {
-                    info!("Failed to parse json. Using config from toml file");
-                    info!("{}", error);
-                    toml::from_str(&std::fs::read_to_string(config)?)?
-                }
-            }
-        } else {
-            info!("Using config from config.toml");
-            toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
-        };
-        let path = args_input.unwrap();
-
-        let mut fs = fs::fs_from_file(path.as_ref())?;
-        
-        let info = if let Some(info) = args_info {
-            serde_json::from_str(&info)?
-        } else {
-            fs::load_info(fs.deref_mut()).await?
-        };
-
-        (fs, config, info)
-    } else {
-        let mut stdin = std::io::stdin().lock();
-        let stdin = &mut stdin;
-
-        let mut line = String::new();
-        stdin.read_line(&mut line)?;
-        let params: RenderParams = serde_json::from_str(line.trim())?;
-        let path = params.path;
-
-        let fs = fs::fs_from_file(&path)?;
-
-        let config = params.config;
-        let info = params.info;
-
-        (fs, config, info)
-    };
+    let fs = fs::fs_from_file(&params.path)?;
+    let config = params.config;
+    let info = params.info;
 
     let mut prpr_config: Config = config.to_config();
     if autoplay {
@@ -180,10 +137,9 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
 
     if tweak_offset {
         if let Some(result_offset) = *offset.borrow() {
-            let result_json = serde_json::to_string(&result_offset)?;
-            println!("{}", result_json);
+            return Ok(Some(result_offset));
         }
     }
 
-    Ok(())
+    Ok(None)
 }

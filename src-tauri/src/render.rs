@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
     cmp::Ordering,
-    io::{BufRead, BufWriter, Write},
+    io::{BufWriter, Write},
     ops::DerefMut,
     path::{Path, PathBuf},
     process::{Command, Stdio},
@@ -373,11 +373,8 @@ fn round_to_step(v: f64, step: f64) -> f64 {
     (v / step).round() * step
 }
 
-pub async fn main(cmd: bool) -> Result<()> {
-    let loading_time = Instant::now();
-    init_assets();
-    let (mut fs, output_path, mut config, info) = if cmd {
-        let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
+pub async fn generate_params() -> Result<(RenderParams, PathBuf)> {
+    let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
             match serde_json::from_str(config) {
@@ -396,9 +393,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
         };
         let path = args_input.unwrap();
-
         let mut fs = fs::fs_from_file(path.as_ref())?;
-
         let info = if let Some(info) = args_info {
             serde_json::from_str(&info)?
         } else {
@@ -407,7 +402,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         let file_name = generate_filename(&info, &config);
 
-        let output_path = if let Some(output_string) = args_output {
+        let output = if let Some(output_string) = args_output {
             let output_dir = PathBuf::from(output_string);
             if output_dir.extension().is_some() {
                 output_dir
@@ -418,29 +413,22 @@ pub async fn main(cmd: bool) -> Result<()> {
         } else {
             get_output_dir()?.join(file_name) 
         };
-        info!("output file: {:?}", output_path);
+        info!("output file: {:?}", output);
 
-        (fs, output_path, config, info)
-    } else {
-        let mut stdin = std::io::stdin().lock();
-        let stdin = &mut stdin;
+        Ok((RenderParams {
+            path: PathBuf::from(path),
+            info,
+            config,
+        }, output))
+}
 
-        let mut line = String::new();
-        stdin.read_line(&mut line)?;
-        let params: RenderParams = serde_json::from_str(line.trim())?;
-        let path = params.path;
+pub async fn main(params: RenderParams, output: PathBuf, cmd: bool) -> Result<()> {
+    let loading_time = Instant::now();
+    init_assets();
 
-        line.clear();
-        stdin.read_line(&mut line)?;
-        let output_path: PathBuf = serde_json::from_str(line.trim())?;
-
-        let fs = fs::fs_from_file(&path)?;
-
-        let config = params.config;
-        let info = params.info;
-
-        (fs, output_path, config, info)
-    };
+    let mut fs = fs::fs_from_file(&params.path)?;
+    let mut config = params.config;
+    let info = params.info;
 
     use crate::ipc::client::*;
     let ipc = if cmd { false } else { true };
@@ -952,7 +940,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         "-i", output_music_temp.path().display(),
         "-i", ASSET_PATH.get().unwrap().join("ending.ogg").display(),
         args2,
-        output_path.display()
+        output.display()
     );
 
     let mut proc = cmd_hidden(&ffmpeg)
@@ -961,7 +949,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         .arg("-i").arg(output_music_temp.path())
         .arg("-i").arg(output_ending_temp.path())
         .args(args2.split_whitespace())
-        .arg(output_path)
+        .arg(output)
         .args(["-loglevel", "warning"])
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
