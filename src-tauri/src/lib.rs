@@ -14,7 +14,6 @@ use anyhow::{bail, Context, Result};
 use common::{
     collect_chart_files, create_zip, ensure_dir, get_presets_json_file, get_presets_toml_file, get_rpe_dir, get_output_dir, respack_dir, save_presets, AppConfig, Extra, CONFIG_DIR, DATA_DIR
 };
-use macroquad::prelude::set_pc_assets_folder;
 use phire::{
     log,
     fs::{self, FileSystem},
@@ -55,10 +54,6 @@ pub fn build_conf() -> macroquad::window::Conf {
             big: BIG_ICON,
             small: SMALL_ICON,
         }),
-        headless: std::env::args().len() <= 1 || matches!(
-            std::env::args().skip(1).next().as_deref(),
-            Some("render") | Some("--render")
-        ),
         ..Default::default()
     }
 }
@@ -71,11 +66,13 @@ async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeEr
     })
 }
 
-async fn run_wrapped(f: impl Future<Output = Result<()>>) {
-    if let Err(err) = f.await {
-        error!("{err:?}");
-        exit_program(1);
-    }
+fn run_wrapped(f: impl Future<Output = Result<()>> + 'static) {
+    macroquad::Window::from_config(build_conf(), async {
+        if let Err(err) = f.await {
+            error!("{err:?}");
+            exit_program(1);
+        }
+    });
     exit_program(0);
 }
 
@@ -96,7 +93,7 @@ fn hide_cmd() {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub async fn run() -> Result<()> {
+pub fn run() -> Result<()> {
     let rt = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
@@ -195,7 +192,6 @@ pub async fn run() -> Result<()> {
     // let asset_dir = resolver.resolve("assets", BaseDirectory::Config).unwrap();
     let asset_dir = exe_dir.join("assets");
     ASSET_PATH.set(asset_dir.clone()).ok();
-    set_pc_assets_folder(&asset_dir.display().to_string());
 
     let config = common::read_config()?;
     if config.show_detailed_log {
@@ -215,28 +211,28 @@ pub async fn run() -> Result<()> {
                 exit_program(0);
             }
             "render" => {
-                run_wrapped(render::main(false)).await;
+                run_wrapped(render::main(false));
             }
             "play" => {
-                run_wrapped(preview::main(false, false, false)).await;
+                run_wrapped(preview::main(false, false, false));
             }
             "preview" => {
-                run_wrapped(preview::main(false, false, true)).await;
+                run_wrapped(preview::main(false, false, true));
             }
             "tweakoffset" => {
-                run_wrapped(preview::main(false, true, true)).await;
+                run_wrapped(preview::main(false, true, true));
             }
             "--render" | "-r" => {
-                run_wrapped(render::main(true)).await;
+                run_wrapped(render::main(true));
             }
             "--play" => {
-                run_wrapped(preview::main(true, false, false)).await;
+                run_wrapped(preview::main(true, false, false));
             }
             "--preview" | "-p" => {
-                run_wrapped(preview::main(true, false, true)).await;
+                run_wrapped(preview::main(true, false, true));
             }
             "--tweakoffset" | "-t" => {
-                run_wrapped(preview::main(true, true, true)).await;
+                run_wrapped(preview::main(true, true, true));
             }
             cmd => {
                 info!("Command: {cmd:?}");
@@ -244,7 +240,7 @@ pub async fn run() -> Result<()> {
                 let path = Path::new(&args);
                 if path.is_file() || path.is_dir() {
                     info!("Find a valid path, start preview");
-                    run_wrapped(preview::main(true, false, true)).await;
+                    run_wrapped(preview::main(true, false, true));
                     exit_program(0);
                 } else {
                     exit_program(1);

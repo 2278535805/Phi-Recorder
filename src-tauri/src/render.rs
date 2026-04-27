@@ -11,15 +11,7 @@ use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use ndarray::{s, Array1};
 use phire::{
-    config::{ChallengeModeColor, Config, Mods},
-    core::{internal_id, HitSound, MSRenderTarget, Note, ResourcePack},
-    ext::{NotNanExt, SafeTexture, BLACK_TEXTURE},
-    fs::{self, FileSystem},
-    info::ChartInfo,
-    scene::{game::WAIT_TIME, BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene},
-    time::TimeManager,
-    ui::{FontArc, TextPainter},
-    Main,
+    Main, config::{ChallengeModeColor, Config, Mods}, core::{HitSound, MSRenderTarget, Note, ResourcePack, init_assets, internal_id}, ext::{BLACK_TEXTURE, NotNanExt, SafeTexture}, fs::{self, FileSystem}, info::ChartInfo, scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene, game::WAIT_TIME}, time::TimeManager, ui::{FontArc, TextPainter}
 };
 use rustc_hash::FxHashMap;
 use sasa::AudioClip;
@@ -383,8 +375,7 @@ fn round_to_step(v: f64, step: f64) -> f64 {
 
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
-    let asset_dir = ASSET_PATH.get().unwrap();
-    set_pc_assets_folder(&asset_dir.display().to_string());
+    init_assets();
     let (mut fs, output_path, mut config, info) = if cmd {
         let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
