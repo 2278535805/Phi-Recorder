@@ -443,7 +443,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
 
     use crate::ipc::client::*;
-    let ipc = if cmd { false } else { true };
+    let ipc = !cmd;
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);
     let volume_music = std::mem::take(&mut config.volume_music);
@@ -602,7 +602,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let judge_offset = config.judge_offset;
         let sfx_start_time = config.play_start_time - config.judge_offset;
         let sfx_end_time = sfx_start_time + chart_length_sfx;
-        let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::new();
+        let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
 
         if config.audio_mix_optimization {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
@@ -626,7 +626,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 }
             });
 
-            let mut kept = Vec::with_capacity(sfx_list.len());
+            let mut kept_sfx_list = Vec::with_capacity(len);
             let mut last_arr: Option<&Array1<f32>> = None;
             let mut last_t = 0.0;
             let mut count = 0;
@@ -644,21 +644,21 @@ pub async fn main(cmd: bool) -> Result<()> {
                     last_arr = Some(clip);
                     last_t = pos;
                     count = 1;
-                    kept.push((pos, clip));
+                    kept_sfx_list.push((pos, clip));
                 } else {
                     if count < 3 {
-                        kept.push((pos, clip));
+                        kept_sfx_list.push((pos, clip));
                         count += 1;
                     }
                 }
             }
+            drop(sfx_list);
 
-            sfx_list = kept;
-            let num = sfx_list.len();
+            let num = kept_sfx_list.len();
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
-            for (pos, sfx) in sfx_list {
+            for (pos, sfx) in kept_sfx_list {
                 place_sfx(pos, sfx);
                 if ipc {
                     send(IPCEvent::Sfx);
