@@ -728,10 +728,17 @@ pub async fn main(cmd: bool) -> Result<()> {
                 .spawn()
                 .with_context(|| tl!("run-ffmpeg-failed"))?;
             let input = proc.stdin.as_mut().unwrap();
-            let mut writer = BufWriter::new(input);
-            for sample in samples {
-                writer.write_all(&sample.to_le_bytes())?;
-            }
+            let slice = samples.as_slice().unwrap();
+            let byte_slice = unsafe {
+                std::slice::from_raw_parts(
+                    slice.as_ptr() as *const u8,
+                    std::mem::size_of_val(slice),
+                )
+            };
+            let mut writer = BufWriter::with_capacity(64 * 1024, input);
+            writer.write_all(byte_slice)?;
+            writer.flush()?;
+
             drop(writer);
             proc.wait()?;
             Ok(())
