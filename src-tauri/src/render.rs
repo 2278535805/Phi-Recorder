@@ -25,7 +25,7 @@ use std::{
     process::{Command, Stdio},
     rc::Rc,
     sync::atomic::{AtomicBool, Ordering as AtomicOrdering},
-    time::Instant,
+    time::{Duration, Instant},
 };
 use std::{ffi::OsStr, fmt::Write as _};
 use tempfile::NamedTempFile;
@@ -356,7 +356,7 @@ pub fn get_encoder(
 }
 
 pub fn test_encoder(ffmpeg: &String, encoder: &str) -> bool {
-    info!("Testing encoder: {}", encoder);
+    eprintln!("Testing encoder: {}", encoder);
     let output = Command::new(ffmpeg)
         .args(["-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=5:duration=1", "-pix_fmt", "yuv420p", "-c:v", encoder, "-f", "null", "-"])
         .args(["-loglevel", "warning"])
@@ -382,17 +382,17 @@ pub async fn main(cmd: bool) -> Result<()> {
         let config: RenderConfig = if let Some(config) = &args_config {
             match serde_json::from_str(config) {
                 Ok(config_json) => {
-                    info!("Using config from json");
+                    eprintln!("Using config from json");
                     config_json
                 }
                 Err(error) => {
-                    info!("Failed to parse json. Using config from toml file");
-                    info!("{}", error);
+                    eprintln!("Failed to parse json. Using config from toml file");
+                    eprintln!("{}", error);
                     toml::from_str(&std::fs::read_to_string(config)?)?
                 }
             }
         } else {
-            info!("Using config from config.toml");
+            eprintln!("Using config from config.toml");
             toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
         };
         let path = args_input.unwrap();
@@ -418,7 +418,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         } else {
             get_output_dir()?.join(file_name) 
         };
-        info!("output file: {:?}", output_path);
+        eprintln!("output file: {:?}", output_path);
 
         (fs, output_path, config, info)
     } else {
@@ -536,10 +536,10 @@ pub async fn main(cmd: bool) -> Result<()> {
             bail!(tl!("no-hwacc"))
         };
 
-    info!("Encoder: {}", ffmpeg_encoder);
+    eprintln!("Encoder: {}", ffmpeg_encoder);
 
-    info!("Loading Time: {:.2?}", loading_time.elapsed());
-    info!("video length: {:.2}s frame: {}", video_length, video_frames);
+    eprintln!("Loading Time: {:.2?}", loading_time.elapsed());
+    eprintln!("video length: {:.2}s frame: {}", video_length, video_frames);
 
     let render_start_time = Instant::now();
 
@@ -579,7 +579,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let clip = music.slice(s![position_read..position_read + len]);
         let mut slice = output_music.slice_mut(s![position_wrtie..position_wrtie + len]);
         slice += &clip;
-        info!("Process Music Time: {:.2?}", music_time.elapsed());
+        eprintln!("Process Music Time: {:.2?}", music_time.elapsed());
     }
 
     type HitSoundMap = FxHashMap<String, Array1<f32>>;
@@ -666,7 +666,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
 
             let elapsed = sfx_time.elapsed();
-            info!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
+            eprintln!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
         } else {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
@@ -685,7 +685,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
 
             let elapsed = sfx_time.elapsed();
-            info!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
+            eprintln!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
         }
     }
 
@@ -699,7 +699,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             slice += &clip;
             position_wrtie += len;
         }
-        info!("Process Ending Music Time: {:.2?}", ending_time.elapsed());
+        eprintln!("Process Ending Music Time: {:.2?}", ending_time.elapsed());
     }
 
     if ipc {
@@ -748,7 +748,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         output_audio(output_sfx_temp.path(), sample_rate, output_sfx)?;
         output_audio(output_ending_temp.path(), ending_music_sample_rate, output_ending_music)?;
 
-        info!("Output Audio Time: {:.2?}", output_audio_time.elapsed());
+        eprintln!("Output Audio Time: {:.2?}", output_audio_time.elapsed());
     }
 
     if ipc {
@@ -947,12 +947,12 @@ pub async fn main(cmd: bool) -> Result<()> {
         if config.hires { "mov" } else { "mp4" }
     );
 
-    info!(
+    eprintln!(
         "Preparing Render Time: {:.2?}",
         preparing_render_time.elapsed()
     );
 
-    info!("Command: {} {} {} {} {} {} {} {} {} {}",
+    eprintln!("Command: {} {} {} {} {} {} {} {} {} {}",
         &ffmpeg,
         args,
         "-i", output_sfx_temp.path().display(),
@@ -1005,6 +1005,8 @@ pub async fn main(cmd: bool) -> Result<()> {
     let frames_per_10 = (video_frames / 10).max(1);
     let frames = video_frames;
     let mut step_time = Instant::now();
+    let mut last_print = Instant::now();
+
     for frame in 0..frames {
         let now = (frame as f64) / fps;
         *my_time.borrow_mut() = now.max(0.);
@@ -1020,10 +1022,19 @@ pub async fn main(cmd: bool) -> Result<()> {
             mst.blit();
         }
 
-        if frame % frames_per_10 == 0 {
+        if !cmd && frame % frames_per_10 == 0 {
             let progress = round_to_step((frame as f64 / video_frames as f64 * 100.).ceil(), 10.0);
-            info!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
+            eprintln!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
                 progress, frame, video_frames, std::mem::replace(&mut step_time, Instant::now()).elapsed().as_secs_f32());
+        }
+
+        if cmd && last_print.elapsed() >= Duration::from_secs(1) {
+            let progress = (frame as f64 / video_frames as f64 * 100.).round();
+            last_print = Instant::now();
+            eprint!(
+                "\rprogress={:.0}% frame={}/{}",
+                progress, frame, video_frames
+            );
         }
 
         unsafe {
@@ -1054,10 +1065,16 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
     }
     drop(input);
-    info!("Render Time: {:.2?}", render_time.elapsed());
-    info!("Average FPS: {:.2}",frames as f64 / render_time.elapsed().as_secs_f64());
+    if cmd {
+        eprintln!(
+            "\rprogress=100% frame={}/{}",
+            video_frames, video_frames
+        );
+    }
+    eprintln!("Render Time: {:.2?}", render_time.elapsed());
+    eprintln!("Average FPS: {:.2}",frames as f64 / render_time.elapsed().as_secs_f64());
     proc.wait()?;
-    info!("Total Time: {:.2?}", loading_time.elapsed());
+    eprintln!("Total Time: {:.2?}", loading_time.elapsed());
     if ipc {
         send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
     }
