@@ -9,10 +9,10 @@ mpeg4 = false
 # customEncoder = ""
 fileNameFormat = "%date% %time% %info.name%_%level_prefix%"
 dynamicBitrateControl = true
-bitrate = "26"
+bitrate = "28"
 endingLength = 0.0
-renderStartTime = 0.0
-# renderEndTime = 
+playStartTime = 0.0
+# playEndTime = 
 renderLoading = true
 
 
@@ -34,7 +34,7 @@ noteScale = 1.0
 renderLine = true
 renderLineExtra = true
 renderNote = true
-doubleHint = true
+renderDoubleHint = true
 renderUiPause = true
 renderUiName = true
 renderUiLevel = true
@@ -60,7 +60,7 @@ maxParticles = 5000 # 5000 25000 200000
 forceLimit = true
 hires = false
 loudnessEqualization = false
-AudioMixOptimization = true
+audioMixOptimization = true
 
 volumeMusic = 0.5
 volumeSfx = 0.4
