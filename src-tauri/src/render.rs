@@ -375,7 +375,6 @@ fn round_to_step(v: f64, step: f64) -> f64 {
 
 pub async fn main(cmd: bool) -> Result<()> {
     let loading_time = Instant::now();
-    init_assets();
     let (mut fs, output_path, mut config, info) = if cmd {
         let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
@@ -442,6 +441,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         (fs, output_path, config, info)
     };
 
+    init_assets();
     use crate::ipc::client::*;
     let ipc = !cmd;
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
