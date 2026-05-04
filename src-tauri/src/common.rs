@@ -40,7 +40,12 @@ pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<
                 args_now += 2;
             }
             arg => {
-                if !arg.starts_with("--") && args_input.is_none() {
+                // Filter out `--render`, `--preview`, `--play`, and `--tweak_offset` so that they do not trigger the "Unknown argument" error message.
+                // Since `parse_args` is only used when `cmd` is true,
+                // there is no need to check if `arg` is one of "render" or "preview".
+                if matches!(arg, "--render" | "-r" | "--preview" | "-p" | "--tweak_offset" | "-t" | "--play") {
+                    // Skipping here
+                } else if !arg.starts_with("--") && args_input.is_none() {
                     args_input = Some(arg.to_string());
                 } else {
                     eprintln!("Unknown argument: {}", arg);
