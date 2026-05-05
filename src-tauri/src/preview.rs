@@ -127,7 +127,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
             let real_now_fps = (1. / (flash_end - frame_start)) as u32;
             let avg_fps = frame_times.iter().map(|(_, fps)| fps).sum::<u32>() / real_fps;
             let min_fps = frame_times.iter().map(|(_, fps)| fps).min().unwrap_or(&0);
-            info!("| AVG: {}|{} NOW: {}|{}, MIN: {}", real_fps, avg_fps, real_now_fps, now_fps, min_fps);
+            eprintln!("| AVG: {}|{} NOW: {}|{}, MIN: {}", real_fps, avg_fps, real_now_fps, now_fps, min_fps);
         }
     }
 
