@@ -1,17 +1,16 @@
 use crate::{
-    ASSET_PATH, common::{parse_args, read_config}, render::{RenderConfig, RenderParams, build_player}
+    ASSET_PATH, common::{read_config}, render::{build_player, generate_resource}
 };
 use anyhow::{Result};
 use macroquad::prelude::*;
 use phire::{
     config::{Config, Mods},
-    fs,
     scene::{show_error, GameMode, LoadingScene, NextScene, Scene},
     time::TimeManager,
     ui::{FontArc, TextPainter, Ui},
     Main,
 };
-use std::{cell::RefCell, collections::VecDeque, io::BufRead, ops::DerefMut, rc::Rc};
+use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 
 struct BaseScene(Option<NextScene>, bool, Rc<RefCell<Option<f32>>>);
 impl Scene for BaseScene {
@@ -52,52 +51,7 @@ impl Scene for BaseScene {
 }
 
 pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
-    let (fs, config, info) = if cmd {
-        let (args_input, _, args_config, args_info) = parse_args(std::env::args().collect());
-
-        let config: RenderConfig = if let Some(config) = &args_config {
-            match serde_json::from_str(config) {
-                Ok(config_json) => {
-                    info!("Using config from json");
-                    config_json
-                }
-                Err(error) => {
-                    info!("Failed to parse json. Using config from toml file");
-                    info!("{}", error);
-                    toml::from_str(&std::fs::read_to_string(config)?)?
-                }
-            }
-        } else {
-            info!("Using config from config.toml");
-            toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
-        };
-        let path = args_input.unwrap();
-
-        let mut fs = fs::fs_from_file(path.as_ref())?;
-        
-        let info = if let Some(info) = args_info {
-            serde_json::from_str(&info)?
-        } else {
-            fs::load_info(fs.deref_mut()).await?
-        };
-
-        (fs, config, info)
-    } else {
-        let mut stdin = std::io::stdin().lock();
-        let stdin = &mut stdin;
-
-        let mut line = String::new();
-        stdin.read_line(&mut line)?;
-        let params: RenderParams = serde_json::from_str(line.trim())?;
-        let path = params.path;
-
-        let fs = fs::fs_from_file(&path)?;
-
-        let config = params.config;
-        let info = params.info;
-
-        (fs, config, info)
-    };
+    let (fs, _, config, info) = generate_resource(cmd, false).await?;
 
     set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     let mut prpr_config: Config = config.to_config();

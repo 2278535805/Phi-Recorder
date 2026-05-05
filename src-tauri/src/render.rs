@@ -373,9 +373,8 @@ fn round_to_step(v: f64, step: f64) -> f64 {
     (v / step).round() * step
 }
 
-pub async fn main(cmd: bool) -> Result<()> {
-    let loading_time = Instant::now();
-    let (mut fs, output_path, mut config, info) = if cmd {
+pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(Box<dyn FileSystem + Send + Sync>, PathBuf, RenderConfig, ChartInfo)> {
+    if is_cli {
         let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
@@ -385,8 +384,8 @@ pub async fn main(cmd: bool) -> Result<()> {
                     config_json
                 }
                 Err(error) => {
-                    eprintln!("Failed to parse json. Using config from toml file");
                     eprintln!("{}", error);
+                    eprintln!("Failed to parse json. Using config from toml file");
                     toml::from_str(&std::fs::read_to_string(config)?)?
                 }
             }
@@ -394,6 +393,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             eprintln!("Using config from config.toml");
             toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
         };
+
         let path = args_input.unwrap();
 
         let mut fs = fs::fs_from_file(path.as_ref())?;
@@ -401,45 +401,58 @@ pub async fn main(cmd: bool) -> Result<()> {
         let info = if let Some(info) = args_info {
             serde_json::from_str(&info)?
         } else {
-            fs::load_info(fs.deref_mut()).await?
-        };
+                fs::load_info(fs.deref_mut()).await?
+            };
 
-        let file_name = generate_filename(&info, &config);
+        let output_path = if generate_output {
+            let file_name = generate_filename(&info, &config);
 
-        let output_path = if let Some(output_string) = args_output {
-            let output_dir = PathBuf::from(output_string);
-            if output_dir.extension().is_some() {
-                output_dir
+            let output_path = if let Some(output_string) = args_output {
+                let output_dir = PathBuf::from(output_string);
+                if output_dir.extension().is_some() {
+                    output_dir
+                } else {
+                    test_output_dir(output_dir.clone())?;
+                    output_dir.join(file_name)
+                }
             } else {
-                test_output_dir(output_dir.clone())?;
-                output_dir.join(file_name)
-            }
+                get_output_dir()?.join(file_name) 
+            };
+            eprintln!("output file: {:?}", output_path);
+            output_path
         } else {
-            get_output_dir()?.join(file_name) 
+            PathBuf::new()
         };
-        eprintln!("output file: {:?}", output_path);
 
-        (fs, output_path, config, info)
+        Ok((fs, output_path, config, info))
     } else {
         let mut stdin = std::io::stdin().lock();
-        let stdin = &mut stdin;
 
         let mut line = String::new();
         stdin.read_line(&mut line)?;
         let params: RenderParams = serde_json::from_str(line.trim())?;
         let path = params.path;
-
-        line.clear();
-        stdin.read_line(&mut line)?;
-        let output_path: PathBuf = serde_json::from_str(line.trim())?;
+        
+        let output_path = if generate_output {
+            line.clear();
+            stdin.read_line(&mut line)?;
+            serde_json::from_str::<PathBuf>(line.trim())?
+        } else {
+            PathBuf::new()
+        };
 
         let fs = fs::fs_from_file(&path)?;
 
         let config = params.config;
         let info = params.info;
 
-        (fs, output_path, config, info)
-    };
+        Ok((fs, output_path, config, info))
+    }
+}
+
+pub async fn main(cmd: bool) -> Result<()> {
+    let loading_time = Instant::now();
+    let (mut fs, output_path, mut config, info) = generate_resource(cmd, true).await?;
 
     set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     use crate::ipc::client::*;
