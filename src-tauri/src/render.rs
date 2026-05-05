@@ -11,7 +11,7 @@ use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::GLuint, prelude::*};
 use ndarray::{s, Array1};
 use phire::{
-    Main, config::{ChallengeModeColor, Config, Mods}, core::{HitSound, MSRenderTarget, Note, ResourcePack, init_assets, internal_id}, ext::{BLACK_TEXTURE, NotNanExt, SafeTexture}, fs::{self, FileSystem}, info::ChartInfo, scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene, game::WAIT_TIME}, time::TimeManager, ui::{FontArc, TextPainter}
+    Main, config::{ChallengeModeColor, Config, Mods}, core::{HitSound, MSRenderTarget, Note, ResourcePack, internal_id}, ext::{BLACK_TEXTURE, NotNanExt, SafeTexture}, fs::{self, FileSystem}, info::ChartInfo, scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene, game::WAIT_TIME}, time::TimeManager, ui::{FontArc, TextPainter}
 };
 use rustc_hash::FxHashMap;
 use sasa::AudioClip;
@@ -441,7 +441,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         (fs, output_path, config, info)
     };
 
-    init_assets();
+    set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     use crate::ipc::client::*;
     let ipc = !cmd;
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
