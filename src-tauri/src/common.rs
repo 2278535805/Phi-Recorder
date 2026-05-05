@@ -20,7 +20,7 @@ pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<
     let mut args_output = None;
     let mut args_config = None;
     let mut args_info = None;
-    let mut args_now = 1;
+    let mut args_now = 1; // the first argument is the binary file name
     while args_now < args.len() {
         match args[args_now].as_str() {
             "--input" | "-i" => {
@@ -40,10 +40,10 @@ pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<
                 args_now += 2;
             }
             arg => {
-                // Filter out `--render`, `--preview`, `--play`, and `--tweak_offset` so that they do not trigger the "Unknown argument" error message.
-                // Since `parse_args` is only used when `cmd` is true,
-                // there is no need to check if `arg` is one of "render" or "preview".
-                if matches!(arg, "--render" | "-r" | "--preview" | "-p" | "--tweak_offset" | "-t" | "--play") {
+                // Filter out instructive options so that they do not trigger the "Unknown argument" error message.
+                // Since `parse_args()` is only used when `cmd` is true,
+                // there is no need to check if `arg` is one of "render" or "preview" etc.
+                if args_now == 1 && matches!(arg, "--render" | "-r" | "--preview" | "-p" | "--tweak_offset" | "-t" | "--play") {
                     // Skipping here
                 } else if !arg.starts_with("--") && args_input.is_none() {
                     args_input = Some(arg.to_string());
