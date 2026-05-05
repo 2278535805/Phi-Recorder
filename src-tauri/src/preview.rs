@@ -1,11 +1,10 @@
 use crate::{
-    common::{parse_args, read_config}, render::{RenderConfig, RenderParams, build_player}
+    ASSET_PATH, common::{parse_args, read_config}, render::{RenderConfig, RenderParams, build_player}
 };
 use anyhow::{Result};
 use macroquad::prelude::*;
 use phire::{
     config::{Config, Mods},
-    core::init_assets,
     fs,
     scene::{show_error, GameMode, LoadingScene, NextScene, Scene},
     time::TimeManager,
@@ -53,7 +52,6 @@ impl Scene for BaseScene {
 }
 
 pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
-    init_assets();
     let (fs, config, info) = if cmd {
         let (args_input, _, args_config, args_info) = parse_args(std::env::args().collect());
 
@@ -101,6 +99,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         (fs, config, info)
     };
 
+    set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     let mut prpr_config: Config = config.to_config();
     if autoplay {
         prpr_config.mods |= Mods::AUTOPLAY;
