@@ -111,7 +111,8 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         }
 
         let frame_end = tm.real_time();
-        let now_fps = (1. / (frame_end - frame_start)) as u32;
+        let frame_end_during = frame_end - frame_start;
+        let now_fps = (1. / frame_end_during) as u32;
         frame_times.push_back((frame_end, now_fps));
         while frame_times.front().is_some_and(|it| frame_end - it.0 > 1.0) {
             frame_times.pop_front();
@@ -119,15 +120,16 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
 
         next_frame().await;
         let flash_end = tm.real_time();
+        let flash_end_during = flash_end - frame_start;
 
         let fps_now_sec = frame_start as u32;
         if fps_last_update_sec != fps_now_sec {
             fps_last_update_sec = fps_now_sec;
-            let real_fps = frame_times.len() as u32;
-            let real_now_fps = (1. / (flash_end - frame_start)) as u32;
-            let avg_fps = frame_times.iter().map(|(_, fps)| fps).sum::<u32>() / real_fps;
+            let real_avg_fps = frame_times.len() as u32;
+            let real_now_fps = (1. / flash_end_during) as u32;
+            let avg_fps = frame_times.iter().map(|(_, fps)| fps).sum::<u32>() / real_avg_fps;
             let min_fps = frame_times.iter().map(|(_, fps)| fps).min().unwrap_or(&0);
-            eprintln!("| AVG: {}|{} NOW: {}|{}, MIN: {}", real_fps, avg_fps, real_now_fps, now_fps, min_fps);
+            eprintln!("| AVG: {}|{} NOW: {}({:.4})|{}({:.4}), MIN: {}", real_avg_fps, avg_fps, real_now_fps, flash_end_during * 1000., now_fps, frame_end_during * 1000., min_fps);
         }
     }
 
