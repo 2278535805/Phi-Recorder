@@ -15,8 +15,7 @@ export interface ChartInfo {
   aspectRatio: number;
   forceAspectRatio: boolean;
   backgroundDim: number;
-  lineReferenceYAxis: boolean;
-  lineLength: number | null;
+  lineLength: number;
   offset: number;
   tip: string | null;
   tags: string[];
