@@ -512,20 +512,17 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                   <v-text-field type="text" class="" :label="t('info.illustration')" v-model="chartInfo.illustration"></v-text-field>
                 </v-col>
                 <v-col cols="3">
-                  <v-switch class="d-flex justify-center ml-n2" :label="t('info.line-reference-y-axis')" color="btn" v-model="chartInfo.lineReferenceYAxis"></v-switch>
+                  <v-text-field type="number" class="" :rules="[RULES.less10000]" :label="t('info.lineLength')"
+                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
                 </v-col>
               </v-row>
 
               <v-row class="my-n2">
-                <v-col cols="6">
+                <v-col cols="9">
                   <v-text-field type="text" class="" :label="t('info.intro')" v-model="chartInfo.intro"></v-text-field>
                 </v-col>
                 <v-col cols="3">
                   <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="chartInfo.holdParticleIntervalRatio" @update:modelValue="chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
-                </v-col>
-                <v-col cols="3">
-                  <v-text-field type="number" class="" :rules="[RULES.less10000]" :label="t('info.lineLength')"
-                  v-model="chartInfo.lineLength" @update:modelValue="chartInfo.lineLength = parseFloat($event)"></v-text-field>
                 </v-col>
               </v-row>
 
