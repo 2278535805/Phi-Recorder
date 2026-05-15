@@ -970,7 +970,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         args,
         "-i", output_sfx_temp.path().display(),
         "-i", output_music_temp.path().display(),
-        "-i", ASSET_PATH.get().unwrap().join("ending.ogg").display(),
+        "-i", output_ending_temp.path().display(),
         args2,
         output_path.display()
     );
