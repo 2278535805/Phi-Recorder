@@ -534,7 +534,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let chart_length_sfx = config.play_end_time.unwrap_or(music_length).min(music_length) - config.play_start_time - offset + WAIT_TIME;
     let video_length = chart_length + config.ending_length;
     let video_length_music = chart_length_music + config.ending_length; // chart_length needs to be divided by speed, but music needs to be rendered at the original speed, which is changed by ffmpeg
-    let video_frames = (video_length * fps as f64 + N as f64 - 1.).ceil() as u64;
+    let video_frames = (video_length * fps as f64).ceil() as u64;
 
     let encoder_list = if config.hevc {
         ENCODER_LIST_HEVC
@@ -1075,6 +1075,18 @@ pub async fn main(cmd: bool) -> Result<()> {
         if ipc {
             send(IPCEvent::Frame);
         }
+    }
+    unsafe {
+        let start = (frames as usize + 1) % N;
+        for i in 0..N - 1 {
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(start + i) % N]);
+            let src: *const u8 = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
+            if !src.is_null() {
+                input.write_all(&std::slice::from_raw_parts(src, byte_size))?;
+            }
+            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+        }
+        glDeleteBuffers(N as _, pbos.as_ptr());
     }
     drop(input);
     if cmd {
