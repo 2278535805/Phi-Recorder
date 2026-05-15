@@ -614,17 +614,17 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
         }
 
         {
-            info!("Not found Chartlist.txt, start reading folder");
             use regex::Regex;
-            let onely_num = Regex::new(r"^\d+$").unwrap();
+            static ONLY_NUM: OnceLock<Regex> = OnceLock::new();
+            let only_num = ONLY_NUM.get_or_init(|| Regex::new(r"^\d+$").unwrap());
             let mut folders = Vec::new();
             let path = dir.join("Resources");
             for entry in std::fs::read_dir(path)? {
                 let entry = entry?;
                 let path = entry.path();
                 if path.is_dir() {
-                    if let Some(folder_name) = path.file_name() {
-                        if onely_num.is_match(folder_name.to_str().unwrap_or("")) {
+                    if let Some(folder_name) = path.file_name().and_then(|n| n.to_str()) {
+                        if only_num.is_match(folder_name) {
                             folders.push(path);
                         }
                     }
@@ -659,26 +659,11 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
                         continue;
                     };
                     *(match key {
-                        "Name" => {
-                            info!("name: {}", value.trim());
-                            &mut name
-                        },
-                        "Path" => {
-                            info!("id: {}", value.trim());
-                            &mut id
-                        },
-                        "Chart" => {
-                            info!("chart: {}", value.trim());
-                            &mut chart
-                        },
-                        "Picture" => {
-                            info!("illustration: {}", value.trim());
-                            &mut illustration
-                        },
-                        "Charter" => {
-                            info!("charter: {}", value.trim());
-                            &mut charter
-                        },
+                        "Name" => &mut name,
+                        "Path" => &mut id,
+                        "Chart" => &mut chart,
+                        "Picture" => &mut illustration,
+                        "Charter" => &mut charter,
                         _ => continue,
                     }) = Some(value.trim().to_owned());
                 }
@@ -686,9 +671,7 @@ fn get_rpe_charts() -> Result<Option<Vec<RPEChartInfo>>, InvokeError> {
             }
         }
 
-        results.sort_by_key(|it| it.modified);
-        results.reverse();
-        info!("found chart successfully");
+        results.sort_by(|a, b| b.modified.cmp(&a.modified));
 
         Ok(Some(results))
     })()
