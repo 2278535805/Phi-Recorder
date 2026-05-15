@@ -8,7 +8,7 @@ use crate::{
     ASSET_PATH
 };
 use anyhow::{bail, Context, Result};
-use macroquad::{miniquad::gl::GLuint, prelude::*};
+use macroquad::{miniquad::gl::*, prelude::*};
 use ndarray::{s, Array1};
 use phire::{
     Main, config::{ChallengeModeColor, Config, Mods}, core::{HitSound, MSRenderTarget, Note, ResourcePack, internal_id}, ext::{BLACK_TEXTURE, NotNanExt, SafeTexture}, fs::{self, FileSystem}, info::ChartInfo, scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene, game::WAIT_TIME}, time::TimeManager, ui::{FontArc, TextPainter}
@@ -1051,7 +1051,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
 
         unsafe {
-            use miniquad::gl::*;
             glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
             glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
             glReadPixels(
@@ -1063,7 +1062,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 GL_UNSIGNED_BYTE,
                 std::ptr::null_mut(),
             );
-            if frame >= N as u64 {
+            if frame >= N as u64 - 1 {
                 glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[(frame + 1) as usize % N]);
                 let src: *const u8 = glMapBuffer(GL_PIXEL_PACK_BUFFER, 0x88B8 /* GL_READ_ONLY */);
                 if !src.is_null() {
