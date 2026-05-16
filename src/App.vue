@@ -10,7 +10,7 @@ import { gt } from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
 import * as os from "@tauri-apps/plugin-os"
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { useStorage } from '@vueuse/core';
+import { clamp, useStorage } from '@vueuse/core';
 
 const onLoaded = ref<() => void>();
 const component = ref();
@@ -74,15 +74,20 @@ document.addEventListener('contextmenu', (e) => {
 
   if (count >= 7) {
     count = 0;
-    const rand = Math.floor(Math.random() * 101);
+    let rand = Math.floor(Math.random() * 102); // 0 - 101
     toast(`${t('luck-value')}: ${rand}`, 'info');
-    const zoomValue = 300 - rand * 2;
-    const blurValue = (100 - rand) * 0.02;
-    const hueValue = 270 - rand * 2.70;
-    const saturateValue = rand;
-    const contrastValue = 150 - rand * 0.5;
+    rand = clamp(rand, 0, 100);
+    let zoomValue = 300 - rand * 2;
+    let blurValue = (100 - rand) * 0.02;
+    let hueValue = 270 - rand * 2.70;
+    let saturateValue = rand;
+    let contrastValue = 150 - rand * 0.5;
     document.body.style.zoom = `${zoomValue}%`;
     document.body.style.filter = `blur(${blurValue}px) hue-rotate(${hueValue}deg) saturate(${saturateValue}%) contrast(${contrastValue}%`;
+    
+    if (rand === 0) {
+      document.body.classList.add('shake-distort');
+    }
   }
 }, { passive: true });
 
@@ -623,5 +628,23 @@ html {
 
 html::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes shake-distort {
+  0% { transform: translate(-10px, 4px) skew(5deg, 3deg); }
+  10% { transform: translate(12px, -6px) skew(-6deg, -4deg); }
+  20% { transform: translate(-8px, 5px) skew(4deg, 2deg); }
+  30% { transform: translate(10px, -3px) skew(-5deg, -3deg); }
+  40% { transform: translate(-12px, 6px) skew(6deg, 4deg); }
+  50% { transform: translate(8px, -5px) skew(-4deg, -2deg); }
+  60% { transform: translate(-10px, 3px) skew(5deg, 3deg); }
+  70% { transform: translate(12px, -6px) skew(-6deg, -4deg); }
+  80% { transform: translate(-8px, 4px) skew(4deg, 2deg); }
+  90% { transform: translate(10px, -5px) skew(-5deg, -3deg); }
+  100% { transform: translate(-10px, 4px) skew(5deg, 3deg); }
+}
+
+.shake-distort {
+  animation: shake-distort 1s ease-in-out infinite;
 }
 </style>
