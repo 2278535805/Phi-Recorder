@@ -137,6 +137,17 @@ const aggressiveParticle = ref(DEFAULT_RENDER_CONFIG.aggressiveParticle);
 const roman = ref(DEFAULT_RENDER_CONFIG.roman);
 const chinese = ref(DEFAULT_RENDER_CONFIG.chinese);
 
+watch(aggressiveChart, (chart) => {
+  if (!chart) {
+    aggressiveNote.value = false;
+    aggressiveParticle.value = false;
+  }
+});
+watch([aggressiveNote, aggressiveParticle], ([note, particle]) => {
+  if (note || particle) {
+    aggressiveChart.value = true;
+  }
+});
 
 function parseResolution(resolution: string): [number, number] | null {
   let parts = resolution.split(/[xX]/g);

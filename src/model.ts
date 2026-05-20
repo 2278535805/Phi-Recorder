@@ -167,7 +167,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   dynamicBitrateControl: true,
   bitrate: '28',
 
-  aggressiveChart: false,
+  aggressiveChart: true,
   aggressiveNote: false,
   aggressiveParticle: false,
   challengeColor: 'rainbow',

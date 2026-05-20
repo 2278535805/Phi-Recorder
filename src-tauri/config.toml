@@ -47,7 +47,7 @@ renderBgDim = true
 particle = true
 renderExtra = true
 
-aggressiveChart = false
+aggressiveChart = true
 aggressiveNote = false
 aggressiveParticle = false
 
