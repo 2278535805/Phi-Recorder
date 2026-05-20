@@ -67,7 +67,6 @@ pub struct RenderConfig {
     pub speed: f32,
     pub volume_music: f32,
     pub volume_sfx: f32,
-    pub compression_ratio: f32,
     pub force_limit: bool,
     pub limit_threshold: f32,
     pub loudness_equalization: bool,
@@ -192,7 +191,6 @@ impl Default for RenderConfig {
             speed: 1.0,
             volume_music: 0.5,
             volume_sfx: 0.4,
-            compression_ratio: 20.,
             force_limit: true,
             limit_threshold: 0.5,
             loudness_equalization: false,
@@ -912,11 +910,6 @@ pub async fn main(cmd: bool) -> Result<()> {
         format!(
             ",alimiter=limit={}:level=false:attack=0.1:release=1",
             config.limit_threshold
-        )
-    } else if config.compression_ratio > 1. {
-        format!(
-            ",acompressor=threshold=0dB:ratio={}:attack=0.01:release=0.01",
-            config.compression_ratio
         )
     } else {
         String::new()

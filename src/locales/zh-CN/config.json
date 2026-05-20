@@ -50,6 +50,7 @@
     "disable-effect": "禁用特效",
     "speed": "速度",
     "volume-music": "音乐音量",
+    "volume-music-ratio": "音乐音量倍率",
     "volume-sfx": "音效音量",
     "compression-ratio": "音效压缩比",
     "limit-threshold": "音效限幅",

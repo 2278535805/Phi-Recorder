@@ -112,7 +112,6 @@ export interface RenderConfig {
   speed: number;
   volumeMusic: number;
   volumeSfx: number;
-  compressionRatio: number;
   watermark: string;
   roman: boolean;
   chinese: boolean;
@@ -183,7 +182,6 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   speed: 1,
   volumeMusic: 0.5,
   volumeSfx: 0.4,
-  compressionRatio: 20.0,
   forceLimit: true,
   limitThreshold: 0.5,
   loudnessEqualization: false,

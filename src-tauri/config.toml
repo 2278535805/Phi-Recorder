@@ -57,15 +57,14 @@ combo = "AUTOPLAY"
 maxParticles = 5000 # 5000 25000 200000
 
 # Audio 音频
-forceLimit = true
 hires = false
 loudnessEqualization = false
 audioMixOptimization = true
 
 volumeMusic = 0.5
 volumeSfx = 0.4
-limitThreshold = 0.5 # if forceLimit
-compressionRatio = 20.0 # else
+forceLimit = true
+limitThreshold = 0.5
 
 
 # Other 其他
