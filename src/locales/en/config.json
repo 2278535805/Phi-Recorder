@@ -93,6 +93,7 @@
     "render-bg": "Background",
     "render-bg-dim": "Background Dim",
     "preserve-framebuffer": "Preserve Framebuffer",
+    "preserve-framebuffer-tips": "Requires anti-aliasing enabled, background disabled",
     "render-hit": "Hit Effects",
     "render-extra": "Extra (Shader)",
     "render-double-hint": "Double Hit Hint",
