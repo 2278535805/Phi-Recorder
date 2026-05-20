@@ -5,7 +5,7 @@ use anyhow::{Result};
 use macroquad::prelude::*;
 use phire::{
     config::{Config, Mods},
-    scene::{show_error, GameMode, LoadingScene, NextScene, Scene},
+    scene::{show_error, DIALOG, GameMode, LoadingScene, NextScene, Scene},
     time::TimeManager,
     ui::{FontArc, TextPainter, Ui},
     Main,
@@ -46,6 +46,13 @@ impl Scene for BaseScene {
         Ok(())
     }
     fn next_scene(&mut self, _tm: &mut TimeManager) -> phire::scene::NextScene {
+        if self.1 {
+            let has_dialog = DIALOG.with(|it| it.borrow().is_some());
+            if !has_dialog {
+                return NextScene::Exit;
+            }
+            return NextScene::None;
+        }
         self.0.take().unwrap_or_default()
     }
 }
