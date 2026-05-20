@@ -441,9 +441,14 @@ html {
 }
 
 .log-card-bg {
-  animation: blurFade 0.3s ease forwards;
+  backdrop-filter: blur(0px);
+  transition: backdrop-filter 0.15s ease-out;
 }
 
+.log-card-bg.v-overlay--active {
+  backdrop-filter: blur(20px);
+  animation: blurFade 0.2s ease-out;
+}
 
 .log-card-window {
   border-radius: 16px !important;
@@ -486,12 +491,14 @@ html {
   justify-content: center;
   align-items: center;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  backdrop-filter: blur(0px);
+  transition: opacity 0.3s ease, backdrop-filter 0.3s ease-out;
   cursor: pointer;
 }
 
 .overlay:hover {
   opacity: 1;
+  backdrop-filter: blur(10px);
 }
 
 .icon {
