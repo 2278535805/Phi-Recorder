@@ -9,6 +9,7 @@ export interface ChartInfo {
   chart: string;
   music: string;
   illustration: string;
+  unlockVideo: string;
 
   previewStart: number;
   previewEnd: number | null;
