@@ -177,7 +177,7 @@ impl Default for RenderConfig {
             custom_encoder: None,
             dynamic_bitrate_control: true,
             bitrate: "28".to_string(),
-            aggressive_chart: false,
+            aggressive_chart: true,
             aggressive_note: false,
             aggressive_particle: false,
             challenge_color: ChallengeModeColor::Rainbow,
