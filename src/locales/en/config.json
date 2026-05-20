@@ -51,6 +51,7 @@
     "disable-effect": "Disable Effect",
     "speed": "Speed",
     "volume-music": "Music Volume",
+    "volume-music-ratio": "Music Volume Ratio",
     "volume-sfx": "SFX Volume",
     "compression-ratio": "SFX Comp Ratio",
     "limit-threshold": "SFX Limiter",

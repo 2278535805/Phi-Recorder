@@ -61,7 +61,6 @@ const speedList = ['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75', '2.0'];
 const speed = ref(String(DEFAULT_RENDER_CONFIG.speed));
 const volumeMusic = ref(DEFAULT_RENDER_CONFIG.volumeMusic);
 const volumeSfx = ref(DEFAULT_RENDER_CONFIG.volumeSfx);
-const compressionRatio = ref(DEFAULT_RENDER_CONFIG.compressionRatio);
 const limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold);
 const forceLimit = ref(DEFAULT_RENDER_CONFIG.forceLimit);
 const hires = ref(DEFAULT_RENDER_CONFIG.hires);
@@ -78,8 +77,8 @@ watch(() => limitThreshold.value, (limit) => {
     volumeSfx.value = limitThreshold.value;
   }
 })
-watch(() => loudnessEqualization.value, (loudnessEq) => {
-  if (loudnessEq) {
+watch(() => loudnessEqualization.value, (value) => {
+  if (value && volumeMusic.value < 0.6) {
     volumeMusic.value = 1.0;
   }
 })
@@ -309,7 +308,6 @@ async function buildConfig(): Promise<RenderConfig | null> {
     speed: parseFloat(speed.value),
     volumeMusic: volumeMusic.value,
     volumeSfx: volumeSfx.value,
-    compressionRatio: compressionRatio.value,
     limitThreshold: limitThreshold.value,
     allGood: judgeMode.value === t('judge-modes').split(',')[1] ? true : false,
     allBad: false,
@@ -431,7 +429,6 @@ function applyConfig(config: RenderConfig) {
   speed.value = String(config.speed);
   volumeMusic.value = config.volumeMusic;
   volumeSfx.value = config.volumeSfx;
-  compressionRatio.value = config.compressionRatio;
   limitThreshold.value = config.limitThreshold;
   watermark.value = config.watermark;
   combo.value = config.combo;
@@ -894,9 +891,6 @@ function setConfigForQuality() {
       <StickyLabel :title="t('title.audio')"></StickyLabel>
       <v-row no-gutters class="mx-n2 mt-2">
         <v-col cols="3" class="px-2">
-          <TipSwitch :label="t('force-limit')" color="btn" v-model="forceLimit"></TipSwitch>
-        </v-col>
-        <v-col cols="3" class="px-2">
           <TipSwitch :label="t('hires')" color="btn" v-model="hires"></TipSwitch>
         </v-col>
         <v-col cols="3" class="px-2">
@@ -905,17 +899,21 @@ function setConfigForQuality() {
         <v-col cols="3" class="px-2">
           <TipSwitch :label="t('audio-mix-optimization')" color="btn" v-model="audioMixOptimization"></TipSwitch>
         </v-col>
+        <v-col cols="3" class="px-2">
+          <TipSwitch :label="t('force-limit')" color="btn" v-model="forceLimit"></TipSwitch>
+        </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center px-6">
         <v-col cols="4">
-          <v-slider :label="t('volume-music')" color="btn" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeMusic"> </v-slider>
+          <v-slider v-if="!loudnessEqualization" :label="t('volume-music')" color="btn" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeMusic"> </v-slider>
+          <v-slider v-if="loudnessEqualization" :label="t('volume-music-ratio')" color="btn" thumb-label="always" :min="0.6" :max="2" :step="0.01" v-model="volumeMusic"> </v-slider>
         </v-col>
         <v-col cols="4">
           <v-slider :label="t('volume-sfx')" color="btn" thumb-label="always" :min="0" :max="2" :step="0.01" v-model="volumeSfx"> </v-slider>
         </v-col>
         <v-col cols="4">
-          <v-slider v-if="!forceLimit" :label="t('compression-ratio')" color="btn" thumb-label="always" :min="1" :max="20" :step="1" v-model="compressionRatio"> </v-slider>
           <v-slider v-if="forceLimit" :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.01" v-model="limitThreshold"> </v-slider>
+          <v-slider v-if="!forceLimit" disabled :label="t('limit-threshold')" color="btn" thumb-label="always" :min="0.1" :max="2" :step="0.01" v-model="limitThreshold"> </v-slider>
         </v-col>
       </v-row>
       <v-row no-gutters class="mt-2" />

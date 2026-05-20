@@ -90,7 +90,6 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
             "speed"                      => config.speed.to_string(),
             "volume_music"               => config.volume_music.to_string(),
             "volume_sfx"                 => config.volume_sfx.to_string(),
-            "compression_ratio"          => config.compression_ratio.to_string(),
             "force_limit"                => config.force_limit.to_string(),
             "limit_threshold"            => config.limit_threshold.to_string(),
             "loudness_equalization"      => config.loudness_equalization.to_string(),
