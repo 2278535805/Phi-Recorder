@@ -67,17 +67,17 @@ const hires = ref(DEFAULT_RENDER_CONFIG.hires);
 const loudnessEqualization = ref(DEFAULT_RENDER_CONFIG.loudnessEqualization);
 const audioMixOptimization = ref(DEFAULT_RENDER_CONFIG.audioMixOptimization);
 
-watch(() => volumeSfx.value, (volume) => {
+watch(volumeSfx, (volume) => {
   if (forceLimit.value && volume > limitThreshold.value) {
     limitThreshold.value = volumeSfx.value;
   }
 })
-watch(() => limitThreshold.value, (limit) => {
+watch(limitThreshold, (limit) => {
   if (forceLimit.value && limit < volumeSfx.value) {
     volumeSfx.value = limitThreshold.value;
   }
 })
-watch(() => loudnessEqualization.value, (value) => {
+watch(loudnessEqualization, (value) => {
   if (value && volumeMusic.value < 0.6) {
     volumeMusic.value = 1.0;
   }
