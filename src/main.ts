@@ -99,6 +99,14 @@ localStorage.setItem('theme', savedTheme);
 const vuetify = createVuetify({
   components,
   directives,
+  defaults: {
+    VCombobox: {
+      transition: 'fade-transition',
+    },
+    VAutocomplete: {
+      transition: 'fade-transition',
+    },
+  },
   theme: {
     defaultTheme: savedTheme,
     themes: {
