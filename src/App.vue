@@ -14,6 +14,7 @@ import { clamp, useStorage } from '@vueuse/core';
 
 const onLoaded = ref<() => void>();
 const component = ref();
+const appVersion = await getVersion();
 
 watch(component, (comp) => {
   if (comp && onLoaded.value) onLoaded.value();
@@ -241,7 +242,7 @@ async function checkForUpdates(dialog = true): Promise<boolean> {
     const latestVersion = release.tag_name;
     //const latestVersion = '0.4.0';
     console.log(latestVersion);
-    const updates = gt(latestVersion, await getVersion());
+    const updates = gt(latestVersion, appVersion);
     if (updates) {
       return true;
     }
@@ -271,7 +272,7 @@ onMounted(async () => {
     <v-sonner position="top-center" />
     <v-app-bar style="box-shadow: 0px -18px 20px 0px rgba(0, 0, 0, 0.5) !important" class="blur-background" height="60">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
-      <div class="gradient-text" style="position: absolute; pointer-events: none;">
+      <div class="gradient-text" style="position: relative; pointer-events: none;">
         <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
       </div>
       <div @click="routerPush('about')" style="position: absolute; left: 152px; cursor: pointer;" v-if="update">
