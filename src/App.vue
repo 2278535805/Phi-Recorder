@@ -437,6 +437,10 @@ html {
 
 .v-list {
   background-color: rgba(var(--v-theme-primary), 0.0) !important; /* This color cannot be apply in tag editor */
+  /* backdrop-filter: blur(20px); */
+}
+
+.v-overlay__content {
   backdrop-filter: blur(20px);
 }
 
