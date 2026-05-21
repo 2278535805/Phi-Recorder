@@ -88,6 +88,7 @@ document.addEventListener('contextmenu', (e) => {
     
     if (rand === 0) {
       document.body.classList.add('shake-distort');
+      open(t('rick-roll'));
     }
   }
 }, { passive: true });
