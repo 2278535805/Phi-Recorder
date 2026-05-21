@@ -272,8 +272,11 @@ onMounted(async () => {
     <v-sonner position="top-center" />
     <v-app-bar style="box-shadow: 0px -18px 20px 0px rgba(0, 0, 0, 0.5) !important" class="blur-background" height="60">
       <!--<v-app-bar-nav-icon @click="toggleNav" class="mx-1"></v-app-bar-nav-icon>-->
+      <img src="./assets/icon.png" alt="icon" style="height: 28px; vertical-align: middle; margin: 0 -4px 0px 15px;" />
       <div class="gradient-text" style="position: relative; pointer-events: none;">
-        <v-app-bar-title class="mx-5 text-glow">Phi Recorder</v-app-bar-title>
+        <v-app-bar-title class="mx-5 text-glow">
+          Phi Recorder
+        </v-app-bar-title>
       </div>
       <div @click="routerPush('about')" style="position: absolute; left: 152px; cursor: pointer;" v-if="update">
           <i class="mdi mdi-cloud-download"></i>&nbsp;&nbsp;{{t('update-available')}}
@@ -311,6 +314,9 @@ onMounted(async () => {
           class="list-item-hover-rail"
         ></v-list-item>
       </v-list>
+      <div class="version-label" style="position: absolute; left: 28px; bottom: 0px; transform: translateX(-50%); pointer-events: none;">
+        {{ appVersion }}
+      </div>
     </v-navigation-drawer>
 
     <v-main class="d-flex justify-center">
@@ -395,6 +401,12 @@ html {
   /* IE and Edge */
   user-select: none;
   /* Non-prefixed version, currently supported by Chrome, Opera, and Edge */
+}
+
+.version-label {
+  font-size: 0.5rem;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .v-input__details { /* 不让details占据布局空间 */
