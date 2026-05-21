@@ -141,6 +141,16 @@ const aggressiveNote = ref(DEFAULT_RENDER_CONFIG.aggressiveNote);
 const aggressiveParticle = ref(DEFAULT_RENDER_CONFIG.aggressiveParticle);
 const roman = ref(DEFAULT_RENDER_CONFIG.roman);
 const chinese = ref(DEFAULT_RENDER_CONFIG.chinese);
+watch(roman, (value) => {
+  if (value) {
+    chinese.value = false;
+  }
+});
+watch(chinese, (value) => {
+  if (value) {
+    roman.value = false;
+  }
+});
 
 watch(aggressiveChart, (chart) => {
   if (!chart) {
