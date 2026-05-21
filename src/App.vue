@@ -490,7 +490,7 @@ html {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(var(--v-theme-overlay), 0.3);
+  background: rgba(var(--v-theme-overlay), 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
