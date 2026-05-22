@@ -263,6 +263,7 @@ onMounted(() => {
 }
 
 .github-btn {
+  width: 9em;
   background: rgba(147, 147, 147, 0.2);
   padding: 0px 24px;
   font-weight: 600;
