@@ -42,6 +42,7 @@
         "intro": "Introduction",
         "hold-partial-cover": "Hold Tail Cover",
         "hold-partial-cover-tip": "Default at the head, enable to cover at the tail",
+        "negative-length-hold": "Allow Negative Length Hold",
         "note-uniform-scale": "Note Uniform Scale",
         "note-uniform-scale-tip": "Default only scales X axis, enable to scale Note uniformly",
         "score-total": "Total Score",
