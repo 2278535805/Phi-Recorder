@@ -571,29 +571,38 @@ function filterText(
 
           <v-row>
             <v-col cols="3">
-              <v-text-field type="text" class="" :label="t('info.tip')" v-model="charts[chartInfoSelect]!.chartInfo.tip"></v-text-field>
+              <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000]"
+              v-model="charts[chartInfoSelect]!.chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect]!.chartInfo.scoreTotal = parseInt($event)"></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" color="btn" v-model="charts[chartInfoSelect]!.chartInfo.backgroundDim"> </v-slider>
             </v-col>
             <v-col cols="3">
               <v-text-field type="number" class="" :rules="[RULES.positive]" :label="t('info.hold-particle-interval-ratio')" v-model="charts[chartInfoSelect]!.chartInfo.holdParticleIntervalRatio" @update:modelValue="charts[chartInfoSelect]!.chartInfo.holdParticleIntervalRatio = parseFloat($event)"></v-text-field>
             </v-col>
-            <v-col cols="6">
-              <v-slider class="my-3" :label="t('info.backgroundDim')" thumb-label="always" :min="0" :max="1" :step="0.05" v-model="charts[chartInfoSelect]!.chartInfo.backgroundDim"> </v-slider>
+          </v-row>
+
+          <v-row>
+            <v-col cols="9">
+              <v-text-field type="text" class="" :label="t('info.tip')" v-model="charts[chartInfoSelect]!.chartInfo.tip"></v-text-field>
+            </v-col>
+            <v-col cols="3">
+              <v-switch class="d-flex justify-center ml-n2" v-model="charts[chartInfoSelect]!.chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" color="btn" :title="t('info.hold-partial-cover-tip')"></v-switch>
             </v-col>
           </v-row>
 
           <v-row>
             <v-col cols="3">
-              <v-text-field :label="t('info.score-total')" type="number" :rules="[RULES.less4000000000]"
-              v-model="charts[chartInfoSelect]!.chartInfo.scoreTotal" @update:modelValue="charts[chartInfoSelect]!.chartInfo.scoreTotal = parseInt($event)"></v-text-field>
-            </v-col>
-            <v-col cols="3">
               <v-switch class="d-flex justify-center ml-n2" :label="t('info.force-aspect-ratio')" color="btn" v-model="charts[chartInfoSelect]!.chartInfo.forceAspectRatio"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="" v-model="charts[chartInfoSelect]!.chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+              <v-switch class="d-flex justify-center ml-n2" v-model="charts[chartInfoSelect]!.chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" color="btn" :title="t('info.note-uniform-scale-tip')"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="" v-model="charts[chartInfoSelect]!.chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
+              <v-switch class="d-flex justify-center ml-n2" :label="t('info.fold-animation')" color="btn" v-model="charts[chartInfoSelect]!.chartInfo.foldAnimation"></v-switch>
+            </v-col>
+            <v-col cols="3">
+              <v-switch class="d-flex justify-center ml-n2" v-model="charts[chartInfoSelect]!.chartInfo.negativeLengthHold" :label="t('info.negative-length-hold')" color="btn"></v-switch>
             </v-col>
           </v-row>
 
