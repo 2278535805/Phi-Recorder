@@ -42,6 +42,7 @@
         "intro": "简介",
         "hold-partial-cover": "Hold 尾部遮罩",
         "hold-partial-cover-tip": "默认在头部, 开启后在尾部",
+        "negative-length-hold": "允许负长度 Hold",
         "note-uniform-scale": "Note 等比缩放",
         "note-uniform-scale-tip": "默认仅缩放 X 轴, 开启后 Note 等比缩放",
         "score-total": "总分",

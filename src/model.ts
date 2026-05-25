@@ -24,6 +24,7 @@ export interface ChartInfo {
   intro: string,
 
   holdPartialCover: boolean;
+  negativeLengthHold: boolean;
   noteUniformScale: boolean;
   scoreTotal: number;
   holdParticleIntervalRatio: number;

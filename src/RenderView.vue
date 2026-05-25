@@ -419,20 +419,16 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
           </v-row>
 
           <v-row no-gutters class="mt-1 my-2 pt-2">
-            <v-col cols="12" sm="4">
+            <v-col cols="3">
               <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.charter')" v-model="chartInfo.charter"></v-textarea>
             </v-col>
-            <v-col cols="12" sm="4">
+            <v-col cols="3">
               <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.composer')" v-model="chartInfo.composer"></v-textarea>
             </v-col>
-            <v-col cols="12" sm="4">
+            <v-col cols="3">
               <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.illustrator')" v-model="chartInfo.illustrator"></v-textarea>
             </v-col>
-          </v-row>
-
-          <p class="text-caption mx-3" v-t="'info.aspectRatio'"></p>
-          <v-row no-gutters class="mt-1 my-2 align-center">
-            <v-col cols="4">
+            <v-col cols="3">
               <div class="mx-2 d-flex flex-column">
                 <div class="d-flex flex-row align-center justify-center">
                   <v-text-field type="number" class="mr-2" :rules="[RULES.positive]" :label="t('width')" v-model="aspectWidth"></v-text-field>
@@ -441,8 +437,14 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
                 </div>
               </div>
             </v-col>
-            <v-col cols="8">
+          </v-row>
+
+          <v-row no-gutters class="mt-1 my-2 align-center">
+            <v-col cols="9">
               <v-textarea rows="1" auto-grow class="mx-2" :label="t('info.tip')" :placeholder="t('info.tip-placeholder')" v-model="chartInfo.tip"></v-textarea>
+            </v-col>
+            <v-col cols="3">
+              <v-switch class="ml-4 mr-2" v-model="chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
             </v-col>
           </v-row>
 
@@ -451,10 +453,10 @@ watch(() => chartInfo.value?.tags ?? [], (newVal, oldVal) => {
               <v-slider :label="t('info.backgroundDim')" thumb-label="always" color="btn" :min="0" :max="1" :step="0.01" v-model="chartInfo.backgroundDim"></v-slider>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
+              <v-switch class="ml-4 mr-2" v-model="chartInfo.holdPartialCover" :label="t('info.hold-partial-cover')" :title="t('info.hold-partial-cover-tip')"></v-switch>
             </v-col>
             <v-col cols="3">
-              <v-switch class="mx-2" v-model="chartInfo.noteUniformScale" :label="t('info.note-uniform-scale')" :title="t('info.note-uniform-scale-tip')"></v-switch>
+              <v-switch class="mx-2" v-model="chartInfo.negativeLengthHold" :label="t('info.negative-length-hold')"></v-switch>
             </v-col>
           </v-row>
 
