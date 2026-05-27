@@ -429,10 +429,10 @@ async fn remove_task(queue: State<'_, TaskQueue>, index: u32, remove_file: bool)
     wrap_async(async move {
         if let Some(task) = queue.tasks().await.get(index as usize) {
             info!("Task #{}(index: {}) deleted", task.id, index);
-            queue.remove(index).await;
             if remove_file && task.output.exists() && task.output.is_file() {
                 tokio::fs::remove_file(&task.output).await?;
             }
+            queue.remove(index).await;
         }
         Ok(())
     }).await

@@ -163,13 +163,14 @@ function fromBackIndex(length: number, indexFromBack: number): number | null {
     if (indexFromBack >= length) return null;
     return length - indexFromBack - 1;
 }
-function removeTask(index: number, removeFile: boolean = false) {
+async function removeTask(index: number, removeFile: boolean = false) {
   removeDialog.value = false;
   let realIndex = fromBackIndex(tasks.value!.length, index);
-  invoke('remove_task', { index: realIndex, removeFile: removeFile })
+  await invoke('remove_task', { index: realIndex, removeFile: removeFile })
     .catch((e) => {
       toastError(e);
     });
+  await updateList();
 }
 
 function dragOutput(event: DragEvent, task: Task) {
@@ -317,7 +318,7 @@ function dragOutput(event: DragEvent, task: Task) {
         <v-card-actions class="justify-end">
           <v-btn class="hover-scale" variant="text" @click="removeDialog = false" v-t="'cancel'"></v-btn>
           <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex)" v-t="'remove-task-only'"></v-btn>
-          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex)" v-t="'remove-task-and-file'"></v-btn>
+          <v-btn class="hover-scale" variant="text" @click="removeTask(removeTaskIndex, true)" v-t="'remove-task-and-file'"></v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
