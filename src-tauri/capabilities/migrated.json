@@ -48,6 +48,7 @@
     "core:window:allow-toggle-maximize",
     "core:window:allow-internal-toggle-maximize",
     "core:window:allow-start-dragging",
+    "core:window:allow-set-progress-bar",
     "drag:default",
     "opener:default",
     {
