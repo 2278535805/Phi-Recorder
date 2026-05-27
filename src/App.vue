@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useI18n } from 'vue-i18n';
@@ -47,10 +47,10 @@ export default {
 
 <script setup lang="ts">
 import { fetch } from '@tauri-apps/plugin-http';
-import type { Release, Assets } from './model';
+import type { Release, Assets, Task } from './model';
 import { open } from '@tauri-apps/plugin-shell';
 import { useTheme } from 'vuetify';
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { getCurrentWindow, ProgressBarStatus } from '@tauri-apps/api/window';
 import { toast } from './common';
 const appWindow = getCurrentWindow();
 const theme = useTheme();
@@ -264,6 +264,42 @@ onMounted(async () => {
   if (await checkForUpdates()) {
     icons.value.about = 'mdi-cloud-download';
     update.value = true;
+  }
+
+  startTaskbarProgressUpdate();
+});
+
+let taskbarProgressTimer: number | null = null;
+
+function startTaskbarProgressUpdate() {
+  taskbarProgressTimer = window.setInterval(async () => {
+    try {
+      const tasks = await invoke<Task[]>('get_tasks');
+      if (!tasks) return;
+      const activeTask = tasks.find(t => ['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(t.status.type));
+      if (activeTask && (activeTask.status.type === 'rendering' || activeTask.status.type === 'mixing_sfx')) {
+        await appWindow.setProgressBar({
+          progress: Math.round(activeTask.status.progress * 100),
+          status: ProgressBarStatus.Normal
+        });
+      } else if (activeTask && (activeTask.status.type === 'loading' || activeTask.status.type === 'mixing')) {
+        await appWindow.setProgressBar({
+          status: ProgressBarStatus.Indeterminate
+        });
+      } else {
+        await appWindow.setProgressBar({
+          status: ProgressBarStatus.None
+        });
+      }
+    } catch (e) {
+        console.error('Error updating taskbar progress:', e);
+    }
+  }, 1400);
+}
+
+onUnmounted(() => {
+  if (taskbarProgressTimer) {
+    clearInterval(taskbarProgressTimer);
   }
 });
 </script>
