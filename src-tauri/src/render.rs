@@ -469,6 +469,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let pause_requested = Arc::new(AtomicBool::new(false));
     if !cmd {
         let pause_requested = Arc::clone(&pause_requested);
+        let render_thread = std::thread::current();
         std::thread::spawn(move || {
             let stdin = std::io::stdin();
             let mut line = String::new();
@@ -478,7 +479,10 @@ pub async fn main(cmd: bool) -> Result<()> {
                     Ok(0) => break,
                     Ok(_) => match line.trim() {
                         "pause" => pause_requested.store(true, AtomicOrdering::SeqCst),
-                        "resume" => pause_requested.store(false, AtomicOrdering::SeqCst),
+                        "resume" => {
+                            pause_requested.store(false, AtomicOrdering::SeqCst);
+                            render_thread.unpark();
+                        }
                         _ => {}
                     },
                     Err(_) => break,
@@ -1042,7 +1046,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             if ipc { send(IPCEvent::Paused); }
             let pause_begin = Instant::now();
             while pause_requested.load(AtomicOrdering::SeqCst) {
-                std::thread::sleep(Duration::from_millis(700));
+                std::thread::park();
             }
             pause_duration += pause_begin.elapsed();
             step_time = Instant::now();
