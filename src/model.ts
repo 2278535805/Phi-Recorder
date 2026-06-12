@@ -55,6 +55,10 @@ export type TaskStatus =
       estimate: number;
     }
   | {
+      type: 'paused';
+      progress: number;
+    }
+  | {
       type: 'done';
       duration: number;
       output: string;

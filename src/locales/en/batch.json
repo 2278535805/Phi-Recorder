@@ -24,6 +24,7 @@
         "mixing": "Mixing",
         "done": "Completed",
         "canceled": "Canceled",
+        "paused": "Paused",
         "failed": "Failed",
         "output": "Output",
         "show-output": "Show Output",

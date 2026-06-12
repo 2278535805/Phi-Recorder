@@ -24,6 +24,7 @@
         "mixing": "混音中",
         "done": "完成",
         "canceled": "取消",
+        "paused": "已暂停",
         "failed": "失败",
         "output": "输出",
         "show-output": "查看输出",

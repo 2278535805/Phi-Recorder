@@ -5,6 +5,7 @@
         "loading": "加载中…",
         "mixing": "混音中…",
         "rendering": "渲染中 ({ progress }%), { fps } FPS, 预计 { estimate } 结束",
+        "paused": "已暂停 ({ progress }%)",
         "done": "已完成，耗时 { duration }",
         "canceled": "已取消",
         "failed": "失败"
