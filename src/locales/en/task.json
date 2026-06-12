@@ -5,6 +5,7 @@
         "loading": "Loading…",
         "mixing": "Mixing…",
         "rendering": "Rendering ({ progress }%), { fps } FPS, estimated to end { estimate }",
+        "paused": "Paused ({ progress }%)",
         "done": "Done, took { duration }",
         "canceled": "Canceled",
         "failed": "Failed"

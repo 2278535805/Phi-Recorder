@@ -8,6 +8,8 @@ pub enum IPCEvent {
     Sfx,
     RenderFrame(u64),
     Frame,
+    Paused,
+    Resumed,
     Done(f64),
 }
 

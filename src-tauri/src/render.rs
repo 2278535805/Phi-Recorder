@@ -25,6 +25,7 @@ use std::{
     process::{Command, Stdio},
     rc::Rc,
     sync::atomic::{AtomicBool, Ordering as AtomicOrdering},
+    sync::Arc,
     time::{Duration, Instant},
 };
 use std::{ffi::OsStr, fmt::Write as _};
@@ -464,6 +465,27 @@ pub async fn main(cmd: bool) -> Result<()> {
     let Some(ffmpeg) = find_ffmpeg()? else {
         bail!("FFmpeg not found")
     };
+
+    let pause_requested = Arc::new(AtomicBool::new(false));
+    if !cmd {
+        let pause_requested = Arc::clone(&pause_requested);
+        std::thread::spawn(move || {
+            let stdin = std::io::stdin();
+            let mut line = String::new();
+            loop {
+                line.clear();
+                match stdin.read_line(&mut line) {
+                    Ok(0) => break,
+                    Ok(_) => match line.trim() {
+                        "pause" => pause_requested.store(true, AtomicOrdering::SeqCst),
+                        "resume" => pause_requested.store(false, AtomicOrdering::SeqCst),
+                        _ => {}
+                    },
+                    Err(_) => break,
+                }
+            }
+        });
+    }
 
     let (chart, format) = GameScene::load_chart(fs.deref_mut(), &info, &prpr_config)
         .await
@@ -1012,8 +1034,22 @@ pub async fn main(cmd: bool) -> Result<()> {
     let frames = video_frames;
     let mut step_time = Instant::now();
     let mut last_print = Instant::now();
+    let mut pause_duration = Duration::ZERO;
 
     for frame in 0..frames {
+        if !cmd && pause_requested.load(AtomicOrdering::SeqCst) {
+            eprintln!("Render paused");
+            if ipc { send(IPCEvent::Paused); }
+            let pause_begin = Instant::now();
+            while pause_requested.load(AtomicOrdering::SeqCst) {
+                std::thread::sleep(Duration::from_millis(700));
+            }
+            pause_duration += pause_begin.elapsed();
+            step_time = Instant::now();
+            eprintln!("Render resumed");
+            if ipc { send(IPCEvent::Resumed); }
+        }
+
         let now = (frame as f64) / fps;
         *my_time.borrow_mut() = now.max(0.);
         gl.quad_gl.render_pass(Some(mst.output().render_pass));
@@ -1088,8 +1124,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             video_frames, video_frames
         );
     }
-    eprintln!("Render Time: {:.2?}", render_time.elapsed());
-    eprintln!("Average FPS: {:.2}",frames as f64 / render_time.elapsed().as_secs_f64());
+    let actual_render_time = render_time.elapsed().saturating_sub(pause_duration);
+    eprintln!("Render Time: {:.2?}", actual_render_time);
+    eprintln!("Average FPS: {:.2}", frames as f64 / actual_render_time.as_secs_f64());
     proc.wait()?;
     eprintln!("Total Time: {:.2?}", loading_time.elapsed());
     if ipc {

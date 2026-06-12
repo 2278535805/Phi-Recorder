@@ -44,6 +44,9 @@ pub enum TaskStatus {
         fps: u64,
         estimate: f64,
     },
+    Paused {
+        progress: f64,
+    },
     Done {
         duration: f64,
         output: String,
@@ -208,6 +211,7 @@ pub struct Task {
     params: RenderParams,
     status: Mutex<TaskStatus>,
     request_cancel: AtomicBool,
+    request_pause: AtomicBool,
 }
 
 impl Task {
@@ -230,6 +234,7 @@ impl Task {
             params,
             status: Mutex::new(TaskStatus::Pending),
             request_cancel: AtomicBool::default(),
+            request_pause: AtomicBool::default(),
         })
     }
 
@@ -272,6 +277,9 @@ impl Task {
         let mut frame_times = VecDeque::new();
         let mut last_update_fps_sec: u32 = 0;
         let mut last_fps: usize = 0;
+        let mut pause_written = false;
+        let mut total_pause_duration = Duration::ZERO;
+        let mut pause_start: Option<Instant> = None;
 
         let config = read_config()?;
 
@@ -323,7 +331,7 @@ impl Task {
                         },
                         IPCEvent::Frame => {
                             frame_count += 1;
-                            let cur = start.elapsed().as_secs_f64();
+                            let cur = start.elapsed().as_secs_f64() - total_pause_duration.as_secs_f64() - pause_start.map_or(0.0, |s| s.elapsed().as_secs_f64());
                             let sec = cur as u32;
                             frame_times.push_back(cur);
                             while frame_times.front().is_some_and(|it| cur - *it > 1.0) {
@@ -333,12 +341,35 @@ impl Task {
                                 last_fps = frame_times.len();
                                 last_update_fps_sec = sec;
                             }
-                            let estimate = total_frame.saturating_sub(frame_count).max(1) as f64 / last_fps as f64;
+                            let estimate = total_frame.saturating_sub(frame_count).max(1) as f64 / last_fps.max(1) as f64;
                             *self.status.lock().await = TaskStatus::Rendering {
                                 progress: frame_count as f64 / total_frame as f64,
                                 fps: last_fps as u64,
                                 estimate,
                             };
+                        },
+                        IPCEvent::Paused => {
+                            let mut status = self.status.lock().await;
+                            if let TaskStatus::Rendering { progress, .. } = *status {
+                                *status = TaskStatus::Paused { progress };
+                            }
+                            pause_start = Some(Instant::now());
+                        },
+                        IPCEvent::Resumed => {
+                            if let Some(s) = pause_start.take() {
+                                total_pause_duration += s.elapsed();
+                            }
+                            frame_times.clear();
+                            last_fps = 0;
+                            last_update_fps_sec = 0;
+                            let mut status = self.status.lock().await;
+                            if let TaskStatus::Paused { progress } = *status {
+                                *status = TaskStatus::Rendering {
+                                    progress,
+                                    fps: 0,
+                                    estimate: 0.0,
+                                };
+                            }
                         },
                         IPCEvent::Done(duration) => {
                             info!("Task #{} completed in {}", self.id, format_duration(Duration::from_secs_f64(duration)));
@@ -354,16 +385,35 @@ impl Task {
                 },
 
                 _ = async {
-                    while !self.request_cancel.load(Ordering::Relaxed) {
+                    loop {
+                        let cancel = self.request_cancel.load(Ordering::Relaxed);
+                        let pause = self.request_pause.load(Ordering::Relaxed);
+                        if cancel || (pause && !pause_written) || (!pause && pause_written) {
+                            break;
+                        }
                         sleep(Duration::from_millis(50)).await;
                     }
                 } => {
-                    info!("Task #{} cancelled", self.id);
-                    child.kill().await?;
-                    *self.status.lock().await = TaskStatus::Canceled {
-                        output: output_stderr,
-                    };
-                    return Ok(());
+                    if self.request_cancel.load(Ordering::Relaxed) {
+                        info!("Task #{} cancelled", self.id);
+                        child.kill().await?;
+                        *self.status.lock().await = TaskStatus::Canceled {
+                            output: output_stderr,
+                        };
+                        return Ok(());
+                    }
+                    if self.request_pause.load(Ordering::Relaxed) && !pause_written {
+                        info!("Task #{} paused", self.id);
+                        let _ = stdin.write_all(b"pause\n").await;
+                        let _ = stdin.flush().await;
+                        pause_written = true;
+                    }
+                    if !self.request_pause.load(Ordering::Relaxed) && pause_written {
+                        info!("Task #{} resumed", self.id);
+                        let _ = stdin.write_all(b"resume\n").await;
+                        let _ = stdin.flush().await;
+                        pause_written = false;
+                    }
                 },
             }
         }
@@ -385,6 +435,14 @@ impl Task {
 
     pub fn cancel(&self) {
         self.request_cancel.store(true, Ordering::Relaxed);
+    }
+
+    pub fn pause(&self) {
+        self.request_pause.store(true, Ordering::Relaxed);
+    }
+
+    pub fn resume(&self) {
+        self.request_pause.store(false, Ordering::Relaxed);
     }
 
     pub async fn to_view(&self) -> TaskView {
@@ -490,6 +548,14 @@ impl TaskQueue {
 
     pub async fn cancel(&self, id: u32) {
         self.tasks.lock().await[id as usize].cancel();
+    }
+
+    pub async fn pause(&self, id: u32) {
+        self.tasks.lock().await[id as usize].pause();
+    }
+
+    pub async fn resume(&self, id: u32) {
+        self.tasks.lock().await[id as usize].resume();
     }
 
     pub async fn remove(&self, id: u32) {

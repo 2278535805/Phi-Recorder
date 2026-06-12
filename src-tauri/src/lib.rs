@@ -126,6 +126,8 @@ pub fn run() -> Result<()> {
             post_render,
             get_tasks,
             cancel_task,
+            pause_task,
+            resume_task,
             clear_tasks,
             remove_task,
             get_respacks,
@@ -415,6 +417,18 @@ async fn get_tasks(queue: State<'_, TaskQueue>) -> Result<Vec<TaskView>, InvokeE
 #[tauri::command]
 async fn cancel_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
     queue.cancel(id).await;
+    Ok(())
+}
+
+#[tauri::command]
+async fn pause_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
+    queue.pause(id).await;
+    Ok(())
+}
+
+#[tauri::command]
+async fn resume_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
+    queue.resume(id).await;
     Ok(())
 }
 

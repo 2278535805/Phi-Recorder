@@ -68,7 +68,11 @@ function describeStatus(status: TaskStatus): string {
       return t('status.rendering', {
         progress: (status.progress * 100).toFixed(2),
         fps: status.fps,
-        estimate: status.estimate ? formatDuration(status.estimate) : '',// status.estimate ? moment.duration(Math.ceil(status.estimate), 'seconds').humanize(true, { ss: 0, s: 120, m: 120, h: 120 })
+        estimate: status.estimate ? formatDuration(status.estimate) : '',
+      });
+    case 'paused':
+      return t('status.paused', {
+        progress: (status.progress * 100).toFixed(2),
       });
     case 'done':
       return t('status.done', {
@@ -207,9 +211,9 @@ function dragOutput(event: DragEvent, task: Task) {
               <v-card-subtitle class="mt-n2 select" :title="item.path" style="cursor: pointer;" @click="showInFolder(item.path)">{{ item.path }}</v-card-subtitle>
               <div class="w-100 pa-4 pb-3 pr-2">
                 <p class="mb-2 text-medium-emphasis">{{ describeStatus(item.status) }}</p>
-                <div v-if="['loading', 'mixing', 'mixing_sfx', 'rendering'].includes(item.status.type)" class="pb-2">
+                <div v-if="['loading', 'mixing', 'mixing_sfx', 'rendering', 'paused'].includes(item.status.type)" class="pb-2">
                   <v-progress-linear
-                    v-if="item.status.type === 'rendering' || item.status.type === 'mixing_sfx'"
+                    v-if="item.status.type === 'rendering' || item.status.type === 'mixing_sfx' || item.status.type === 'paused'"
                     :model-value="item.status.progress * 100"
                     rounded
                   ></v-progress-linear>
@@ -220,7 +224,21 @@ function dragOutput(event: DragEvent, task: Task) {
                   ></v-progress-linear>
                 </div>
                 <div v-else style="height: 12px"></div>
-                <div v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering'].includes(item.status.type)" class="d-flex justify-end">
+                <div v-if="['pending', 'loading', 'mixing', 'mixing_sfx', 'rendering', 'paused'].includes(item.status.type)" class="d-flex justify-end">
+                  <v-btn
+                    v-if="item.status.type === 'rendering'"
+                    class="hover-scale btn"
+                    variant="text"
+                    @click="invoke('pause_task', { id: item.id })"
+                    :title="t('pause')"
+                    icon="mdi-pause"></v-btn>
+                  <v-btn
+                    v-if="item.status.type === 'paused'"
+                    class="hover-scale btn"
+                    variant="text"
+                    @click="invoke('resume_task', { id: item.id })"
+                    :title="t('resume')"
+                    icon="mdi-play"></v-btn>
                   <v-btn class="hover-scale btn"
                     variant="text"
                     @click="invoke('cancel_task', { id: item.id })"

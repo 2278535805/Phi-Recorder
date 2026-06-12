@@ -15,6 +15,8 @@
     "ffmpeg-not-found-detail": "请下载 ffmpeg, Windows 用户一般只需下载 \"ffmpeg-master-latest-win64-gpl.zip\"\n将 bin 文件夹内的所有文件放置在程序文件夹内或配置 ffmpeg 环境变量",
     "confirm": "确定",
     "cancel": "取消",
+    "pause": "暂停",
+    "resume": "继续",
     "close": "关闭",
     "off": "关",
     "luck-value": "人品值",
