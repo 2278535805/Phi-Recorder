@@ -966,7 +966,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     );
 
     let args2 = format!(
-        "-c:a {} -c:v {} -movflags +faststart -pix_fmt yuv420p {} {} -filter_complex {} -map 0:v:0 -map [a] -vf vflip -f {}",
+        "-c:a {} -c:v {} -movflags +faststart -pix_fmt yuv420p {} {} -filter_complex {} -map 0:v:0 -map [a] -f {}",
         if config.hires {
             "pcm_f32le"
         } else {
