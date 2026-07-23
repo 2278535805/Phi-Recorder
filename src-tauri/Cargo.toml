@@ -24,7 +24,7 @@ serde = { version = "1.0.217", features = ["derive"] }
 tauri = { version = "2.9.4", features = [ "protocol-asset", "tray-icon"] }
 
 anyhow = { version = "1.0.95", features = ["backtrace"] }
-macroquad = { git = "https://github.com/2278535805/prpr-macroquad", default-features = false }
+macroquad = { git = "https://github.com/2278535805/macroquad", default-features = false }
 phire = { git = "https://github.com/2278535805/phire", package = "phire", default-features = false, features = ["log", "video"] }
 # phire = { path = "../../phire/phire", default-features = false, features = ["log", "video"] }
 

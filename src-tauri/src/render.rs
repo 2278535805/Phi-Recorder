@@ -1056,7 +1056,7 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         let now = (frame as f64) / fps;
         *my_time.borrow_mut() = now.max(0.);
-        gl.quad_gl.render_pass(Some(mst.output().render_pass));
+        gl.quad_gl.render_pass(Some(mst.output().render_pass.raw_miniquad_id()));
         main.update()?;
         main.render(&mut painter)?;
         if *my_time.borrow() <= LoadingScene::TOTAL_TIME && config.render_loading {
