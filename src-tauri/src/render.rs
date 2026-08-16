@@ -1006,6 +1006,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut input = proc.stdin.take().unwrap();
 
     // let byte_size = (vw * vh * 4) as usize; // RGBA
+    let yuvh = vh * 3 / 8; // (w * h * 3 / 2) / (w * 4) = h * 3 / 8
     let byte_size = (vw * vh * 3 / 2) as usize; // YUV420
 
     let yuv_target = render_target(vw, vh);
@@ -1036,7 +1037,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
             glBufferData(
                 GL_PIXEL_PACK_BUFFER,
-                (vw as u64 * vh as u64 * 4) as _,
+                byte_size as _,
                 std::ptr::null(),
                 GL_STREAM_READ,
             );
@@ -1118,7 +1119,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 0,
                 0,
                 vw as _,
-                vh as _,
+                yuvh as _,
                 GL_RGBA,
                 GL_UNSIGNED_BYTE,
                 std::ptr::null_mut(),
