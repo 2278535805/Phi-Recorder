@@ -894,13 +894,13 @@ pub async fn main(cmd: bool) -> Result<()> {
         "-b:v"
     };
 
-    let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo".to_owned();
+    let mut args = "-probesize 50M -y -f rawvideo -c:v rawvideo -color_range full".to_owned();
     if ffmpeg_encoder == encoder_list[0] {
         args += " -hwaccel_output_format cuda";
     }
     write!(
         &mut args,
-        " -s {vw}x{vh} -r {fps} -pix_fmt rgba -thread_queue_size 1024 -i pipe:0"
+        " -s {vw}x{vh} -r {fps} -pix_fmt yuv420p -thread_queue_size 1024 -i pipe:0"
     )?;
 
     let mut ffmpeg_audio_filter_music = if config.loudness_equalization { format!(
@@ -1005,7 +1005,27 @@ pub async fn main(cmd: bool) -> Result<()> {
         .with_context(|| tl!("run-ffmpeg-failed"))?;
     let mut input = proc.stdin.take().unwrap();
 
-    let byte_size = vw as usize * vh as usize * 4;
+    // let byte_size = (vw * vh * 4) as usize; // RGBA
+    let byte_size = (vw * vh * 3 / 2) as usize; // YUV420
+
+    let yuv_target = render_target(vw, vh);
+    let yuv_material = load_material(
+        ShaderSource::Glsl {
+            vertex: YUV_VERTEX_SHADER,
+            fragment: YUV_FRAGMENT_SHADER,
+        },
+        MaterialParams {
+            uniforms: vec![
+                UniformDesc::new("screenSize", UniformType::Int2),
+                UniformDesc::new("uFlipY", UniformType::Int1),
+            ],
+            textures: vec!["screenTexture".to_string()],
+            ..Default::default()
+        },
+    )
+    .with_context(|| "failed to load YUV shader")?;
+    yuv_material.set_uniform("screenSize", [vw as i32, vh as i32]);
+    yuv_material.set_uniform("uFlipY", 1i32);
 
     const N: usize = 5; // Buffer Size
     let mut pbos: [GLuint; N] = [0; N];
@@ -1064,6 +1084,18 @@ pub async fn main(cmd: bool) -> Result<()> {
             mst.blit();
         }
 
+        // GPU RGB -> YUV420
+        yuv_material.set_texture("screenTexture", mst.output().texture);
+        set_camera(&Camera2D {
+            zoom: vec2(1., 1.),
+            render_target: Some(yuv_target.clone()),
+            ..Default::default()
+        });
+        gl_use_material(&yuv_material);
+        draw_rectangle(-1., -1., 2., 2., WHITE);
+        gl_use_default_material();
+        gl.flush();
+
         if !cmd && frame % frames_per_10 == 0 {
             let progress = round_to_step((frame as f64 / video_frames as f64 * 100.).ceil(), 10.0);
             eprintln!("Render progress: {:.0}% {}/{} Time elapsed: {:.2}s",
@@ -1080,7 +1112,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
 
         unsafe {
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(mst.output()));
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, internal_id(yuv_target.clone()));
             glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[frame as usize % N]);
             glReadPixels(
                 0,
@@ -1134,3 +1166,104 @@ pub async fn main(cmd: bool) -> Result<()> {
     }
     Ok(())
 }
+
+const YUV_VERTEX_SHADER: &str = r#"
+#version 130
+
+in vec3 position;
+in vec2 texcoord;
+
+uniform mat4 Projection;
+uniform mat4 Model;
+
+out vec2 fragTexCoord;
+
+void main() {
+    gl_Position = Projection * Model * vec4(position, 1.0);
+    fragTexCoord = texcoord;
+}
+"#;
+
+const YUV_FRAGMENT_SHADER: &str = r#"
+#version 130
+
+// precision highp float;
+
+in vec2 fragTexCoord;
+
+uniform sampler2D screenTexture;
+uniform ivec2 screenSize;
+uniform bool uFlipY;
+
+out vec4 outColor;
+
+vec3 getPixel(int x, int y) {
+    return texelFetch(screenTexture, ivec2(x, y), 0).xyz;
+}
+
+float getY(int x, int y) {
+    vec3 pixel = getPixel(x, y);
+    return dot(pixel, vec3(0.299, 0.587, 0.114));
+}
+
+float getU(int x, int y) {
+    vec3 pixel = (
+        getPixel(x, y)
+        + getPixel(x, y + 1)
+        + getPixel(x + 1, y)
+        + getPixel(x + 1, y + 1)
+    ) * 0.25;
+    return dot(pixel, vec3(-0.168736, -0.331264, 0.5)) + 0.5;
+}
+
+float getV(int x, int y) {
+    vec3 pixel = (
+        getPixel(x, y)
+        + getPixel(x, y + 1)
+        + getPixel(x + 1, y)
+        + getPixel(x + 1, y + 1)
+    ) * 0.25;
+    return dot(pixel, vec3(0.5, -0.418688, -0.081312)) + 0.5;
+}
+
+float getYI(int index) {
+    return getY(index % screenSize.x, index / screenSize.x);
+}
+
+float getUI(int index) {
+    return getU((index % (screenSize.x / 2)) * 2, index / (screenSize.x / 2) * 2);
+}
+
+float getVI(int index) {
+    return getV((index % (screenSize.x / 2)) * 2, index / (screenSize.x / 2) * 2);
+}
+
+void main() {
+    int w = screenSize.x; int h = screenSize.y;
+    ivec2 curr_pos = ivec2(fragTexCoord * vec2(screenSize));
+    if (!uFlipY) curr_pos.y = h - curr_pos.y - 1;
+    int byte_index = (int(curr_pos.x) + int(curr_pos.y) * w) * 4;
+
+    int y_bytes = w * h; int uv_bytes = y_bytes / 4;
+
+    if (byte_index < y_bytes) {
+        int pixel_index = byte_index;
+        outColor = vec4(
+            getYI(pixel_index), getYI(pixel_index + 1),
+            getYI(pixel_index + 2), getYI(pixel_index + 3)
+        );
+    } else if (byte_index < y_bytes + uv_bytes) {
+        int pixel_index = byte_index - y_bytes;
+        outColor = vec4(
+            getUI(pixel_index), getUI(pixel_index + 1),
+            getUI(pixel_index + 2), getUI(pixel_index + 3)
+        );
+    } else if (byte_index < y_bytes + uv_bytes * 2) {
+        int pixel_index = byte_index - y_bytes - uv_bytes;
+        outColor = vec4(
+            getVI(pixel_index), getVI(pixel_index + 1),
+            getVI(pixel_index + 2), getVI(pixel_index + 3)
+        );
+    } else outColor = vec4(0);
+}
+"#;
