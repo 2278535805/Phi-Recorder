@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
     cmp::Ordering,
-    io::{BufRead, BufWriter, Write},
+    io::{BufRead, Write},
     ops::DerefMut,
     path::{Path, PathBuf},
     process::{Command, Stdio},
@@ -772,11 +772,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                     std::mem::size_of_val(slice),
                 )
             };
-            let mut writer = BufWriter::with_capacity(64 * 1024, input);
-            writer.write_all(byte_slice)?;
-            writer.flush()?;
-
-            drop(writer);
+            input.write_all(byte_slice)?;
             proc.wait()?;
             Ok(())
         };
