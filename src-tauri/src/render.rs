@@ -1009,7 +1009,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let yuvh = vh * 3 / 8; // (w * h * 3 / 2) / (w * 4) = h * 3 / 8
     let byte_size = (vw * vh * 3 / 2) as usize; // YUV420
 
-    let yuv_target = render_target(vw, vh);
+    let yuv_target = render_target(vw, yuvh);
     let yuv_material = load_material(
         ShaderSource::Glsl {
             vertex: YUV_VERTEX_SHADER,
@@ -1018,6 +1018,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         MaterialParams {
             uniforms: vec![
                 UniformDesc::new("screenSize", UniformType::Int2),
+                UniformDesc::new("targetSize", UniformType::Int2),
                 UniformDesc::new("uFlipY", UniformType::Int1),
             ],
             textures: vec!["screenTexture".to_string()],
@@ -1026,6 +1027,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     )
     .with_context(|| "failed to load YUV shader")?;
     yuv_material.set_uniform("screenSize", [vw as i32, vh as i32]);
+    yuv_material.set_uniform("targetSize", [vw as i32, yuvh as i32]);
     yuv_material.set_uniform("uFlipY", 1i32);
 
     const N: usize = 5; // Buffer Size
@@ -1174,13 +1176,10 @@ const YUV_VERTEX_SHADER: &str = r#"
 in vec3 position;
 in vec2 texcoord;
 
-uniform mat4 Projection;
-uniform mat4 Model;
-
 out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = Projection * Model * vec4(position, 1.0);
+    gl_Position = vec4(position, 1.0);
     fragTexCoord = texcoord;
 }
 "#;
@@ -1194,6 +1193,7 @@ in vec2 fragTexCoord;
 
 uniform sampler2D screenTexture;
 uniform ivec2 screenSize;
+uniform ivec2 targetSize;
 uniform bool uFlipY;
 
 out vec4 outColor;
@@ -1241,7 +1241,7 @@ float getVI(int index) {
 
 void main() {
     int w = screenSize.x; int h = screenSize.y;
-    ivec2 curr_pos = ivec2(fragTexCoord * vec2(screenSize));
+    ivec2 curr_pos = ivec2(fragTexCoord * vec2(targetSize));
     if (!uFlipY) curr_pos.y = h - curr_pos.y - 1;
     int byte_index = (int(curr_pos.x) + int(curr_pos.y) * w) * 4;
 
