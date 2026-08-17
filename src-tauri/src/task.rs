@@ -270,13 +270,10 @@ impl Task {
         let mut stderr_lines = BufReader::new(stderr).lines();
         let mut output_stderr = String::new();
         let mut total_mixing: u64 = 0;
-        let mut mixing_count: u64 = 0;
         let mut total_frame: u64 = 0;
-        let mut frame_count: u64 = 0;
         let start = Instant::now();
-        let mut frame_times = VecDeque::new();
-        let mut last_update_fps_sec: u32 = 0;
-        let mut last_fps: usize = 0;
+        let mut frame_samples: VecDeque<(f64, u64)> = VecDeque::new();
+        let mut last_fps: u64 = 0;
         let mut pause_written = false;
         let mut total_pause_duration = Duration::ZERO;
         let mut pause_start: Option<Instant> = None;
@@ -315,10 +312,9 @@ impl Task {
                             };
                             total_mixing = total;
                         },
-                        IPCEvent::Sfx => {
-                            mixing_count += 1;
+                        IPCEvent::Sfx(completed) => {
                             *self.status.lock().await = TaskStatus::MixingSfx {
-                                progress: mixing_count as f64 / total_mixing as f64,
+                                progress: completed as f64 / total_mixing as f64,
                             };
                         },
                         IPCEvent::RenderFrame(total) => {
@@ -329,22 +325,22 @@ impl Task {
                             };
                             total_frame = total;
                         },
-                        IPCEvent::Frame => {
-                            frame_count += 1;
+                        IPCEvent::Frame(completed) => {
                             let cur = start.elapsed().as_secs_f64() - total_pause_duration.as_secs_f64() - pause_start.map_or(0.0, |s| s.elapsed().as_secs_f64());
-                            let sec = cur as u32;
-                            frame_times.push_back(cur);
-                            while frame_times.front().is_some_and(|it| cur - *it > 1.0) {
-                                frame_times.pop_front();
+                            frame_samples.push_back((cur, completed));
+                            while frame_samples.len() > 2 && frame_samples.get(1).is_some_and(|(time, _)| cur - *time > 1.0) {
+                                frame_samples.pop_front();
                             }
-                            if last_update_fps_sec != sec {
-                                last_fps = frame_times.len();
-                                last_update_fps_sec = sec;
+                            if let Some(&(sample_time, sample_frame)) = frame_samples.front() {
+                                let elapsed = cur - sample_time;
+                                if elapsed > 0.0 {
+                                    last_fps = ((completed - sample_frame) as f64 / elapsed).round() as u64;
+                                }
                             }
-                            let estimate = total_frame.saturating_sub(frame_count).max(1) as f64 / last_fps.max(1) as f64;
+                            let estimate = total_frame.saturating_sub(completed).max(1) as f64 / last_fps.max(1) as f64;
                             *self.status.lock().await = TaskStatus::Rendering {
-                                progress: frame_count as f64 / total_frame as f64,
-                                fps: last_fps as u64,
+                                progress: completed as f64 / total_frame as f64,
+                                fps: last_fps,
                                 estimate,
                             };
                         },
@@ -359,9 +355,8 @@ impl Task {
                             if let Some(s) = pause_start.take() {
                                 total_pause_duration += s.elapsed();
                             }
-                            frame_times.clear();
+                            frame_samples.clear();
                             last_fps = 0;
-                            last_update_fps_sec = 0;
                             let mut status = self.status.lock().await;
                             if let TaskStatus::Paused { progress } = *status {
                                 *status = TaskStatus::Rendering {
@@ -372,8 +367,15 @@ impl Task {
                             }
                         },
                         IPCEvent::Done(duration) => {
-                            info!("Task #{} completed in {}", self.id, format_duration(Duration::from_secs_f64(duration)));
                             child.wait().await?;
+                            while let Some(line) = stderr_lines.next_line().await? {
+                                if config.print_stderr {
+                                    eprintln!("{}", line);
+                                }
+                                output_stderr.push_str(&line);
+                                output_stderr.push('\n');
+                            }
+                            info!("Task #{} completed in {}", self.id, format_duration(Duration::from_secs_f64(duration)));
 
                             *self.status.lock().await = TaskStatus::Done {
                                 duration,

@@ -695,10 +695,13 @@ pub async fn main(cmd: bool) -> Result<()> {
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
-            for (pos, sfx) in kept_sfx_list {
+            let mut last_sfx_progress = Instant::now();
+            for (index, (pos, sfx)) in kept_sfx_list.into_iter().enumerate() {
                 place_sfx(pos, sfx);
-                if ipc {
-                    send(IPCEvent::Sfx);
+                let completed = index as u64 + 1;
+                if ipc && (last_sfx_progress.elapsed() >= Duration::from_millis(350) || completed == num as u64) {
+                    send(IPCEvent::Sfx(completed));
+                    last_sfx_progress = Instant::now();
                 }
             }
 
@@ -714,10 +717,13 @@ pub async fn main(cmd: bool) -> Result<()> {
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
-            for (pos, sfx) in sfx_list {
+            let mut last_sfx_progress = Instant::now();
+            for (index, (pos, sfx)) in sfx_list.into_iter().enumerate() {
                 place_sfx(pos, sfx);
-                if ipc {
-                    send(IPCEvent::Sfx);
+                let completed = index as u64 + 1;
+                if ipc && (last_sfx_progress.elapsed() >= Duration::from_millis(350) || completed == num as u64) {
+                    send(IPCEvent::Sfx(completed));
+                    last_sfx_progress = Instant::now();
                 }
             }
 
@@ -1057,6 +1063,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let frames = video_frames;
     let mut step_time = Instant::now();
     let mut last_print = Instant::now();
+    let mut last_frame_progress = Instant::now();
     let mut pause_duration = Duration::ZERO;
 
     for frame in 0..frames {
@@ -1136,8 +1143,10 @@ pub async fn main(cmd: bool) -> Result<()> {
             }
         }
 
-        if ipc {
-            send(IPCEvent::Frame);
+        let completed = frame + 1;
+        if ipc && (last_frame_progress.elapsed() >= Duration::from_millis(350) || completed == frames) {
+            send(IPCEvent::Frame(completed));
+            last_frame_progress = Instant::now();
         }
     }
     unsafe {
@@ -1163,9 +1172,9 @@ pub async fn main(cmd: bool) -> Result<()> {
     eprintln!("Render Time: {:.2?}", actual_render_time);
     eprintln!("Average FPS: {:.2}", frames as f64 / actual_render_time.as_secs_f64());
     proc.wait()?;
-    eprintln!("Total Time: {:.2?}", loading_time.elapsed());
+    eprintln!("Total Time: {:.2?}", loading_time.elapsed().saturating_sub(pause_duration));
     if ipc {
-        send(IPCEvent::Done(render_start_time.elapsed().as_secs_f64()));
+        send(IPCEvent::Done(render_start_time.elapsed().saturating_sub(pause_duration).as_secs_f64()));
     }
     Ok(())
 }
