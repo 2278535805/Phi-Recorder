@@ -18,7 +18,6 @@ use sasa::AudioClip;
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
-    cmp::Ordering,
     io::{BufRead, Write},
     ops::DerefMut,
     path::{Path, PathBuf},
@@ -644,23 +643,14 @@ pub async fn main(cmd: bool) -> Result<()> {
         if config.audio_mix_optimization {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    sfx_list.push((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
+                    let pos = round_to_step(before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, 0.005);
+                    sfx_list.push((pos, sfx));
                 }
             });
             let len = sfx_list.len();
 
-            sfx_list.sort_by(|(a1, b1), (a2, b2)| {
-                let a1 = round_to_step(*a1, 0.005);
-                let a2 = round_to_step(*a2, 0.005);
-                match a1.partial_cmp(&a2).unwrap_or(Ordering::Equal) {
-                    Ordering::Less  => Ordering::Less,
-                    Ordering::Greater => Ordering::Greater,
-                    Ordering::Equal => {
-                        let p1 = b1.as_ptr() as usize;
-                        let p2 = b2.as_ptr() as usize;
-                        p1.cmp(&p2)
-                    }
-                }
+            sfx_list.sort_unstable_by(|(time_a, sfx_a), (time_b, sfx_b)| {
+                time_a.total_cmp(time_b).then_with(|| sfx_a.as_ptr().cmp(&sfx_b.as_ptr()))
             });
 
             let mut kept_sfx_list = Vec::with_capacity(len);
@@ -669,7 +659,6 @@ pub async fn main(cmd: bool) -> Result<()> {
             let mut count = 0;
 
             for &(pos, clip) in &sfx_list {
-                let pos = round_to_step(pos, 0.005);
                 let is_new_group = match last_arr {
                     None => true,
                     Some(prev) => {
