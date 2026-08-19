@@ -215,7 +215,7 @@ impl Default for RenderConfig {
             force_limit: true,
             limit_threshold: 0.5,
             loudness_equalization: false,
-            audio_mix_mode: AudioMixMode::Optimized,
+            audio_mix_mode: AudioMixMode::Fft,
             chart_debug_line: 0.0,
             chart_debug_note: 0.0,
             chart_ratio: 1.0,
