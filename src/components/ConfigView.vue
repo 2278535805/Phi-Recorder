@@ -65,7 +65,12 @@ const limitThreshold = ref(DEFAULT_RENDER_CONFIG.limitThreshold);
 const forceLimit = ref(DEFAULT_RENDER_CONFIG.forceLimit);
 const hires = ref(DEFAULT_RENDER_CONFIG.hires);
 const loudnessEqualization = ref(DEFAULT_RENDER_CONFIG.loudnessEqualization);
-const audioMixOptimization = ref(DEFAULT_RENDER_CONFIG.audioMixOptimization);
+const audioMixMode = ref(DEFAULT_RENDER_CONFIG.audioMixMode);
+const audioMixModeList = [
+  { title: t('audio-mix-mode-traditional'), value: 'traditional' },
+  { title: t('audio-mix-mode-optimized'), value: 'optimized' },
+  { title: t('audio-mix-mode-fft'), value: 'fft' },
+];
 
 watch(volumeSfx, (volume) => {
   if (forceLimit.value && volume > limitThreshold.value) {
@@ -361,7 +366,7 @@ async function buildConfig(): Promise<RenderConfig | null> {
     forceLimit: forceLimit.value,
     hires: hires.value,
     loudnessEqualization: loudnessEqualization.value,
-    audioMixOptimization: audioMixOptimization.value,
+    audioMixMode: audioMixMode.value,
   };
 }
 
@@ -489,7 +494,7 @@ function applyConfig(config: RenderConfig) {
   forceLimit.value = config.forceLimit;
   hires.value = config.hires;
   loudnessEqualization.value = config.loudnessEqualization;
-  audioMixOptimization.value = config.audioMixOptimization;
+  audioMixMode.value = config.audioMixMode;
 }
 
 const DEFAULT_PRESET: Preset = {
@@ -907,10 +912,10 @@ function setConfigForQuality() {
           <TipSwitch :label="t('loudness-equalization')" color="btn" v-model="loudnessEqualization"></TipSwitch>
         </v-col>
         <v-col cols="3" class="px-2">
-          <TipSwitch :label="t('audio-mix-optimization')" color="btn" v-model="audioMixOptimization"></TipSwitch>
+          <TipSwitch :label="t('force-limit')" color="btn" v-model="forceLimit"></TipSwitch>
         </v-col>
         <v-col cols="3" class="px-2">
-          <TipSwitch :label="t('force-limit')" color="btn" v-model="forceLimit"></TipSwitch>
+          <v-autocomplete class="mx-2" :label="t('audio-mix-mode')" :items="audioMixModeList" item-title="title" item-value="value" v-model="audioMixMode"></v-autocomplete>
         </v-col>
       </v-row>
       <v-row no-gutters class="mx-n2 mt-6 align-center px-6">

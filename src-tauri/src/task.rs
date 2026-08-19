@@ -96,7 +96,7 @@ pub fn generate_filename(info: &ChartInfo, config: &RenderConfig) -> String {
             "force_limit"                => config.force_limit.to_string(),
             "limit_threshold"            => config.limit_threshold.to_string(),
             "loudness_equalization"      => config.loudness_equalization.to_string(),
-            "audio_mix_optimization"     => config.audio_mix_optimization.to_string(),
+            "audio_mix_mode"             => config.audio_mix_mode.as_str().to_string(),
             "chart_debug_line"           => config.chart_debug_line.to_string(),
             "chart_debug_note"           => config.chart_debug_note.to_string(),
             "chart_ratio"                => config.chart_ratio.to_string(),

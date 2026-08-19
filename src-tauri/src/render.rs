@@ -9,12 +9,14 @@ use crate::{
 };
 use anyhow::{bail, Context, Result};
 use macroquad::{miniquad::gl::*, prelude::*};
+use num_complex::Complex;
 use ndarray::{s, Array1};
 use phire::{
     Main, config::{ChallengeModeColor, Config, Mods}, core::{HitSound, MSRenderTarget, Note, ResourcePack, internal_id}, ext::{BLACK_TEXTURE, NotNanExt, SafeTexture}, fs::{self, FileSystem}, info::ChartInfo, scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene, game::WAIT_TIME}, time::TimeManager, ui::{FontArc, TextPainter}
 };
 use rustc_hash::FxHashMap;
 use sasa::AudioClip;
+use realfft::RealFftPlanner;
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
@@ -70,7 +72,7 @@ pub struct RenderConfig {
     pub force_limit: bool,
     pub limit_threshold: f32,
     pub loudness_equalization: bool,
-    pub audio_mix_optimization: bool,
+    pub audio_mix_mode: AudioMixMode,
     pub watermark: String,
     pub roman: bool,
     pub chinese: bool,
@@ -101,6 +103,25 @@ pub struct RenderConfig {
 
     pub fade: f32,
     pub alpha_tint: bool,
+}
+
+#[derive(Default, Deserialize, Serialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum AudioMixMode {
+    Traditional,
+    #[default]
+    Optimized,
+    Fft,
+}
+
+impl AudioMixMode {
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            Self::Traditional => "traditional",
+            Self::Optimized => "optimized",
+            Self::Fft => "fft",
+        }
+    }
 }
 
 impl RenderConfig {
@@ -194,7 +215,7 @@ impl Default for RenderConfig {
             force_limit: true,
             limit_threshold: 0.5,
             loudness_equalization: false,
-            audio_mix_optimization: true,
+            audio_mix_mode: AudioMixMode::Optimized,
             chart_debug_line: 0.0,
             chart_debug_note: 0.0,
             chart_ratio: 1.0,
@@ -369,6 +390,41 @@ pub fn test_encoder(ffmpeg: &String, encoder: &str) -> bool {
 
 fn round_to_step(v: f64, step: f64) -> f64 {
     (v / step).round() * step
+}
+
+fn mix_sfx_fft(output: &mut Array1<f32>, clip: &Array1<f32>, positions: &[usize]) -> Result<()> {
+    if positions.is_empty() || clip.is_empty() {
+        return Ok(());
+    }
+
+    let fft_size = (output.len() + clip.len() - 1).next_power_of_two();
+    let mut planner = RealFftPlanner::<f32>::new();
+    let forward = planner.plan_fft_forward(fft_size);
+    let inverse = planner.plan_fft_inverse(fft_size);
+
+    let mut impulse = vec![0.0_f32; fft_size];
+    for &position in positions {
+        impulse[position] += 1.0;
+    }
+
+    let mut clip_input = vec![0.0_f32; fft_size];
+    clip_input[..clip.len()].copy_from_slice(clip.as_slice().unwrap());
+    let mut impulse_fft = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
+    let mut clip_fft = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
+    forward.process(&mut impulse, &mut impulse_fft)?;
+    forward.process(&mut clip_input, &mut clip_fft)?;
+
+    for (impulse_bin, clip_bin) in impulse_fft.iter_mut().zip(clip_fft) {
+        *impulse_bin *= clip_bin;
+    }
+
+    let mut mixed = vec![0.0_f32; fft_size];
+    inverse.process(&mut impulse_fft, &mut mixed)?;
+    let scale = 1.0 / fft_size as f32;
+    for (target, value) in output.iter_mut().zip(mixed) {
+        *target += value * scale;
+    }
+    Ok(())
 }
 
 pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(Box<dyn FileSystem + Send + Sync>, PathBuf, RenderConfig, ChartInfo)> {
@@ -640,7 +696,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let sfx_end_time = sfx_start_time + chart_length_sfx;
         let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
 
-        if config.audio_mix_optimization {
+        if config.audio_mix_mode == AudioMixMode::Optimized {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
                     let pos = round_to_step(before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, 0.005);
@@ -696,6 +752,33 @@ pub async fn main(cmd: bool) -> Result<()> {
 
             let elapsed = sfx_time.elapsed();
             eprintln!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
+        } else if config.audio_mix_mode == AudioMixMode::Fft {
+            let mut groups: Vec<(&Array1<f32>, Vec<usize>)> = Vec::new();
+            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
+                if let Some(sfx) = get_hitsound(&note) {
+                    let position = (before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * sample_rate_f64;
+                    let position = position.ceil() as usize * 2;
+                    if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
+                        if let Some((_, positions)) = groups.iter_mut().find(|(clip, _)| std::ptr::eq(*clip, sfx)) {
+                            positions.push(position);
+                        } else {
+                            groups.push((sfx, vec![position]));
+                        }
+                    }
+                }
+            });
+
+            let num = groups.len();
+            if ipc {
+                send(IPCEvent::MixingSfx(num as u64));
+            }
+            for (index, (clip, positions)) in groups.into_iter().enumerate() {
+                mix_sfx_fft(&mut output_sfx, clip, &positions)?;
+                if ipc {
+                    send(IPCEvent::Sfx(index as u64 + 1));
+                }
+            }
+            eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {}", sfx_time.elapsed(), num);
         } else {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
