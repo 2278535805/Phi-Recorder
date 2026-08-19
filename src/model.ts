@@ -190,7 +190,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   forceLimit: true,
   limitThreshold: 0.5,
   loudnessEqualization: false,
-  audioMixMode: 'optimized',
+  audioMixMode: 'fft',
   watermark: '',
   roman: false,
   chinese: false,
