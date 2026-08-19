@@ -70,8 +70,15 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         macroquad::window::set_fullscreen(true);
     }
 
-    let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
-    let mut painter = TextPainter::new(font);
+    let mut fonts = vec![FontArc::try_from_vec(load_file("font.ttf").await?)?];
+    for font_path in ["fallback.ttf", "emoji.ttf"] {
+        if let Ok(data) = load_file(font_path).await {
+            if let Ok(font) = FontArc::try_from_vec(data) {
+                fonts.push(font);
+            }
+        }
+    }
+    let mut painter = TextPainter::new(fonts);
 
     let player = build_player(&config).await?;
 
