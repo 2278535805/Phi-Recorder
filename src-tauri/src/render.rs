@@ -26,7 +26,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Stdio},
     rc::Rc,
-    sync::{atomic::{AtomicBool, Ordering as AtomicOrdering}, Arc, Mutex},
+    sync::{atomic::{AtomicBool, Ordering}, Arc, Mutex},
     time::{Duration, Instant},
 };
 use std::{ffi::OsStr, fmt::Write as _};
@@ -398,8 +398,8 @@ struct PreparedSfx {
 }
 
 struct SfxFftWorker {
-    forward: std::sync::Arc<dyn realfft::RealToComplex<f32>>,
-    inverse: std::sync::Arc<dyn realfft::ComplexToReal<f32>>,
+    forward: Arc<dyn realfft::RealToComplex<f32>>,
+    inverse: Arc<dyn realfft::ComplexToReal<f32>>,
     impulse: Vec<f32>,
     impulse_fft: Vec<Complex<f32>>,
     total_fft: Vec<Complex<f32>>,
@@ -510,7 +510,7 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
                 if ipc {
                     let mut completed = completed.lock().unwrap();
                     *completed += 1;
-                    crate::ipc::client::send(IPCEvent::Sfx(*completed));
+                    send(IPCEvent::Sfx(*completed));
                 }
                 Ok::<(), anyhow::Error>(())
             },
@@ -624,9 +624,9 @@ pub async fn main(cmd: bool) -> Result<()> {
                 match stdin.read_line(&mut line) {
                     Ok(0) => break,
                     Ok(_) => match line.trim() {
-                        "pause" => pause_requested.store(true, AtomicOrdering::SeqCst),
+                        "pause" => pause_requested.store(true, Ordering::SeqCst),
                         "resume" => {
-                            pause_requested.store(false, AtomicOrdering::SeqCst);
+                            pause_requested.store(false, Ordering::SeqCst);
                             render_thread.unpark();
                         }
                         _ => {}
@@ -979,10 +979,10 @@ pub async fn main(cmd: bool) -> Result<()> {
                 move || {
                     cnt += 1;
                     if cnt == 1 || cnt == 3 {
-                        MSAA.store(true, AtomicOrdering::SeqCst);
+                        MSAA.store(true, Ordering::SeqCst);
                         Some(mst.input())
                     } else {
-                        MSAA.store(false, AtomicOrdering::SeqCst);
+                        MSAA.store(false, Ordering::SeqCst);
                         Some(mst.output())
                     }
                 }
@@ -1022,10 +1022,10 @@ pub async fn main(cmd: bool) -> Result<()> {
                 move || {
                     cnt += 1;
                     if cnt == 1 || cnt == 3 {
-                        MSAA.store(true, AtomicOrdering::SeqCst);
+                        MSAA.store(true, Ordering::SeqCst);
                         Some(mst.input())
                     } else {
-                        MSAA.store(false, AtomicOrdering::SeqCst);
+                        MSAA.store(false, Ordering::SeqCst);
                         Some(mst.output())
                     }
                 }
@@ -1221,11 +1221,11 @@ pub async fn main(cmd: bool) -> Result<()> {
     let mut pause_duration = Duration::ZERO;
 
     for frame in 0..frames {
-        if !cmd && pause_requested.load(AtomicOrdering::SeqCst) {
+        if !cmd && pause_requested.load(Ordering::SeqCst) {
             eprintln!("Render paused");
             if ipc { send(IPCEvent::Paused); }
             let pause_begin = Instant::now();
-            while pause_requested.load(AtomicOrdering::SeqCst) {
+            while pause_requested.load(Ordering::SeqCst) {
                 std::thread::park();
             }
             pause_duration += pause_begin.elapsed();
@@ -1244,7 +1244,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         }
         gl.flush();
 
-        if MSAA.load(AtomicOrdering::SeqCst) {
+        if MSAA.load(Ordering::SeqCst) {
             mst.blit();
         }
 
