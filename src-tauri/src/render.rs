@@ -15,6 +15,7 @@ use phire::{
     Main, config::{ChallengeModeColor, Config, Mods}, core::{HitSound, MSRenderTarget, Note, ResourcePack, internal_id}, ext::{BLACK_TEXTURE, NotNanExt, SafeTexture}, fs::{self, FileSystem}, info::ChartInfo, scene::{BasicPlayer, EndingScene, GameMode, GameScene, LoadingScene, game::WAIT_TIME}, time::TimeManager, ui::{FontArc, TextPainter}
 };
 use rustc_hash::FxHashMap;
+use rayon::prelude::*;
 use sasa::AudioClip;
 use realfft::RealFftPlanner;
 use serde::{Deserialize, Serialize};
@@ -392,39 +393,115 @@ fn round_to_step(v: f64, step: f64) -> f64 {
     (v / step).round() * step
 }
 
-fn mix_sfx_fft(output: &mut Array1<f32>, clip: &Array1<f32>, positions: &[usize]) -> Result<()> {
-    if positions.is_empty() || clip.is_empty() {
-        return Ok(());
+struct PreparedSfx {
+    positions: Vec<usize>,
+    spectrum: Vec<Complex<f32>>,
+}
+
+struct SfxFftWorker {
+    forward: std::sync::Arc<dyn realfft::RealToComplex<f32>>,
+    inverse: std::sync::Arc<dyn realfft::ComplexToReal<f32>>,
+    impulse: Vec<f32>,
+    impulse_fft: Vec<Complex<f32>>,
+    total_fft: Vec<Complex<f32>>,
+    mixed: Vec<f32>,
+}
+
+impl SfxFftWorker {
+    fn new(fft_size: usize) -> Self {
+        let mut planner = RealFftPlanner::<f32>::new();
+        Self {
+            forward: planner.plan_fft_forward(fft_size),
+            inverse: planner.plan_fft_inverse(fft_size),
+            impulse: vec![0.0; fft_size],
+            impulse_fft: vec![Complex::new(0.0, 0.0); fft_size / 2 + 1],
+            total_fft: vec![Complex::new(0.0, 0.0); fft_size / 2 + 1],
+            mixed: vec![0.0; fft_size],
+        }
     }
 
-    let fft_size = (output.len() + clip.len() - 1).next_power_of_two();
+    fn mix_block(
+        &mut self,
+        output: &mut [f32],
+        block_start: usize,
+        block_len: usize,
+        overlap: usize,
+        groups: &[PreparedSfx],
+    ) -> Result<()> {
+        let input_start = block_start as isize - overlap as isize;
+        let input_end = input_start + self.impulse.len() as isize;
+
+        self.total_fft.fill(Complex::new(0.0, 0.0));
+        for group in groups {
+            self.impulse.fill(0.0);
+            let first = group.positions.partition_point(|&position| (position as isize) < input_start);
+            let last = group.positions.partition_point(|&position| (position as isize) < input_end);
+            for &position in &group.positions[first..last] {
+                let impulse_position = position as isize - input_start;
+                if impulse_position >= 0 {
+                    self.impulse[impulse_position as usize] += 1.0;
+                }
+            }
+
+            self.forward.process(&mut self.impulse, &mut self.impulse_fft)?;
+            for (total, (impulse, clip)) in self
+                .total_fft
+                .iter_mut()
+                .zip(self.impulse_fft.iter().zip(&group.spectrum))
+            {
+                *total += *impulse * *clip;
+            }
+        }
+
+        self.inverse.process(&mut self.total_fft, &mut self.mixed)?;
+        let scale = 1.0 / self.impulse.len() as f32;
+        let valid_len = output.len().min(block_len);
+        for (target, &value) in output[..valid_len]
+            .iter_mut()
+            .zip(&self.mixed[overlap..overlap + valid_len])
+        {
+            *target = value * scale;
+        }
+        Ok(())
+    }
+}
+
+fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>)]) -> Result<(usize, usize)> {
+    if groups.iter().all(|(clip, positions)| clip.is_empty() || positions.is_empty()) || output.is_empty() {
+        return Ok((0, 0));
+    }
+
+    let max_clip_len = groups.iter().filter(|(clip, positions)| !clip.is_empty() && !positions.is_empty()).map(|(clip, _)| clip.len()).max().unwrap();
+    const TARGET_BLOCK_LEN: usize = 1 << 17;
+    let fft_size = (max_clip_len + TARGET_BLOCK_LEN).next_power_of_two();
+    let overlap = max_clip_len - 1;
+    let block_len = ((fft_size - overlap) / 2) * 2;
+
     let mut planner = RealFftPlanner::<f32>::new();
     let forward = planner.plan_fft_forward(fft_size);
-    let inverse = planner.plan_fft_inverse(fft_size);
-
-    let mut impulse = vec![0.0_f32; fft_size];
-    for &position in positions {
-        impulse[position] += 1.0;
+    let mut prepared = Vec::with_capacity(groups.len());
+    for (clip, positions) in groups.iter_mut() {
+        if clip.is_empty() || positions.is_empty() {
+            continue;
+        }
+        positions.sort_unstable();
+        let mut input = vec![0.0; fft_size];
+        input[..clip.len()].copy_from_slice(clip.as_slice().unwrap());
+        let mut spectrum = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
+        forward.process(&mut input, &mut spectrum)?;
+        prepared.push(PreparedSfx { positions: std::mem::take(positions), spectrum });
     }
 
-    let mut clip_input = vec![0.0_f32; fft_size];
-    clip_input[..clip.len()].copy_from_slice(clip.as_slice().unwrap());
-    let mut impulse_fft = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
-    let mut clip_fft = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
-    forward.process(&mut impulse, &mut impulse_fft)?;
-    forward.process(&mut clip_input, &mut clip_fft)?;
+    let output_slice = output.as_slice_mut().unwrap();
+    output_slice
+        .par_chunks_mut(block_len)
+        .enumerate()
+        .try_for_each_init(
+            || SfxFftWorker::new(fft_size),
+            |worker, (index, block)| worker.mix_block(block, index * block_len, block_len, overlap, &prepared),
+        )?;
 
-    for (impulse_bin, clip_bin) in impulse_fft.iter_mut().zip(clip_fft) {
-        *impulse_bin *= clip_bin;
-    }
-
-    let mut mixed = vec![0.0_f32; fft_size];
-    inverse.process(&mut impulse_fft, &mut mixed)?;
-    let scale = 1.0 / fft_size as f32;
-    for (target, value) in output.iter_mut().zip(mixed) {
-        *target += value * scale;
-    }
-    Ok(())
+    Ok((fft_size, block_len))
 }
 
 pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(Box<dyn FileSystem + Send + Sync>, PathBuf, RenderConfig, ChartInfo)> {
@@ -768,17 +845,15 @@ pub async fn main(cmd: bool) -> Result<()> {
                 }
             });
 
-            let num = groups.len();
+            let num = groups.iter().map(|(_, positions)| positions.len()).sum::<usize>();
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
-            for (index, (clip, positions)) in groups.into_iter().enumerate() {
-                mix_sfx_fft(&mut output_sfx, clip, &positions)?;
-                if ipc {
-                    send(IPCEvent::Sfx(index as u64 + 1));
-                }
+            let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups)?;
+            if ipc {
+                send(IPCEvent::Sfx(num as u64));
             }
-            eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {}", sfx_time.elapsed(), num);
+            eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {} FFT size: {} Block size: {}", sfx_time.elapsed(), groups.len(), fft_size, block_len);
         } else {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {

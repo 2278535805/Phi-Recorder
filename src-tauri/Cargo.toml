@@ -54,6 +54,7 @@ tauri-plugin-opener = "2"
 rustc-hash = "2.1.2"
 num-complex = "0.4.6"
 realfft = { version = "3.5.0", features = ["avx", "sse"] }
+rayon = "1.10.0"
 # sysinfo = "0.29.0"
 
 [features]
