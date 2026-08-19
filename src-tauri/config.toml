@@ -59,7 +59,7 @@ maxParticles = 5000 # 5000 25000 200000
 # Audio 音频
 hires = false
 loudnessEqualization = false
-audioMixOptimization = true
+audioMixMode = "optimized" # traditional optimized fft
 
 volumeMusic = 0.5
 volumeSfx = 0.4
