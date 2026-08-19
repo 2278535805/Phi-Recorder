@@ -4408,6 +4408,7 @@ dependencies = [
  "open",
  "phire",
  "rand 0.9.5",
+ "rayon",
  "realfft",
  "regex",
  "rustc-hash",
