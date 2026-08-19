@@ -781,9 +781,9 @@ pub async fn main(cmd: bool) -> Result<()> {
         let judge_offset = config.judge_offset;
         let sfx_start_time = config.play_start_time - config.judge_offset;
         let sfx_end_time = sfx_start_time + chart_length_sfx;
-        let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
 
         if config.audio_mix_mode == AudioMixMode::Optimized {
+            let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
                     let pos = round_to_step(before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, 0.005);
@@ -897,19 +897,20 @@ pub async fn main(cmd: bool) -> Result<()> {
             let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups, ipc)?;
             eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {} FFT size: {} Block size: {}", sfx_time.elapsed(), groups.len(), fft_size, block_len);
         } else {
-            let mut place_sfx = |pos: f64, clip: &Array1<f32>| {
-                let position = (pos * sample_rate_f64).ceil() as usize * 2;
+            let mut sfx_list: Vec<(usize, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
+            let mut place_sfx = |position: usize, clip: &Array1<f32>| {
                 let len = clip.len();
                 let end = position + len;
-                if end > output_sfx_len {
-                    return;
-                }
                 let mut slice = output_sfx.slice_mut(s![position..end]);
                 slice += clip;
             };
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    sfx_list.push((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, sfx));
+                    let position = (before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * sample_rate_f64;
+                    let position = position.ceil() as usize * 2;
+                    if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
+                        sfx_list.push((position, sfx));
+                    }
                 }
             });
             let num = sfx_list.len();
