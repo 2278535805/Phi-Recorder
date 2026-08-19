@@ -602,8 +602,15 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     let ipc = !cmd;
-    let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
-    let mut painter = TextPainter::new(font);
+    let mut fonts = vec![FontArc::try_from_vec(load_file("font.ttf").await?)?];
+    for font_path in ["fallback.ttf", "emoji.ttf"] {
+        if let Ok(data) = load_file(font_path).await {
+            if let Ok(font) = FontArc::try_from_vec(data) {
+                fonts.push(font);
+            }
+        }
+    }
+    let mut painter = TextPainter::new(fonts);
     let volume_music = std::mem::take(&mut config.volume_music);
     let volume_sfx = std::mem::take(&mut config.volume_sfx);
     let mut prpr_config = config.to_config();
