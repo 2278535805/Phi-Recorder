@@ -3,7 +3,7 @@ phire::tl_file!("render");
 
 use crate::{
     common::{get_output_dir, parse_args, read_config, test_output_dir},
-    ipc::IPCEvent,
+    ipc::{client::*, IPCEvent},
     task::generate_filename,
     ASSET_PATH
 };
@@ -26,8 +26,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Stdio},
     rc::Rc,
-    sync::atomic::{AtomicBool, Ordering as AtomicOrdering},
-    sync::Arc,
+    sync::{atomic::{AtomicBool, Ordering as AtomicOrdering}, Arc, Mutex},
     time::{Duration, Instant},
 };
 use std::{ffi::OsStr, fmt::Write as _};
@@ -466,7 +465,7 @@ impl SfxFftWorker {
     }
 }
 
-fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>)]) -> Result<(usize, usize)> {
+fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>)], ipc: bool) -> Result<(usize, usize)> {
     if groups.iter().all(|(clip, positions)| clip.is_empty() || positions.is_empty()) || output.is_empty() {
         return Ok((0, 0));
     }
@@ -476,6 +475,10 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
     let fft_size = (max_clip_len + TARGET_BLOCK_LEN).next_power_of_two();
     let overlap = max_clip_len - 1;
     let block_len = ((fft_size - overlap) / 2) * 2;
+    let block_count = output.len().div_ceil(block_len);
+    if ipc {
+        send(IPCEvent::MixingSfx(block_count as u64 + 1));
+    }
 
     let mut planner = RealFftPlanner::<f32>::new();
     let forward = planner.plan_fft_forward(fft_size);
@@ -493,12 +496,24 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
     }
 
     let output_slice = output.as_slice_mut().unwrap();
+    if ipc {
+        send(IPCEvent::Sfx(1));
+    }
+    let completed = Mutex::new(1);
     output_slice
         .par_chunks_mut(block_len)
         .enumerate()
         .try_for_each_init(
             || SfxFftWorker::new(fft_size),
-            |worker, (index, block)| worker.mix_block(block, index * block_len, block_len, overlap, &prepared),
+            |worker, (index, block)| {
+                worker.mix_block(block, index * block_len, block_len, overlap, &prepared)?;
+                if ipc {
+                    let mut completed = completed.lock().unwrap();
+                    *completed += 1;
+                    crate::ipc::client::send(IPCEvent::Sfx(*completed));
+                }
+                Ok::<(), anyhow::Error>(())
+            },
         )?;
 
     Ok((fft_size, block_len))
@@ -586,7 +601,6 @@ pub async fn main(cmd: bool) -> Result<()> {
     let (mut fs, output_path, mut config, info) = generate_resource(cmd, true).await?;
 
     set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
-    use crate::ipc::client::*;
     let ipc = !cmd;
     let font = FontArc::try_from_vec(load_file("font.ttf").await?)?;
     let mut painter = TextPainter::new(font);
@@ -845,14 +859,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 }
             });
 
-            let num = groups.iter().map(|(_, positions)| positions.len()).sum::<usize>();
-            if ipc {
-                send(IPCEvent::MixingSfx(num as u64));
-            }
-            let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups)?;
-            if ipc {
-                send(IPCEvent::Sfx(num as u64));
-            }
+            let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups, ipc)?;
             eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {} FFT size: {} Block size: {}", sfx_time.elapsed(), groups.len(), fft_size, block_len);
         } else {
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
