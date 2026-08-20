@@ -783,53 +783,37 @@ pub async fn main(cmd: bool) -> Result<()> {
         let sfx_end_time = sfx_start_time + chart_length_sfx;
 
         if config.audio_mix_mode == AudioMixMode::Optimized {
-            let mut sfx_list: Vec<(f64, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
+            let total_notes = chart.lines.iter().map(|line| line.notes.len()).sum::<usize>();
+            let mut sfx_list: Vec<(i64, &Array1<f32>)> = Vec::with_capacity(total_notes);
+            let mut sfx_counts: FxHashMap<(i64, usize), u8> =
+                FxHashMap::with_capacity_and_hasher(total_notes, Default::default());
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
-                    let pos = round_to_step(before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio, 0.005);
-                    sfx_list.push((pos, sfx));
-                }
-            });
-            let len = sfx_list.len();
-
-            sfx_list.sort_unstable_by(|(time_a, sfx_a), (time_b, sfx_b)| {
-                time_a.total_cmp(time_b).then_with(|| sfx_a.as_ptr().cmp(&sfx_b.as_ptr()))
-            });
-
-            let mut kept_sfx_list: Vec<(usize, &Array1<f32>)> = Vec::with_capacity(len);
-            let mut last_arr: Option<&Array1<f32>> = None;
-            let mut last_t = 0.0;
-            let mut count = 0;
-
-            for &(pos, clip) in &sfx_list {
-                let is_new_group = match last_arr {
-                    None => true,
-                    Some(prev) => {
-                        !std::ptr::eq(prev, clip) || pos != last_t
-                    }
-                };
-
-                if is_new_group {
-                    last_arr = Some(clip);
-                    last_t = pos;
-                    count = 1;
-                    let position = (pos * sample_rate_f64).ceil() as usize * 2;
-                    if position.checked_add(clip.len()).is_some_and(|end| end <= output_sfx_len) {
-                        kept_sfx_list.push((position, clip));
-                    }
-                } else {
-                    if count < 3 {
-                        let position = (pos * sample_rate_f64).ceil() as usize * 2;
-                        if position.checked_add(clip.len()).is_some_and(|end| end <= output_sfx_len) {
-                            kept_sfx_list.push((position, clip));
+                    let pos = ((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * 200.0).round() as i64;
+                    let count = sfx_counts.entry((pos, sfx.as_ptr() as usize)).or_insert(0);
+                    if *count < 3 {
+                        *count += 1;
+                        let position = (pos as f64 * 0.005 * sample_rate_f64).ceil() as usize * 2;
+                        if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
+                            sfx_list.push((pos, sfx));
                         }
-                        count += 1;
                     }
                 }
-            }
-            drop(sfx_list);
+            });
 
+            sfx_list.sort_unstable_by_key(|&(pos, sfx)| {
+                (pos, sfx.as_ptr() as usize)
+            });
+
+            let kept_sfx_list: Vec<(usize, &Array1<f32>)> = sfx_list
+                .into_iter()
+                .map(|(pos, clip)| ((pos as f64 * 0.005 * sample_rate_f64).ceil() as usize * 2, clip))
+                .collect();
             let num = kept_sfx_list.len();
+            let elapsed = sfx_time.elapsed();
+            eprintln!("Pre-Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32());
+            let sfx_time = Instant::now();
+
             const OPTIMIZED_BLOCK_LEN: usize = 1 << 17;
             let block_count = output_sfx_len.div_ceil(OPTIMIZED_BLOCK_LEN);
             let max_sfx_len = kept_sfx_list.iter().map(|(_, clip)| clip.len()).max().unwrap_or(0);
@@ -877,7 +861,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                 })?;
 
             let elapsed = sfx_time.elapsed();
-            eprintln!("Process Hit Effects Time: {:.2?} Equivalent Speed: {:.2} notes/sec Speed: {:.2} notes/sec", elapsed, len as f32 / elapsed.as_secs_f32(), num as f32 / elapsed.as_secs_f32())
+            eprintln!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
         } else if config.audio_mix_mode == AudioMixMode::Fft {
             let mut groups: Vec<(&Array1<f32>, Vec<usize>)> = Vec::new();
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
