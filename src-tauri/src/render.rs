@@ -782,86 +782,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         let sfx_start_time = config.play_start_time - config.judge_offset;
         let sfx_end_time = sfx_start_time + chart_length_sfx;
 
-        if config.audio_mix_mode == AudioMixMode::Optimized {
-            let total_notes = chart.lines.iter().map(|line| line.notes.len()).sum::<usize>();
-            let mut sfx_list: Vec<(i64, &Array1<f32>)> = Vec::with_capacity(total_notes);
-            let mut sfx_counts: FxHashMap<(i64, usize), u8> = FxHashMap::with_capacity_and_hasher(total_notes, Default::default());
-            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
-                if let Some(sfx) = get_hitsound(&note) {
-                    let pos = ((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * 200.0).round() as i64;
-                    let count = sfx_counts.entry((pos, sfx.as_ptr() as usize)).or_insert(0);
-                    if *count < 3 {
-                        *count += 1;
-                        let position = (pos as f64 * 0.005 * sample_rate_f64).ceil() as usize * 2;
-                        if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
-                            sfx_list.push((pos, sfx));
-                        }
-                    }
-                }
-            });
-
-            sfx_list.sort_unstable_by_key(|&(pos, sfx)| {
-                (pos, sfx.as_ptr() as usize)
-            });
-
-            let kept_sfx_list: Vec<(usize, &Array1<f32>)> = sfx_list
-                .into_iter()
-                .map(|(pos, clip)| ((pos as f64 * 0.005 * sample_rate_f64).ceil() as usize * 2, clip))
-                .collect();
-            let num = kept_sfx_list.len();
-            let elapsed = sfx_time.elapsed();
-            eprintln!("Pre-Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32());
-            let sfx_time = Instant::now();
-
-            const OPTIMIZED_BLOCK_LEN: usize = 1 << 17;
-            let block_count = output_sfx_len.div_ceil(OPTIMIZED_BLOCK_LEN);
-            let max_sfx_len = kept_sfx_list.iter().map(|(_, clip)| clip.len()).max().unwrap_or(0);
-            if ipc {
-                send(IPCEvent::MixingSfx(block_count as u64));
-            }
-            let completed = Mutex::new(0);
-            output_sfx
-                .as_slice_mut()
-                .unwrap()
-                .par_chunks_mut(OPTIMIZED_BLOCK_LEN)
-                .enumerate()
-                .try_for_each(|(block_index, block)| -> Result<()> {
-                    let block_start = block_index * OPTIMIZED_BLOCK_LEN;
-                    let block_end = block_start + block.len();
-                    let search_start = block_start.saturating_sub(max_sfx_len);
-                    let first = kept_sfx_list.partition_point(|&(position, _)| position < search_start);
-                    let last = kept_sfx_list.partition_point(|&(position, _)| position < block_end);
-
-                    for &(position, clip) in &kept_sfx_list[first..last] {
-                        let end = position + clip.len();
-                        let overlap_start = position.max(block_start);
-                        let overlap_end = end.min(block_end);
-                        if overlap_start >= overlap_end {
-                            continue;
-                        }
-
-                        let source_start = overlap_start - position;
-                        let target_start = overlap_start - block_start;
-                        let overlap_len = overlap_end - overlap_start;
-                        for (target, source) in block[target_start..target_start + overlap_len]
-                            .iter_mut()
-                            .zip(&clip.as_slice().unwrap()[source_start..source_start + overlap_len])
-                        {
-                            *target += *source;
-                        }
-                    }
-
-                    if ipc {
-                        let mut completed = completed.lock().unwrap();
-                        *completed += 1;
-                        send(IPCEvent::Sfx(*completed));
-                    }
-                    Ok(())
-                })?;
-
-            let elapsed = sfx_time.elapsed();
-            eprintln!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
-        } else if config.audio_mix_mode == AudioMixMode::Fft {
+        if config.audio_mix_mode == AudioMixMode::Fft {
             let mut groups: Vec<(&Array1<f32>, Vec<usize>)> = Vec::new();
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
@@ -881,38 +802,86 @@ pub async fn main(cmd: bool) -> Result<()> {
             let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups, ipc)?;
             eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {} FFT size: {} Block size: {}", sfx_time.elapsed(), groups.len(), fft_size, block_len);
         } else {
-            let mut sfx_list: Vec<(usize, &Array1<f32>)> = Vec::with_capacity(chart.lines.iter().map(|line| line.notes.len()).sum::<usize>());
-            let mut place_sfx = |position: usize, clip: &Array1<f32>| {
-                let len = clip.len();
-                let end = position + len;
-                let mut slice = output_sfx.slice_mut(s![position..end]);
-                slice += clip;
-            };
-            chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
-                if let Some(sfx) = get_hitsound(&note) {
-                    let position = (before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * sample_rate_f64;
-                    let position = position.ceil() as usize * 2;
-                    if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
-                        sfx_list.push((position, sfx));
-                    }
+            let place_sfx = |output: &mut [f32], output_start: usize, position: usize, clip: &Array1<f32>| {
+                let block_end = output_start + output.len();
+                let end = position + clip.len();
+                let overlap_start = position.max(output_start);
+                let overlap_end = end.min(block_end);
+                if overlap_start >= overlap_end {
+                    return;
                 }
-            });
+
+                let source_start = overlap_start - position;
+                let target_start = overlap_start - output_start;
+                let overlap_len = overlap_end - overlap_start;
+                for (target, source) in output[target_start..target_start + overlap_len]
+                    .iter_mut()
+                    .zip(&clip.as_slice().unwrap()[source_start..source_start + overlap_len])
+                {
+                    *target += *source;
+                }
+            };
+            let total_notes = chart.lines.iter().map(|line| line.notes.len()).sum::<usize>();
+            let mut sfx_list: Vec<(usize, &Array1<f32>)> = Vec::with_capacity(total_notes);
+            if config.audio_mix_mode == AudioMixMode::Optimized {
+                let mut optimized_sfx_list: Vec<(i64, &Array1<f32>)> = Vec::with_capacity(total_notes);
+                let mut sfx_counts: FxHashMap<(i64, usize), u8> = FxHashMap::with_capacity_and_hasher(total_notes, Default::default());
+                chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
+                    if let Some(sfx) = get_hitsound(&note) {
+                        let pos = ((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * 200.0).round() as i64;
+                        let count = sfx_counts.entry((pos, sfx.as_ptr() as usize)).or_insert(0);
+                        if *count < 3 {
+                            *count += 1;
+                            let position = (pos as f64 * 0.005 * sample_rate_f64).ceil() as usize * 2;
+                            if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
+                                optimized_sfx_list.push((pos, sfx));
+                            }
+                        }
+                    }
+                });
+                optimized_sfx_list.sort_unstable_by_key(|&(pos, sfx)| (pos, sfx.as_ptr() as usize));
+                sfx_list.extend(optimized_sfx_list.into_iter().map(|(pos, clip)| ((pos as f64 * 0.005 * sample_rate_f64).ceil() as usize * 2, clip)));
+            } else {
+                chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
+                    if let Some(sfx) = get_hitsound(&note) {
+                        let position = (before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * sample_rate_f64;
+                        let position = position.ceil() as usize * 2;
+                        if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
+                            sfx_list.push((position, sfx));
+                        }
+                    }
+                });
+                sfx_list.sort_unstable_by_key(|&(position, _)| position);
+            }
+
             let num = sfx_list.len();
             let elapsed = sfx_time.elapsed();
             eprintln!("Pre-Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32());
             let sfx_time = Instant::now();
+
+            const BLOCK_LEN: usize = 1 << 17;
+            let block_count = output_sfx_len.div_ceil(BLOCK_LEN);
+            let max_sfx_len = sfx_list.iter().map(|(_, clip)| clip.len()).max().unwrap_or(0);
             if ipc {
-                send(IPCEvent::MixingSfx(num as u64));
+                send(IPCEvent::MixingSfx(block_count as u64));
             }
-            let mut last_sfx_progress = Instant::now();
-            for (index, (pos, sfx)) in sfx_list.into_iter().enumerate() {
-                place_sfx(pos, sfx);
-                let completed = index as u64 + 1;
-                if ipc && (last_sfx_progress.elapsed() >= Duration::from_millis(350) || completed == num as u64) {
-                    send(IPCEvent::Sfx(completed));
-                    last_sfx_progress = Instant::now();
+            let completed = Mutex::new(0);
+            output_sfx.as_slice_mut().unwrap().par_chunks_mut(BLOCK_LEN).enumerate().try_for_each(|(block_index, block)| -> Result<()> {
+                let block_start = block_index * BLOCK_LEN;
+                let block_end = block_start + block.len();
+                let search_start = block_start.saturating_sub(max_sfx_len);
+                let first = sfx_list.partition_point(|&(position, _)| position < search_start);
+                let last = sfx_list.partition_point(|&(position, _)| position < block_end);
+                for &(position, clip) in &sfx_list[first..last] {
+                    place_sfx(block, block_start, position, clip);
                 }
-            }
+                if ipc {
+                    let mut completed = completed.lock().unwrap();
+                    *completed += 1;
+                    send(IPCEvent::Sfx(*completed));
+                }
+                Ok(())
+            })?;
 
             let elapsed = sfx_time.elapsed();
             eprintln!("Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32())
