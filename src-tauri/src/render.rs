@@ -665,7 +665,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let sfx_protect_time = if let Some(sfx_longest) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
         sfx_longest.length()
     } else {
-        sfx_drag.length()
+        sfx_click.length().max(sfx_drag.length()).max(sfx_flick.length())
     };
 
     fn check_sample_rate(expected: u32, actual: u32, name: &str) -> Result<()> {
