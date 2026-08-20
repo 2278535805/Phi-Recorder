@@ -177,6 +177,21 @@ async function removeTask(index: number, removeFile: boolean = false) {
   await updateList();
 }
 
+async function pauseTask(index: number) {
+  const realIndex = fromBackIndex(tasks.value!.length, index);
+  await invoke('pause_task', { index: realIndex });
+}
+
+async function resumeTask(index: number) {
+  const realIndex = fromBackIndex(tasks.value!.length, index);
+  await invoke('resume_task', { index: realIndex });
+}
+
+async function cancelTask(index: number) {
+  const realIndex = fromBackIndex(tasks.value!.length, index);
+  await invoke('cancel_task', { index: realIndex });
+}
+
 function dragOutput(event: DragEvent, task: Task) {
   event.preventDefault();
   if (task.status.type !== 'done') return;
@@ -229,19 +244,19 @@ function dragOutput(event: DragEvent, task: Task) {
                     v-if="item.status.type === 'rendering'"
                     class="hover-scale btn"
                     variant="text"
-                    @click="invoke('pause_task', { id: item.id })"
+                    @click="pauseTask(index)"
                     :title="t('pause')"
                     icon="mdi-pause"></v-btn>
                   <v-btn
                     v-if="item.status.type === 'paused'"
                     class="hover-scale btn"
                     variant="text"
-                    @click="invoke('resume_task', { id: item.id })"
+                    @click="resumeTask(index)"
                     :title="t('resume')"
                     icon="mdi-play"></v-btn>
                   <v-btn class="hover-scale btn"
                     variant="text"
-                    @click="invoke('cancel_task', { id: item.id })"
+                    @click="cancelTask(index)"
                     :title="t('cancel')"
                     icon="mdi-cancel"></v-btn>
                 </div>
@@ -260,7 +275,7 @@ function dragOutput(event: DragEvent, task: Task) {
                           openOutputDialog(item.status.output);
                         }
                       }"
-                    @contextmenu="removeDialog = true; removeTaskIndex = item.id"
+                    @contextmenu="removeDialog = true; removeTaskIndex = index"
                     :title="t('show-output')"
                     icon="mdi-bug"
                     class="hover-scale btn"></v-btn>
