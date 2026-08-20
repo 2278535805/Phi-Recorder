@@ -26,7 +26,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Stdio},
     rc::Rc,
-    sync::{atomic::{AtomicBool, Ordering}, Arc, Mutex},
+    sync::{atomic::{AtomicBool, AtomicUsize, Ordering}, Arc},
     time::{Duration, Instant},
 };
 use std::{ffi::OsStr, fmt::Write as _};
@@ -499,7 +499,7 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
     if ipc {
         send(IPCEvent::Sfx(1));
     }
-    let completed = Mutex::new(1);
+    let completed = AtomicUsize::new(1);
     output_slice
         .par_chunks_mut(block_len)
         .enumerate()
@@ -508,9 +508,8 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
             |worker, (index, block)| {
                 worker.mix_block(block, index * block_len, block_len, overlap, &prepared)?;
                 if ipc {
-                    let mut completed = completed.lock().unwrap();
-                    *completed += 1;
-                    send(IPCEvent::Sfx(*completed));
+                    let completed = completed.fetch_add(1, Ordering::Relaxed) + 1;
+                    send(IPCEvent::Sfx(completed as u64));
                 }
                 Ok::<(), anyhow::Error>(())
             },
@@ -865,7 +864,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             if ipc {
                 send(IPCEvent::MixingSfx(block_count as u64));
             }
-            let completed = Mutex::new(0);
+            let completed = AtomicUsize::new(0);
             output_sfx.as_slice_mut().unwrap().par_chunks_mut(BLOCK_LEN).enumerate().try_for_each(|(block_index, block)| -> Result<()> {
                 let block_start = block_index * BLOCK_LEN;
                 let block_end = block_start + block.len();
@@ -876,9 +875,8 @@ pub async fn main(cmd: bool) -> Result<()> {
                     place_sfx(block, block_start, position, clip);
                 }
                 if ipc {
-                    let mut completed = completed.lock().unwrap();
-                    *completed += 1;
-                    send(IPCEvent::Sfx(*completed));
+                    let completed = completed.fetch_add(1, Ordering::Relaxed) + 1;
+                    send(IPCEvent::Sfx(completed as u64));
                 }
                 Ok(())
             })?;
