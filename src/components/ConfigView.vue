@@ -177,10 +177,15 @@ function parseResolution(resolution: string): [number, number] | null {
   if (!isNumeric(ws) || !isNumeric(hs)) return null;
   let w = parseInt(ws),
     h = parseInt(hs);
-  if (w <= 0 || h <= 0) return null;
+  if (w <= 0 || h <= 0 || w % 2 !== 0 || h % 2 !== 0) return null;
   return [w, h];
 }
 const resolutionRule = (value: string) => parseResolution(value) !== null || t('rules.resolution');
+const roundToEven = (value: number) => Math.max(2, Math.round(value / 2) * 2);
+const playTimeRangeRule = () => {
+  if (!playEndTime.value || !isNumeric(playEndTime.value) || !isNumeric(playStartTime.value)) return true;
+  return Number(playStartTime.value) <= Number(playEndTime.value) || t('rules.play-time-range');
+};
 const sampleCountRule = (value: string) => (isNumeric(value) && Math.log2(Number(value)) % 1 === 0) || t('rules.sample-count');
 const isCrf = (value: string) => (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 51) || t('rules.crf');
 const isBitrate = (value: string) => {
@@ -371,12 +376,12 @@ async function buildConfig(): Promise<RenderConfig | null> {
 }
 
 function applyAspectRatio(aspectRatio: number) {
-  let h = parseInt(resolution.value.split('x')[1]!);
+  let h = roundToEven(parseInt(resolution.value.split('x')[1]!));
 
   if (aspectRatio <= 1.0) {
     resolution.value = `${ h }x${ h }`
   } else {
-    let w = Math.floor(h * aspectRatio);
+    let w = roundToEven(h * aspectRatio);
     resolution.value = `${ w }x${ h }`
   }
 }
@@ -384,17 +389,19 @@ function applyAspectRatio(aspectRatio: number) {
 function applyResolution(w?: number, h?: number) {
   if (w) {
     let width = parseInt(resolution.value.split('x')[0]!);
-    let ratio = w / width;
-    let height = Math.floor(parseInt(resolution.value.split('x')[1]!) * ratio);
+    let targetWidth = roundToEven(w);
+    let ratio = targetWidth / width;
+    let height = roundToEven(parseInt(resolution.value.split('x')[1]!) * ratio);
     
-    resolution.value = `${ w }x${ height }`
+    resolution.value = `${ targetWidth }x${ height }`
   }
   if (h) {
     let height = parseInt(resolution.value.split('x')[1]!);
-    let ratio = h / height;
-    let width = Math.floor(parseInt(resolution.value.split('x')[0]!) * ratio);
+    let targetHeight = roundToEven(h);
+    let ratio = targetHeight / height;
+    let width = roundToEven(parseInt(resolution.value.split('x')[0]!) * ratio);
 
-    resolution.value = `${ width }x${ h }`
+    resolution.value = `${ width }x${ targetHeight }`
   }
 }
 
@@ -678,10 +685,10 @@ function setConfigForQuality() {
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero, playTimeRangeRule]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull, playTimeRangeRule]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <TipSwitch class="ml-n1" :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
@@ -735,10 +742,10 @@ function setConfigForQuality() {
           <v-text-field class="mx-2" :label="t('ending-length')" v-model="endingLength" type="number" :rules="[RULES.notEmpty]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-start-time')" v-model="playStartTime" type="number" :rules="[RULES.positiveOrZero, playTimeRangeRule]"></v-text-field>
         </v-col>
         <v-col cols="3">
-          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull]"></v-text-field>
+          <v-text-field class="mx-2" :label="t('render-end-time')" v-model="playEndTime" type="number" :rules="[RULES.positiveOrNull, playTimeRangeRule]"></v-text-field>
         </v-col>
         <v-col cols="3">
           <TipSwitch :label="t('render-loading')" color="btn" v-model="renderLoading"></TipSwitch>
