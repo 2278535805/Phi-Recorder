@@ -904,29 +904,14 @@ pub async fn main(cmd: bool) -> Result<()> {
     if ipc {
         send(IPCEvent::Mixing);
     }
-    let output_music_temp = NamedTempFile::new()?;
-    let output_sfx_temp = NamedTempFile::new()?;
-    let output_ending_temp = NamedTempFile::new()?;
+    let mut output_music_temp = NamedTempFile::new()?;
+    let mut output_sfx_temp = NamedTempFile::new()?;
+    let mut output_ending_temp = NamedTempFile::new()?;
 
     {
         let output_audio_time = Instant::now();
 
-        let output_audio = |output: &Path, sample_rate: u32, samples: ndarray::Array1<f32>| -> Result<()> {
-            let mut proc = cmd_hidden(&ffmpeg)
-                .args(
-                    format!(
-                        "-y -f f32le -ar {} -ac 2 -i pipe:0 -c:a pcm_f32le -f wav", sample_rate
-                    )
-                    .split_whitespace(),
-                )
-                .arg(output)
-                .args(["-loglevel", "warning"])
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .with_context(|| tl!("run-ffmpeg-failed"))?;
-            let input = proc.stdin.as_mut().unwrap();
+        let output_audio = |output: &mut NamedTempFile, samples: ndarray::Array1<f32>| -> Result<()> {
             let slice = samples.as_slice().unwrap();
             let byte_slice = unsafe {
                 std::slice::from_raw_parts(
@@ -934,14 +919,13 @@ pub async fn main(cmd: bool) -> Result<()> {
                     std::mem::size_of_val(slice),
                 )
             };
-            input.write_all(byte_slice)?;
-            proc.wait()?;
+            output.write_all(byte_slice)?;
             Ok(())
         };
 
-        output_audio(output_music_temp.path(), music_sample_rate, output_music)?;
-        output_audio(output_sfx_temp.path(), sample_rate, output_sfx)?;
-        output_audio(output_ending_temp.path(), ending_music_sample_rate, output_ending_music)?;
+        output_audio(&mut output_music_temp, output_music)?;
+        output_audio(&mut output_sfx_temp, output_sfx)?;
+        output_audio(&mut output_ending_temp, output_ending_music)?;
 
         eprintln!("Output Audio Time: {:.2?}", output_audio_time.elapsed());
     }
@@ -1142,21 +1126,21 @@ pub async fn main(cmd: bool) -> Result<()> {
         preparing_render_time.elapsed()
     );
 
-    eprintln!("Command: {} {} {} {} {} {} {} {} {} {}",
+    eprintln!("Command: {} {} {} {} {} {} {} {} {} {} {} {} {}",
         &ffmpeg,
         args,
-        "-i", output_sfx_temp.path().display(),
-        "-i", output_music_temp.path().display(),
-        "-i", output_ending_temp.path().display(),
+        format!("-y -f f32le -ar {} -ac 2", sample_rate), "-i", output_sfx_temp.path().display(),
+        format!("-y -f f32le -ar {} -ac 2", music_sample_rate), "-i", output_music_temp.path().display(),
+        format!("-y -f f32le -ar {} -ac 2", ending_music_sample_rate), "-i", output_ending_temp.path().display(),
         args2,
         output_path.display()
     );
 
     let mut proc = cmd_hidden(&ffmpeg)
         .args(args.split_whitespace())
-        .arg("-i").arg(output_sfx_temp.path())
-        .arg("-i").arg(output_music_temp.path())
-        .arg("-i").arg(output_ending_temp.path())
+        .args(format!("-y -f f32le -ar {} -ac 2", sample_rate).split_whitespace()).arg("-i").arg(output_sfx_temp.path())
+        .args(format!("-y -f f32le -ar {} -ac 2", music_sample_rate).split_whitespace()).arg("-i").arg(output_music_temp.path())
+        .args(format!("-y -f f32le -ar {} -ac 2", ending_music_sample_rate).split_whitespace()).arg("-i").arg(output_ending_temp.path())
         .args(args2.split_whitespace())
         .arg(output_path)
         .args(["-loglevel", "warning"])
