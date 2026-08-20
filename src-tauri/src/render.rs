@@ -785,8 +785,7 @@ pub async fn main(cmd: bool) -> Result<()> {
         if config.audio_mix_mode == AudioMixMode::Optimized {
             let total_notes = chart.lines.iter().map(|line| line.notes.len()).sum::<usize>();
             let mut sfx_list: Vec<(i64, &Array1<f32>)> = Vec::with_capacity(total_notes);
-            let mut sfx_counts: FxHashMap<(i64, usize), u8> =
-                FxHashMap::with_capacity_and_hasher(total_notes, Default::default());
+            let mut sfx_counts: FxHashMap<(i64, usize), u8> = FxHashMap::with_capacity_and_hasher(total_notes, Default::default());
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
                     let pos = ((before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * 200.0).round() as i64;
@@ -877,7 +876,8 @@ pub async fn main(cmd: bool) -> Result<()> {
                     }
                 }
             });
-
+            eprintln!("Pre-Process Hit Effects Time: {:.2?}", sfx_time.elapsed());
+            let sfx_time = Instant::now();
             let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups, ipc)?;
             eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {} FFT size: {} Block size: {}", sfx_time.elapsed(), groups.len(), fft_size, block_len);
         } else {
@@ -898,6 +898,9 @@ pub async fn main(cmd: bool) -> Result<()> {
                 }
             });
             let num = sfx_list.len();
+            let elapsed = sfx_time.elapsed();
+            eprintln!("Pre-Process Hit Effects Time: {:.2?} Speed: {:.2} notes/sec", elapsed, num as f32 / elapsed.as_secs_f32());
+            let sfx_time = Instant::now();
             if ipc {
                 send(IPCEvent::MixingSfx(num as u64));
             }
