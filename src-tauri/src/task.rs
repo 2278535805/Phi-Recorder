@@ -548,20 +548,20 @@ impl TaskQueue {
         result
     }
 
-    pub async fn cancel(&self, id: u32) {
-        self.tasks.lock().await[id as usize].cancel();
+    pub async fn cancel(&self, index: u32) {
+        self.tasks.lock().await[index as usize].cancel();
     }
 
-    pub async fn pause(&self, id: u32) {
-        self.tasks.lock().await[id as usize].pause();
+    pub async fn pause(&self, index: u32) {
+        self.tasks.lock().await[index as usize].pause();
     }
 
-    pub async fn resume(&self, id: u32) {
-        self.tasks.lock().await[id as usize].resume();
+    pub async fn resume(&self, index: u32) {
+        self.tasks.lock().await[index as usize].resume();
     }
 
-    pub async fn remove(&self, id: u32) {
-        self.tasks.lock().await.remove(id as usize);
+    pub async fn remove(&self, index: u32) {
+        self.tasks.lock().await.remove(index as usize);
     }
 
     pub async fn clear(&self) {

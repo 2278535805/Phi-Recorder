@@ -311,7 +311,9 @@ async function cancelSelectTask() {
   for (let chart of charts.value) {
     if (chart.isSelect && chart.taskId !== null) {
       try {
-        await invoke('cancel_task', { id: chart.taskId });
+        const indexFromBack = tasks.value?.findIndex((task) => task.id === chart.taskId) ?? -1;
+        if (indexFromBack < 0) continue;
+        await invoke('cancel_task', { index: tasks.value!.length - indexFromBack - 1 });
       } catch (e) {
         toastError(e);
       }

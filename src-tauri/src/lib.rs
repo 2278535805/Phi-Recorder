@@ -415,20 +415,20 @@ async fn get_tasks(queue: State<'_, TaskQueue>) -> Result<Vec<TaskView>, InvokeE
 }
 
 #[tauri::command]
-async fn cancel_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
-    queue.cancel(id).await;
+async fn cancel_task(queue: State<'_, TaskQueue>, index: u32) -> Result<(), InvokeError> {
+    queue.cancel(index).await;
     Ok(())
 }
 
 #[tauri::command]
-async fn pause_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
-    queue.pause(id).await;
+async fn pause_task(queue: State<'_, TaskQueue>, index: u32) -> Result<(), InvokeError> {
+    queue.pause(index).await;
     Ok(())
 }
 
 #[tauri::command]
-async fn resume_task(queue: State<'_, TaskQueue>, id: u32) -> Result<(), InvokeError> {
-    queue.resume(id).await;
+async fn resume_task(queue: State<'_, TaskQueue>, index: u32) -> Result<(), InvokeError> {
+    queue.resume(index).await;
     Ok(())
 }
 
@@ -442,7 +442,7 @@ async fn clear_tasks(queue: State<'_, TaskQueue>) -> Result<(), InvokeError> {
 async fn remove_task(queue: State<'_, TaskQueue>, index: u32, remove_file: bool) -> Result<(), InvokeError> {
     wrap_async(async move {
         if let Some(task) = queue.tasks().await.get(index as usize) {
-            info!("Task #{}(index: {}) deleted", task.id, index);
+            info!("Task #{} deleted", task.id);
             if remove_file && task.output.exists() && task.output.is_file() {
                 tokio::fs::remove_file(&task.output).await?;
             }
