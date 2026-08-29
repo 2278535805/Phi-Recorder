@@ -492,7 +492,7 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
         input[..clip.len()].copy_from_slice(clip.as_slice().unwrap());
         let mut spectrum = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
         forward.process(&mut input, &mut spectrum)?;
-        prepared.push(PreparedSfx { positions: std::mem::take(positions), spectrum });
+        prepared.push(PreparedSfx { positions: *positions, spectrum });
     }
 
     let output_slice = output.as_slice_mut().unwrap();
@@ -661,11 +661,13 @@ pub async fn main(cmd: bool) -> Result<()> {
 
     let sample_rate = 48000;
     let sample_rate_f64 = sample_rate as f64;
-    let sfx_protect_time = if let Some(sfx_longest) = chart.hitsounds.values().max_by_key(|v| v.length().not_nan()) {
-        sfx_longest.length()
-    } else {
-        sfx_click.length().max(sfx_drag.length()).max(sfx_flick.length())
-    };
+    let sfx_protect_time = chart
+        .hitsounds
+        .values()
+        .map(|clip| clip.length())
+        .chain([sfx_click.length(), sfx_drag.length(), sfx_flick.length()])
+        .max_by(|a, b| a.total_cmp(b))
+        .unwrap_or(0.0);
 
     fn check_sample_rate(expected: u32, actual: u32, name: &str) -> Result<()> {
         if expected != actual {
