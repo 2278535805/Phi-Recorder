@@ -110,7 +110,7 @@ pub struct RenderConfig {
 pub enum AudioMixMode {
     Traditional,
     #[default]
-    Optimized,
+    Culling,
     Fft,
 }
 
@@ -118,7 +118,7 @@ impl AudioMixMode {
     pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Traditional => "traditional",
-            Self::Optimized => "optimized",
+            Self::Culling => "culling",
             Self::Fft => "fft",
         }
     }
@@ -215,7 +215,7 @@ impl Default for RenderConfig {
             force_limit: true,
             limit_threshold: 0.5,
             loudness_equalization: false,
-            audio_mix_mode: AudioMixMode::Optimized,
+            audio_mix_mode: AudioMixMode::Culling,
             chart_debug_line: 0.0,
             chart_debug_note: 0.0,
             chart_ratio: 1.0,
@@ -827,7 +827,7 @@ pub async fn main(cmd: bool) -> Result<()> {
             };
             let total_notes = chart.lines.iter().map(|line| line.notes.len()).sum::<usize>();
             let mut sfx_list: Vec<(usize, &Array1<f32>)> = Vec::with_capacity(total_notes);
-            if config.audio_mix_mode == AudioMixMode::Optimized {
+            if config.audio_mix_mode == AudioMixMode::Culling {
                 let mut optimized_sfx_list: Vec<(i64, &Array1<f32>)> = Vec::with_capacity(total_notes);
                 let mut sfx_counts: FxHashMap<(i64, usize), u8> = FxHashMap::with_capacity_and_hasher(total_notes, Default::default());
                 chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {

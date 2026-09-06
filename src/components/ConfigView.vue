@@ -68,7 +68,7 @@ const loudnessEqualization = ref(DEFAULT_RENDER_CONFIG.loudnessEqualization);
 const audioMixMode = ref(DEFAULT_RENDER_CONFIG.audioMixMode);
 const audioMixModeList = [
   { title: t('audio-mix-mode-traditional'), value: 'traditional' },
-  { title: t('audio-mix-mode-optimized'), value: 'optimized' },
+  { title: t('audio-mix-mode-culling'), value: 'culling' },
   { title: t('audio-mix-mode-fft'), value: 'fft' },
 ];
 
