@@ -100,7 +100,7 @@
     "loudness-equalization": "音乐响度均衡 (-16 LUFS)",
     "audio-mix-mode": "混音模式",
     "audio-mix-mode-traditional": "传统",
-    "audio-mix-mode-optimized": "优化",
+    "audio-mix-mode-culling": "剔除",
     "audio-mix-mode-fft": "FFT",
     "others": "更多",
     "selects": "已选中",
