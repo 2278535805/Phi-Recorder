@@ -614,6 +614,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let volume_sfx = std::mem::take(&mut config.volume_sfx);
     let mut prpr_config = config.to_config();
     prpr_config.mods = Mods::AUTOPLAY;
+    prpr_config.adjust_time = false;
     let Some(ffmpeg) = find_ffmpeg()? else {
         bail!("FFmpeg not found")
     };
