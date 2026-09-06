@@ -465,7 +465,7 @@ impl SfxFftWorker {
     }
 }
 
-fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>)], ipc: bool) -> Result<(usize, usize)> {
+fn mix_sfx_fft(output: &mut Array1<f32>, groups: Vec<(&Array1<f32>, Vec<usize>)>, ipc: bool) -> Result<(usize, usize)> {
     if groups.iter().all(|(clip, positions)| clip.is_empty() || positions.is_empty()) || output.is_empty() {
         return Ok((0, 0));
     }
@@ -483,7 +483,7 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
     let mut planner = RealFftPlanner::<f32>::new();
     let forward = planner.plan_fft_forward(fft_size);
     let mut prepared = Vec::with_capacity(groups.len());
-    for (clip, positions) in groups.iter_mut() {
+    for (clip, mut positions) in groups {
         if clip.is_empty() || positions.is_empty() {
             continue;
         }
@@ -492,7 +492,7 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: &mut [(&Array1<f32>, Vec<usize>
         input[..clip.len()].copy_from_slice(clip.as_slice().unwrap());
         let mut spectrum = vec![Complex::new(0.0, 0.0); fft_size / 2 + 1];
         forward.process(&mut input, &mut spectrum)?;
-        prepared.push(PreparedSfx { positions: *positions, spectrum });
+        prepared.push(PreparedSfx { positions: positions, spectrum });
     }
 
     let output_slice = output.as_slice_mut().unwrap();
@@ -785,11 +785,13 @@ pub async fn main(cmd: bool) -> Result<()> {
 
         if config.audio_mix_mode == AudioMixMode::Fft {
             let mut groups: Vec<(&Array1<f32>, Vec<usize>)> = Vec::new();
+            let mut num = 0;
             chart.lines.iter().flat_map(|line| &line.notes).filter(|note| !note.fake && note.time > sfx_start_time && note.time < sfx_end_time).for_each(|note| {
                 if let Some(sfx) = get_hitsound(&note) {
                     let position = (before_time + note.time * speed_time_ratio + judge_offset - config.play_start_time * speed_time_ratio) * sample_rate_f64;
                     let position = position.ceil() as usize * 2;
                     if position.checked_add(sfx.len()).is_some_and(|end| end <= output_sfx_len) {
+                        num += 1;
                         if let Some((_, positions)) = groups.iter_mut().find(|(clip, _)| std::ptr::eq(*clip, sfx)) {
                             positions.push(position);
                         } else {
@@ -800,8 +802,9 @@ pub async fn main(cmd: bool) -> Result<()> {
             });
             eprintln!("Pre-Process Hit Effects Time: {:.2?}", sfx_time.elapsed());
             let sfx_time = Instant::now();
-            let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, &mut groups, ipc)?;
-            eprintln!("Process Hit Effects FFT Time: {:.2?} Groups: {} FFT size: {} Block size: {}", sfx_time.elapsed(), groups.len(), fft_size, block_len);
+            let (fft_size, block_len) = mix_sfx_fft(&mut output_sfx, groups, ipc)?;
+            let elapsed = sfx_time.elapsed();
+            eprintln!("Process Hit Effects FFT Time: {:.2?} Speed: {:.2} notes/sec FFT size: {} Block size: {}", elapsed, num as f32 / elapsed.as_secs_f32(), fft_size, block_len);
         } else {
             let place_sfx = |output: &mut [f32], output_start: usize, position: usize, clip: &Array1<f32>| {
                 let block_end = output_start + output.len();
