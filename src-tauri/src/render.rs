@@ -1024,6 +1024,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     };
     main.top_level = false;
     main.viewport = Some((0, 0, vw as i32, vh as i32));
+    macroquad::miniquad::window::set_window_size(vw as u32, vh as u32);
 
     let bitrate_control = if config.dynamic_bitrate_control {
         if ffmpeg_encoder == encoder_list[0] && !config.mpeg4 {

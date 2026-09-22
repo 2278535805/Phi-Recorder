@@ -66,6 +66,12 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
         prpr_config.mods |= Mods::AUTOPLAY;
     }
     prpr_config.volume_bgm = prpr_config.volume_music;
+
+    let (vw, vh) = config.resolution;
+    let asp = vw as f32 / vh as f32;
+    let ww = (720. * asp) as u32;
+    let wh = 720;
+    macroquad::miniquad::window::set_window_size(ww, wh);
     if let Ok(true) = read_config().map(|config| config.fullscreen_mode) {
         macroquad::window::set_fullscreen(true);
     }
