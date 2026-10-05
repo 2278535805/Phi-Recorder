@@ -544,6 +544,11 @@ impl TaskQueue {
         for task in guard.iter() {
             result.push(task.to_view().await);
         }
+        result
+    }
+
+    pub async fn tasks_inv(&self) -> Vec<TaskView> {
+        let mut result = self.tasks().await;
         result.reverse();
         result
     }

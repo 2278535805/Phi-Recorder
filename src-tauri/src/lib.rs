@@ -410,7 +410,7 @@ async fn post_render(queue: State<'_, TaskQueue>, params: RenderParams) -> Resul
 #[tauri::command]
 async fn get_tasks(queue: State<'_, TaskQueue>) -> Result<Vec<TaskView>, InvokeError> {
     wrap_async(async move {
-        Ok(queue.tasks().await)
+        Ok(queue.tasks_inv().await)
     }).await
 }
 
