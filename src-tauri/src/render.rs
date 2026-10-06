@@ -155,6 +155,7 @@ impl RenderConfig {
             combo: self.combo.clone(),
             difficulty: self.difficulty.clone(),
             judge_offset: self.judge_offset,
+            autoplay_judge_offset: self.judge_offset,
 
             render_line: self.render_line,
             render_line_extra: self.render_line_extra,
@@ -614,6 +615,7 @@ pub async fn main(cmd: bool) -> Result<()> {
     let volume_sfx = std::mem::take(&mut config.volume_sfx);
     let mut prpr_config = config.to_config();
     prpr_config.mods = Mods::AUTOPLAY;
+    prpr_config.adjust_time = false;
     let Some(ffmpeg) = find_ffmpeg()? else {
         bail!("FFmpeg not found")
     };
@@ -959,6 +961,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                     Some(player),
                     None,
                     None,
+                    None,
                 ).await?
             ),
             tm,
@@ -1000,6 +1003,7 @@ pub async fn main(cmd: bool) -> Result<()> {
                     Some(player),
                     background,
                     illustration,
+                    None,
                     None,
                     None,
                 ).await?

@@ -107,6 +107,7 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
                     Some(player),
                     None,
                     None,
+                    None,
                 )
                 .await?,
             ))),
