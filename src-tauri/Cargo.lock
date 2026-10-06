@@ -4591,7 +4591,7 @@ dependencies = [
 [[package]]
 name = "phire"
 version = "0.4.0"
-source = "git+https://github.com/2278535805/phire#9d5bf8b0ed7fc7048ca1d0e6e040a927512337fc"
+source = "git+https://github.com/2278535805/phire#0eb1252b1f61dbcd7a722e6a17d82dd710a5efd0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4867,7 +4867,7 @@ dependencies = [
 [[package]]
 name = "prpr-avc"
 version = "0.1.0"
-source = "git+https://github.com/2278535805/phire#9d5bf8b0ed7fc7048ca1d0e6e040a927512337fc"
+source = "git+https://github.com/2278535805/phire#0eb1252b1f61dbcd7a722e6a17d82dd710a5efd0"
 dependencies = [
  "flate2",
  "sasa",
