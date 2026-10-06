@@ -35,9 +35,14 @@ pub fn parse_args(args: Vec<String>) -> (Option<String>, Option<String>, Option<
                 args_config = args.get(args_now + 1).cloned();
                 args_now += 2;
             }
-            "--info" | "ci" => {
+            "--info" | "-ci" | "ci" => {
                 args_info = args.get(args_now + 1).cloned();
                 args_now += 2;
+            }
+            "--render" | "-r" | "--play" | "--preview" | "-p" | "--tweakoffset" | "-t"
+                if args_now == 1 =>
+            {
+                args_now += 1;
             }
             arg => {
                 if !arg.starts_with("--") && args_input.is_none() {
