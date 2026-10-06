@@ -12,10 +12,10 @@ use phire::{
 };
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 
-struct BaseScene(Option<NextScene>, bool, Rc<RefCell<Option<f32>>>);
+struct BaseScene(Option<NextScene>, bool, Rc<RefCell<Option<f64>>>);
 impl Scene for BaseScene {
     fn on_result(&mut self, _tm: &mut TimeManager, result: Box<dyn std::any::Any>) -> Result<()> {
-        match result.downcast::<Option<f32>>() {
+        match result.downcast::<Option<f64>>() {
             Ok(result_offset) => {
                 if let Some(offset) = *result_offset {
                     *self.2.borrow_mut() = Some(offset);

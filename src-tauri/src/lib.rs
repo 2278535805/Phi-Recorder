@@ -364,7 +364,7 @@ async fn preview_chart(params: RenderParams) -> Result<(), InvokeError> {
 }
 
 #[tauri::command]
-async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, InvokeError> {
+async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f64>, InvokeError> {
     wrap_async(async move {
         let mut child = cmd_hidden(std::env::current_exe()?)
             .arg("tweakoffset")
@@ -385,7 +385,7 @@ async fn preview_tweakoffset(params: RenderParams) -> Result<Option<f32>, Invoke
 
         loop {
             if let Some(stdout_result) = stdout_lines.next_line().await? {
-                if let Ok(result) = serde_json::from_str::<f32>(&stdout_result) {
+                if let Ok(result) = serde_json::from_str::<f64>(&stdout_result) {
                     offset = Some(result)
                 }
             } else {
