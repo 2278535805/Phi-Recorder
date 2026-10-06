@@ -67,14 +67,38 @@ async fn wrap_async<R>(f: impl Future<Output = Result<R>>) -> Result<R, InvokeEr
     })
 }
 
-fn run_wrapped(f: impl Future<Output = Result<()>> + 'static, headless: bool) {
-    macroquad::Window::from_config(build_conf(headless), async {
+fn run_wrapped(conf: macroquad::window::Conf, f: impl Future<Output = Result<()>> + 'static) {
+    macroquad::Window::from_config(conf, async {
         if let Err(err) = f.await {
             error!("{err:?}");
             exit_program(1);
         }
     });
     exit_program(0);
+}
+
+fn window_size(resolution: (u32, u32)) -> (u32, u32) {
+    let (vw, vh) = resolution;
+    let asp = vw as f32 / vh.max(1) as f32;
+    ((720. * asp).round().max(1.) as u32, 720)
+}
+
+fn run_preview(cmd: bool, tweak_offset: bool, autoplay: bool) {
+    let source = match render::read_resource(cmd, false) {
+        Ok(source) => source,
+        Err(err) => {
+            error!("{err:?}");
+            exit_program(1);
+            return;
+        }
+    };
+    let (ww, wh) = window_size(source.resolution());
+    let conf = macroquad::window::Conf {
+        window_width: ww as i32,
+        window_height: wh as i32,
+        ..build_conf(false)
+    };
+    run_wrapped(conf, preview::main(source, tweak_offset, autoplay));
 }
 
 fn hide_cmd() {
@@ -214,28 +238,28 @@ pub fn run() -> Result<()> {
                 exit_program(0);
             }
             "render" => {
-                run_wrapped(render::main(false), true);
+                run_wrapped(build_conf(true), render::main(false));
             }
             "play" => {
-                run_wrapped(preview::main(false, false, false), false);
+                run_preview(false, false, false);
             }
             "preview" => {
-                run_wrapped(preview::main(false, false, true), false);
+                run_preview(false, false, true);
             }
             "tweakoffset" => {
-                run_wrapped(preview::main(false, true, true), false);
+                run_preview(false, true, true);
             }
             "--render" | "-r" => {
-                run_wrapped(render::main(true), true);
+                run_wrapped(build_conf(true), render::main(true));
             }
             "--play" => {
-                run_wrapped(preview::main(true, false, false), false);
+                run_preview(true, false, false);
             }
             "--preview" | "-p" => {
-                run_wrapped(preview::main(true, false, true), false);
+                run_preview(true, false, true);
             }
             "--tweakoffset" | "-t" => {
-                run_wrapped(preview::main(true, true, true), false);
+                run_preview(true, true, true);
             }
             cmd => {
                 info!("Command: {cmd:?}");
@@ -243,7 +267,7 @@ pub fn run() -> Result<()> {
                 let path = Path::new(&args);
                 if path.is_file() || path.is_dir() {
                     info!("Find a valid path, start preview");
-                    run_wrapped(preview::main(true, false, true), false);
+                    run_preview(true, false, true);
                     exit_program(0);
                 } else {
                     exit_program(1);

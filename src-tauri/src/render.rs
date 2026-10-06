@@ -519,8 +519,31 @@ fn mix_sfx_fft(output: &mut Array1<f32>, groups: Vec<(&Array1<f32>, Vec<usize>)>
     Ok((fft_size, block_len))
 }
 
-pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(Box<dyn FileSystem + Send + Sync>, PathBuf, RenderConfig, ChartInfo)> {
-    if is_cli {
+pub enum ResourceSource {
+    Cli {
+        input: PathBuf,
+        output: Option<String>,
+        config: RenderConfig,
+        info: Option<ChartInfo>,
+        generate_output: bool,
+    },
+    Ipc {
+        params: RenderParams,
+        output: PathBuf,
+    },
+}
+
+impl ResourceSource {
+    pub fn resolution(&self) -> (u32, u32) {
+        match self {
+            Self::Cli { config, .. } => config.resolution,
+            Self::Ipc { params, .. } => params.config.resolution,
+        }
+    }
+}
+
+pub fn read_resource(cmd: bool, generate_output: bool) -> Result<ResourceSource> {
+    if cmd {
         let (args_input, args_output, args_config, args_info) = parse_args(std::env::args().collect());
 
         let config: RenderConfig = if let Some(config) = &args_config {
@@ -540,46 +563,26 @@ pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(B
             toml::from_str(&std::fs::read_to_string(std::env::current_exe()?.parent().unwrap().join("config.toml"))?)?
         };
 
-        let path = args_input.unwrap();
+        let input = PathBuf::from(args_input.unwrap());
+        let info = args_info
+            .map(|info| serde_json::from_str::<ChartInfo>(&info))
+            .transpose()?;
 
-        let mut fs = fs::fs_from_file(path.as_ref())?;
-
-        let info = if let Some(info) = args_info {
-            serde_json::from_str(&info)?
-        } else {
-                fs::load_info(fs.deref_mut()).await?
-            };
-
-        let output_path = if generate_output {
-            let file_name = generate_filename(&info, &config);
-
-            let output_path = if let Some(output_string) = args_output {
-                let output_dir = PathBuf::from(output_string);
-                if output_dir.extension().is_some() {
-                    output_dir
-                } else {
-                    test_output_dir(output_dir.clone())?;
-                    output_dir.join(file_name)
-                }
-            } else {
-                get_output_dir()?.join(file_name) 
-            };
-            eprintln!("output file: {:?}", output_path);
-            output_path
-        } else {
-            PathBuf::new()
-        };
-
-        Ok((fs, output_path, config, info))
+        Ok(ResourceSource::Cli {
+            input,
+            output: args_output,
+            config,
+            info,
+            generate_output,
+        })
     } else {
         let mut stdin = std::io::stdin().lock();
 
         let mut line = String::new();
         stdin.read_line(&mut line)?;
         let params: RenderParams = serde_json::from_str(line.trim())?;
-        let path = params.path;
-        
-        let output_path = if generate_output {
+
+        let output = if generate_output {
             line.clear();
             stdin.read_line(&mut line)?;
             serde_json::from_str::<PathBuf>(line.trim())?
@@ -587,13 +590,62 @@ pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(B
             PathBuf::new()
         };
 
-        let fs = fs::fs_from_file(&path)?;
-
-        let config = params.config;
-        let info = params.info;
-
-        Ok((fs, output_path, config, info))
+        Ok(ResourceSource::Ipc { params, output })
     }
+}
+
+pub async fn load_resource(
+    source: ResourceSource,
+) -> Result<(Box<dyn FileSystem + Send + Sync>, PathBuf, RenderConfig, ChartInfo)> {
+    match source {
+        ResourceSource::Cli {
+            input,
+            output,
+            config,
+            info,
+            generate_output,
+        } => {
+            let mut fs = fs::fs_from_file(input.as_ref())?;
+
+            let info = if let Some(info) = info {
+                info
+            } else {
+                fs::load_info(fs.deref_mut()).await?
+            };
+
+            let output_path = if generate_output {
+                let file_name = generate_filename(&info, &config);
+
+                let output_path = if let Some(output_string) = output {
+                    let output_dir = PathBuf::from(output_string);
+                    if output_dir.extension().is_some() {
+                        output_dir
+                    } else {
+                        test_output_dir(output_dir.clone())?;
+                        output_dir.join(file_name)
+                    }
+                } else {
+                    get_output_dir()?.join(file_name)
+                };
+                eprintln!("output file: {:?}", output_path);
+                output_path
+            } else {
+                PathBuf::new()
+            };
+
+            Ok((fs, output_path, config, info))
+        }
+        ResourceSource::Ipc { params, output } => {
+            let fs = fs::fs_from_file(&params.path)?;
+
+            Ok((fs, output, params.config, params.info))
+        }
+    }
+}
+
+pub async fn generate_resource(is_cli: bool, generate_output: bool) -> Result<(Box<dyn FileSystem + Send + Sync>, PathBuf, RenderConfig, ChartInfo)> {
+    let source = read_resource(is_cli, generate_output)?;
+    load_resource(source).await
 }
 
 pub async fn main(cmd: bool) -> Result<()> {

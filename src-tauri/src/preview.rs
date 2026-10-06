@@ -1,5 +1,5 @@
 use crate::{
-    ASSET_PATH, common::{read_config}, render::{build_player, generate_resource}
+    ASSET_PATH, common::{read_config}, render::{build_player, load_resource, ResourceSource}
 };
 use anyhow::{Result};
 use macroquad::prelude::*;
@@ -57,8 +57,8 @@ impl Scene for BaseScene {
     }
 }
 
-pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
-    let (fs, _, config, info) = generate_resource(cmd, false).await?;
+pub async fn main(source: ResourceSource, tweak_offset: bool, autoplay: bool) -> Result<()> {
+    let (fs, _, config, info) = load_resource(source).await?;
 
     set_pc_assets_folder(ASSET_PATH.get().unwrap().to_str().unwrap());
     let mut prpr_config: Config = config.to_config();
@@ -67,11 +67,6 @@ pub async fn main(cmd: bool, tweak_offset: bool, autoplay: bool) -> Result<()> {
     }
     prpr_config.volume_bgm = prpr_config.volume_music;
 
-    let (vw, vh) = config.resolution;
-    let asp = vw as f32 / vh as f32;
-    let ww = (720. * asp) as u32;
-    let wh = 720;
-    macroquad::miniquad::window::set_window_size(ww, wh);
     if let Ok(true) = read_config().map(|config| config.fullscreen_mode) {
         macroquad::window::set_fullscreen(true);
     }
