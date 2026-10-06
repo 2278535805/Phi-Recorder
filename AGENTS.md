@@ -74,7 +74,7 @@ pnpm prettier
 
 - `.github/workflows/debug.yaml`: builds on push to any branch (when src changes), uploads MSI/NSIS/AppImage/deb artifacts
 - `.github/workflows/release.yaml`: builds on `v*` tags, creates draft GitHub release
-- Both use `pnpm/action-setup@v2` (version 8) and `dtolnay/rust-toolchain@stable`
+- Both use `pnpm/action-setup@v6` (version 11) and `dtolnay/rust-toolchain@stable`
 
 ## Gotchas
 
